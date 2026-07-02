@@ -193,7 +193,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news'>('home');
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [lang, setLang] = useState<'ru' | 'en'>('ru');
+  const [lang, setLang] = useState<'ru' | 'en'>('en');
   const [donationOpen, setDonationOpen] = useState(false);
   const [rustoriaServers, setRustoriaServers] = useState<any[]>([]);
   const [loadingServers, setLoadingServers] = useState(false);
@@ -257,7 +257,7 @@ export default function App() {
 
   // Automatically update the logged-in user's avatar and class to Developer as requested
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || currentUser.uid !== 'serustqs') return;
     
     const applyDeveloperUpgrade = async () => {
       const developerAvatarUrl = '/src/assets/images/developer_cat_avatar_1782899645243.jpg';

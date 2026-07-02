@@ -162,7 +162,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   // Admin controls & list
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([]);
-  const [usersMap, setUsersMap] = useState<Record<string, { isBlocked: boolean; isVip?: boolean; role: string; displayName: string; photoURL: string; avatarClass: string; voiceChannel?: string | null }>>({});
+  const [usersMap, setUsersMap] = useState<Record<string, { isBlocked: boolean; isVip?: boolean; role: string; displayName: string; photoURL: string; avatarClass: string; clanTag?: string; voiceChannel?: string | null }>>({});
   const [searchUserQuery, setSearchUserQuery] = useState('');
   const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -277,7 +277,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   // Real-time subscribe to registered users to dynamically retrieve VIP status, blocks, and roles
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'chat_users'), (snapshot) => {
-      const uMap: Record<string, { isBlocked: boolean; isVip?: boolean; role: string; displayName: string; photoURL: string; avatarClass: string; voiceChannel?: string | null }> = {};
+      const uMap: Record<string, { isBlocked: boolean; isVip?: boolean; role: string; displayName: string; photoURL: string; avatarClass: string; clanTag?: string; voiceChannel?: string | null }> = {};
       const usersList: RegisteredUser[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
@@ -288,6 +288,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
           displayName: data.displayName || doc.id,
           photoURL: data.photoURL || '',
           avatarClass: data.avatarClass || 'hazmat',
+          clanTag: data.clanTag || '',
           voiceChannel: data.voiceChannel || null
         };
         usersList.push({
@@ -1191,7 +1192,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                         onClick={() => setInspectUserId(msg.uid)}
                       >
                         <img 
-                          src={msg.photoURL || avatarConfig.url} 
+                          src={usersMap[msg.uid]?.photoURL || msg.photoURL || avatarConfig.url} 
                           alt="Avatar" 
                           className="w-10 h-10 rounded-full border border-zinc-700 bg-zinc-900 object-cover"
                           referrerPolicy="no-referrer"
@@ -1207,7 +1208,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <span 
                             onClick={() => setInspectUserId(msg.uid)}
-                            className={`text-[13px] font-bold cursor-pointer hover:underline ${
+                            className={`text-[13px] font-bold cursor-pointer hover:underline flex items-center gap-1 ${
                               isMsgFounder 
                                 ? 'text-[#f87171]' 
                                 : isMsgVip 
@@ -1215,7 +1216,12 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                                   : 'text-zinc-200'
                             }`}
                           >
-                            {msg.displayName}
+                            {usersMap[msg.uid]?.clanTag && (
+                              <span className="text-[#cd412b] font-black font-mono">
+                                [{usersMap[msg.uid].clanTag}]
+                              </span>
+                            )}
+                            <span>{usersMap[msg.uid]?.displayName || msg.displayName}</span>
                           </span>
                           
                           {/* Role tag badge - Discord style */}

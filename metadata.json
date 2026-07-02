@@ -1,6 +1,6 @@
 {
   "name": "Rusty.Lub",
-  "description": "Ультимативный справочник по Rust: исправление критических ошибок, полезные бинды, калькулятор рейдов и оптимизация FPS.",
+  "description": "The ultimate Rust reference guide: critical error fixes, tactical keybinds, interactive raid calculator, and performance FPS optimization.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

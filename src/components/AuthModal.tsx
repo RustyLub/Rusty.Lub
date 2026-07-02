@@ -129,6 +129,19 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
           return;
         }
 
+        // Strict ban on EAC tag/abbreviation in user nicknames
+        const isEacMimic = lowerDisplay.includes('eac') || lowerUser.includes('eac');
+        if (isEacMimic && cleanUsername !== 'serustqs') {
+          onToast(
+            lang === 'ru' 
+              ? 'Использование клан-тега или аббревиатуры EAC в никнейме строго запрещено!' 
+              : 'Using the EAC clan tag or abbreviation in your nickname is strictly prohibited!',
+            'error'
+          );
+          setAuthLoading(false);
+          return;
+        }
+
         const isSystemAdmin = cleanUsername === 'serustqs';
 
         const newUserData = {
@@ -333,7 +346,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                   {lang === 'ru' ? 'КЛАСС ВЫЖИВШЕГО' : 'SURVIVOR CLASS'}
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
-                  {SURVIVOR_AVATARS.map((avatar) => {
+                  {SURVIVOR_AVATARS.filter(a => a.id !== 'developer').map((avatar) => {
                     const isSelected = selectedAvatar === avatar.id;
                     return (
                       <button
