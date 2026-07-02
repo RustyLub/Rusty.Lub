@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { doc, db, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot } from '../firebase';
 import { CustomUser } from '../types';
-import { SURVIVOR_AVATARS } from './ChatTab';
+import { CUSTOM_AVATARS } from '../customAvatars';
 
 export interface BadgeInfo {
   id: string;
@@ -276,7 +276,7 @@ export default function UserProfileModal({
 
   const selectedTheme = PROFILE_THEMES.find(t => t.id === targetUser?.customTheme) || PROFILE_THEMES[0];
   const friendBtn = getFriendButtonState();
-  const matchedAvatar = targetUser ? SURVIVOR_AVATARS.find(a => a.id === targetUser.avatarClass) || SURVIVOR_AVATARS[0] : null;
+  const matchedAvatar = targetUser ? CUSTOM_AVATARS.find(a => a.id === targetUser.avatarClass) || CUSTOM_AVATARS[0] : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">

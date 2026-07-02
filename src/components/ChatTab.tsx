@@ -160,6 +160,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   const [passwordInput, setPasswordInput] = useState('');
   const [displayNameInput, setDisplayNameInput] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState('hazmat');
+  const [gender, setGender] = useState<'male' | 'female'>('male');
   const [authLoading, setAuthLoading] = useState(false);
 
   // Admin controls & list
@@ -256,6 +257,15 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
         } catch (e) {
           console.warn("Error deleting fraud accounts:", e);
         }
+
+        // Set default gender 'male' for all existing users
+        const usersSnap = await getDocs(collection(db, 'chat_users'));
+        usersSnap.forEach(async (userDoc) => {
+          const userData = userDoc.data();
+          if (!userData.gender) {
+            await setDoc(userDoc.ref, { gender: 'male' }, { merge: true });
+          }
+        });
 
         // Trigger one-time chat purge to clear existing messages completely
         const purgeMetaRef = doc(db, 'chat_metadata', 'purge_req_v1');
@@ -433,6 +443,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
           displayName: isSystemAdmin ? 'SEO-RustyLub' : cleanDisplayName,
           avatarClass: isSystemAdmin ? 'heavy_plate' : selectedAvatar,
           photoURL: matchedAvatar.url,
+          gender: gender,
           role: isSystemAdmin ? 'admin' : 'user',
           isBlocked: false,
           createdAt: new Date().toISOString()
@@ -1229,6 +1240,12 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                           alt="Avatar" 
                           className="w-10 h-10 rounded-full border border-zinc-700 bg-zinc-900 object-cover"
                           referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            if (target.src !== avatarConfig.url) {
+                              target.src = avatarConfig.url;
+                            }
+                          }}
                         />
                         <div 
                           className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border border-[#2b2d31] shadow-sm" 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, User, Lock, Crosshair, Sparkles } from 'lucide-react';
 import { doc, getDoc, setDoc, query, collection, where, getDocs, db, auth } from '../firebase';
-import { SURVIVOR_AVATARS } from './ChatTab';
+import { CUSTOM_AVATARS } from '../customAvatars';
 import { CustomUser } from '../types';
 
 interface AuthModalProps {
@@ -19,6 +19,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
   const [passwordInput, setPasswordInput] = useState('');
   const [displayNameInput, setDisplayNameInput] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState('hazmat');
+  const [gender, setGender] = useState<'male' | 'female'>('male');
   const [authLoading, setAuthLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -107,7 +108,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
           return;
         }
 
-        const matchedAvatar = SURVIVOR_AVATARS.find(a => a.id === selectedAvatar) || SURVIVOR_AVATARS[0];
+        const matchedAvatar = CUSTOM_AVATARS.find(a => a.id === selectedAvatar) || CUSTOM_AVATARS[0];
         
         // Prevent mimicry of 'seo-rustylub' and related admin terms
         const lowerUser = cleanUsername.toLowerCase();
@@ -150,6 +151,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
           displayName: isSystemAdmin ? 'SEO-RustyLub' : cleanDisplayName,
           avatarClass: isSystemAdmin ? 'heavy_plate' : selectedAvatar,
           photoURL: matchedAvatar.url,
+          gender: gender,
           role: isSystemAdmin ? 'admin' : 'user',
           isBlocked: false,
           createdAt: new Date().toISOString()
@@ -341,40 +343,68 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
 
             {/* Survivor Class Selector (if registering) */}
             {authMode === 'register' && (
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block font-mono">
-                  {lang === 'ru' ? 'КЛАСС ВЫЖИВШЕГО' : 'SURVIVOR CLASS'}
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
-                  {SURVIVOR_AVATARS.filter(a => a.id !== 'developer').map((avatar) => {
-                    const isSelected = selectedAvatar === avatar.id;
-                    return (
-                      <button
-                        key={avatar.id}
-                        type="button"
-                        onClick={() => setSelectedAvatar(avatar.id)}
-                        className={`p-2 border text-left flex items-center gap-2.5 cursor-pointer transition-all ${
-                          isSelected 
-                            ? 'border-[#cd412b] bg-[#cd412b]/10' 
-                            : 'border-[#2a2f3b] bg-[#0c0d10] hover:border-gray-500'
-                        }`}
-                      >
-                        <img 
-                          src={avatar.url} 
-                          alt={avatar.name[lang]} 
-                          className="w-6 h-6 rounded-full object-cover bg-zinc-950"
-                        />
-                        <div className="min-w-0">
-                          <span className="text-[9px] font-bold text-white block truncate leading-tight">
-                            {avatar.name[lang]}
-                          </span>
-                          <span className="text-[7px] text-gray-500 block truncate leading-none mt-0.5 font-mono">
-                            {avatar.role[lang]}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block font-mono">
+                    {lang === 'ru' ? 'ПОЛ' : 'GENDER'} <span className="text-[#cd412b]">*</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setGender('male')}
+                      className={`flex-1 py-1.5 text-xs font-bold transition-all cursor-pointer border ${
+                        gender === 'male' ? 'bg-[#cd412b] text-white border-[#cd412b]' : 'bg-[#0c0d10] text-gray-400 border-[#2a2f3b]'
+                      }`}
+                    >
+                      {lang === 'ru' ? 'Мужской' : 'Male'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setGender('female')}
+                      className={`flex-1 py-1.5 text-xs font-bold transition-all cursor-pointer border ${
+                        gender === 'female' ? 'bg-[#cd412b] text-white border-[#cd412b]' : 'bg-[#0c0d10] text-gray-400 border-[#2a2f3b]'
+                      }`}
+                    >
+                      {lang === 'ru' ? 'Женский' : 'Female'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block font-mono">
+                    {lang === 'ru' ? 'КЛАСС ВЫЖИВШЕГО' : 'SURVIVOR CLASS'}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                    {CUSTOM_AVATARS.map((avatar) => {
+                      const isSelected = selectedAvatar === avatar.id;
+                      return (
+                        <button
+                          key={avatar.id}
+                          type="button"
+                          onClick={() => setSelectedAvatar(avatar.id)}
+                          className={`p-2 border text-left flex items-center gap-2.5 cursor-pointer transition-all ${
+                            isSelected 
+                              ? 'border-[#cd412b] bg-[#cd412b]/10' 
+                              : 'border-[#2a2f3b] bg-[#0c0d10] hover:border-gray-500'
+                          }`}
+                        >
+                          <img 
+                            src={avatar.url} 
+                            alt={avatar.name[lang]} 
+                            className="w-6 h-6 rounded-full object-cover bg-zinc-950"
+                          />
+                          <div className="min-w-0">
+                            <span className="text-[9px] font-bold text-white block truncate leading-tight">
+                              {avatar.name[lang]}
+                            </span>
+                            <span className="text-[7px] text-gray-500 block truncate leading-none mt-0.5 font-mono">
+                              {avatar.role[lang]}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )}

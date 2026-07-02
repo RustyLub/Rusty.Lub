@@ -42,7 +42,7 @@ import {
   arrayRemove,
   getDoc
 } from '../firebase';
-import { SURVIVOR_AVATARS } from './ChatTab';
+import { CUSTOM_AVATARS } from '../customAvatars';
 import { CustomUser } from '../types';
 import UserProfileModal, { BADGES, PROFILE_THEMES } from './UserProfileModal';
 
@@ -226,53 +226,6 @@ export default function CabinetModal({
 
   if (!isOpen || !user) return null;
 
-  // Compress and handle file upload
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      onToast(lang === 'ru' ? 'Файл должен быть изображением!' : 'File must be an image!', 'error');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 128;
-        const MAX_HEIGHT = 128;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
-          setCustomAvatarUrl(compressedBase64);
-          onToast(lang === 'ru' ? 'Изображение успешно загружено и оптимизировано!' : 'Image successfully loaded and optimized!', 'success');
-        }
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  };
-
   // Save Extended Profile custom state
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -358,7 +311,7 @@ export default function CabinetModal({
       return;
     }
 
-    const matchedAvatar = SURVIVOR_AVATARS.find(a => a.id === avatarId);
+    const matchedAvatar = CUSTOM_AVATARS.find(a => a.id === avatarId);
     if (!matchedAvatar) return;
 
     try {
@@ -870,50 +823,8 @@ export default function CabinetModal({
                       {/* Avatar Custom URL or Preset selector */}
                       <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-3">
                         <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1">
-                          {lang === 'ru' ? '3. ВНЕШНИЙ ВИД (ЗАГРУЗКА И ПРЕСЕТЫ)' : '3. SURVIVOR AVATAR'}
+                          {lang === 'ru' ? '3. ВНЕШНИЙ ВИД (ПРЕСЕТЫ)' : '3. SURVIVOR AVATAR'}
                         </span>
-
-                        {/* Drag and Drop / Custom File Upload Area */}
-                        <div className="space-y-1">
-                          <label className="text-[8px] text-zinc-500 font-mono uppercase block">
-                            {lang === 'ru' ? 'Загрузить файл аватарки' : 'Upload Avatar File'}
-                          </label>
-                          <div 
-                            className="border border-dashed border-zinc-800 bg-[#14171e] hover:border-zinc-700 p-3 text-center cursor-pointer transition-colors relative group rounded-sm"
-                            onDragOver={(e) => e.preventDefault()}
-                            onDrop={(e) => {
-                              e.preventDefault();
-                              const file = e.dataTransfer.files?.[0];
-                              if (file) {
-                                const input = document.getElementById('avatar-file-input') as HTMLInputElement;
-                                if (input) {
-                                  const dataTransfer = new DataTransfer();
-                                  dataTransfer.items.add(file);
-                                  input.files = dataTransfer.files;
-                                  const event = { target: input } as unknown as React.ChangeEvent<HTMLInputElement>;
-                                  handleFileUpload(event);
-                                }
-                              }
-                            }}
-                          >
-                            <input 
-                              type="file" 
-                              id="avatar-file-input"
-                              accept="image/*"
-                              onChange={handleFileUpload}
-                              className="hidden"
-                            />
-                            <label htmlFor="avatar-file-input" className="cursor-pointer block space-y-1">
-                              <Upload size={16} className="mx-auto text-zinc-500 group-hover:text-zinc-300 transition-colors animate-pulse" />
-                              <span className="block text-[9px] text-zinc-400 group-hover:text-zinc-200 font-bold">
-                                {lang === 'ru' ? 'Перетащите файл сюда или кликните' : 'Drag & drop file here or click to upload'}
-                              </span>
-                              <span className="block text-[7px] text-zinc-600 font-mono">
-                                {lang === 'ru' ? 'PNG, JPG (Рекомендуется квадратная, автосжатие)' : 'PNG, JPG (Square recommended, auto-resizes)'}
-                              </span>
-                            </label>
-                          </div>
-                        </div>
 
                         {/* Custom avatar URL */}
                         <div className="space-y-1">
@@ -929,15 +840,20 @@ export default function CabinetModal({
 
                         {/* Preset avatars scrollbar */}
                         <div className="space-y-1">
-                          <label className="text-[8px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Или выберите классический костюм (пресет)' : 'Or pick an island preset suit'}</label>
-                          <div className="grid grid-cols-1 gap-1.5 max-h-[100px] overflow-y-auto pr-1">
-                            {SURVIVOR_AVATARS.filter((avatar) => avatar.id !== 'developer' || isAdmin).map((avatar) => {
-                              const isCurrent = fullProfile && (fullProfile.avatarClass === avatar.id || customAvatarUrl === avatar.url);
+                          <label className="text-[8px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Выберите аватарку' : 'Pick an avatar'}</label>
+                          <div className="grid grid-cols-1 gap-1.5 max-h-[300px] overflow-y-auto pr-1">
+                            {CUSTOM_AVATARS.map((avatar) => {
+                              const isCurrent = fullProfile && fullProfile.avatarClass === avatar.id;
                               return (
                                 <button
                                   key={avatar.id}
                                   type="button"
-                                  onClick={() => handleSelectAvatar(avatar.id)}
+                                  onClick={() => {
+                                    handleSelectAvatar(avatar.id);
+                                    if (fullProfile) {
+                                      setFullProfile({ ...fullProfile, avatarClass: avatar.id, photoURL: avatar.url });
+                                    }
+                                  }}
                                   className={`p-1.5 border text-left flex items-center justify-between cursor-pointer transition-all rounded-sm ${
                                     isCurrent 
                                       ? 'border-[#cd412b] bg-[#cd412b]/10' 
@@ -1216,7 +1132,7 @@ export default function CabinetModal({
                   ) : (
                     filteredUsers.map((rUser) => {
                       const isTargetSelf = rUser.username === user.uid;
-                      const avatarData = SURVIVOR_AVATARS.find(a => a.id === rUser.avatarClass) || SURVIVOR_AVATARS[0];
+                      const avatarData = CUSTOM_AVATARS.find(a => a.id === rUser.avatarClass) || CUSTOM_AVATARS[0];
                       return (
                         <div key={rUser.username} className="p-3 flex items-center justify-between gap-3 text-xs">
                           <div className="flex items-center gap-2.5 min-w-0 cursor-pointer" onClick={() => setInspectUserId(rUser.username)}>

@@ -60,5 +60,6 @@ export interface CustomUser {
   friendRequestsReceived?: string[];
   badges?: string[];
   customTheme?: string;
+  gender?: 'male' | 'female';
 }
 
