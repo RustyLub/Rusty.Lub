@@ -149,6 +149,7 @@ export const SURVIVOR_AVATARS = [
 export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast }: ChatTabProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(false);
   const [inspectUserId, setInspectUserId] = useState<string | null>(null);
@@ -555,9 +556,14 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
         photoURL: user.photoURL,
         avatarClass: user.avatarClass || 'hazmat',
         channel: activeChannel,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        replyTo: replyTo ? {
+          text: replyTo.text,
+          displayName: replyTo.displayName
+        } : null
       });
       setNewMessage('');
+      setReplyTo(null);
     } catch (error) {
       console.error('Error sending message:', error);
       onToast(t.errorSend[lang], 'error');
@@ -1011,10 +1017,10 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
         </div>
 
         {/* 2. MAIN CHAT CONTAINER (CENTER) */}
-        <div className="flex-1 bg-[#313338] flex flex-col h-full overflow-hidden">
+        <div className="flex-1 bg-gradient-to-br from-purple-950/20 via-[#313338] to-yellow-950/20 flex flex-col h-full overflow-hidden">
           
           {/* Top Chat Header */}
-          <div className="h-12 border-b border-[#1f2023] flex items-center justify-between px-4 shadow-sm bg-[#313338]">
+          <div className="h-12 border-b border-[#1f2023] flex items-center justify-between px-4 shadow-sm bg-[#313338]/80 backdrop-blur-sm">
             <div className="flex items-center gap-2 truncate text-left">
               <Hash size={18} className="text-zinc-400" />
               <span className="font-bold text-white text-sm">{activeChannel}</span>
@@ -1273,29 +1279,47 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
 
                         {/* Text block directly under name - 100% Discord style */}
                         <div className="text-zinc-200 text-sm leading-relaxed mt-1 break-words select-text">
+                          {(msg as any).replyTo && (
+                            <div className="bg-[#2b2d31] text-[11px] text-zinc-400 p-1.5 rounded-md border-l-2 border-zinc-600 mb-1.5 opacity-80">
+                              <span className="font-bold text-zinc-300">{(msg as any).replyTo.displayName}: </span>
+                              {(msg as any).replyTo.text.slice(0, 60)}{(msg as any).replyTo.text.length > 60 ? '...' : ''}
+                            </div>
+                          )}
                           {msg.text}
                         </div>
                       </div>
 
-                      {/* HOVER ADMIN MESSAGE CONTROLS - DISCORD STYLE FLOATING BAR */}
-                      {isAdmin && (
+                      {/* HOVER MESSAGE ACTIONS - DISCORD STYLE FLOATING BAR */}
+                      {user && (
                         <div className="absolute top-1 right-4 bg-[#313338] border border-zinc-800 rounded-lg shadow-lg py-1 px-1.5 items-center gap-1.5 flex opacity-0 group-hover:opacity-100 transition-opacity z-10">
                           <button
-                            onClick={() => handleDeleteMessage(msg.id)}
-                            className="p-1 hover:bg-red-500/10 text-zinc-400 hover:text-red-400 transition-colors cursor-pointer rounded"
-                            title={lang === 'ru' ? 'Удалить сообщение' : 'Delete Message'}
+                            onClick={() => setReplyTo(msg)}
+                            className="p-1 hover:bg-zinc-700/50 text-zinc-400 hover:text-white transition-colors cursor-pointer rounded"
+                            title={lang === 'ru' ? 'Ответить' : 'Reply'}
                           >
-                            <Trash2 size={13} />
+                            <MessageSquare size={13} />
                           </button>
+                          
+                          {isAdmin && (
+                            <>
+                              <button
+                                onClick={() => handleDeleteMessage(msg.id)}
+                                className="p-1 hover:bg-red-500/10 text-zinc-400 hover:text-red-400 transition-colors cursor-pointer rounded"
+                                title={lang === 'ru' ? 'Удалить сообщение' : 'Delete Message'}
+                              >
+                                <Trash2 size={13} />
+                              </button>
 
-                          {msg.uid !== 'serustqs' && (
-                            <button
-                              onClick={() => handleToggleBlockUser(msg.uid, false)}
-                              className="p-1 hover:bg-amber-500/10 text-zinc-400 hover:text-amber-400 transition-colors cursor-pointer rounded"
-                              title={lang === 'ru' ? 'Забанить автора' : 'Ban Author'}
-                            >
-                              <UserX size={13} />
-                            </button>
+                              {msg.uid !== 'serustqs' && (
+                                <button
+                                  onClick={() => handleToggleBlockUser(msg.uid, false)}
+                                  className="p-1 hover:bg-amber-500/10 text-zinc-400 hover:text-amber-400 transition-colors cursor-pointer rounded"
+                                  title={lang === 'ru' ? 'Забанить автора' : 'Ban Author'}
+                                >
+                                  <UserX size={13} />
+                                </button>
+                              )}
+                            </>
                           )}
                         </div>
                       )}
@@ -1309,8 +1333,17 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
 
           {/* Bottom Floating Message Input Area */}
           {user && (
-            <div className="p-4 bg-[#313338] border-t border-[#1f2023]/20 relative">
-              <form onSubmit={handleSendMessage} className="flex gap-3 items-center">
+            <div className="bg-[#313338] border-t border-[#1f2023]/20 relative">
+              {replyTo && (
+                <div className="bg-[#2b2d31] p-2 px-4 text-xs text-zinc-400 flex items-center justify-between border-b border-zinc-700/50">
+                  <span className="truncate">
+                    {lang === 'ru' ? 'Ответ пользователю ' : 'Replying to '}
+                    <b className="text-zinc-100">{replyTo.displayName}</b>: {replyTo.text.slice(0, 50)}{replyTo.text.length > 50 ? '...' : ''}
+                  </span>
+                  <button onClick={() => setReplyTo(null)} className="text-zinc-500 hover:text-white cursor-pointer ml-2">✕</button>
+                </div>
+              )}
+              <form onSubmit={handleSendMessage} className="flex gap-3 items-center p-4">
                 <div className="relative flex-1 bg-[#383a40] focus-within:ring-1 focus-within:ring-[#5865f2] rounded-lg flex items-center px-4 transition-all">
                   
                   {/* Plus action icon inside input (Discord aesthetic) */}
