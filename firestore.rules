@@ -1,23 +1,8 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    match /chat_users/{userId} {
-      allow read: if true;
-      allow create, update: if request.auth != null;
-      allow delete: if false;
-    }
-    match /messages/{docId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && get(/databases/$(database)/documents/chat_users/serustqs).data.uid == request.auth.uid;
-    }
-    match /presence/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null; // Presence is handled by UID in App.tsx
-    }
+  match /databases/ai-studio-rusthub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59/documents {
     match /{document=**} {
-      allow read: if true;
-      allow write: if request.auth != null && get(/databases/$(database)/documents/chat_users/serustqs).data.uid == request.auth.uid;
+      allow read, write: if true;
     }
   }
 }

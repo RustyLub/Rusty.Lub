@@ -44,7 +44,6 @@ export interface ToastType {
 
 export interface CustomUser {
   uid: string;
-  realUid?: string;
   displayName: string;
   photoURL: string;
   avatarClass?: string;
@@ -56,11 +55,11 @@ export interface CustomUser {
   steamId?: string;
   steamName?: string;
   steamAvatar?: string;
-  steamUrl?: string;
   friends?: string[];
   friendRequestsSent?: string[];
   friendRequestsReceived?: string[];
   badges?: string[];
   customTheme?: string;
+  steamUrl?: string;
 }
 

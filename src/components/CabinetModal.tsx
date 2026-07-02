@@ -28,7 +28,7 @@ import {
   Save,
   UserPlus,
   Upload,
-  RefreshCw
+  ExternalLink
 } from 'lucide-react';
 import { 
   doc, 
@@ -42,7 +42,6 @@ import {
   arrayUnion,
   arrayRemove,
   getDoc,
-  getDocs,
   query,
   orderBy,
   addDoc,
@@ -50,15 +49,11 @@ import {
   storage,
   ref,
   uploadBytes,
-  getDownloadURL,
-  auth,
-  signOut
+  getDownloadURL
 } from '../firebase';
 import { SURVIVOR_AVATARS } from './ChatTab';
 import { CustomUser } from '../types';
 import UserProfileModal, { BADGES, PROFILE_THEMES } from './UserProfileModal';
-
-import { INITIAL_USERS } from '../data/initialUsers';
 
 interface CabinetModalProps {
   isOpen: boolean;
@@ -78,6 +73,8 @@ interface RegisteredUser {
   role: string;
   isBlocked: boolean;
   isVip?: boolean;
+  password?: string;
+  [key: string]: any; // Allow other fields to be preserved in export
 }
 
 interface SiteAnnouncement {
@@ -98,33 +95,15 @@ export default function CabinetModal({
 }: CabinetModalProps) {
   const [activeTab, setActiveTab] = useState<'profile' | 'friends' | 'admin_users' | 'admin_site'>('profile');
   
-  const migrateUsers = async () => {
-    try {
-      const batch = writeBatch(db);
-      INITIAL_USERS.forEach(userData => {
-        const userRef = doc(db, 'chat_users', userData.username);
-        batch.set(userRef, {
-          ...userData,
-          createdAt: serverTimestamp(),
-        }, { merge: true });
-      });
-      await batch.commit();
-      onToast(lang === 'ru' ? 'Миграция завершена!' : 'Migration complete!', 'success');
-    } catch (err: any) {
-      console.error("Migration error:", err);
-      onToast('Migration error: ' + err.message, 'error');
-    }
-  };
-  
   // Customization local states
   const [bio, setBio] = useState('');
   const [clanTag, setClanTag] = useState('');
   const [hoursPlayed, setHoursPlayed] = useState<number>(0);
   const [playstyle, setPlaystyle] = useState('Casual');
   const [favoriteWeapon, setFavoriteWeapon] = useState('AK-47');
-  const [steamUrl, setSteamUrl] = useState('');
   const [customTheme, setCustomTheme] = useState('slate');
   const [customAvatarUrl, setCustomAvatarUrl] = useState('');
+  const [steamUrl, setSteamUrl] = useState('');
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [siteSections, setSiteSections] = useState<any[]>([]);
   const [editingSection, setEditingSection] = useState<any>(null);
@@ -146,7 +125,7 @@ export default function CabinetModal({
   const [inspectUserId, setInspectUserId] = useState<string | null>(null);
 
   // Registered users for admin view and quick friends listing
-  const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>(INITIAL_USERS as any[]);
+  const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([]);
   const [userSearch, setUserSearch] = useState('');
   
   // Admin site settings states
@@ -154,10 +133,72 @@ export default function CabinetModal({
   const [announcementActive, setAnnouncementActive] = useState(false);
   const [announcementType, setAnnouncementType] = useState<'info' | 'hazard' | 'important'>('hazard');
   const [savingSiteSettings, setSavingSiteSettings] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   const [fullProfile, setFullProfile] = useState<CustomUser | null>(null);
 
   const isAdmin = user && (user.uid === 'serustqs' || (fullProfile && fullProfile.badges?.includes('founder')));
+
+  const handleExportUsers = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(registeredUsers, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "rust_survivors_export.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    onToast(lang === 'ru' ? 'База данных экспортирована!' : 'Database exported successfully!', 'success');
+  };
+
+  const handleImportUsers = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        const usersToImport = Array.isArray(json) ? json : [json];
+        
+        const batch = writeBatch(db);
+        let count = 0;
+
+        usersToImport.forEach((u: any) => {
+          const uid = u.username || u.uid || u.id;
+          if (uid) {
+            const userRef = doc(db, 'chat_users', String(uid));
+            // Ensure basic fields exist
+            const cleanedUser = {
+              ...u,
+              username: uid,
+              role: u.role || 'user',
+              isBlocked: !!u.isBlocked,
+              createdAt: u.createdAt || new Date().toISOString()
+            };
+            batch.set(userRef, cleanedUser, { merge: true });
+            count++;
+          }
+        });
+
+        await batch.commit();
+        onToast(
+          lang === 'ru' 
+            ? `Импорт завершен: ${count} выживших добавлено!` 
+            : `Import complete: ${count} survivors added!`, 
+          'success'
+        );
+      } catch (err) {
+        console.error(err);
+        onToast(lang === 'ru' ? 'Ошибка формата JSON!' : 'JSON Format Error!', 'error');
+      } finally {
+        setIsImporting(false);
+        // Clear input
+        e.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  };
 
   // Subscribe to logged-in user's own profile doc live
   useEffect(() => {
@@ -195,8 +236,8 @@ export default function CabinetModal({
         setPlaystyle(profile.playstyle || 'Casual');
         setFavoriteWeapon(profile.favoriteWeapon || 'AK-47');
         setCustomTheme(profile.customTheme || 'slate');
-        setSteamUrl(profile.steamUrl || '');
         setCustomAvatarUrl(profile.photoURL || '');
+        setSteamUrl(profile.steamUrl || '');
       }
     });
 
@@ -208,24 +249,24 @@ export default function CabinetModal({
     if (!isOpen) return;
 
     const unsubscribe = onSnapshot(collection(db, 'chat_users'), (snapshot) => {
-      console.log("Registered users snapshot received. Size:", snapshot.size);
       const list: RegisteredUser[] = [];
       snapshot.forEach((docSnap) => {
         const data = docSnap.data();
         list.push({
+          ...data,
           username: docSnap.id,
           displayName: data.displayName || docSnap.id,
           photoURL: data.photoURL || '',
           avatarClass: data.avatarClass || 'hazmat',
           role: data.role || 'user',
           isBlocked: !!data.isBlocked,
-          isVip: !!data.isVip
+          isVip: !!data.isVip,
+          password: data.password || ''
         });
       });
       setRegisteredUsers(list);
     }, (err) => {
       console.error("Error syncing users:", err);
-      onToast(lang === 'ru' ? 'Ошибка синхронизации пользователей: ' + err.message : 'User sync error: ' + err.message, 'error');
     });
 
     return () => unsubscribe();
@@ -273,6 +314,13 @@ export default function CabinetModal({
     e.preventDefault();
     setIsSavingProfile(true);
 
+    // Validation for Steam URL
+    if (steamUrl && !steamUrl.startsWith('https://steamcommunity.com/')) {
+      onToast(lang === 'ru' ? 'Некорректная ссылка на Steam! Используйте https://steamcommunity.com/...' : 'Invalid Steam URL! Must start with https://steamcommunity.com/...', 'error');
+      setIsSavingProfile(false);
+      return;
+    }
+
     try {
       const userRef = doc(db, 'chat_users', user.uid);
       
@@ -291,16 +339,6 @@ export default function CabinetModal({
       } else if (hoursPlayed < 1000 && updatedBadges.includes('veteran')) {
         const idx = updatedBadges.indexOf('veteran');
         if (idx > -1) updatedBadges.splice(idx, 1);
-      }
-
-      // Validate Steam URL
-      if (steamUrl && !steamUrl.includes('steamcommunity.com/')) {
-        onToast(
-          lang === 'ru' ? 'Некорректная ссылка на Steam профиль!' : 'Invalid Steam profile link!', 
-          'error'
-        );
-        setIsSavingProfile(false);
-        return;
       }
 
       const updatePayload: any = {
@@ -429,7 +467,7 @@ export default function CabinetModal({
       await updateDoc(doc(db, 'chat_users', targetId), {
         friendRequestsSent: arrayRemove(user.uid)
       });
-      onToast(lang === 'ru' ? 'Запрос отклонен.' : 'Request declined.', 'warning');
+      onToast(lang === 'ru' ? 'Запрос отклонен.' : 'Request declined.', 'info');
     } catch (err) {
       console.error(err);
     }
@@ -816,14 +854,51 @@ export default function CabinetModal({
                           className="w-full bg-[#14171e] border border-zinc-800 text-xs font-mono p-2.5 text-zinc-200 focus:border-zinc-700 outline-none transition-all placeholder-zinc-700 resize-none"
                         />
                       </div>
+
+                      {/* Steam Link Field */}
+                      <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-2">
+                        <label className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1">
+                          {lang === 'ru' ? '3. ССЫЛКА НА STEAM' : '3. STEAM PROFILE LINK'}
+                        </label>
+                        <div className="flex gap-2">
+                          <div className="flex-1 relative">
+                            <input
+                              type="text"
+                              value={steamUrl}
+                              onChange={(e) => setSteamUrl(e.target.value)}
+                              placeholder="https://steamcommunity.com/id/..."
+                              className="w-full bg-[#14171e] border border-zinc-800 text-xs font-mono p-2.5 text-zinc-200 focus:border-zinc-700 outline-none transition-all placeholder-zinc-700"
+                            />
+                            {steamUrl && steamUrl.startsWith('https://steamcommunity.com/') && (
+                              <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                                <CheckCircle2 size={12} className="text-green-500" />
+                              </div>
+                            )}
+                          </div>
+                          {steamUrl && steamUrl.startsWith('https://steamcommunity.com/') && (
+                            <a
+                              href={steamUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 flex items-center justify-center transition-all"
+                              title={lang === 'ru' ? 'Перейти в профиль' : 'Visit Profile'}
+                            >
+                              <ExternalLink size={14} />
+                            </a>
+                          )}
+                        </div>
+                        <p className="text-[9px] font-mono text-zinc-600">
+                          {lang === 'ru' ? '* Только ссылки steamcommunity.com' : '* Only steamcommunity.com links allowed'}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Right Column: Customization and Steam Link */}
+                    {/* Right Column: Customization */}
                     <div className="space-y-4">
                       {/* Avatar Custom URL or Preset selector */}
                       <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-3">
                         <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1">
-                          {lang === 'ru' ? '3. ВНЕШНИЙ ВИД (СВОЯ АВАТАРКА)' : '3. SURVIVOR AVATAR'}
+                          {lang === 'ru' ? '4. ВНЕШНИЙ ВИД (СВОЯ АВАТАРКА)' : '4. SURVIVOR AVATAR'}
                         </span>
 
                         {/* Custom avatar URL */}
@@ -886,7 +961,7 @@ export default function CabinetModal({
                       {/* Theme selection */}
                       <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-2">
                         <label className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1">
-                          {lang === 'ru' ? '4. СТИЛЬ ВИЗИТКИ (ТЕМЫ ПРОФИЛЯ)' : '4. CARD THEME & LAYOUT'}
+                          {lang === 'ru' ? '5. СТИЛЬ ВИЗИТКИ (ТЕМЫ ПРОФИЛЯ)' : '5. CARD THEME & LAYOUT'}
                         </label>
                         <div className="grid grid-cols-2 gap-1.5">
                           {PROFILE_THEMES.map((theme) => {
@@ -906,25 +981,6 @@ export default function CabinetModal({
                               </button>
                             );
                           })}
-                        </div>
-                      </div>
-                      
-                      {/* Steam Link */}
-                      <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-2">
-                        <label className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1">
-                          {lang === 'ru' ? '5. ИГРОВОЙ ПРОФИЛЬ STEAM' : '5. STEAM GAMING PROFILE'}
-                        </label>
-                        <div className="space-y-1.5">
-                          <label className="text-[8px] text-zinc-500 font-mono uppercase block">
-                            {lang === 'ru' ? 'Ссылка на профиль Steam' : 'Steam Profile URL'}
-                          </label>
-                          <input 
-                            type="text" 
-                            value={steamUrl}
-                            onChange={(e) => setSteamUrl(e.target.value)}
-                            placeholder="https://steamcommunity.com/id/example"
-                            className="w-full bg-[#14171e] border border-zinc-800 p-2 text-[10px] font-mono text-white outline-none focus:border-zinc-700"
-                          />
                         </div>
                       </div>
                     </div>
@@ -1130,67 +1186,37 @@ export default function CabinetModal({
                   </div>
 
                   {/* Users Counter */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <div className="text-[9px] font-mono text-gray-400">
                       {lang === 'ru' ? 'Зарегистрировано' : 'Registered'}: <span className="text-[#cd412b] font-black">{registeredUsers.length}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <button 
-                        onClick={migrateUsers}
-                        className="p-1 hover:bg-emerald-500/10 rounded transition-colors cursor-pointer text-gray-500 hover:text-emerald-500"
-                        title={lang === 'ru' ? 'Миграция пользователей' : 'Migrate users'}
+                    
+                    <div className="flex gap-1">
+                      <button
+                        onClick={handleExportUsers}
+                        className="px-2 py-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-[8px] font-mono text-zinc-300 font-bold uppercase cursor-pointer transition-all flex items-center gap-1"
+                        title={lang === 'ru' ? 'Скачать базу пользователей' : 'Download User Database'}
                       >
-                        <UserPlus size={10} />
+                        <Save size={10} />
+                        <span>{lang === 'ru' ? 'ЭКСПОРТ' : 'EXPORT'}</span>
                       </button>
-                      <button 
-                        onClick={async () => {
-                        try {
-                          const snap = await getDocs(collection(db, 'chat_users'));
-                          const list: RegisteredUser[] = [...(INITIAL_USERS as any[])];
-                          
-                          snap.forEach((docSnap) => {
-                            const data = docSnap.data();
-                            const username = docSnap.id;
-                            
-                            const existingIdx = list.findIndex(u => u.username === username);
-                            if (existingIdx === -1) {
-                              list.push({
-                                username: username,
-                                displayName: data.displayName || username,
-                                photoURL: data.photoURL || '',
-                                avatarClass: data.avatarClass || 'hazmat',
-                                role: data.role || 'user',
-                                isBlocked: !!data.isBlocked,
-                                isVip: !!data.isVip
-                              });
-                            } else {
-                              list[existingIdx] = {
-                                ...list[existingIdx],
-                                displayName: data.displayName || username,
-                                photoURL: data.photoURL || list[existingIdx].photoURL,
-                                avatarClass: data.avatarClass || list[existingIdx].avatarClass,
-                                role: data.role || list[existingIdx].role,
-                                isBlocked: !!data.isBlocked,
-                                isVip: !!data.isVip
-                              };
-                            }
-                          });
-                          setRegisteredUsers(list);
-                          onToast(lang === 'ru' ? 'База синхронизирована!' : 'Database synced!', 'success');
-                        } catch (err: any) {
-                          onToast('Sync error: ' + err.message, 'error');
-                        }
-                      }}
-                      className="p-1 hover:bg-white/5 rounded transition-colors cursor-pointer text-gray-500 hover:text-white"
-                      title={lang === 'ru' ? 'Обновить список' : 'Refresh list'}
-                    >
-                      <RefreshCw size={10} />
-                    </button>
+                      
+                      <label className="px-2 py-1 bg-[#cd412b] hover:bg-red-700 border border-red-600 text-[8px] font-mono text-white font-bold uppercase cursor-pointer transition-all flex items-center gap-1">
+                        <Upload size={10} />
+                        <span>{isImporting ? (lang === 'ru' ? 'ЗАГРУЗКА...' : 'IMPORTING...') : (lang === 'ru' ? 'ИМПОРТ' : 'IMPORT')}</span>
+                        <input
+                          type="file"
+                          accept=".json"
+                          onChange={handleImportUsers}
+                          className="hidden"
+                          disabled={isImporting}
+                        />
+                      </label>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Search users */}
+                {/* Search users */}
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500" size={13} />
                   <input

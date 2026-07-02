@@ -13,7 +13,8 @@ import {
   Award, 
   Sparkles, 
   MessageSquare,
-  Bookmark
+  Bookmark,
+  ExternalLink
 } from 'lucide-react';
 import { doc, db, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot } from '../firebase';
 import { CustomUser } from '../types';
@@ -124,12 +125,12 @@ export default function UserProfileModal({
           steamId: data.steamId || '',
           steamName: data.steamName || '',
           steamAvatar: data.steamAvatar || '',
+          steamUrl: data.steamUrl || '',
           friends: data.friends || [],
           friendRequestsSent: data.friendRequestsSent || [],
           friendRequestsReceived: data.friendRequestsReceived || [],
           badges: data.badges || [],
-          customTheme: data.customTheme || 'slate',
-          steamUrl: data.steamUrl || ''
+          customTheme: data.customTheme || 'slate'
         });
       } else {
         setTargetUser(null);
@@ -377,51 +378,6 @@ export default function UserProfileModal({
               </button>
             )}
 
-            {/* Admin Panel for Owner */}
-            {currentUser?.uid === 'serustqs' && targetUser.uid !== 'serustqs' && (
-              <div className="bg-red-950/20 border border-red-900/50 p-3 space-y-2">
-                <span className="text-[9px] font-mono text-red-400 block uppercase tracking-wider">
-                  Admin Panel: Clan Tag Management
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={async () => {
-                      setActionLoading(true);
-                      try {
-                        await updateDoc(doc(db, 'chat_users', targetUser.uid), { clanTag: 'EAC' });
-                        onToast('Clan tag [EAC] assigned!', 'success');
-                      } catch (e) {
-                        onToast('Failed to assign tag', 'error');
-                      } finally {
-                        setActionLoading(false);
-                      }
-                    }}
-                    disabled={actionLoading}
-                    className="flex-1 py-1.5 bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold uppercase rounded-none transition"
-                  >
-                    Set [EAC]
-                  </button>
-                  <button
-                    onClick={async () => {
-                      setActionLoading(true);
-                      try {
-                        await updateDoc(doc(db, 'chat_users', targetUser.uid), { clanTag: '' });
-                        onToast('Clan tag removed!', 'success');
-                      } catch (e) {
-                        onToast('Failed to remove tag', 'error');
-                      } finally {
-                        setActionLoading(false);
-                      }
-                    }}
-                    disabled={actionLoading}
-                    className="flex-1 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-white text-[10px] font-bold uppercase rounded-none transition"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* Dynamic Status/Bio Description Block */}
             <div className="bg-black/40 border border-[#2a2f3b]/40 p-3">
               <span className="text-[9px] font-mono text-zinc-500 block uppercase tracking-wider mb-1.5">
@@ -455,49 +411,45 @@ export default function UserProfileModal({
             </div>
 
             {/* Steam Link Integration Section */}
-            {targetUser.steamUrl ? (
-              <a 
-                href={targetUser.steamUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-[#171a21]/90 border border-[#3b4b57]/40 p-3.5 rounded-sm flex items-center justify-between gap-3 text-left hover:bg-[#22272f] transition-colors group"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded bg-[#101216] flex items-center justify-center border border-[#4c5c68]/30 shrink-0">
-                    <Gamepad2 size={16} className="text-[#3a8bca]" />
-                  </div>
-                  <div className="min-w-0">
-                    <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest block leading-none mb-0.5">
-                      Steam Profile Linked
-                    </span>
-                    <span className="text-xs font-bold text-[#3a8bca] font-sans truncate block group-hover:text-sky-400">
-                      {lang === 'ru' ? 'ОТКРЫТЬ ПРОФИЛЬ' : 'VIEW PROFILE'}
-                    </span>
-                  </div>
+            <div className="bg-[#171a21]/90 border border-[#3b4b57]/40 p-3.5 rounded-sm flex items-center justify-between gap-3 text-left">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded bg-[#101216] flex items-center justify-center border border-[#4c5c68]/30 shrink-0">
+                  <Gamepad2 size={16} className="text-[#3a8bca]" />
                 </div>
-
-                <div className="shrink-0 flex items-center gap-1 bg-[#223846]/40 border border-[#3a8bca]/30 px-2 py-1">
-                  <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shrink-0" />
-                  <span className="text-[8px] font-mono font-black text-[#3a8bca] uppercase tracking-wider">Connected</span>
-                </div>
-              </a>
-            ) : (
-              <div className="bg-[#171a21]/90 border border-[#3b4b57]/40 p-3.5 rounded-sm flex items-center justify-between gap-3 text-left">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded bg-[#101216] flex items-center justify-center border border-[#4c5c68]/30 shrink-0">
-                    <Gamepad2 size={16} className="text-zinc-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest block leading-none mb-0.5">
-                      Steam Profile Integration
+                <div className="min-w-0">
+                  <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest block leading-none mb-0.5">
+                    Steam Profile Integration
+                  </span>
+                  {targetUser.steamUrl ? (
+                    <span className="text-xs font-bold text-zinc-200 font-sans truncate block">
+                      {targetUser.steamUrl.replace('https://steamcommunity.com/', '')}
                     </span>
-                    <span className="text-xs font-bold text-zinc-500 font-mono block">
+                  ) : (
+                    <span className="text-xs font-bold text-[#3a8bca] font-mono block">
                       {lang === 'ru' ? 'НЕ СВЯЗАН' : 'NOT LINKED'}
                     </span>
-                  </div>
+                  )}
                 </div>
               </div>
-            )}
+
+              {targetUser.steamUrl && (
+                <div className="shrink-0 flex items-center gap-2">
+                  <div className="hidden sm:flex items-center gap-1 bg-[#223846]/40 border border-[#3a8bca]/30 px-2 py-1">
+                    <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shrink-0" />
+                    <span className="text-[8px] font-mono font-black text-[#3a8bca] uppercase tracking-wider">Connected</span>
+                  </div>
+                  <a
+                    href={targetUser.steamUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-2 bg-[#3a8bca] hover:bg-[#4ea2e0] text-white transition-all rounded-sm flex items-center justify-center"
+                    title={lang === 'ru' ? 'Перейти в Steam' : 'Open Steam Profile'}
+                  >
+                    <ExternalLink size={14} />
+                  </a>
+                </div>
+              )}
+            </div>
 
             {/* Achievements & Badges Grid */}
             <div className="space-y-2">
@@ -514,7 +466,7 @@ export default function UserProfileModal({
                     (badge.id === 'first_beacon') || 
                     (badge.id === 'founder' && targetUser.uid === 'serustqs') ||
                     (badge.id === 'veteran' && (targetUser.hoursPlayed || 0) >= 1000) ||
-                    (badge.id === 'steam_linked' && (!!targetUser.steamId || !!targetUser.steamUrl));
+                    (badge.id === 'steam_linked' && !!targetUser.steamUrl);
 
                   return (
                     <div 

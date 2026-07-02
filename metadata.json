@@ -1,8 +1,6 @@
 {
-  "name": "Remix: RUST HUB",
+  "name": "Rusty.Lub",
   "description": "Ультимативный справочник по Rust: исправление критических ошибок, полезные бинды, калькулятор рейдов и оптимизация FPS.",
   "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

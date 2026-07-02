@@ -3,8 +3,6 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 
 dotenv.config();
 
@@ -12,34 +10,7 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  // Trust proxy for correct rate limiting behind Cloud Run/Nginx
-  app.set('trust proxy', 1);
-
-  // Basic Security Headers with AI Studio compatibility
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        "img-src": ["'self'", "data:", "https:", "http:"],
-        "connect-src": ["'self'", "https://api.battlemetrics.com", "https://api.rustoria.co", "https://*.googleapis.com", "https://*.firebaseio.com", "https://*.firebase.com"],
-        "frame-ancestors": ["'self'", "https://*.google.com", "https://ai.studio", "https://*.run.app"],
-        "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Vite and some inline scripts need this
-      },
-    },
-    crossOriginEmbedderPolicy: false,
-    frameguard: false, // Disable X-Frame-Options to let CSP frame-ancestors handle it
-  }));
-
   app.use(express.json());
-
-  // Rate Limiting for API routes
-  const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
-    message: { error: "Too many requests from this IP, please try again after 15 minutes" }
-  });
-
-  app.use("/api/", apiLimiter);
 
   // Initialize Gemini API client on the server side
   const ai = new GoogleGenAI({
@@ -55,8 +26,8 @@ async function startServer() {
   app.post("/api/gemini/solve", async (req, res) => {
     try {
       const { errorQuery } = req.body;
-      if (!errorQuery || typeof errorQuery !== 'string' || errorQuery.length > 1000) {
-        return res.status(400).json({ error: "Invalid or too long errorQuery provided" });
+      if (!errorQuery) {
+        return res.status(400).json({ error: "No errorQuery provided" });
       }
 
       const prompt = `Ты — профессиональный ИИ-диагност и технический эксперт по игре Rust (Facepunch) и античиту Easy Anti-Cheat (EAC).
