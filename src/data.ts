@@ -884,6 +884,18 @@ export const raidTargets: RaidTarget[] = [
     explosive_ammo: 200,
     beancan: 56
   },
+  {
+    id: 'armored_hatch',
+    name: 'Armored Hatch (HQM)',
+    category: 'doors',
+    icon: '⬛',
+    hp: 800,
+    c4: 2,
+    rocket: 4,
+    satchel: 12,
+    explosive_ammo: 200,
+    beancan: 56
+  },
 
   // --- DEPLOYABLES ---
   {

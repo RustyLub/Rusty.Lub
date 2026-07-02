@@ -1677,6 +1677,7 @@ export default function App() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 gap-3">
+                      <AnimatePresence>
                       {rustoriaServers
                         .filter((server) => {
                           const matchesRegion = regionFilter === 'ALL' || 
@@ -1695,8 +1696,11 @@ export default function App() {
                           const progressPercent = Math.min(100, Math.max(0, (server.players / server.maxPlayers) * 100));
                           
                           return (
-                            <div
+                            <motion.section
                               key={server.id}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
                               className="flex flex-col lg:flex-row lg:items-center justify-between p-4 rounded-sm bg-[#1b1e26] border-l-4 border-l-[#cd412b] border-y border-r border-[#2a2f3b] hover:border-r-gray-500 hover:border-y-gray-500 transition-all gap-4 group relative overflow-hidden"
                             >
                               {/* Server info / Status */}
@@ -1766,9 +1770,10 @@ export default function App() {
                                   <span>{isCopied ? appTranslations.rustoriaMonitor.copied[lang] : appTranslations.rustoriaMonitor.connect[lang]}</span>
                                 </button>
                               </div>
-                            </div>
+                            </motion.section>
                           );
                         })}
+                      </AnimatePresence>
                     </div>
                   )}
                 </div>
