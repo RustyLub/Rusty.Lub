@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, User, Lock, Crosshair, Sparkles } from 'lucide-react';
-import { doc, getDoc, setDoc, query, collection, where, getDocs, db, auth } from '../firebase';
+import { doc, getDoc, setDoc, query, collection, where, getDocs, db, auth, signInAnonymously } from '../firebase';
 import { SURVIVOR_AVATARS } from './ChatTab';
 import { CustomUser } from '../types';
+
+import { INITIAL_USERS } from '../data/initialUsers';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -50,6 +52,10 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
     setAuthLoading(true);
 
     try {
+      // 1. Perform REAL Firebase Anonymous Authentication to get a valid UID for security rules
+      const authResult = await signInAnonymously(auth);
+      const realUid = authResult.user.uid;
+
       const userRef = doc(db, 'chat_users', cleanUsername);
       const userSnap = await getDoc(userRef);
 
@@ -61,16 +67,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
           return;
         }
 
-        if (cleanDisplayName.length < 3 || cleanDisplayName.length > 40) {
-          onToast(
-            lang === 'ru' ? 'Позывной должен быть от 3 до 40 символов!' : 'Callsign must be between 3 and 40 characters!', 
-            'warning'
-          );
-          setAuthLoading(false);
-          return;
-        }
-
-        // Check if the displayName (username/nickname) is already registered
+        // Optimized name check using direct query instead of fetching all users
         const nameQuery = query(
           collection(db, 'chat_users'),
           where('displayName', '==', cleanDisplayName)
@@ -79,28 +76,6 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
         if (!nameQuerySnap.empty) {
           onToast(
             lang === 'ru' ? 'Этот позывной (никнейм) уже занят!' : 'This callsign is already taken!',
-            'error'
-          );
-          setAuthLoading(false);
-          return;
-        }
-
-        // Case-insensitive double check for any matching display name or username
-        const allUsersSnap = await getDocs(collection(db, 'chat_users'));
-        let isNameTaken = false;
-        allUsersSnap.forEach((doc) => {
-          const data = doc.data();
-          if (data.displayName && data.displayName.toLowerCase() === cleanDisplayName.toLowerCase()) {
-            isNameTaken = true;
-          }
-          if (data.username && data.username.toLowerCase() === cleanUsername.toLowerCase()) {
-            isNameTaken = true;
-          }
-        });
-
-        if (isNameTaken) {
-          onToast(
-            lang === 'ru' ? 'Этот логин или позывной уже занят!' : 'This login or callsign is already taken!',
             'error'
           );
           setAuthLoading(false);
@@ -132,6 +107,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
         const isSystemAdmin = cleanUsername === 'serustqs';
 
         const newUserData = {
+          uid: realUid,
           username: cleanUsername,
           password: cleanPassword,
           displayName: isSystemAdmin ? 'SEO-RustyLub' : cleanDisplayName,
@@ -148,7 +124,8 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
           uid: cleanUsername,
           displayName: newUserData.displayName,
           photoURL: newUserData.photoURL,
-          avatarClass: newUserData.avatarClass
+          avatarClass: newUserData.avatarClass,
+          realUid: realUid
         });
 
         onToast(
@@ -158,17 +135,38 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
         onClose();
       } else {
         // Login Mode
+        let dbUser: any = null;
+        
         if (!userSnap.exists()) {
-          onToast(lang === 'ru' ? 'Пользователь не найден!' : 'Survivor callsign not registered!', 'error');
-          setAuthLoading(false);
-          return;
-        }
-
-        const dbUser = userSnap.data();
-        if (dbUser.password !== cleanPassword) {
-          onToast(lang === 'ru' ? 'Неверный пароль!' : 'Incorrect credentials!', 'error');
-          setAuthLoading(false);
-          return;
+          // Check if user exists in hardcoded INITIAL_USERS
+          const hardcodedUser = INITIAL_USERS.find(u => u.username.toLowerCase() === cleanUsername);
+          if (hardcodedUser && hardcodedUser.password === cleanPassword) {
+            // Auto-migrate this user to Firestore if they login with correct credentials
+            const newUserData = {
+              uid: realUid,
+              username: hardcodedUser.username,
+              password: hardcodedUser.password,
+              displayName: hardcodedUser.displayName,
+              avatarClass: hardcodedUser.avatarClass,
+              photoURL: hardcodedUser.photoURL,
+              role: (hardcodedUser as any).role || 'user',
+              isBlocked: !!hardcodedUser.isBlocked,
+              createdAt: new Date().toISOString()
+            };
+            await setDoc(userRef, newUserData);
+            dbUser = newUserData;
+          } else {
+            onToast(lang === 'ru' ? 'Пользователь не найден!' : 'Survivor callsign not registered!', 'error');
+            setAuthLoading(false);
+            return;
+          }
+        } else {
+          dbUser = userSnap.data();
+          if (dbUser.password !== cleanPassword) {
+            onToast(lang === 'ru' ? 'Неверный пароль!' : 'Incorrect credentials!', 'error');
+            setAuthLoading(false);
+            return;
+          }
         }
 
         if (dbUser.isBlocked) {
@@ -182,11 +180,17 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
           return;
         }
 
+        // Update the user document with the current realUid if it's missing or different
+        if (dbUser.uid !== realUid) {
+          await setDoc(userRef, { uid: realUid }, { merge: true });
+        }
+
         onUserLogin({
           uid: cleanUsername,
           displayName: dbUser.displayName,
           photoURL: dbUser.photoURL,
-          avatarClass: dbUser.avatarClass
+          avatarClass: dbUser.avatarClass,
+          realUid: realUid
         });
 
         onToast(

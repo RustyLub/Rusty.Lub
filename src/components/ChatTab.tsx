@@ -14,7 +14,9 @@ import {
   getDoc,
   getDocs,
   deleteDoc,
-  writeBatch
+  writeBatch,
+  auth,
+  signInAnonymously
 } from '../firebase';
 import { 
   Send, 
@@ -58,6 +60,8 @@ import UserProfileModal from './UserProfileModal';
 
 // @ts-ignore
 import developerCatAvatar from '../assets/images/developer_cat_avatar_1782899645243.jpg';
+
+import { INITIAL_USERS } from '../data/initialUsers';
 
 interface ChatTabProps {
   lang: 'ru' | 'en';
@@ -161,8 +165,22 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
 
   // Admin controls & list
   const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([]);
-  const [usersMap, setUsersMap] = useState<Record<string, { isBlocked: boolean; isVip?: boolean; role: string; displayName: string; photoURL: string; avatarClass: string; voiceChannel?: string | null }>>({});
+  const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>(INITIAL_USERS as any[]);
+  const [usersMap, setUsersMap] = useState<Record<string, { isBlocked: boolean; isVip?: boolean; role: string; displayName: string; photoURL: string; avatarClass: string; voiceChannel?: string | null }>>(() => {
+    const initialMap: any = {};
+    INITIAL_USERS.forEach(u => {
+      initialMap[u.username] = {
+        isBlocked: u.isBlocked,
+        isVip: u.isVip,
+        role: u.role,
+        displayName: u.displayName,
+        photoURL: u.photoURL,
+        avatarClass: u.avatarClass,
+        voiceChannel: null
+      };
+    });
+    return initialMap;
+  });
   const [searchUserQuery, setSearchUserQuery] = useState('');
   const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -235,16 +253,19 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
         // Setup new admin
         const adminRef = doc(db, 'chat_users', 'serustqs');
         const defaultAvatar = SURVIVOR_AVATARS.find(a => a.id === 'heavy_plate') || SURVIVOR_AVATARS[0];
-        await setDoc(adminRef, {
-          username: 'serustqs',
-          password: 'Duf@#13@4fhe34',
-          displayName: 'SEO-RustyLub',
-          avatarClass: 'heavy_plate',
-          photoURL: defaultAvatar.url,
-          role: 'admin',
-          isBlocked: false,
-          createdAt: new Date().toISOString()
-        });
+        const adminSnap = await getDoc(adminRef);
+        
+        if (!adminSnap.exists()) {
+          await setDoc(adminRef, {
+            username: 'serustqs',
+            displayName: 'SEO-RustyLub',
+            avatarClass: 'heavy_plate',
+            photoURL: defaultAvatar.url,
+            role: 'admin',
+            isBlocked: false,
+            createdAt: new Date().toISOString()
+          });
+        }
 
         // Clean up fraudulent mock-admin accounts that mimicking logins created
         try {
@@ -278,28 +299,60 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'chat_users'), (snapshot) => {
       const uMap: Record<string, { isBlocked: boolean; isVip?: boolean; role: string; displayName: string; photoURL: string; avatarClass: string; voiceChannel?: string | null }> = {};
-      const usersList: RegisteredUser[] = [];
+      
+      // Start with initial hardcoded users
+      INITIAL_USERS.forEach(u => {
+        uMap[u.username] = {
+          isBlocked: u.isBlocked,
+          isVip: u.isVip,
+          role: u.role,
+          displayName: u.displayName,
+          photoURL: u.photoURL,
+          avatarClass: u.avatarClass,
+          voiceChannel: null
+        };
+      });
+
+      const usersList: RegisteredUser[] = [...(INITIAL_USERS as any[])];
+
       snapshot.forEach((doc) => {
         const data = doc.data();
-        uMap[doc.id] = {
+        const username = doc.id;
+        
+        uMap[username] = {
           isBlocked: !!data.isBlocked,
           isVip: !!data.isVip,
           role: data.role || 'user',
-          displayName: data.displayName || doc.id,
+          displayName: data.displayName || username,
           photoURL: data.photoURL || '',
           avatarClass: data.avatarClass || 'hazmat',
           voiceChannel: data.voiceChannel || null
         };
-        usersList.push({
-          username: doc.id,
-          displayName: data.displayName || doc.id,
-          photoURL: data.photoURL || '',
-          avatarClass: data.avatarClass || 'hazmat',
-          role: data.role || 'user',
-          isBlocked: !!data.isBlocked,
-          isVip: !!data.isVip,
-          voiceChannel: data.voiceChannel || null
-        } as any);
+
+        const existingIdx = usersList.findIndex(u => u.username === username);
+        if (existingIdx === -1) {
+          usersList.push({
+            username: username,
+            displayName: data.displayName || username,
+            photoURL: data.photoURL || '',
+            avatarClass: data.avatarClass || 'hazmat',
+            role: data.role || 'user',
+            isBlocked: !!data.isBlocked,
+            isVip: !!data.isVip,
+            voiceChannel: data.voiceChannel || null
+          } as any);
+        } else {
+          usersList[existingIdx] = {
+            ...usersList[existingIdx],
+            displayName: data.displayName || username,
+            photoURL: data.photoURL || usersList[existingIdx].photoURL,
+            avatarClass: data.avatarClass || usersList[existingIdx].avatarClass,
+            role: data.role || usersList[existingIdx].role,
+            isBlocked: !!data.isBlocked,
+            isVip: !!data.isVip,
+            voiceChannel: data.voiceChannel || null
+          } as any;
+        }
       });
       setUsersMap(uMap);
       setRegisteredUsers(usersList);
@@ -422,7 +475,15 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
         // Automatically make admin accounts
         const isSystemAdmin = cleanUsername === 'serustqs';
 
+        // Ensure user is signed in to Firebase anonymously
+        let realUid = auth.currentUser?.uid;
+        if (!realUid) {
+          const authRes = await signInAnonymously(auth);
+          realUid = authRes.user.uid;
+        }
+
         const newUserData = {
+          uid: realUid,
           username: cleanUsername,
           password: cleanPassword,
           displayName: isSystemAdmin ? 'SEO-RustyLub' : cleanDisplayName,
@@ -439,7 +500,8 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
           uid: cleanUsername,
           displayName: newUserData.displayName,
           photoURL: newUserData.photoURL,
-          avatarClass: newUserData.avatarClass
+          avatarClass: newUserData.avatarClass,
+          realUid: realUid
         });
 
         onToast(
@@ -467,11 +529,23 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
           return;
         }
 
+        // Ensure realUid is tracked for existing users too
+        let realUid = auth.currentUser?.uid;
+        if (!realUid) {
+          const authRes = await signInAnonymously(auth);
+          realUid = authRes.user.uid;
+        }
+
+        if (dbUser.uid !== realUid) {
+          await setDoc(userRef, { uid: realUid }, { merge: true });
+        }
+
         onUserLogin({
           uid: dbUser.username,
           displayName: dbUser.displayName,
           photoURL: dbUser.photoURL,
-          avatarClass: dbUser.avatarClass
+          avatarClass: dbUser.avatarClass,
+          realUid: realUid
         });
 
         onToast(

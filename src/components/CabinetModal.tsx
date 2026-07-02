@@ -27,7 +27,8 @@ import {
   Link,
   Save,
   UserPlus,
-  Upload
+  Upload,
+  RefreshCw
 } from 'lucide-react';
 import { 
   doc, 
@@ -41,9 +42,11 @@ import {
   arrayUnion,
   arrayRemove,
   getDoc,
+  getDocs,
   query,
   orderBy,
   addDoc,
+  writeBatch,
   storage,
   ref,
   uploadBytes,
@@ -54,6 +57,8 @@ import {
 import { SURVIVOR_AVATARS } from './ChatTab';
 import { CustomUser } from '../types';
 import UserProfileModal, { BADGES, PROFILE_THEMES } from './UserProfileModal';
+
+import { INITIAL_USERS } from '../data/initialUsers';
 
 interface CabinetModalProps {
   isOpen: boolean;
@@ -93,12 +98,31 @@ export default function CabinetModal({
 }: CabinetModalProps) {
   const [activeTab, setActiveTab] = useState<'profile' | 'friends' | 'admin_users' | 'admin_site'>('profile');
   
+  const migrateUsers = async () => {
+    try {
+      const batch = writeBatch(db);
+      INITIAL_USERS.forEach(userData => {
+        const userRef = doc(db, 'chat_users', userData.username);
+        batch.set(userRef, {
+          ...userData,
+          createdAt: serverTimestamp(),
+        }, { merge: true });
+      });
+      await batch.commit();
+      onToast(lang === 'ru' ? 'Миграция завершена!' : 'Migration complete!', 'success');
+    } catch (err: any) {
+      console.error("Migration error:", err);
+      onToast('Migration error: ' + err.message, 'error');
+    }
+  };
+  
   // Customization local states
   const [bio, setBio] = useState('');
   const [clanTag, setClanTag] = useState('');
   const [hoursPlayed, setHoursPlayed] = useState<number>(0);
   const [playstyle, setPlaystyle] = useState('Casual');
   const [favoriteWeapon, setFavoriteWeapon] = useState('AK-47');
+  const [steamUrl, setSteamUrl] = useState('');
   const [customTheme, setCustomTheme] = useState('slate');
   const [customAvatarUrl, setCustomAvatarUrl] = useState('');
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -122,7 +146,7 @@ export default function CabinetModal({
   const [inspectUserId, setInspectUserId] = useState<string | null>(null);
 
   // Registered users for admin view and quick friends listing
-  const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([]);
+  const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>(INITIAL_USERS as any[]);
   const [userSearch, setUserSearch] = useState('');
   
   // Admin site settings states
@@ -159,7 +183,8 @@ export default function CabinetModal({
           friendRequestsSent: data.friendRequestsSent || [],
           friendRequestsReceived: data.friendRequestsReceived || [],
           badges: data.badges || [],
-          customTheme: data.customTheme || 'slate'
+          customTheme: data.customTheme || 'slate',
+          steamUrl: data.steamUrl || ''
         };
         setFullProfile(profile);
 
@@ -170,6 +195,7 @@ export default function CabinetModal({
         setPlaystyle(profile.playstyle || 'Casual');
         setFavoriteWeapon(profile.favoriteWeapon || 'AK-47');
         setCustomTheme(profile.customTheme || 'slate');
+        setSteamUrl(profile.steamUrl || '');
         setCustomAvatarUrl(profile.photoURL || '');
       }
     });
@@ -182,6 +208,7 @@ export default function CabinetModal({
     if (!isOpen) return;
 
     const unsubscribe = onSnapshot(collection(db, 'chat_users'), (snapshot) => {
+      console.log("Registered users snapshot received. Size:", snapshot.size);
       const list: RegisteredUser[] = [];
       snapshot.forEach((docSnap) => {
         const data = docSnap.data();
@@ -198,6 +225,7 @@ export default function CabinetModal({
       setRegisteredUsers(list);
     }, (err) => {
       console.error("Error syncing users:", err);
+      onToast(lang === 'ru' ? 'Ошибка синхронизации пользователей: ' + err.message : 'User sync error: ' + err.message, 'error');
     });
 
     return () => unsubscribe();
@@ -265,6 +293,16 @@ export default function CabinetModal({
         if (idx > -1) updatedBadges.splice(idx, 1);
       }
 
+      // Validate Steam URL
+      if (steamUrl && !steamUrl.includes('steamcommunity.com/')) {
+        onToast(
+          lang === 'ru' ? 'Некорректная ссылка на Steam профиль!' : 'Invalid Steam profile link!', 
+          'error'
+        );
+        setIsSavingProfile(false);
+        return;
+      }
+
       const updatePayload: any = {
         bio,
         clanTag: clanTag.slice(0, 5),
@@ -272,6 +310,7 @@ export default function CabinetModal({
         playstyle,
         favoriteWeapon,
         customTheme,
+        steamUrl,
         badges: updatedBadges
       };
 
@@ -870,21 +909,22 @@ export default function CabinetModal({
                         </div>
                       </div>
                       
-                      {/* Connected Services */}
+                      {/* Steam Link */}
                       <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-2">
                         <label className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1">
-                          {lang === 'ru' ? '5. ПОДКЛЮЧЕННЫЕ СЕРВИСЫ' : '5. CONNECTED SERVICES'}
+                          {lang === 'ru' ? '5. ИГРОВОЙ ПРОФИЛЬ STEAM' : '5. STEAM GAMING PROFILE'}
                         </label>
-                        <div className="flex items-center justify-between p-2 bg-[#14171e] border border-zinc-800">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-zinc-300 font-mono">GitHub</span>
-                          </div>
-                          <button
-                            onClick={() => signOut(auth)}
-                            className="px-2 py-1 bg-zinc-800 hover:bg-zinc-700 text-white text-[9px] font-bold uppercase rounded cursor-pointer"
-                          >
-                            {lang === 'ru' ? 'Выйти' : 'Sign Out'}
-                          </button>
+                        <div className="space-y-1.5">
+                          <label className="text-[8px] text-zinc-500 font-mono uppercase block">
+                            {lang === 'ru' ? 'Ссылка на профиль Steam' : 'Steam Profile URL'}
+                          </label>
+                          <input 
+                            type="text" 
+                            value={steamUrl}
+                            onChange={(e) => setSteamUrl(e.target.value)}
+                            placeholder="https://steamcommunity.com/id/example"
+                            className="w-full bg-[#14171e] border border-zinc-800 p-2 text-[10px] font-mono text-white outline-none focus:border-zinc-700"
+                          />
                         </div>
                       </div>
                     </div>
@@ -1090,12 +1130,67 @@ export default function CabinetModal({
                   </div>
 
                   {/* Users Counter */}
-                  <div className="text-[9px] font-mono text-gray-400">
-                    {lang === 'ru' ? 'Зарегистрировано' : 'Registered'}: <span className="text-[#cd412b] font-black">{registeredUsers.length}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="text-[9px] font-mono text-gray-400">
+                      {lang === 'ru' ? 'Зарегистрировано' : 'Registered'}: <span className="text-[#cd412b] font-black">{registeredUsers.length}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button 
+                        onClick={migrateUsers}
+                        className="p-1 hover:bg-emerald-500/10 rounded transition-colors cursor-pointer text-gray-500 hover:text-emerald-500"
+                        title={lang === 'ru' ? 'Миграция пользователей' : 'Migrate users'}
+                      >
+                        <UserPlus size={10} />
+                      </button>
+                      <button 
+                        onClick={async () => {
+                        try {
+                          const snap = await getDocs(collection(db, 'chat_users'));
+                          const list: RegisteredUser[] = [...(INITIAL_USERS as any[])];
+                          
+                          snap.forEach((docSnap) => {
+                            const data = docSnap.data();
+                            const username = docSnap.id;
+                            
+                            const existingIdx = list.findIndex(u => u.username === username);
+                            if (existingIdx === -1) {
+                              list.push({
+                                username: username,
+                                displayName: data.displayName || username,
+                                photoURL: data.photoURL || '',
+                                avatarClass: data.avatarClass || 'hazmat',
+                                role: data.role || 'user',
+                                isBlocked: !!data.isBlocked,
+                                isVip: !!data.isVip
+                              });
+                            } else {
+                              list[existingIdx] = {
+                                ...list[existingIdx],
+                                displayName: data.displayName || username,
+                                photoURL: data.photoURL || list[existingIdx].photoURL,
+                                avatarClass: data.avatarClass || list[existingIdx].avatarClass,
+                                role: data.role || list[existingIdx].role,
+                                isBlocked: !!data.isBlocked,
+                                isVip: !!data.isVip
+                              };
+                            }
+                          });
+                          setRegisteredUsers(list);
+                          onToast(lang === 'ru' ? 'База синхронизирована!' : 'Database synced!', 'success');
+                        } catch (err: any) {
+                          onToast('Sync error: ' + err.message, 'error');
+                        }
+                      }}
+                      className="p-1 hover:bg-white/5 rounded transition-colors cursor-pointer text-gray-500 hover:text-white"
+                      title={lang === 'ru' ? 'Обновить список' : 'Refresh list'}
+                    >
+                      <RefreshCw size={10} />
+                    </button>
                   </div>
                 </div>
+              </div>
 
-                {/* Search users */}
+              {/* Search users */}
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500" size={13} />
                   <input

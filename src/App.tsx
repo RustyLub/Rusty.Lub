@@ -58,7 +58,8 @@ import {
   query,
   handleFirestoreError,
   OperationType,
-  auth
+  auth,
+  signInAnonymously
 } from './firebase';
 
 // Tab Components
@@ -216,6 +217,22 @@ export default function App() {
   const [cabinetModalOpen, setCabinetModalOpen] = useState(false);
   const [announcement, setAnnouncement] = useState<{ text: string; active: boolean; type: 'info' | 'hazard' | 'important' } | null>(null);
 
+  // Ensure Firebase Anonymous Authentication is active for security rules
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (auth.currentUser) return;
+        
+        await signInAnonymously(auth);
+        console.log('Firebase Anonymous Auth initialized');
+      } catch (err: any) {
+        // If anonymous auth is disabled in console, we log it but don't crash
+        console.warn('Firebase Auth: Anonymous sign-in might be disabled in Firebase Console or restricted.', err.code);
+      }
+    };
+    initAuth();
+  }, []);
+
   // Real-time site announcement subscription
   useEffect(() => {
     const unsubscribe = onSnapshot(doc(db, 'site_settings', 'announcement'), (docSnap) => {
@@ -241,6 +258,10 @@ export default function App() {
 
     const updatePresence = async () => {
       try {
+        // Ensure user is signed in to Firebase
+        if (!auth.currentUser) {
+          await signInAnonymously(auth);
+        }
         await setDoc(doc(db, 'presence', currentUser.uid), {
           lastActive: serverTimestamp(),
           displayName: currentUser.displayName || 'Survivor'
@@ -256,18 +277,22 @@ export default function App() {
     return () => clearInterval(interval);
   }, [currentUser]);
 
-  // Automatically update the logged-in user's avatar and class to Developer as requested
+  // Handle auto-upgrade only for the site owner
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || currentUser.uid !== 'serustqs') return;
     
     const applyDeveloperUpgrade = async () => {
       const developerAvatarUrl = '/src/assets/images/developer_cat_avatar_1782899645243.jpg';
       if (currentUser.avatarClass !== 'developer' || currentUser.photoURL !== developerAvatarUrl) {
         try {
+          if (!auth.currentUser) {
+            await signInAnonymously(auth);
+          }
           const userRef = doc(db, 'chat_users', currentUser.uid);
           await setDoc(userRef, {
             avatarClass: 'developer',
-            photoURL: developerAvatarUrl
+            photoURL: developerAvatarUrl,
+            uid: auth.currentUser?.uid // Ensure real UID is stored for rules
           }, { merge: true });
 
           const updated = {

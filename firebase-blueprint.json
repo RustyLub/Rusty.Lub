@@ -45,6 +45,22 @@
         }
       },
       "required": ["lastActive"]
+    },
+    "ChatUser": {
+      "title": "ChatUser",
+      "description": "User profile data for chat and management",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "username": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "avatarClass": { "type": "string" },
+        "role": { "type": "string" },
+        "isBlocked": { "type": "boolean" },
+        "isVip": { "type": "boolean" },
+        "steamUrl": { "type": "string" }
+      }
     }
   },
   "firestore": {
@@ -55,6 +71,10 @@
     "/presence/{userId}": {
       "schema": "Presence",
       "description": "Real-time presence collection"
+    },
+    "/chat_users/{username}": {
+      "schema": "ChatUser",
+      "description": "Registered chat users"
     }
   }
 }

@@ -128,7 +128,8 @@ export default function UserProfileModal({
           friendRequestsSent: data.friendRequestsSent || [],
           friendRequestsReceived: data.friendRequestsReceived || [],
           badges: data.badges || [],
-          customTheme: data.customTheme || 'slate'
+          customTheme: data.customTheme || 'slate',
+          steamUrl: data.steamUrl || ''
         });
       } else {
         setTargetUser(null);
@@ -454,34 +455,49 @@ export default function UserProfileModal({
             </div>
 
             {/* Steam Link Integration Section */}
-            <div className="bg-[#171a21]/90 border border-[#3b4b57]/40 p-3.5 rounded-sm flex items-center justify-between gap-3 text-left">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded bg-[#101216] flex items-center justify-center border border-[#4c5c68]/30 shrink-0">
-                  <Gamepad2 size={16} className="text-[#3a8bca]" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest block leading-none mb-0.5">
-                    Steam Profile Integration
-                  </span>
-                  {targetUser.steamId ? (
-                    <span className="text-xs font-bold text-zinc-200 font-sans truncate block">
-                      {targetUser.steamName}
+            {targetUser.steamUrl ? (
+              <a 
+                href={targetUser.steamUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#171a21]/90 border border-[#3b4b57]/40 p-3.5 rounded-sm flex items-center justify-between gap-3 text-left hover:bg-[#22272f] transition-colors group"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded bg-[#101216] flex items-center justify-center border border-[#4c5c68]/30 shrink-0">
+                    <Gamepad2 size={16} className="text-[#3a8bca]" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest block leading-none mb-0.5">
+                      Steam Profile Linked
                     </span>
-                  ) : (
-                    <span className="text-xs font-bold text-[#3a8bca] font-mono block">
-                      {lang === 'ru' ? 'НЕ СВЯЗАН' : 'NOT LINKED'}
+                    <span className="text-xs font-bold text-[#3a8bca] font-sans truncate block group-hover:text-sky-400">
+                      {lang === 'ru' ? 'ОТКРЫТЬ ПРОФИЛЬ' : 'VIEW PROFILE'}
                     </span>
-                  )}
+                  </div>
                 </div>
-              </div>
 
-              {targetUser.steamId && (
                 <div className="shrink-0 flex items-center gap-1 bg-[#223846]/40 border border-[#3a8bca]/30 px-2 py-1">
                   <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shrink-0" />
                   <span className="text-[8px] font-mono font-black text-[#3a8bca] uppercase tracking-wider">Connected</span>
                 </div>
-              )}
-            </div>
+              </a>
+            ) : (
+              <div className="bg-[#171a21]/90 border border-[#3b4b57]/40 p-3.5 rounded-sm flex items-center justify-between gap-3 text-left">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded bg-[#101216] flex items-center justify-center border border-[#4c5c68]/30 shrink-0">
+                    <Gamepad2 size={16} className="text-zinc-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest block leading-none mb-0.5">
+                      Steam Profile Integration
+                    </span>
+                    <span className="text-xs font-bold text-zinc-500 font-mono block">
+                      {lang === 'ru' ? 'НЕ СВЯЗАН' : 'NOT LINKED'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Achievements & Badges Grid */}
             <div className="space-y-2">
@@ -498,7 +514,7 @@ export default function UserProfileModal({
                     (badge.id === 'first_beacon') || 
                     (badge.id === 'founder' && targetUser.uid === 'serustqs') ||
                     (badge.id === 'veteran' && (targetUser.hoursPlayed || 0) >= 1000) ||
-                    (badge.id === 'steam_linked' && !!targetUser.steamId);
+                    (badge.id === 'steam_linked' && (!!targetUser.steamId || !!targetUser.steamUrl));
 
                   return (
                     <div 
