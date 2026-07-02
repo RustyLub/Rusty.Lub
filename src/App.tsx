@@ -621,7 +621,7 @@ export default function App() {
 
       {/* HEADER / NAVIGATION BAR */}
       <nav className="sticky top-1 z-40 bg-[#0c0e14]/90 backdrop-blur-md border-b border-[#1f232e] shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <div className="flex items-center gap-2.5 shrink-0">
@@ -649,29 +649,21 @@ export default function App() {
               </div>
             </div>
 
-            {/* Desktop Navigation Tabs - Modern Segmented Control Dock */}
-            <div className="hidden lg:flex items-center bg-[#08090d]/80 border border-[#1f232e] rounded-lg p-0.5 shadow-inner gap-1">
-              {tabs.map((tab) => {
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTabChange(tab.id)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer rounded-md relative overflow-hidden font-mono ${
-                      isActive
-                        ? 'bg-[#cd412b] text-white shadow-md shadow-[#cd412b]/20'
-                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    {tab.icon}
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Language Selection & Login Buttons - Streamlined Horizontal Row */}
+            {/* Language Selection, Chat & Login Buttons - Streamlined Horizontal Row */}
             <div className="hidden lg:flex items-center gap-2">
+              {/* Chat Button */}
+              <button
+                onClick={() => handleTabChange('chat')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold border rounded-md transition-all cursor-pointer font-mono uppercase ${
+                  activeTab === 'chat'
+                    ? 'bg-gradient-to-r from-blue-600 to-[#ff4d30] text-white border-purple-500/40 shadow-md shadow-purple-500/10'
+                    : 'bg-[#1b1e26]/40 hover:bg-[#1b1e26]/80 border-[#2a2f3b] hover:border-gray-500 text-gray-300 hover:text-white'
+                }`}
+              >
+                <MessageSquare size={12} className={activeTab === 'chat' ? 'text-white' : 'text-purple-400'} />
+                <span>{lang === 'ru' ? 'ЧАТ' : 'CHAT'}</span>
+              </button>
+
               {/* Profile/Auth Button */}
               {currentUser ? (
                 <button
@@ -837,8 +829,66 @@ export default function App() {
       </nav>
 
       {/* CORE APPLICATION CONTAINER */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 relative z-10">
-        <AnimatePresence mode="wait">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 relative z-10">
+        <div className="flex flex-col lg:flex-row gap-8 items-start relative">
+          {/* Left Sidebar Navigation - Only on Desktop */}
+          <aside className="w-full lg:w-52 shrink-0 lg:sticky lg:top-20 space-y-5 hidden lg:block xl:absolute xl:right-full xl:mr-8 xl:top-0 xl:w-44">
+            <div className="bg-[#14171e]/90 border border-[#2a2f3b] p-2.5 space-y-1.5 rounded-none shadow-xl relative rust-metal-pattern">
+              {/* Corner Brackets to fit the Rust authentic feel */}
+              <div className="rust-bracket-tl" />
+              <div className="rust-bracket-tr" />
+              <div className="rust-bracket-bl" />
+              <div className="rust-bracket-br" />
+              
+              <div className="px-3 py-2.5 border-b border-[#2a2f3b] mb-3">
+                <span className="text-[9px] font-mono font-black text-[#cd412b] tracking-widest uppercase block">
+                  {lang === 'ru' ? 'НАВИГАЦИЯ' : 'NAVIGATION'}
+                </span>
+              </div>
+
+              {tabs.filter(t => t.id !== 'chat').map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleTabChange(tab.id)}
+                    className={`w-full flex items-center gap-3 px-3 py-3 text-[10px] font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer rounded-none relative overflow-hidden font-mono group ${
+                      isActive
+                        ? 'bg-gradient-to-r from-blue-600/10 to-[#ff4d30]/10 text-white border border-[#cd412b]/40 shadow-sm font-black'
+                        : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
+                    }`}
+                  >
+                    <span className={`transition-transform duration-150 group-hover:scale-105 ${isActive ? 'text-[#cd412b]' : 'text-gray-500 group-hover:text-[#cd412b]'}`}>
+                      {tab.icon}
+                    </span>
+                    <span>{tab.label}</span>
+                    {/* Hover indicator side bar */}
+                    <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#cd412b] scale-y-0 group-hover:scale-y-100 transition-transform origin-top" />
+                  </button>
+                );
+              })}
+            </div>
+            
+            {/* System Status Info block in sidebar */}
+            <div className="bg-[#14171e]/50 border border-[#2a2f3b] p-3 text-[10px] font-mono text-gray-500 space-y-2 rounded-none">
+              <div className="flex justify-between">
+                <span>SYSTEM_SEC:</span>
+                <span className="text-gray-400">SECURE</span>
+              </div>
+              <div className="flex justify-between">
+                <span>EAC_STATUS:</span>
+                <span className="text-emerald-500 font-bold uppercase">{lang === 'ru' ? 'АКТИВЕН' : 'ACTIVE'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>VERSION:</span>
+                <span className="text-gray-400">v2.4</span>
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Content Area */}
+          <div className="flex-1 min-w-0 w-full">
+            <AnimatePresence mode="wait">
           {activeTab === 'home' && (
             <motion.div
               key="home"
@@ -1671,7 +1721,9 @@ export default function App() {
               />
             </motion.div>
           )}
-        </AnimatePresence>
+            </AnimatePresence>
+          </div>
+        </div>
       </main>
 
       {/* DONATION MODAL */}
