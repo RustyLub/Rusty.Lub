@@ -29,7 +29,6 @@ import {
   arrayUnion,
   arrayRemove
 } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCKBAhIPVmCFhg8hom5G91VEbY3kaxNhGQ",
@@ -43,8 +42,9 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+// Use the custom database ID provided in the configuration
 const db = getFirestore(app, "ai-studio-rusthub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59");
-const storage = getStorage(app);
 
 const githubProvider = new GithubAuthProvider();
 const googleProvider = new GoogleAuthProvider();
@@ -52,10 +52,6 @@ const googleProvider = new GoogleAuthProvider();
 export { 
   auth, 
   db, 
-  storage,
-  ref,
-  uploadBytes,
-  getDownloadURL,
   githubProvider, 
   googleProvider,
   signInWithPopup, 

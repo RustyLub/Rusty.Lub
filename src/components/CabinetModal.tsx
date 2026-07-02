@@ -26,9 +26,7 @@ import {
   UserMinus,
   Link,
   Save,
-  UserPlus,
-  Upload,
-  ExternalLink
+  UserPlus
 } from 'lucide-react';
 import { 
   doc, 
@@ -41,15 +39,7 @@ import {
   updateDoc,
   arrayUnion,
   arrayRemove,
-  getDoc,
-  query,
-  orderBy,
-  addDoc,
-  writeBatch,
-  storage,
-  ref,
-  uploadBytes,
-  getDownloadURL
+  getDoc
 } from '../firebase';
 import { SURVIVOR_AVATARS } from './ChatTab';
 import { CustomUser } from '../types';
@@ -73,8 +63,6 @@ interface RegisteredUser {
   role: string;
   isBlocked: boolean;
   isVip?: boolean;
-  password?: string;
-  [key: string]: any; // Allow other fields to be preserved in export
 }
 
 interface SiteAnnouncement {
@@ -103,19 +91,6 @@ export default function CabinetModal({
   const [favoriteWeapon, setFavoriteWeapon] = useState('AK-47');
   const [customTheme, setCustomTheme] = useState('slate');
   const [customAvatarUrl, setCustomAvatarUrl] = useState('');
-  const [steamUrl, setSteamUrl] = useState('');
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const [siteSections, setSiteSections] = useState<any[]>([]);
-  const [editingSection, setEditingSection] = useState<any>(null);
-
-  useEffect(() => {
-    const q = query(collection(db, 'site_sections'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const sections = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setSiteSections(sections);
-    });
-    return () => unsubscribe();
-  }, []);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   // Friend search and add direct states
@@ -133,72 +108,10 @@ export default function CabinetModal({
   const [announcementActive, setAnnouncementActive] = useState(false);
   const [announcementType, setAnnouncementType] = useState<'info' | 'hazard' | 'important'>('hazard');
   const [savingSiteSettings, setSavingSiteSettings] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
 
   const [fullProfile, setFullProfile] = useState<CustomUser | null>(null);
 
   const isAdmin = user && (user.uid === 'serustqs' || (fullProfile && fullProfile.badges?.includes('founder')));
-
-  const handleExportUsers = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(registeredUsers, null, 2));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "rust_survivors_export.json");
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-    onToast(lang === 'ru' ? 'База данных экспортирована!' : 'Database exported successfully!', 'success');
-  };
-
-  const handleImportUsers = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsImporting(true);
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const json = JSON.parse(event.target?.result as string);
-        const usersToImport = Array.isArray(json) ? json : [json];
-        
-        const batch = writeBatch(db);
-        let count = 0;
-
-        usersToImport.forEach((u: any) => {
-          const uid = u.username || u.uid || u.id;
-          if (uid) {
-            const userRef = doc(db, 'chat_users', String(uid));
-            // Ensure basic fields exist
-            const cleanedUser = {
-              ...u,
-              username: uid,
-              role: u.role || 'user',
-              isBlocked: !!u.isBlocked,
-              createdAt: u.createdAt || new Date().toISOString()
-            };
-            batch.set(userRef, cleanedUser, { merge: true });
-            count++;
-          }
-        });
-
-        await batch.commit();
-        onToast(
-          lang === 'ru' 
-            ? `Импорт завершен: ${count} выживших добавлено!` 
-            : `Import complete: ${count} survivors added!`, 
-          'success'
-        );
-      } catch (err) {
-        console.error(err);
-        onToast(lang === 'ru' ? 'Ошибка формата JSON!' : 'JSON Format Error!', 'error');
-      } finally {
-        setIsImporting(false);
-        // Clear input
-        e.target.value = '';
-      }
-    };
-    reader.readAsText(file);
-  };
 
   // Subscribe to logged-in user's own profile doc live
   useEffect(() => {
@@ -224,8 +137,7 @@ export default function CabinetModal({
           friendRequestsSent: data.friendRequestsSent || [],
           friendRequestsReceived: data.friendRequestsReceived || [],
           badges: data.badges || [],
-          customTheme: data.customTheme || 'slate',
-          steamUrl: data.steamUrl || ''
+          customTheme: data.customTheme || 'slate'
         };
         setFullProfile(profile);
 
@@ -237,7 +149,6 @@ export default function CabinetModal({
         setFavoriteWeapon(profile.favoriteWeapon || 'AK-47');
         setCustomTheme(profile.customTheme || 'slate');
         setCustomAvatarUrl(profile.photoURL || '');
-        setSteamUrl(profile.steamUrl || '');
       }
     });
 
@@ -253,15 +164,13 @@ export default function CabinetModal({
       snapshot.forEach((docSnap) => {
         const data = docSnap.data();
         list.push({
-          ...data,
           username: docSnap.id,
           displayName: data.displayName || docSnap.id,
           photoURL: data.photoURL || '',
           avatarClass: data.avatarClass || 'hazmat',
           role: data.role || 'user',
           isBlocked: !!data.isBlocked,
-          isVip: !!data.isVip,
-          password: data.password || ''
+          isVip: !!data.isVip
         });
       });
       setRegisteredUsers(list);
@@ -290,36 +199,10 @@ export default function CabinetModal({
 
   if (!isOpen || !user) return null;
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-
-    setIsUploadingAvatar(true);
-    try {
-      const storageRef = ref(storage, `avatars/${user.uid}/${Date.now()}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      setCustomAvatarUrl(downloadURL);
-      onToast(lang === 'ru' ? 'Аватар загружен!' : 'Avatar uploaded!', 'success');
-    } catch (err) {
-      console.error(err);
-      onToast(lang === 'ru' ? 'Ошибка загрузки аватара.' : 'Failed to upload avatar.', 'error');
-    } finally {
-      setIsUploadingAvatar(false);
-    }
-  };
-
   // Save Extended Profile custom state
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSavingProfile(true);
-
-    // Validation for Steam URL
-    if (steamUrl && !steamUrl.startsWith('https://steamcommunity.com/')) {
-      onToast(lang === 'ru' ? 'Некорректная ссылка на Steam! Используйте https://steamcommunity.com/...' : 'Invalid Steam URL! Must start with https://steamcommunity.com/...', 'error');
-      setIsSavingProfile(false);
-      return;
-    }
 
     try {
       const userRef = doc(db, 'chat_users', user.uid);
@@ -348,7 +231,6 @@ export default function CabinetModal({
         playstyle,
         favoriteWeapon,
         customTheme,
-        steamUrl,
         badges: updatedBadges
       };
 
@@ -467,7 +349,7 @@ export default function CabinetModal({
       await updateDoc(doc(db, 'chat_users', targetId), {
         friendRequestsSent: arrayRemove(user.uid)
       });
-      onToast(lang === 'ru' ? 'Запрос отклонен.' : 'Request declined.', 'info');
+      onToast(lang === 'ru' ? 'Запрос отклонен.' : 'Request declined.', 'warning');
     } catch (err) {
       console.error(err);
     }
@@ -854,66 +736,19 @@ export default function CabinetModal({
                           className="w-full bg-[#14171e] border border-zinc-800 text-xs font-mono p-2.5 text-zinc-200 focus:border-zinc-700 outline-none transition-all placeholder-zinc-700 resize-none"
                         />
                       </div>
-
-                      {/* Steam Link Field */}
-                      <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-2">
-                        <label className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1">
-                          {lang === 'ru' ? '3. ССЫЛКА НА STEAM' : '3. STEAM PROFILE LINK'}
-                        </label>
-                        <div className="flex gap-2">
-                          <div className="flex-1 relative">
-                            <input
-                              type="text"
-                              value={steamUrl}
-                              onChange={(e) => setSteamUrl(e.target.value)}
-                              placeholder="https://steamcommunity.com/id/..."
-                              className="w-full bg-[#14171e] border border-zinc-800 text-xs font-mono p-2.5 text-zinc-200 focus:border-zinc-700 outline-none transition-all placeholder-zinc-700"
-                            />
-                            {steamUrl && steamUrl.startsWith('https://steamcommunity.com/') && (
-                              <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                                <CheckCircle2 size={12} className="text-green-500" />
-                              </div>
-                            )}
-                          </div>
-                          {steamUrl && steamUrl.startsWith('https://steamcommunity.com/') && (
-                            <a
-                              href={steamUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="px-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 flex items-center justify-center transition-all"
-                              title={lang === 'ru' ? 'Перейти в профиль' : 'Visit Profile'}
-                            >
-                              <ExternalLink size={14} />
-                            </a>
-                          )}
-                        </div>
-                        <p className="text-[9px] font-mono text-zinc-600">
-                          {lang === 'ru' ? '* Только ссылки steamcommunity.com' : '* Only steamcommunity.com links allowed'}
-                        </p>
-                      </div>
                     </div>
 
-                    {/* Right Column: Customization */}
+                    {/* Right Column: Customization and Steam Link */}
                     <div className="space-y-4">
                       {/* Avatar Custom URL or Preset selector */}
                       <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-3">
                         <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1">
-                          {lang === 'ru' ? '4. ВНЕШНИЙ ВИД (СВОЯ АВАТАРКА)' : '4. SURVIVOR AVATAR'}
+                          {lang === 'ru' ? '3. ВНЕШНИЙ ВИД (СВОЯ АВАТАРКА)' : '3. SURVIVOR AVATAR'}
                         </span>
 
                         {/* Custom avatar URL */}
                         <div className="space-y-1">
-                          <label className="text-[8px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Или загрузите файл аватарки' : 'Upload custom avatar file'}</label>
-                          <input 
-                            type="file" 
-                            accept="image/*"
-                            onChange={handleAvatarUpload}
-                            disabled={isUploadingAvatar}
-                            className="w-full bg-[#14171e] border border-zinc-800 p-1 text-[10px] font-mono text-white outline-none focus:border-zinc-700 file:bg-[#cd412b] file:text-white file:border-0 file:py-1 file:px-2 file:cursor-pointer"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[8px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Ссылка на аватарку (URL)' : 'Avatar Image URL'}</label>
+                          <label className="text-[8px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Ссылка на свою аватарку (URL)' : 'Custom Avatar Image URL'}</label>
                           <input 
                             type="text" 
                             value={customAvatarUrl}
@@ -961,7 +796,7 @@ export default function CabinetModal({
                       {/* Theme selection */}
                       <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-2">
                         <label className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1">
-                          {lang === 'ru' ? '5. СТИЛЬ ВИЗИТКИ (ТЕМЫ ПРОФИЛЯ)' : '5. CARD THEME & LAYOUT'}
+                          {lang === 'ru' ? '4. СТИЛЬ ВИЗИТКИ (ТЕМЫ ПРОФИЛЯ)' : '4. CARD THEME & LAYOUT'}
                         </label>
                         <div className="grid grid-cols-2 gap-1.5">
                           {PROFILE_THEMES.map((theme) => {
@@ -1186,33 +1021,8 @@ export default function CabinetModal({
                   </div>
 
                   {/* Users Counter */}
-                  <div className="flex items-center gap-3">
-                    <div className="text-[9px] font-mono text-gray-400">
-                      {lang === 'ru' ? 'Зарегистрировано' : 'Registered'}: <span className="text-[#cd412b] font-black">{registeredUsers.length}</span>
-                    </div>
-                    
-                    <div className="flex gap-1">
-                      <button
-                        onClick={handleExportUsers}
-                        className="px-2 py-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-[8px] font-mono text-zinc-300 font-bold uppercase cursor-pointer transition-all flex items-center gap-1"
-                        title={lang === 'ru' ? 'Скачать базу пользователей' : 'Download User Database'}
-                      >
-                        <Save size={10} />
-                        <span>{lang === 'ru' ? 'ЭКСПОРТ' : 'EXPORT'}</span>
-                      </button>
-                      
-                      <label className="px-2 py-1 bg-[#cd412b] hover:bg-red-700 border border-red-600 text-[8px] font-mono text-white font-bold uppercase cursor-pointer transition-all flex items-center gap-1">
-                        <Upload size={10} />
-                        <span>{isImporting ? (lang === 'ru' ? 'ЗАГРУЗКА...' : 'IMPORTING...') : (lang === 'ru' ? 'ИМПОРТ' : 'IMPORT')}</span>
-                        <input
-                          type="file"
-                          accept=".json"
-                          onChange={handleImportUsers}
-                          className="hidden"
-                          disabled={isImporting}
-                        />
-                      </label>
-                    </div>
+                  <div className="text-[9px] font-mono text-gray-400">
+                    {lang === 'ru' ? 'Зарегистрировано' : 'Registered'}: <span className="text-[#cd412b] font-black">{registeredUsers.length}</span>
                   </div>
                 </div>
 
@@ -1433,68 +1243,6 @@ export default function CabinetModal({
                     {savingSiteSettings ? (lang === 'ru' ? 'СОХРАНЕНИЕ...' : 'SAVING...') : (lang === 'ru' ? 'ПРИМЕНИТЬ НАСТРОЙКИ САЙТА' : 'APPLY SYSTEM BROADCAST')}
                   </button>
                 </form>
-
-                  {/* Content Section Manager */}
-                  <div className="pt-6 border-t border-[#2a2f3b] space-y-6">
-                    <h4 className="text-sm font-bold text-white uppercase font-teko">
-                      {lang === 'ru' ? 'Контент-секции' : 'Content Sections'}
-                    </h4>
-                    
-                    {/* Existing sections list */}
-                    <div className="space-y-3">
-                      {siteSections.map(section => (
-                        <div key={section.id} className="bg-[#0c0d10] border border-[#2a2f3b] p-3 flex justify-between items-center">
-                          <span className="text-xs text-zinc-300 font-bold">{section.title}</span>
-                          <div className="flex gap-2">
-                            <button onClick={() => setEditingSection(section)} className="text-xs text-amber-500 hover:text-amber-400">Edit</button>
-                            <button onClick={async () => {
-                              await deleteDoc(doc(db, 'site_sections', section.id));
-                              onToast(lang === 'ru' ? 'Удалено!' : 'Deleted!', 'success');
-                            }} className="text-xs text-red-500 hover:text-red-400">Delete</button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <h4 className="text-sm font-bold text-white uppercase font-teko">
-                      {editingSection ? (lang === 'ru' ? 'Редактировать секцию' : 'Edit Section') : (lang === 'ru' ? 'Добавить секцию' : 'Add Section')}
-                    </h4>
-                    <form 
-                      onSubmit={async (e) => {
-                        e.preventDefault();
-                        const formData = new FormData(e.currentTarget);
-                        const data = {
-                          title: formData.get('title'),
-                          content: formData.get('content'),
-                          updatedAt: serverTimestamp()
-                        };
-                        
-                        if (editingSection) {
-                          await updateDoc(doc(db, 'site_sections', editingSection.id), data);
-                          onToast(lang === 'ru' ? 'Секция обновлена!' : 'Section updated!', 'success');
-                          setEditingSection(null);
-                        } else {
-                          await addDoc(collection(db, 'site_sections'), { ...data, createdAt: serverTimestamp() });
-                          onToast(lang === 'ru' ? 'Секция добавлена!' : 'Section added!', 'success');
-                        }
-                        e.currentTarget.reset();
-                      }}
-                      className="space-y-3 bg-[#0c0d10] border border-[#2a2f3b] p-4"
-                    >
-                      <input name="title" defaultValue={editingSection?.title} placeholder="Title" className="w-full bg-[#14171e] border border-zinc-800 p-2 text-xs text-white" required />
-                      <textarea name="content" defaultValue={editingSection?.content} placeholder="Content" className="w-full bg-[#14171e] border border-zinc-800 p-2 text-xs text-white" required />
-                      <div className="flex gap-2">
-                        <button type="submit" className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold uppercase cursor-pointer">
-                          {editingSection ? (lang === 'ru' ? 'Сохранить' : 'Save') : (lang === 'ru' ? 'Добавить' : 'Add')}
-                        </button>
-                        {editingSection && (
-                          <button type="button" onClick={() => setEditingSection(null)} className="px-4 py-2 bg-zinc-700 text-white text-xs font-bold uppercase cursor-pointer">
-                            {lang === 'ru' ? 'Отмена' : 'Cancel'}
-                          </button>
-                        )}
-                      </div>
-                    </form>
-                  </div>
               </motion.div>
             )}
           </AnimatePresence>

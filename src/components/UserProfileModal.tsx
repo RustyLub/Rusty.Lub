@@ -13,8 +13,7 @@ import {
   Award, 
   Sparkles, 
   MessageSquare,
-  Bookmark,
-  ExternalLink
+  Bookmark
 } from 'lucide-react';
 import { doc, db, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot } from '../firebase';
 import { CustomUser } from '../types';
@@ -125,7 +124,6 @@ export default function UserProfileModal({
           steamId: data.steamId || '',
           steamName: data.steamName || '',
           steamAvatar: data.steamAvatar || '',
-          steamUrl: data.steamUrl || '',
           friends: data.friends || [],
           friendRequestsSent: data.friendRequestsSent || [],
           friendRequestsReceived: data.friendRequestsReceived || [],
@@ -420,9 +418,9 @@ export default function UserProfileModal({
                   <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest block leading-none mb-0.5">
                     Steam Profile Integration
                   </span>
-                  {targetUser.steamUrl ? (
+                  {targetUser.steamId ? (
                     <span className="text-xs font-bold text-zinc-200 font-sans truncate block">
-                      {targetUser.steamUrl.replace('https://steamcommunity.com/', '')}
+                      {targetUser.steamName}
                     </span>
                   ) : (
                     <span className="text-xs font-bold text-[#3a8bca] font-mono block">
@@ -432,21 +430,10 @@ export default function UserProfileModal({
                 </div>
               </div>
 
-              {targetUser.steamUrl && (
-                <div className="shrink-0 flex items-center gap-2">
-                  <div className="hidden sm:flex items-center gap-1 bg-[#223846]/40 border border-[#3a8bca]/30 px-2 py-1">
-                    <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shrink-0" />
-                    <span className="text-[8px] font-mono font-black text-[#3a8bca] uppercase tracking-wider">Connected</span>
-                  </div>
-                  <a
-                    href={targetUser.steamUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-2 bg-[#3a8bca] hover:bg-[#4ea2e0] text-white transition-all rounded-sm flex items-center justify-center"
-                    title={lang === 'ru' ? 'Перейти в Steam' : 'Open Steam Profile'}
-                  >
-                    <ExternalLink size={14} />
-                  </a>
+              {targetUser.steamId && (
+                <div className="shrink-0 flex items-center gap-1 bg-[#223846]/40 border border-[#3a8bca]/30 px-2 py-1">
+                  <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shrink-0" />
+                  <span className="text-[8px] font-mono font-black text-[#3a8bca] uppercase tracking-wider">Connected</span>
                 </div>
               )}
             </div>
@@ -466,7 +453,7 @@ export default function UserProfileModal({
                     (badge.id === 'first_beacon') || 
                     (badge.id === 'founder' && targetUser.uid === 'serustqs') ||
                     (badge.id === 'veteran' && (targetUser.hoursPlayed || 0) >= 1000) ||
-                    (badge.id === 'steam_linked' && !!targetUser.steamUrl);
+                    (badge.id === 'steam_linked' && !!targetUser.steamId);
 
                   return (
                     <div 
