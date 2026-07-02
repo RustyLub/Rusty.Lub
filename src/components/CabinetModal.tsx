@@ -47,7 +47,9 @@ import {
   storage,
   ref,
   uploadBytes,
-  getDownloadURL
+  getDownloadURL,
+  auth,
+  signOut
 } from '../firebase';
 import { SURVIVOR_AVATARS } from './ChatTab';
 import { CustomUser } from '../types';
@@ -388,7 +390,7 @@ export default function CabinetModal({
       await updateDoc(doc(db, 'chat_users', targetId), {
         friendRequestsSent: arrayRemove(user.uid)
       });
-      onToast(lang === 'ru' ? 'Запрос отклонен.' : 'Request declined.', 'info');
+      onToast(lang === 'ru' ? 'Запрос отклонен.' : 'Request declined.', 'warning');
     } catch (err) {
       console.error(err);
     }

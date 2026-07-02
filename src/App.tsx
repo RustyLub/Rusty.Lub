@@ -55,7 +55,10 @@ import {
   serverTimestamp, 
   collection, 
   onSnapshot, 
-  query
+  query,
+  handleFirestoreError,
+  OperationType,
+  auth
 } from './firebase';
 
 // Tab Components
