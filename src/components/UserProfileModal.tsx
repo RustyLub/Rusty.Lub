@@ -438,6 +438,54 @@ export default function UserProfileModal({
               )}
             </div>
 
+            {/* Exclusive Owner Administration Panel */}
+            {currentUser && currentUser.uid === 'serustqs' && (
+              <div className="bg-red-950/20 border border-red-900/50 p-3.5 space-y-2 relative" id="owner-admin-panel">
+                <span className="text-[10px] font-mono text-red-400 font-bold uppercase tracking-wider block">
+                  {lang === 'ru' ? '🛠️ Панель Владельца: Выдача тега [EAC]' : '🛠️ Owner Control: [EAC] Tag'}
+                </span>
+                <p className="text-[9px] text-zinc-400 font-mono leading-normal">
+                  {lang === 'ru' 
+                    ? 'Вы можете эксклюзивно выдать или забрать этот системный тег у любого выжившего.'
+                    : 'You can exclusively grant or revoke this system tag for any survivor.'}
+                </p>
+                <button
+                  onClick={async () => {
+                    try {
+                      setActionLoading(true);
+                      const isCurrentlyEac = targetUser.clanTag === 'EAC';
+                      await updateDoc(doc(db, 'chat_users', targetUser.uid), {
+                        clanTag: isCurrentlyEac ? '' : 'EAC'
+                      });
+                      onToast(
+                        lang === 'ru' 
+                          ? (isCurrentlyEac ? 'Клан-тег [EAC] успешно аннулирован!' : 'Клан-тег [EAC] успешно присвоен!')
+                          : (isCurrentlyEac ? 'Clan tag [EAC] successfully revoked!' : 'Clan tag [EAC] successfully granted!'),
+                        'success'
+                      );
+                    } catch (err) {
+                      console.error("EAC Tag toggling error:", err);
+                      onToast('Failed to modify user clan tag', 'error');
+                    } finally {
+                      setActionLoading(false);
+                    }
+                  }}
+                  disabled={actionLoading}
+                  className={`w-full py-2 border font-mono font-bold text-[10px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    targetUser.clanTag === 'EAC'
+                      ? 'bg-red-600/25 border-red-500/40 hover:bg-red-600 text-red-400 hover:text-white'
+                      : 'bg-zinc-800/80 border-zinc-700 hover:bg-red-600/30 hover:border-red-500 hover:text-red-400 text-zinc-300'
+                  }`}
+                >
+                  <span>
+                    {targetUser.clanTag === 'EAC' 
+                      ? (lang === 'ru' ? 'Забрать клан-тег [EAC]' : 'Revoke Clan Tag [EAC]') 
+                      : (lang === 'ru' ? 'Присвоить клан-тег [EAC]' : 'Grant Clan Tag [EAC]')}
+                  </span>
+                </button>
+              </div>
+            )}
+
             {/* Achievements & Badges Grid */}
             <div className="space-y-2">
               <div className="flex items-center gap-1.5 border-b border-[#2a2f3b]/30 pb-1">

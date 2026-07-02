@@ -215,6 +215,18 @@ export default function App() {
   const [cabinetModalOpen, setCabinetModalOpen] = useState(false);
   const [announcement, setAnnouncement] = useState<{ text: string; active: boolean; type: 'info' | 'hazard' | 'important' } | null>(null);
 
+  const [twitchSettings, setTwitchSettings] = useState<{
+    channelName: string;
+    isManualLive: boolean;
+    streamTitle: string;
+    clientId?: string;
+    clientSecret?: string;
+    isLiveFromApi?: boolean;
+    viewerCount?: number;
+    apiTitle?: string;
+    gameName?: string;
+  } | null>(null);
+
   // Real-time site announcement subscription
   useEffect(() => {
     const unsubscribe = onSnapshot(doc(db, 'site_settings', 'announcement'), (docSnap) => {
@@ -233,6 +245,88 @@ export default function App() {
     });
     return () => unsubscribe();
   }, []);
+
+  // Real-time Twitch stream settings subscription
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, 'site_settings', 'twitch'), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setTwitchSettings({
+          channelName: data.channelName || '',
+          isManualLive: !!data.isManualLive,
+          streamTitle: data.streamTitle || '',
+          clientId: data.clientId || '',
+          clientSecret: data.clientSecret || '',
+          isLiveFromApi: !!data.isLiveFromApi,
+          viewerCount: Number(data.viewerCount) || 0,
+          apiTitle: data.apiTitle || '',
+          gameName: data.gameName || ''
+        });
+      } else {
+        setTwitchSettings({
+          channelName: 'misterzet',
+          isManualLive: false,
+          streamTitle: 'RUSTY.LUB LIVE STREAM',
+          clientId: '',
+          clientSecret: ''
+        });
+      }
+    }, (err) => {
+      console.warn("Twitch sync error:", err);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Periodically check actual Twitch Helix API status if credentials exist
+  useEffect(() => {
+    if (!twitchSettings) return;
+    const { channelName, clientId, clientSecret, isManualLive } = twitchSettings;
+    if (!channelName) return;
+
+    const checkActualTwitchLiveStatus = async () => {
+      if (isManualLive) return;
+
+      try {
+        const response = await fetch('/api/twitch/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channelName, clientId, clientSecret })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const isLive = !!data.isLive;
+          const viewers = Number(data.viewerCount) || 0;
+          const currentTitle = data.title || '';
+          const currentGame = data.gameName || '';
+
+          // To prevent double triggering or infinite update loops, only write if there is a difference
+          if (
+            twitchSettings.isLiveFromApi !== isLive ||
+            twitchSettings.viewerCount !== viewers ||
+            twitchSettings.apiTitle !== currentTitle ||
+            twitchSettings.gameName !== currentGame
+          ) {
+            await setDoc(doc(db, 'site_settings', 'twitch'), {
+              isLiveFromApi: isLive,
+              viewerCount: viewers,
+              apiTitle: currentTitle,
+              gameName: currentGame,
+              lastChecked: serverTimestamp()
+            }, { merge: true });
+          }
+        }
+      } catch (err) {
+        console.warn("Failed checking Twitch Helix API status:", err);
+      }
+    };
+
+    if (clientId && clientSecret) {
+      checkActualTwitchLiveStatus();
+      const interval = setInterval(checkActualTwitchLiveStatus, 120000);
+      return () => clearInterval(interval);
+    }
+  }, [twitchSettings]);
 
   // Periodic presence update for active logged-in user
   useEffect(() => {
@@ -983,6 +1077,80 @@ export default function App() {
                   </button>
                 </div>
               </div>
+
+              {/* Twitch Live Stream Widget */}
+              {twitchSettings && (twitchSettings.isManualLive || twitchSettings.isLiveFromApi) && (
+                <div className="bg-[#14171e]/90 border-2 border-purple-600/50 rounded-none p-6 shadow-[0_0_25px_rgba(168,85,247,0.15)] relative overflow-hidden rust-metal-pattern">
+                  {/* Tactical Corner Brackets with purple hue */}
+                  <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-purple-500" />
+                  <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-purple-500" />
+                  <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-purple-500" />
+                  <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-purple-500" />
+
+                  {/* Twitch Purple top header stripe */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-purple-600" />
+
+                  <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+                    <div className="space-y-3 flex-1">
+                      {/* Live Badge */}
+                      <div className="flex items-center gap-2">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-red-500 font-mono">
+                          {lang === 'ru' ? 'ПРЯМОЙ ЭФИР' : 'LIVE BROADCAST'}
+                        </span>
+                        <span className="text-gray-600 font-mono text-[9px]">•</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-purple-400 font-mono flex items-center gap-1">
+                          <span>TWITCH</span>
+                        </span>
+                        {!!twitchSettings.viewerCount && twitchSettings.viewerCount > 0 && (
+                          <>
+                            <span className="text-gray-600 font-mono text-[9px]">•</span>
+                            <span className="text-[9px] font-bold text-gray-300 font-mono">
+                              👁️ {twitchSettings.viewerCount} {lang === 'ru' ? 'зрителей' : 'viewers'}
+                            </span>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        <h3 className="text-xl sm:text-2xl font-black text-white uppercase leading-tight font-sans tracking-wide">
+                          {twitchSettings.streamTitle || twitchSettings.apiTitle || (lang === 'ru' ? 'НАЧАЛСЯ СТРИМ!' : 'STREAM IS LIVE!')}
+                        </h3>
+                        <p className="text-xs text-zinc-400 font-mono">
+                          {lang === 'ru' ? 'Канал:' : 'Channel:'} <span className="text-purple-400 font-bold hover:underline cursor-pointer" onClick={() => window.open(`https://twitch.tv/${twitchSettings.channelName}`, '_blank')}>{twitchSettings.channelName}</span>
+                          {twitchSettings.gameName && ` • ${lang === 'ru' ? 'Категория' : 'Category'}: ${twitchSettings.gameName}`}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2.5 pt-1">
+                        <a
+                          href={`https://twitch.tv/${twitchSettings.channelName}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-black uppercase tracking-widest font-mono transition-all cursor-pointer flex items-center gap-1.5 shadow-lg shadow-purple-600/20 border border-purple-500"
+                        >
+                          <span className="text-xs">📺</span>
+                          <span>{lang === 'ru' ? 'ПЕРЕЙТИ НА TWITCH КАНАЛ' : 'GO TO TWITCH CHANNEL'}</span>
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Interactive Twitch Stream Frame embed */}
+                    <div className="w-full lg:w-[420px] aspect-video border border-purple-500/20 bg-black/50 relative overflow-hidden shrink-0">
+                      <iframe
+                        src={`https://player.twitch.tv/?channel=${twitchSettings.channelName}&parent=${window.location.hostname}&muted=false`}
+                        frameBorder="0"
+                        allowFullScreen={true}
+                        scrolling="no"
+                        className="w-full h-full"
+                      ></iframe>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Global Warfare 4 Event Section */}
               <div className="bg-[#14171e]/90 border border-[#2a2f3b] rounded-none p-6 sm:p-8 shadow-xl relative overflow-hidden rust-metal-pattern">

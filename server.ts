@@ -229,6 +229,74 @@ async function startServer() {
     }
   });
 
+  // API route to check Twitch stream live status
+  app.post("/api/twitch/status", async (req, res) => {
+    try {
+      const { channelName, clientId, clientSecret } = req.body;
+      if (!channelName) {
+        return res.status(400).json({ error: "No channelName provided" });
+      }
+
+      // Read credentials from either body or environment variables
+      const actualClientId = clientId || process.env.TWITCH_CLIENT_ID;
+      const actualClientSecret = clientSecret || process.env.TWITCH_CLIENT_SECRET;
+
+      if (!actualClientId || !actualClientSecret) {
+        return res.json({ 
+          isLive: false, 
+          error: "Credentials missing. Set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET in .env or site settings." 
+        });
+      }
+
+      // Fetch App Access Token from Twitch
+      const tokenUrl = `https://id.twitch.tv/oauth2/token?client_id=${actualClientId}&client_secret=${actualClientSecret}&grant_type=client_credentials`;
+      const tokenResponse = await fetch(tokenUrl, { method: "POST" });
+      
+      if (!tokenResponse.ok) {
+        const errorText = await tokenResponse.text();
+        console.error("Twitch token fetch failed:", errorText);
+        return res.status(400).json({ error: "Invalid Twitch credentials" });
+      }
+
+      const tokenJson: any = await tokenResponse.json();
+      const accessToken = tokenJson.access_token;
+
+      // Query Helix Streams API
+      const streamUrl = `https://api.twitch.tv/helix/streams?user_login=${encodeURIComponent(channelName)}`;
+      const streamResponse = await fetch(streamUrl, {
+        headers: {
+          "Client-ID": actualClientId,
+          "Authorization": `Bearer ${accessToken}`
+        }
+      });
+
+      if (!streamResponse.ok) {
+        const errorText = await streamResponse.text();
+        console.error("Twitch stream fetch failed:", errorText);
+        return res.status(400).json({ error: "Twitch API query failed" });
+      }
+
+      const streamJson: any = await streamResponse.json();
+      const streamData = streamJson.data || [];
+      
+      if (streamData.length > 0) {
+        const stream = streamData[0];
+        return res.json({
+          isLive: true,
+          title: stream.title || "",
+          viewerCount: stream.viewer_count || 0,
+          gameName: stream.game_name || "",
+          startedAt: stream.started_at || ""
+        });
+      }
+
+      return res.json({ isLive: false });
+    } catch (err: any) {
+      console.error("Twitch API Error:", err);
+      res.status(500).json({ error: err.message || "Twitch check failed" });
+    }
+  });
+
   // Vite middleware for development or static serving for production
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

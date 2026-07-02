@@ -110,6 +110,14 @@ export default function CabinetModal({
   const [announcementType, setAnnouncementType] = useState<'info' | 'hazard' | 'important'>('hazard');
   const [savingSiteSettings, setSavingSiteSettings] = useState(false);
 
+  // Twitch local states
+  const [twitchChannel, setTwitchChannel] = useState('');
+  const [twitchManualLive, setTwitchManualLive] = useState(false);
+  const [twitchStreamTitle, setTwitchStreamTitle] = useState('');
+  const [twitchClientId, setTwitchClientId] = useState('');
+  const [twitchClientSecret, setTwitchClientSecret] = useState('');
+  const [isSavingTwitch, setIsSavingTwitch] = useState(false);
+
   const [fullProfile, setFullProfile] = useState<CustomUser | null>(null);
 
   const isAdmin = user && (user.uid === 'serustqs' || (fullProfile && fullProfile.badges?.includes('founder')));
@@ -197,6 +205,24 @@ export default function CabinetModal({
 
     return () => unsubscribe();
   }, [isOpen]);
+
+  // Subscribe to twitch site settings for admin edit
+  useEffect(() => {
+    if (!isOpen || !isAdmin) return;
+
+    const unsubscribe = onSnapshot(doc(db, 'site_settings', 'twitch'), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setTwitchChannel(data.channelName || '');
+        setTwitchManualLive(!!data.isManualLive);
+        setTwitchStreamTitle(data.streamTitle || '');
+        setTwitchClientId(data.clientId || '');
+        setTwitchClientSecret(data.clientSecret || '');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [isOpen, isAdmin]);
 
   if (!isOpen || !user) return null;
 
@@ -564,6 +590,31 @@ export default function CabinetModal({
       onToast(lang === 'ru' ? 'Ошибка сохранения настроек сайта.' : 'Failed to save site settings.', 'error');
     } finally {
       setSavingSiteSettings(false);
+    }
+  };
+
+  // Save Twitch stream configuration settings
+  const handleSaveTwitchSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingTwitch(true);
+    try {
+      await setDoc(doc(db, 'site_settings', 'twitch'), {
+        channelName: twitchChannel.trim(),
+        isManualLive: twitchManualLive,
+        streamTitle: twitchStreamTitle,
+        clientId: twitchClientId.trim(),
+        clientSecret: twitchClientSecret.trim(),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      onToast(
+        lang === 'ru' ? 'Настройки Twitch успешно обновлены!' : 'Twitch configurations successfully updated!',
+        'success'
+      );
+    } catch (err) {
+      console.error(err);
+      onToast(lang === 'ru' ? 'Ошибка сохранения настроек Twitch.' : 'Failed to save Twitch settings.', 'error');
+    } finally {
+      setIsSavingTwitch(false);
     }
   };
 
@@ -1359,6 +1410,117 @@ export default function CabinetModal({
                     className="w-full py-2 bg-[#cd412b] hover:bg-[#b03825] text-white font-black text-xs uppercase tracking-widest font-mono cursor-pointer transition-colors"
                   >
                     {savingSiteSettings ? (lang === 'ru' ? 'СОХРАНЕНИЕ...' : 'SAVING...') : (lang === 'ru' ? 'ПРИМЕНИТЬ НАСТРОЙКИ САЙТА' : 'APPLY SYSTEM BROADCAST')}
+                  </button>
+                </form>
+
+                {/* Twitch Configuration Form */}
+                <form onSubmit={handleSaveTwitchSettings} className="space-y-4 bg-[#0c0d10] border border-[#2a2f3b] p-4 mt-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-[#2a2f3b]/60">
+                    <span className="text-base text-purple-500">📺</span>
+                    <span className="text-[10px] font-mono text-gray-400 font-bold uppercase tracking-wider">
+                      {lang === 'ru' ? 'КОНФИГУРАЦИЯ TWITCH СТРИМА' : 'TWITCH STREAM CONFIGURATION'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Channel Name */}
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block font-mono">
+                        {lang === 'ru' ? 'НИКНЕЙМ КАНАЛА TWITCH' : 'TWITCH CHANNEL USERNAME'}
+                      </label>
+                      <input
+                        type="text"
+                        value={twitchChannel}
+                        onChange={(e) => setTwitchChannel(e.target.value)}
+                        placeholder="e.g. misterzet"
+                        className="w-full bg-[#14171e] border border-[#2a2f3b] text-xs font-mono p-2.5 text-white focus:border-purple-500 outline-none transition-all"
+                      />
+                    </div>
+
+                    {/* Stream Title Override */}
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block font-mono">
+                        {lang === 'ru' ? 'ЗАГОЛОВОК СТРИМА (ДЛЯ ПОДМЕНЫ)' : 'STREAM TITLE OVERRIDE'}
+                      </label>
+                      <input
+                        type="text"
+                        value={twitchStreamTitle}
+                        onChange={(e) => setTwitchStreamTitle(e.target.value)}
+                        placeholder="RUSTY.LUB LIVE!"
+                        className="w-full bg-[#14171e] border border-[#2a2f3b] text-xs font-mono p-2.5 text-white focus:border-purple-500 outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Manual Live Switch */}
+                  <div className="flex items-center justify-between py-1 border-t border-[#2a2f3b]/30 pt-3">
+                    <div className="space-y-0.5">
+                      <span className="text-xs font-bold text-gray-300 font-sans block">
+                        {lang === 'ru' ? 'Принудительный статус стрима: LIVE' : 'Manual Live Stream Override'}
+                      </span>
+                      <span className="text-[9px] text-gray-500 font-mono block">
+                        {lang === 'ru' ? 'Включает статус трансляции вручную без проверки по API' : 'Manually forces live status banner on without API check'}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setTwitchManualLive(!twitchManualLive)}
+                      className={`px-3 py-1 text-[10px] font-mono font-bold uppercase border cursor-pointer transition-colors ${
+                        twitchManualLive 
+                          ? 'bg-purple-600/20 border-purple-500 text-purple-400' 
+                          : 'bg-zinc-800 border-zinc-700 text-zinc-400'
+                      }`}
+                    >
+                      {twitchManualLive ? (lang === 'ru' ? 'ВКЛЮЧЕН (LIVE)' : 'FORCED LIVE') : (lang === 'ru' ? 'ОТКЛЮЧЕН' : 'NORMAL / API')}
+                    </button>
+                  </div>
+
+                  {/* Advanced API Config (Optional) */}
+                  <div className="border-t border-[#2a2f3b]/40 pt-3 space-y-3">
+                    <span className="text-[8px] font-mono text-zinc-500 font-bold uppercase tracking-wider block">
+                      {lang === 'ru' ? '🔑 АВТОМАТИЧЕСКАЯ ИНТЕГРАЦИЯ TWITCH HELIX API (ОПЦИОНАЛЬНО)' : '🔑 AUTOMATIC TWITCH HELIX API INTEGRATION (OPTIONAL)'}
+                    </span>
+                    <p className="text-[9px] text-zinc-400 leading-normal font-mono">
+                      {lang === 'ru' 
+                        ? 'Заполните эти данные из Twitch Developer Console, чтобы сайт автоматически запрашивал статус стрима в реальном времени.' 
+                        : 'Fill these from your Twitch Developer Portal to enable fully automated, real-time live status tracking.'}
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block font-mono">
+                          Twitch Client ID
+                        </label>
+                        <input
+                          type="text"
+                          value={twitchClientId}
+                          onChange={(e) => setTwitchClientId(e.target.value)}
+                          placeholder="Client ID"
+                          className="w-full bg-[#14171e] border border-[#2a2f3b] text-xs font-mono p-2 text-zinc-300 focus:border-purple-500 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block font-mono">
+                          Twitch Client Secret
+                        </label>
+                        <input
+                          type="password"
+                          value={twitchClientSecret}
+                          onChange={(e) => setTwitchClientSecret(e.target.value)}
+                          placeholder="Client Secret"
+                          className="w-full bg-[#14171e] border border-[#2a2f3b] text-xs font-mono p-2 text-zinc-300 focus:border-purple-500 outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSavingTwitch}
+                    className="w-full py-2 bg-purple-600/85 hover:bg-purple-700 text-white font-black text-xs uppercase tracking-widest font-mono cursor-pointer transition-colors"
+                  >
+                    {isSavingTwitch ? (lang === 'ru' ? 'СОХРАНЕНИЕ...' : 'SAVING...') : (lang === 'ru' ? 'СОХРАНИТЬ НАСТРОЙКИ TWITCH' : 'SAVE TWITCH SETTINGS')}
                   </button>
                 </form>
               </motion.div>

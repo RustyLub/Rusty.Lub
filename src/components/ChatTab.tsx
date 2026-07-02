@@ -85,6 +85,8 @@ interface RegisteredUser {
   role: string;
   isBlocked: boolean;
   isVip?: boolean;
+  clanTag?: string;
+  voiceChannel?: string | null;
 }
 
 export const SURVIVOR_AVATARS = [
@@ -299,8 +301,9 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
           role: data.role || 'user',
           isBlocked: !!data.isBlocked,
           isVip: !!data.isVip,
+          clanTag: data.clanTag || '',
           voiceChannel: data.voiceChannel || null
-        } as any);
+        });
       });
       setUsersMap(uMap);
       setRegisteredUsers(usersList);
@@ -614,6 +617,30 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
     } catch (err) {
       console.error(err);
       onToast('Error toggling VIP status', 'error');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  };
+
+  // Toggle EAC tag for user exclusively by Owner
+  const handleToggleEacTag = async (targetUid: string, hasEac: boolean) => {
+    if (targetUid === 'serustqs') {
+      onToast(lang === 'ru' ? 'Владелец всегда имеет максимальный статус!' : 'Owner always has maximum status!', 'warning');
+      return;
+    }
+
+    setAdminActionLoading(true);
+    try {
+      await setDoc(doc(db, 'chat_users', targetUid), { clanTag: hasEac ? '' : 'EAC' }, { merge: true });
+      onToast(
+        hasEac 
+          ? (lang === 'ru' ? 'Клан-тег [EAC] успешно забран у пользователя!' : 'Clan tag [EAC] successfully revoked from user!')
+          : (lang === 'ru' ? 'Клан-тег [EAC] успешно выдан пользователю!' : 'Clan tag [EAC] successfully granted to user!'),
+        'success'
+      );
+    } catch (err) {
+      console.error("Toggle EAC error:", err);
+      onToast('Error toggling EAC tag', 'error');
     } finally {
       setAdminActionLoading(false);
     }
@@ -1445,6 +1472,18 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                           {isAdmin && (
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                               <button
+                                onClick={(e) => { e.stopPropagation(); handleToggleEacTag(u.username, u.clanTag === 'EAC'); }}
+                                disabled={adminActionLoading}
+                                className={`p-1 border rounded text-[8px] font-black uppercase transition-colors cursor-pointer ${
+                                  u.clanTag === 'EAC' 
+                                    ? 'bg-red-600/30 border-red-500/50 text-red-400' 
+                                    : 'bg-zinc-800 border-zinc-700 text-gray-400 hover:text-white'
+                                }`}
+                                title={u.clanTag === 'EAC' ? (lang === 'ru' ? 'Забрать [EAC]' : 'Revoke [EAC]') : (lang === 'ru' ? 'Выдать [EAC]' : 'Grant [EAC]')}
+                              >
+                                EAC
+                              </button>
+                              <button
                                 onClick={(e) => { e.stopPropagation(); handleToggleVipUser(u.username, !!u.isVip); }}
                                 disabled={adminActionLoading}
                                 className={`p-1 border rounded text-[8px] font-black uppercase transition-colors cursor-pointer ${
@@ -1485,6 +1524,20 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
           </div>
         )}
       </div>
+
+      {/* DYNAMIC PROFILE CARD INSPECTOR MODAL */}
+      <AnimatePresence>
+        {inspectUserId && (
+          <UserProfileModal
+            isOpen={!!inspectUserId}
+            onClose={() => setInspectUserId(null)}
+            targetUserId={inspectUserId}
+            currentUser={user}
+            lang={lang}
+            onToast={onToast}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
