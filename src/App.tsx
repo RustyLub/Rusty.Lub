@@ -66,6 +66,7 @@ import RaidCalculatorTab from './components/RaidCalculatorTab';
 import ElectricalSimulatorTab from './components/ElectricalSimulatorTab';
 import WeaponGuidesTab from './components/WeaponGuidesTab';
 import ChatTab from './components/ChatTab';
+import NewsTab from './components/NewsTab';
 import AuthModal from './components/AuthModal';
 import CabinetModal from './components/CabinetModal';
 // @ts-ignore
@@ -100,7 +101,8 @@ const appTranslations = {
     fps: { ru: 'Оптимизация FPS', en: 'FPS Boost' },
     raid: { ru: 'Рейд Калькулятор', en: 'Raid Calculator' },
     electrical: { ru: 'Симулятор Электрики', en: 'Electrical Simulator' },
-    weapons: { ru: 'Оружие / Мета', en: 'Weapon Guides' }
+    weapons: { ru: 'Оружие / Мета', en: 'Weapon Guides' },
+    news: { ru: 'Новости', en: 'News' }
   },
   discordBtn: { ru: 'Наш Discord', en: 'Our Discord' },
   discordMobileBtn: { ru: 'Наш Discord сервер', en: 'Our Discord Server' },
@@ -188,7 +190,7 @@ const appTranslations = {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news'>('home');
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lang, setLang] = useState<'ru' | 'en'>('ru');
@@ -366,7 +368,7 @@ export default function App() {
     }, 550);
   };
 
-  const handleTabChange = (tabId: 'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat') => {
+  const handleTabChange = (tabId: 'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news') => {
     setActiveTab(tabId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -560,6 +562,7 @@ export default function App() {
 
   const tabs = [
     { id: 'home', label: appTranslations.tabs.home[lang], icon: <Home size={16} /> },
+    { id: 'news', label: appTranslations.tabs.news[lang], icon: <Compass size={16} /> },
     { id: 'errors', label: appTranslations.tabs.errors[lang], icon: <BookOpen size={16} /> },
     { id: 'binds', label: appTranslations.tabs.binds[lang], icon: <Keyboard size={16} /> },
     { id: 'fps', label: appTranslations.tabs.fps[lang], icon: <Settings size={16} /> },
@@ -1170,41 +1173,103 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Discord Widget / CTA */}
-                <div className="md:col-span-4 bg-gradient-to-br from-[#14171e] to-[#0c0d10] p-6 flex flex-col justify-between border border-[#2a2f3b] rounded-none shadow-xl relative overflow-hidden">
-                  <div className="rust-bracket-tl" />
-                  <div className="rust-bracket-tr" />
-                  <div className="rust-bracket-bl" />
-                  <div className="rust-bracket-br" />
+                {/* Right Side Sidebar Column */}
+                <div className="md:col-span-4 space-y-6 flex flex-col justify-between">
+                  {/* News & Updates Widget - Styled "как на самом вверху" (with hazard stripe, brackets, flashing dot) */}
+                  <div className="bg-gradient-to-b from-[#14171e] via-[#0d0f14] to-[#14171e] border-2 border-[#cd412b]/40 p-6 shadow-xl relative overflow-hidden rust-metal-pattern flex flex-col justify-between">
+                    {/* Tactical Corner Brackets */}
+                    <div className="rust-bracket-tl" />
+                    <div className="rust-bracket-tr" />
+                    <div className="rust-bracket-bl" />
+                    <div className="rust-bracket-br" />
 
-                  <div className="absolute top-0 right-0 w-2 h-full rust-hazard opacity-40" />
-                  
-                  <div className="space-y-4">
-                    <div className="w-12 h-12 rounded-none bg-[#cd412b]/10 text-[#cd412b] flex items-center justify-center border border-[#cd412b]/20 shadow-inner relative">
-                      <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-[#cd412b]/60" />
-                      <div className="absolute top-0.5 right-0.5 w-1 h-1 bg-[#cd412b]/60" />
-                      <MessageSquare size={22} />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-white tracking-wider font-teko uppercase text-lg">
-                        {appTranslations.discordWidgetTitle[lang]}
-                      </h3>
-                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed font-sans font-medium">
-                        {appTranslations.discordWidgetDesc[lang]}
-                      </p>
+                    {/* Top Hazard Warning Stripe */}
+                    <div className="absolute top-0 left-0 right-0 h-1 rust-hazard" />
+
+                    <div className="space-y-4">
+                      {/* Flashing Alert Indicator */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 bg-[#cd412b]/15 border border-[#cd412b]/35 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-[#cd412b] font-mono">
+                          <span className="relative flex h-1 w-1">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-1 w-1 bg-[#cd412b]"></span>
+                          </span>
+                          <span>{lang === 'ru' ? 'СВЕЖИЕ НОВОСТИ' : 'LATEST NEWS'}</span>
+                        </div>
+                        <span className="text-[9px] font-mono text-gray-500 font-bold uppercase">FEED_v2.6</span>
+                      </div>
+
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-bold text-white tracking-wider font-teko uppercase text-lg">
+                          {lang === 'ru' ? 'Новости и обновления Rust' : 'Rust News & Updates'}
+                        </h3>
+                        <div className="h-[1px] w-12 bg-[#cd412b]" />
+                      </div>
+
+                      {/* July Update 2026 Promo */}
+                      <div className="bg-black/40 border border-[#2a2f3b] p-3.5 space-y-2 relative text-left">
+                        <div className="absolute top-1 right-2 text-[7px] font-mono text-gray-600 font-bold">02.07.2026</div>
+                        <span className="block text-[9px] text-[#cd412b] font-mono font-bold uppercase tracking-wider">
+                          JULY UPDATE 2026
+                        </span>
+                        <h4 className="text-xs font-black text-white uppercase tracking-wide leading-snug">
+                          {lang === 'ru' 
+                            ? 'Июльское обновление 2026: Военная Верфь и Энергетический Прорыв' 
+                            : 'July Update 2026: Military Shipyard & Power Grid Breakthrough'}
+                        </h4>
+                        <p className="text-[10.5px] text-gray-400 font-sans leading-normal line-clamp-3">
+                          {lang === 'ru'
+                            ? 'Глобальный патч: новый монумент высокой опасности Tier 3, автоматизация жидкотопливных генераторов и оптимизация Unity Job System.'
+                            : 'Global patch: brand new Tier 3 high-danger monument, liquid fuel generators automation, and Unity Job System optimizations.'}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => handleTabChange('news')}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#cd412b] hover:bg-[#b03825] text-white rounded-none text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer border border-[#e6553f]"
+                      >
+                        <span>{lang === 'ru' ? 'ЧИТАТЬ ОБНОВЛЕНИЕ' : 'READ PATCH LOG'}</span>
+                        <ChevronRight size={12} />
+                      </button>
                     </div>
                   </div>
 
-                  <div className="pt-6 relative z-10">
-                    <a
-                      href="https://discord.gg/R2TyKZ9xvZ"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="w-full flex items-center justify-center gap-2.5 py-3 rounded-none text-xs font-bold uppercase tracking-wider text-white bg-[#5865F2] hover:bg-[#4752c4] transition-all shadow-md"
-                    >
-                      <span>{appTranslations.openDiscord[lang]}</span>
-                      <ExternalLink size={13} />
-                    </a>
+                  {/* Discord Widget / CTA */}
+                  <div className="bg-gradient-to-br from-[#14171e] to-[#0c0d10] p-6 flex flex-col justify-between border border-[#2a2f3b] rounded-none shadow-xl relative overflow-hidden flex-1 mt-0">
+                    <div className="rust-bracket-tl" />
+                    <div className="rust-bracket-tr" />
+                    <div className="rust-bracket-bl" />
+                    <div className="rust-bracket-br" />
+
+                    <div className="absolute top-0 right-0 w-2 h-full rust-hazard opacity-40" />
+                    
+                    <div className="space-y-4">
+                      <div className="w-12 h-12 rounded-none bg-[#cd412b]/10 text-[#cd412b] flex items-center justify-center border border-[#cd412b]/20 shadow-inner relative">
+                        <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-[#cd412b]/60" />
+                        <div className="absolute top-0.5 right-0.5 w-1 h-1 bg-[#cd412b]/60" />
+                        <MessageSquare size={22} />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-white tracking-wider font-teko uppercase text-lg">
+                          {appTranslations.discordWidgetTitle[lang]}
+                        </h3>
+                        <p className="text-xs text-gray-400 mt-1.5 leading-relaxed font-sans font-medium">
+                          {appTranslations.discordWidgetDesc[lang]}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="pt-6 relative z-10">
+                      <a
+                        href="https://discord.gg/R2TyKZ9xvZ"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-full flex items-center justify-center gap-2.5 py-3 rounded-none text-xs font-bold uppercase tracking-wider text-white bg-[#5865F2] hover:bg-[#4752c4] transition-all shadow-md"
+                      >
+                        <span>{appTranslations.openDiscord[lang]}</span>
+                        <ExternalLink size={13} />
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1490,6 +1555,18 @@ export default function App() {
                   )}
                 </div>
               </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'news' && (
+            <motion.div
+              key="news"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <NewsTab lang={lang} />
             </motion.div>
           )}
 

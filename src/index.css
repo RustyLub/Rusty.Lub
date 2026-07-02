@@ -31,13 +31,7 @@
 
 /* Rust Tactical Hazard Stripes background */
 .rust-hazard {
-  background: repeating-linear-gradient(
-    -45deg,
-    #ff4d30,
-    #ff4d30 12px,
-    #0f121a 12px,
-    #0f121a 24px
-  );
+  background: linear-gradient(90deg, #2563eb, #3b82f6, #ef4444, #ff4d30);
 }
 
 .rust-hazard-dark {
