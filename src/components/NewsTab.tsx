@@ -119,14 +119,14 @@ export default function NewsTab({ lang }: NewsTabProps) {
       isFeatured: true,
       coverImage: 'https://i.ytimg.com/vi/RxS0ISoktOY/maxresdefault.jpg',
       summary: {
-        ru: 'Новая серия видео от моего друга: Jungle Fever - Solo Rust.',
-        en: 'New video series by my friend: Jungle Fever - Solo Rust.'
+        ru: 'Новая серия видео от моего друга: Helicopter Time.',
+        en: 'New video series by my friend: Helicopter Time.'
       },
       content: {
         ru: [
           {
-            sectionTitle: '🎥 JUNGLE FEVER - SOLO RUST - PART 1',
-            text: 'Посмотрите первую часть приключений в одиночном Rust.',
+            sectionTitle: '🎥 HELICOPTER TIME - PART 1',
+            text: 'Посмотрите первую часть приключений Helicopter Time.',
             highlights: ['https://youtu.be/RxS0ISoktOY']
           },
           {

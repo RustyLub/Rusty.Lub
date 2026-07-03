@@ -1186,14 +1186,12 @@ export default function App() {
                   <p className="text-xs text-gray-300 font-sans mb-4">
                     {lang === 'ru' ? 'Первая часть моей серии фильмов Jungle Fever!' : 'First part of my Jungle Fever movie series!'}
                   </p>
-                  <a
-                    href="https://youtu.be/RxS0ISoktOY"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block px-4 py-2 bg-[#cd412b] text-white text-[10px] font-bold uppercase tracking-widest font-mono"
+                  <button
+                    onClick={() => setActiveTab('news')}
+                    className="inline-block px-4 py-2 bg-[#cd412b] text-white text-[10px] font-bold uppercase tracking-widest font-mono cursor-pointer"
                   >
                     {lang === 'ru' ? 'СМОТРЕТЬ ПЕРВУЮ ЧАСТЬ' : 'WATCH PART 1'}
-                  </a>
+                  </button>
                 </div>
               )}
 
