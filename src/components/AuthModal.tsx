@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, User, Lock, Crosshair, Sparkles } from 'lucide-react';
+import { X, User, Lock, Crosshair, Sparkles, Mars, Venus } from 'lucide-react';
 import { doc, getDoc, setDoc, query, collection, where, getDocs, db, auth } from '../firebase';
 import { CUSTOM_AVATARS } from '../customAvatars';
 import { CustomUser } from '../types';
@@ -18,7 +18,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
   const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [displayNameInput, setDisplayNameInput] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState('hazmat');
+  const [selectedAvatar, setSelectedAvatar] = useState('whiteout');
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [authLoading, setAuthLoading] = useState(false);
 
@@ -352,20 +352,32 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                     <button
                       type="button"
                       onClick={() => setGender('male')}
-                      className={`flex-1 py-1.5 text-xs font-bold transition-all cursor-pointer border ${
-                        gender === 'male' ? 'bg-[#cd412b] text-white border-[#cd412b]' : 'bg-[#0c0d10] text-gray-400 border-[#2a2f3b]'
+                      className={`flex-1 py-3 flex flex-col items-center justify-center gap-1 transition-all cursor-pointer border rounded-sm ${
+                        gender === 'male'
+                          ? 'bg-[#cd412b]/15 text-[#cd412b] border-[#cd412b]'
+                          : 'bg-[#0c0d10] text-gray-500 border-[#2a2f3b] hover:border-gray-700'
                       }`}
+                      title={lang === 'ru' ? 'Мужской' : 'Man'}
                     >
-                      {lang === 'ru' ? 'Мужской' : 'Male'}
+                      <Mars className="w-5 h-5" />
+                      <span className="text-[9px] font-bold font-mono tracking-wider uppercase">
+                        {lang === 'ru' ? 'МУЖ' : 'MAN'}
+                      </span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setGender('female')}
-                      className={`flex-1 py-1.5 text-xs font-bold transition-all cursor-pointer border ${
-                        gender === 'female' ? 'bg-[#cd412b] text-white border-[#cd412b]' : 'bg-[#0c0d10] text-gray-400 border-[#2a2f3b]'
+                      className={`flex-1 py-3 flex flex-col items-center justify-center gap-1 transition-all cursor-pointer border rounded-sm ${
+                        gender === 'female'
+                          ? 'bg-[#cd412b]/15 text-[#cd412b] border-[#cd412b]'
+                          : 'bg-[#0c0d10] text-gray-500 border-[#2a2f3b] hover:border-gray-700'
                       }`}
+                      title={lang === 'ru' ? 'Женский' : 'Girl'}
                     >
-                      {lang === 'ru' ? 'Женский' : 'Female'}
+                      <Venus className="w-5 h-5" />
+                      <span className="text-[9px] font-bold font-mono tracking-wider uppercase">
+                        {lang === 'ru' ? 'ЖЕН' : 'GIRL'}
+                      </span>
                     </button>
                   </div>
                 </div>

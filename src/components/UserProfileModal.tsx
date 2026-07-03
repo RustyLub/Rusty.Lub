@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { doc, db, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot } from '../firebase';
 import { CustomUser } from '../types';
-import { CUSTOM_AVATARS } from '../customAvatars';
+import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 
 export interface BadgeInfo {
   id: string;
@@ -102,6 +102,22 @@ export default function UserProfileModal({
   const [currentUserFull, setCurrentUserFull] = useState<CustomUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [isFullscreenAvatar, setIsFullscreenAvatar] = useState(false);
+  const [twitchChannel, setTwitchChannel] = useState('serustqs');
+
+  // Load live site Twitch settings to obtain correct channel URL for Owner Card
+  useEffect(() => {
+    if (!isOpen) return;
+    const unsubTwitch = onSnapshot(doc(db, 'site_settings', 'twitch'), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.channelName) {
+          setTwitchChannel(data.channelName);
+        }
+      }
+    });
+    return () => unsubTwitch();
+  }, [isOpen]);
 
   // Sync target user profile live
   useEffect(() => {
@@ -115,7 +131,7 @@ export default function UserProfileModal({
           uid: docSnap.id,
           displayName: data.displayName || docSnap.id,
           photoURL: data.photoURL || '',
-          avatarClass: data.avatarClass || 'hazmat',
+          avatarClass: data.avatarClass || 'whiteout',
           bio: data.bio || '',
           clanTag: data.clanTag || '',
           hoursPlayed: data.hoursPlayed || 0,
@@ -128,7 +144,8 @@ export default function UserProfileModal({
           friendRequestsSent: data.friendRequestsSent || [],
           friendRequestsReceived: data.friendRequestsReceived || [],
           badges: data.badges || [],
-          customTheme: data.customTheme || 'slate'
+          customTheme: data.customTheme || 'slate',
+          steamLink: data.steamLink || ''
         });
       } else {
         setTargetUser(null);
@@ -150,7 +167,7 @@ export default function UserProfileModal({
           uid: docSnap.id,
           displayName: data.displayName || docSnap.id,
           photoURL: data.photoURL || '',
-          avatarClass: data.avatarClass || 'hazmat',
+          avatarClass: data.avatarClass || 'whiteout',
           friends: data.friends || [],
           friendRequestsSent: data.friendRequestsSent || [],
           friendRequestsReceived: data.friendRequestsReceived || [],
@@ -269,7 +286,7 @@ export default function UserProfileModal({
       return {
         label: lang === 'ru' ? 'Добавить в друзья' : 'Add Friend',
         icon: <UserPlus size={13} />,
-        class: 'bg-indigo-500/15 border-indigo-500/35 hover:bg-indigo-500 hover:text-white text-indigo-400'
+        class: 'bg-[#cd412b]/15 border-[#cd412b]/45 hover:bg-[#cd412b] hover:text-white text-red-400'
       };
     }
   };
@@ -279,164 +296,308 @@ export default function UserProfileModal({
   const matchedAvatar = targetUser ? CUSTOM_AVATARS.find(a => a.id === targetUser.avatarClass) || CUSTOM_AVATARS[0] : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className={`w-full max-w-lg border-2 border-[#2a2f3b] rounded-none overflow-hidden shadow-2xl relative flex flex-col p-6 rust-metal-pattern ${selectedTheme.class}`}
+        className={`w-full max-w-2xl border-2 border-[#2a2f3b] rounded-none overflow-hidden shadow-2xl relative flex flex-col p-0 rust-metal-pattern keep-dark ${selectedTheme.class}`}
       >
+        {/* Sleek Tactical Header Bar */}
+        <div className="bg-[#0b0c0f] border-b border-[#2a2f3b] px-4 py-2 flex items-center justify-between text-[9px] font-mono tracking-widest text-zinc-400 select-none">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+            </span>
+            <span className="font-bold text-red-500 uppercase">Rusty.Lub // BIOMETRIC DOSSIER DECRYPTED</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-3">
+            <span>SYS_LOC: CO-ORDS SEC_4</span>
+            <span className="text-zinc-600">|</span>
+            <span className="text-emerald-500 font-bold uppercase">STATUS: SECURE LINK</span>
+          </div>
+        </div>
+
         {/* Corner Brackets */}
         <div className="rust-bracket-tl" />
         <div className="rust-bracket-tr" />
         <div className="rust-bracket-bl" />
         <div className="rust-bracket-br" />
 
-        {/* Close */}
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors cursor-pointer z-20"
+          className="absolute top-10 right-4 text-zinc-400 hover:text-white transition-colors cursor-pointer z-20 bg-black/40 p-1.5 border border-[#2a2f3b]/60 hover:border-zinc-500"
         >
-          <X size={20} />
+          <X size={16} />
         </button>
 
         {loading ? (
-          <div className="py-20 text-center text-xs font-mono uppercase text-zinc-500">
-            {lang === 'ru' ? 'Считывание параметров выжившего...' : 'Scanning biometric parameters...'}
+          <div className="py-24 text-center text-xs font-mono uppercase text-[#cd412b] animate-pulse">
+            {lang === 'ru' ? 'Считывание параметров биометрии выжившего...' : 'ESTABLISHING BIOMETRIC TELEMETRY LINK...'}
           </div>
         ) : !targetUser ? (
-          <div className="py-20 text-center">
-            <span className="block text-sm text-red-400 font-mono font-bold uppercase">
+          <div className="py-24 text-center">
+            <span className="block text-sm text-red-400 font-mono font-bold uppercase tracking-widest">
               {lang === 'ru' ? 'ДАННЫЕ ПОВРЕЖДЕНЫ ИЛИ НЕ НАЙДЕНЫ' : 'USER BIO-SIGNAL LOST'}
             </span>
             <button
               onClick={onClose}
-              className="mt-4 px-4 py-2 border border-zinc-700 text-xs font-mono text-zinc-300 hover:bg-zinc-800"
+              className="mt-6 px-4 py-2 border border-[#cd412b]/40 text-xs font-mono text-zinc-300 hover:bg-[#cd412b]/10"
             >
               {lang === 'ru' ? 'Назад' : 'Back'}
             </button>
           </div>
         ) : (
-          <div className="space-y-6">
-            {/* Main Header Card */}
-            <div className="flex flex-col sm:flex-row gap-4 items-center border-b border-[#2a2f3b]/50 pb-5">
-              <div className="relative">
-                <img 
-                  src={targetUser.photoURL || matchedAvatar?.url} 
-                  alt={targetUser.displayName} 
-                  className="w-16 h-16 rounded-full border-2 border-zinc-600 object-cover bg-black shadow-lg"
-                />
-                {targetUser.clanTag && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-red-600/95 border border-red-500/50 text-[8px] font-black text-white px-1 py-0.5 font-mono shadow rounded-sm uppercase tracking-wider">
-                    [{targetUser.clanTag}]
-                  </span>
-                )}
-              </div>
+          <div className="p-6 space-y-5 max-h-[85vh] overflow-y-auto">
+            {/* Split layout: Avatar & Gauges on Left, Bio & Identity on Right */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch border-b border-[#2a2f3b]/50 pb-5">
+              
+              {/* Left Column: Holographic Avatar display & Survival Telemetry Gauges (Span 5) */}
+              <div className="md:col-span-5 flex flex-col items-center space-y-4">
+                <div 
+                  className="relative group cursor-zoom-in overflow-hidden border border-[#2a2f3b] bg-black p-1.5 shadow-xl hover:border-[#cd412b] transition-all duration-300 w-full max-w-[210px] sm:max-w-[230px]"
+                  onClick={() => setIsFullscreenAvatar(true)}
+                >
+                  <div className="relative overflow-hidden aspect-square bg-zinc-950">
+                    <img 
+                      src={getAvatarUrl(targetUser.photoURL, targetUser.avatarClass)} 
+                      alt={targetUser.displayName} 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    
+                    {/* Retro UI Overlay Scanlines */}
+                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-white/[0.02] to-transparent bg-[size:100%_4px]" />
+                    
+                    {/* Visual target crosshairs inside frame */}
+                    <div className="absolute top-2 left-2 w-3.5 h-3.5 border-t-2 border-l-2 border-[#cd412b]/70" />
+                    <div className="absolute top-2 right-2 w-3.5 h-3.5 border-t-2 border-r-2 border-[#cd412b]/70" />
+                    <div className="absolute bottom-2 left-2 w-3.5 h-3.5 border-b-2 border-l-2 border-[#cd412b]/70" />
+                    <div className="absolute bottom-2 right-2 w-3.5 h-3.5 border-b-2 border-r-2 border-[#cd412b]/70" />
 
-              <div className="text-center sm:text-left space-y-1.5 min-w-0 flex-1">
-                <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                  <span className="text-lg font-black text-white uppercase tracking-wider leading-none truncate font-sans">
-                    {targetUser.displayName}
-                  </span>
+                    {/* Telemetry Status badge */}
+                    <div className="absolute bottom-2 left-2 bg-black/85 border border-[#cd412b]/35 px-2 py-0.5 text-[7px] font-mono text-zinc-300 uppercase tracking-widest flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                      <span>{lang === 'ru' ? 'СВЯЗЬ АКТИВНА' : 'LIVE BEACON'}</span>
+                    </div>
+                  </div>
                   
-                  {targetUser.uid === 'serustqs' ? (
-                    <span className="text-[9px] font-bold text-red-400 bg-red-500/15 border border-red-500/30 px-1.5 py-0.5 rounded-none font-mono tracking-widest uppercase">
-                      Owner
-                    </span>
-                  ) : targetUser.badges?.includes('founder') ? (
-                    <span className="text-[9px] font-bold text-[#cd412b] bg-[#cd412b]/15 border border-[#cd412b]/30 px-1.5 py-0.5 rounded-none font-mono tracking-widest uppercase">
-                      Admin
-                    </span>
-                  ) : targetUser.badges?.includes('sponsor') ? (
-                    <span className="text-[9px] font-bold text-amber-400 bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 rounded-none font-mono tracking-widest uppercase">
-                      VIP
-                    </span>
-                  ) : (
-                    <span className="text-[9px] font-bold text-zinc-400 bg-zinc-500/10 border border-zinc-500/20 px-1.5 py-0.5 rounded-none font-mono tracking-widest uppercase">
-                      Survivor
+                  {targetUser.clanTag && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-[#cd412b] border border-red-500 text-[10px] font-black text-white px-2 py-0.5 font-mono shadow-md uppercase tracking-wider">
+                      [{targetUser.clanTag}]
                     </span>
                   )}
                 </div>
 
-                <div className="text-[10px] text-zinc-400 font-mono tracking-wide leading-relaxed">
-                  {lang === 'ru' ? 'Класс:' : 'Suit:'} <span className="text-zinc-200 font-bold">{matchedAvatar?.name[lang]}</span>
+                {/* Micro Button for Zoom */}
+                <button 
+                  onClick={() => setIsFullscreenAvatar(true)}
+                  className="text-[8px] font-mono text-zinc-500 hover:text-[#cd412b] transition-colors cursor-pointer uppercase tracking-widest flex items-center gap-1.5"
+                >
+                  <span>🔍 {lang === 'ru' ? 'УВЕЛИЧИТЬ СЪЕМКУ' : 'HOLOGRAPHIC ENLARGEMENT'}</span>
+                </button>
+
+                {/* Tactical Status Bars (Simulated Survival HUD) */}
+                <div className="w-full bg-black/60 border border-[#2a2f3b]/70 p-3 space-y-2 select-none text-left">
+                  <span className="text-[7.5px] font-mono text-zinc-500 uppercase tracking-widest block border-b border-zinc-900 pb-1">
+                    {lang === 'ru' ? 'ПОКАЗАТЕЛИ ЖИЗНЕДЕЯТЕЛЬНОСТИ' : 'VITAL TELEMETRY STATUS'}
+                  </span>
+                  
+                  {/* Health gauge */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[7.5px] font-mono text-zinc-400">
+                      <span>HP (SURVIVAL STATUS)</span>
+                      <span className="text-emerald-400 font-bold">100 / 100</span>
+                    </div>
+                    <div className="h-1 bg-zinc-900 overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 w-full" />
+                    </div>
+                  </div>
+
+                  {/* Comfort/Hydration gauge */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[7.5px] font-mono text-zinc-400">
+                      <span>WATER LEVEL</span>
+                      <span className="text-blue-400 font-bold">250ml</span>
+                    </div>
+                    <div className="h-1 bg-zinc-900 overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-blue-600 to-blue-400 w-[85%]" />
+                    </div>
+                  </div>
+
+                  {/* Rads gauge */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[7.5px] font-mono text-zinc-400">
+                      <span>RADIATION BARRIER</span>
+                      <span className="text-yellow-500 font-bold">0.0 mSv/h (SECURE)</span>
+                    </div>
+                    <div className="h-1 bg-zinc-900 overflow-hidden">
+                      <div className="h-full bg-yellow-500 w-[5%]" />
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {/* Right Column: Bio details, Identity & Interventions (Span 7) */}
+              <div className="md:col-span-7 flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <div>
+                    <span className="text-[8px] font-mono text-[#cd412b] uppercase tracking-widest block mb-1">
+                      {lang === 'ru' ? 'КОДОВОЕ ИМЯ ВЫЖИВШЕГО' : 'SURVIVOR ALIAS / CALLSIGN'}
+                    </span>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl sm:text-3xl font-black text-white uppercase tracking-wide leading-none font-sans drop-shadow-md">
+                        {targetUser.displayName}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Status Badges Row */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {targetUser.uid === 'serustqs' ? (
+                      <span className="text-[8px] font-bold text-red-400 bg-red-500/15 border border-red-500/40 px-2 py-0.5 font-mono tracking-widest uppercase">
+                        System Owner
+                      </span>
+                    ) : targetUser.badges?.includes('founder') ? (
+                      <span className="text-[8px] font-bold text-[#cd412b] bg-[#cd412b]/15 border border-[#cd412b]/40 px-2 py-0.5 font-mono tracking-widest uppercase">
+                        Admin Officer
+                      </span>
+                    ) : targetUser.badges?.includes('sponsor') ? (
+                      <span className="text-[8px] font-bold text-amber-400 bg-amber-500/15 border border-amber-500/40 px-2 py-0.5 font-mono tracking-widest uppercase">
+                        VIP Sponsor
+                      </span>
+                    ) : (
+                      <span className="text-[8px] font-bold text-zinc-400 bg-zinc-500/10 border border-zinc-500/25 px-2 py-0.5 font-mono tracking-widest uppercase">
+                        Survivor Elite
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Character Suit Spec Description */}
+                  <div className="bg-[#0b0c0f]/80 border border-[#2a2f3b] p-3 text-left">
+                    <span className="text-[7.5px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">
+                      {lang === 'ru' ? 'СПЕЦИФИКАЦИЯ ЭКИПИРОВАННОГО КОСТЮМА' : 'EQUIPPED SKIN SPECIFICATION'}
+                    </span>
+                    <span className="text-xs font-black text-zinc-200 font-mono flex items-center gap-2 uppercase tracking-wider">
+                      <span className="w-2 h-2 rounded-full bg-[#cd412b] animate-pulse" />
+                      {matchedAvatar?.name[lang]}
+                    </span>
+                    {matchedAvatar?.role && (
+                      <span className="text-[9px] text-zinc-400 font-mono block mt-1 italic pl-4">
+                        {matchedAvatar.role[lang]}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Personal Telex Log (Bio text area) */}
+                <div className="bg-black/50 border border-[#2a2f3b]/50 p-3.5 text-left relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-1 text-[7px] font-mono text-zinc-600 uppercase">SYS_LOG_V2</div>
+                  <span className="text-[8px] font-mono text-[#cd412b] block uppercase tracking-wider mb-1.5 border-b border-zinc-900 pb-1">
+                    {lang === 'ru' ? 'РАДИОФОННЫЙ ЖУРНАЛ' : 'DECRYPTED TRANSMISSION LOG'}
+                  </span>
+                  <p className="text-[11px] text-zinc-300 font-mono leading-relaxed italic break-words whitespace-pre-line max-h-24 overflow-y-auto">
+                    {targetUser.bio || (lang === 'ru' ? '«Выживший не предоставил радиовещательный лог...»' : '"No logs recorded on this survivor frequency..."')}
+                  </p>
+                </div>
+
+                {/* Friends direct action */}
+                {friendBtn && (
+                  <button
+                    onClick={handleFriendAction}
+                    disabled={actionLoading}
+                    className={`w-full py-2.5 font-mono font-bold text-[10px] uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-2 border-2 ${friendBtn.class}`}
+                  >
+                    {friendBtn.icon}
+                    <span>{actionLoading ? '...' : friendBtn.label}</span>
+                  </button>
+                )}
+              </div>
             </div>
 
-            {/* Friends Interaction Action */}
-            {friendBtn && (
-              <button
-                onClick={handleFriendAction}
-                disabled={actionLoading}
-                className={`w-full py-2.5 font-mono font-bold text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 border ${friendBtn.class}`}
-              >
-                {friendBtn.icon}
-                <span>{actionLoading ? '...' : friendBtn.label}</span>
-              </button>
-            )}
-
-            {/* Dynamic Status/Bio Description Block */}
-            <div className="bg-black/40 border border-[#2a2f3b]/40 p-3">
-              <span className="text-[9px] font-mono text-zinc-500 block uppercase tracking-wider mb-1.5">
-                {lang === 'ru' ? 'О СЕБЕ / СТАТУС В ЭФИРЕ' : 'PERSONAL LOG & BIO'}
-              </span>
-              <p className="text-xs text-zinc-200 font-mono leading-relaxed italic break-words whitespace-pre-line">
-                {targetUser.bio || (lang === 'ru' ? '«Данный выживший еще не заполнил свою радиочастотную визитку...»' : '"This survivor has not broadcasted their radio log profile yet..."')}
-              </p>
-            </div>
-
-            {/* Survivor Stats Cards */}
+            {/* Survivor Stats Cards - Clean grid */}
             <div className="grid grid-cols-3 gap-2">
-              <div className="bg-black/30 border border-[#2a2f3b]/30 p-2 text-center">
-                <span className="text-[8px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ЧАСЫ В RUST' : 'RUST HOURS'}</span>
-                <span className="text-sm font-black font-mono text-zinc-200 mt-1 block">
-                  {targetUser.hoursPlayed?.toLocaleString() || 0}
+              <div className="bg-black/40 border border-[#2a2f3b]/40 p-3 text-center">
+                <span className="text-[7.5px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ЧАСЫ В ИГРЕ' : 'RUST STATISTICS'}</span>
+                <span className="text-sm font-black font-mono text-zinc-100 mt-1 block">
+                  {targetUser.hoursPlayed?.toLocaleString() || 0} H
                 </span>
               </div>
-              <div className="bg-black/30 border border-[#2a2f3b]/30 p-2 text-center">
-                <span className="text-[8px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ОБОРУДОВАНИЕ' : 'FAV WEAPON'}</span>
-                <span className="text-xs font-bold font-sans text-zinc-200 mt-1 block truncate">
+              <div className="bg-black/40 border border-[#2a2f3b]/40 p-3 text-center">
+                <span className="text-[7.5px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ОРУЖИЕ ВЫБОРА' : 'EQUIPPED WEAPON'}</span>
+                <span className="text-xs font-bold font-mono text-[#cd412b] mt-1 block truncate">
                   {targetUser.favoriteWeapon || 'AK-47'}
                 </span>
               </div>
-              <div className="bg-black/30 border border-[#2a2f3b]/30 p-2 text-center">
-                <span className="text-[8px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ТАКТИКА' : 'TACTICS'}</span>
-                <span className="text-xs font-bold font-sans text-zinc-200 mt-1 block truncate">
+              <div className="bg-black/40 border border-[#2a2f3b]/40 p-3 text-center">
+                <span className="text-[7.5px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ТАКТИКА БОЯ' : 'PLAYSTYLE TACTICS'}</span>
+                <span className="text-xs font-bold font-mono text-zinc-200 mt-1 block truncate">
                   {targetUser.playstyle || 'Solo'}
                 </span>
               </div>
             </div>
 
             {/* Steam Link Integration Section */}
-            <div className="bg-[#171a21]/90 border border-[#3b4b57]/40 p-3.5 rounded-sm flex items-center justify-between gap-3 text-left">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded bg-[#101216] flex items-center justify-center border border-[#4c5c68]/30 shrink-0">
-                  <Gamepad2 size={16} className="text-[#3a8bca]" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest block leading-none mb-0.5">
-                    Steam Profile Integration
-                  </span>
-                  {targetUser.steamId ? (
-                    <span className="text-xs font-bold text-zinc-200 font-sans truncate block">
-                      {targetUser.steamName}
+            <div className="bg-[#171a21]/95 border border-[#3b4b57]/40 p-3.5 rounded-none flex flex-col gap-3 text-left">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded bg-[#101216] flex items-center justify-center border border-[#4c5c68]/30 shrink-0">
+                    <Gamepad2 size={16} className="text-[#3a8bca]" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest block leading-none mb-0.5">
+                      Steam Profile Integration
                     </span>
-                  ) : (
-                    <span className="text-xs font-bold text-[#3a8bca] font-mono block">
-                      {lang === 'ru' ? 'НЕ СВЯЗАН' : 'NOT LINKED'}
-                    </span>
-                  )}
+                    {targetUser.steamLink ? (
+                      <span className="text-xs font-bold text-zinc-200 font-sans truncate block">
+                        {targetUser.steamLink}
+                      </span>
+                    ) : targetUser.steamId ? (
+                      <span className="text-xs font-bold text-zinc-200 font-sans truncate block">
+                        {targetUser.steamName}
+                      </span>
+                    ) : (
+                      <span className="text-xs font-bold text-[#3a8bca] font-mono block">
+                        {lang === 'ru' ? 'НЕ СВЯЗАН' : 'NOT LINKED'}
+                      </span>
+                    )}
+                  </div>
                 </div>
+
+                {(targetUser.steamId || targetUser.steamLink) && (
+                  <div className="shrink-0 flex items-center gap-1 bg-[#223846]/40 border border-[#3a8bca]/30 px-2 py-1">
+                    <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shrink-0" />
+                    <span className="text-[8px] font-mono font-black text-[#3a8bca] uppercase tracking-wider">Connected</span>
+                  </div>
+                )}
               </div>
 
-              {targetUser.steamId && (
-                <div className="shrink-0 flex items-center gap-1 bg-[#223846]/40 border border-[#3a8bca]/30 px-2 py-1">
-                  <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shrink-0" />
-                  <span className="text-[8px] font-mono font-black text-[#3a8bca] uppercase tracking-wider">Connected</span>
-                </div>
+              {targetUser.steamLink && (
+                <a
+                  href={targetUser.steamLink.startsWith('http') ? targetUser.steamLink : `https://${targetUser.steamLink}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2 bg-[#1b2838] hover:bg-[#2a475e] border border-[#66c0f4]/40 hover:border-[#66c0f4] text-white font-mono font-bold text-[10px] uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-2 select-none"
+                >
+                  <Gamepad2 size={13} className="text-[#66c0f4]" />
+                  <span>{lang === 'ru' ? 'ПЕРЕЙТИ В ПРОФИЛЬ STEAM' : 'GO TO STEAM PROFILE'}</span>
+                </a>
               )}
             </div>
+
+            {/* Twitch Link for the Owner of the site (serustqs) */}
+            {targetUser.uid === 'serustqs' && (
+              <a
+                href={`https://twitch.tv/${twitchChannel}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-2.5 bg-[#6441a5] hover:bg-[#7d5bbe] border border-[#a991d4]/40 hover:border-[#a991d4] text-white font-mono font-bold text-[10px] uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-2 select-none"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                <span>{lang === 'ru' ? 'ПЕРЕЙТИ НА ТВИТЧ' : 'GO TO TWITCH'}</span>
+              </a>
+            )}
 
             {/* Exclusive Owner Administration Panel */}
             {currentUser && currentUser.uid === 'serustqs' && (
@@ -550,6 +711,43 @@ export default function UserProfileModal({
           </div>
         )}
       </motion.div>
+
+      {/* Fullscreen Avatar Lightbox */}
+      <AnimatePresence>
+        {isFullscreenAvatar && targetUser && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsFullscreenAvatar(false)}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md cursor-zoom-out"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="relative max-w-full max-h-[90vh] border border-zinc-700 bg-zinc-950 p-2 shadow-2xl rounded-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={getAvatarUrl(targetUser.photoURL, targetUser.avatarClass)}
+                alt={targetUser.displayName}
+                className="max-w-full max-h-[75vh] md:max-h-[80vh] object-contain rounded-sm"
+              />
+              <div className="mt-3.5 text-center text-xs font-mono text-zinc-400 uppercase tracking-widest">
+                {targetUser.displayName} • {matchedAvatar?.name[lang]}
+              </div>
+              
+              <button
+                onClick={() => setIsFullscreenAvatar(false)}
+                className="absolute -top-10 right-0 text-white font-mono text-xs uppercase tracking-widest flex items-center gap-1 hover:text-[#cd412b] transition-colors cursor-pointer"
+              >
+                <X size={16} /> {lang === 'ru' ? 'Закрыть' : 'Close'}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

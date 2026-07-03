@@ -45,6 +45,17 @@
         }
       },
       "required": ["lastActive"]
+    },
+    "SiteSettings": {
+      "title": "SiteSettings",
+      "description": "Global application configuration",
+      "type": "object",
+      "properties": {
+        "jungleFeverSpoiler": {
+          "type": "boolean",
+          "description": "Show/Hide Jungle Fever spoiler"
+        }
+      }
     }
   },
   "firestore": {
@@ -55,6 +66,10 @@
     "/presence/{userId}": {
       "schema": "Presence",
       "description": "Real-time presence collection"
+    },
+    "/site_settings/{docId}": {
+      "schema": "SiteSettings",
+      "description": "Global site settings"
     }
   }
 }

@@ -75,8 +75,10 @@ import globalWarfareLogo from './assets/images/global_warfare_logo_1782807450573
 import rustWallpaperOne from './assets/images/rust_wallpaper_one_1782810116151.jpg';
 // @ts-ignore
 import rustWallpaperTwo from './assets/images/rust_wallpaper_two_1782810130672.jpg';
+import { getAvatarUrl } from './customAvatars';
 // @ts-ignore
 import rustWallpaperThree from './assets/images/rust_wallpaper_three_1782810145159.jpg';
+
 
 const wallpaperTitles = [
   {
@@ -194,6 +196,27 @@ export default function App() {
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lang, setLang] = useState<'ru' | 'en'>('en');
+  const [appTheme, setAppTheme] = useState<'dark' | 'light'>(() => {
+    try {
+      return (localStorage.getItem('rust_app_theme') as 'dark' | 'light') || 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('rust_app_theme', appTheme);
+    } catch (e) {
+      console.warn(e);
+    }
+    if (appTheme === 'light') {
+      document.body.classList.add('light-theme');
+    } else {
+      document.body.classList.remove('light-theme');
+    }
+  }, [appTheme]);
+
   const [donationOpen, setDonationOpen] = useState(false);
   const [rustoriaServers, setRustoriaServers] = useState<any[]>([]);
   const [loadingServers, setLoadingServers] = useState(false);
@@ -214,6 +237,7 @@ export default function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [cabinetModalOpen, setCabinetModalOpen] = useState(false);
   const [announcement, setAnnouncement] = useState<{ text: string; active: boolean; type: 'info' | 'hazard' | 'important' } | null>(null);
+  const [showJungleFeverSpoiler, setShowJungleFeverSpoiler] = useState(false);
 
   const [twitchSettings, setTwitchSettings] = useState<{
     channelName: string;
@@ -242,6 +266,18 @@ export default function App() {
       }
     }, (err) => {
       console.warn("Announcement sync error:", err);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Jungle Fever spoiler subscription
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, 'site_settings', 'jungle_fever_spoiler'), (docSnap) => {
+      if (docSnap.exists()) {
+        setShowJungleFeverSpoiler(!!docSnap.data().jungleFeverSpoiler);
+      } else {
+        setShowJungleFeverSpoiler(false);
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -348,48 +384,6 @@ export default function App() {
 
     return () => clearInterval(interval);
   }, [currentUser]);
-
-  // Automatically update the logged-in user's avatar and class to Developer as requested
-  useEffect(() => {
-    if (!currentUser || currentUser.uid !== 'serustqs') return;
-    
-    const applyDeveloperUpgrade = async () => {
-      const developerAvatarUrl = '/src/assets/images/developer_cat_avatar_1782899645243.jpg';
-      if (currentUser.avatarClass !== 'developer' || currentUser.photoURL !== developerAvatarUrl) {
-        try {
-          const userRef = doc(db, 'chat_users', currentUser.uid);
-          await setDoc(userRef, {
-            avatarClass: 'developer',
-            photoURL: developerAvatarUrl
-          }, { merge: true });
-
-          const updated = {
-            ...currentUser,
-            avatarClass: 'developer',
-            photoURL: developerAvatarUrl
-          };
-          setCurrentUser(updated);
-          localStorage.setItem('rust_survivor_user', JSON.stringify(updated));
-
-          const toastId = Math.random().toString(36).substring(2, 9);
-          setToasts(prev => [...prev, {
-            id: toastId,
-            message: lang === 'ru' 
-              ? 'Ваш аватар и класс успешно изменены на Разработчик!' 
-              : 'Your avatar and class have been successfully updated to Developer!',
-            type: 'success'
-          }]);
-          setTimeout(() => {
-            setToasts(prev => prev.filter(t => t.id !== toastId));
-          }, 4000);
-        } catch (err) {
-          console.error('Failed to auto-upgrade to Developer class:', err);
-        }
-      }
-    };
-
-    applyDeveloperUpgrade();
-  }, [currentUser, lang]);
 
   // Real-time online count sync
   useEffect(() => {
@@ -702,19 +696,8 @@ export default function App() {
         </div>
       )}
 
-      {/* Dynamic scanline overlay background */}
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-[#cd412b]/8 via-[#0c0d10] to-[#08090c] pointer-events-none z-0" />
-      
-      {/* Subtle Grid overlay for tactical gamer theme */}
-      <div className="fixed inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(255,255,255,0.01)_1px,_transparent_1px)] bg-[size:40px_40px] pointer-events-none z-0" />
-
-      {/* Watermark in margins */}
-      <div className="fixed bottom-3 right-5 text-[9px] font-mono text-gray-500/30 pointer-events-none z-50 select-none hidden md:block">
-        [SYS_SEC: SECURE] • [EAC_STATUS: ACTIVE] • RUSTY.LUB 2026
-      </div>
-
       {/* HEADER / NAVIGATION BAR */}
-      <nav className="sticky top-1 z-40 bg-[#0c0e14]/90 backdrop-blur-md border-b border-[#1f232e] shadow-xl">
+      <nav className="sticky top-1 z-40 bg-white backdrop-blur-md border-b border-gray-200 shadow-xl">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
@@ -724,10 +707,10 @@ export default function App() {
                 <div className="absolute inset-0 bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform" />
               </div>
               <div className="flex flex-col justify-center">
-                <span className="font-black text-base tracking-widest text-white font-teko leading-none block">
+                <span className="font-black text-base tracking-widest text-black font-teko leading-none block">
                   RUSTY<span className="text-[#cd412b]">.LUB</span>
                 </span>
-                <span className="block text-[7.5px] font-black text-gray-400 tracking-widest font-mono uppercase leading-none mt-0.5">
+                <span className="block text-[7.5px] font-black text-black tracking-widest font-mono uppercase leading-none mt-0.5">
                   SURVIVAL KIT v2.4
                 </span>
                 {/* Online Users Indicator integrated directly below logo */}
@@ -736,8 +719,8 @@ export default function App() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10b981] opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-1 w-1 bg-[#10b981]"></span>
                   </span>
-                  <span className="tracking-widest uppercase text-gray-400">
-                    {lang === 'ru' ? 'В СЕТИ' : 'ONLINE'}: <span className="text-emerald-400 font-extrabold">{onlineCount}</span>
+                  <span className="tracking-widest uppercase text-black">
+                    {lang === 'ru' ? 'В СЕТИ' : 'ONLINE'}: <span className="text-emerald-600 font-extrabold">{onlineCount}</span>
                   </span>
                 </div>
               </div>
@@ -751,10 +734,10 @@ export default function App() {
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold border rounded-md transition-all cursor-pointer font-mono uppercase ${
                   activeTab === 'chat'
                     ? 'bg-gradient-to-r from-blue-600 to-[#ff4d30] text-white border-purple-500/40 shadow-md shadow-purple-500/10'
-                    : 'bg-[#1b1e26]/40 hover:bg-[#1b1e26]/80 border-[#2a2f3b] hover:border-gray-500 text-gray-300 hover:text-white'
+                    : 'bg-gray-100 hover:bg-gray-200 border-gray-200 hover:border-gray-300 text-black hover:text-black'
                 }`}
               >
-                <MessageSquare size={12} className={activeTab === 'chat' ? 'text-white' : 'text-purple-400'} />
+                <MessageSquare size={12} className={activeTab === 'chat' ? 'text-white' : 'text-purple-600'} />
                 <span>{lang === 'ru' ? 'ЧАТ' : 'CHAT'}</span>
               </button>
 
@@ -762,12 +745,12 @@ export default function App() {
               {currentUser ? (
                 <button
                   onClick={() => setCabinetModalOpen(true)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold bg-[#1b1e26]/40 hover:bg-[#1b1e26]/80 border border-[#2a2f3b] hover:border-gray-500 text-gray-300 hover:text-white transition-all cursor-pointer rounded-md font-mono uppercase shrink-0"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold bg-gray-100 hover:bg-gray-200 border border-gray-200 hover:border-gray-300 text-black hover:text-black transition-all cursor-pointer rounded-md font-mono uppercase shrink-0"
                 >
                   <img 
-                    src={currentUser.photoURL} 
+                    src={getAvatarUrl(currentUser.photoURL, currentUser.avatarClass)} 
                     alt={currentUser.displayName} 
-                    className="w-4 h-4 rounded-full object-cover border border-gray-700 bg-black shrink-0"
+                    className="w-4 h-4 rounded-full object-cover border border-gray-300 bg-gray-200 shrink-0"
                   />
                   <span className="tracking-wider">
                     {currentUser.uid === 'serustqs' 
@@ -778,7 +761,7 @@ export default function App() {
               ) : (
                 <button
                   onClick={() => setAuthModalOpen(true)}
-                  className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-bold bg-[#cd412b]/10 border border-[#cd412b]/30 hover:border-[#cd412b] hover:bg-[#cd412b]/20 text-white transition-all cursor-pointer rounded-md font-mono uppercase shrink-0"
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-bold bg-[#cd412b]/10 border border-[#cd412b]/30 hover:border-[#cd412b] hover:bg-[#cd412b]/20 text-black transition-all cursor-pointer rounded-md font-mono uppercase shrink-0"
                 >
                   <Power size={11} className="text-[#cd412b] animate-pulse" />
                   <span className="tracking-wider">{lang === 'ru' ? 'ВОЙТИ' : 'LOG IN'}</span>
@@ -788,12 +771,12 @@ export default function App() {
               {/* Language Selector */}
               <button
                 onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
-                className="flex items-center px-2 py-1.5 text-[9px] font-mono font-bold bg-[#14171e]/40 hover:bg-[#1b1e26]/60 border border-[#2a2f3b] hover:border-gray-500 text-gray-400 hover:text-white transition-all cursor-pointer rounded-md shrink-0"
+                className="flex items-center px-2 py-1.5 text-[9px] font-mono font-bold bg-gray-100 hover:bg-gray-200 border border-gray-200 hover:border-gray-300 text-black hover:text-black transition-all cursor-pointer rounded-md shrink-0"
                 title={lang === 'ru' ? 'Switch to English' : 'Переключить на Русский'}
               >
-                <span className={lang === 'ru' ? 'text-white font-bold' : 'text-gray-500'}>RU</span>
-                <span className="text-gray-700 mx-1">|</span>
-                <span className={lang === 'en' ? 'text-white font-bold' : 'text-gray-500'}>EN</span>
+                <span className={lang === 'ru' ? 'text-black font-bold' : 'text-gray-500'}>RU</span>
+                <span className="text-gray-400 mx-1">|</span>
+                <span className={lang === 'en' ? 'text-black font-bold' : 'text-gray-500'}>EN</span>
               </button>
             </div>
 
@@ -806,7 +789,7 @@ export default function App() {
                   title={lang === 'ru' ? 'Кабинет' : 'Profile'}
                 >
                   <img 
-                    src={currentUser.photoURL} 
+                    src={getAvatarUrl(currentUser.photoURL, currentUser.avatarClass)} 
                     alt={currentUser.displayName} 
                     className="w-5 h-5 rounded-full object-cover border border-gray-700 bg-black"
                   />
@@ -824,11 +807,11 @@ export default function App() {
               <div className="flex flex-col items-center">
                 <button
                   onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
-                  className="flex items-center gap-1 px-2 py-1 text-[9px] font-bold bg-[#1b1e26] border border-[#2a2f3b] text-gray-300 rounded-sm"
+                  className="flex items-center gap-1 px-2 py-1 text-[9px] font-bold bg-[#1b1e26] border border-[#2a2f3b] text-white rounded-sm"
                 >
                   <span>{lang === 'ru' ? 'RU' : 'EN'}</span>
                 </button>
-                <div className="flex items-center gap-0.5 text-[8px] font-mono text-gray-500 font-bold uppercase mt-0.5 leading-none">
+                <div className="flex items-center gap-0.5 text-[8px] font-mono text-white font-bold uppercase mt-0.5 leading-none">
                   <span className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse shrink-0" />
                   <span>{onlineCount}</span>
                 </div>
@@ -862,7 +845,7 @@ export default function App() {
                   className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white bg-[#cd412b]/10 border border-[#cd412b]/35 rounded-sm"
                 >
                   <img 
-                    src={currentUser.photoURL} 
+                    src={getAvatarUrl(currentUser.photoURL, currentUser.avatarClass)} 
                     alt={currentUser.displayName} 
                     className="w-6 h-6 rounded-full object-cover border border-gray-700 bg-black shrink-0"
                   />
@@ -905,6 +888,23 @@ export default function App() {
                   </button>
                 );
               })}
+
+              {/* Mobile theme toggle */}
+              <div className="pt-2.5 border-t border-[#2a2f3b]/60 my-2">
+                <button
+                  onClick={() => setAppTheme(appTheme === 'dark' ? 'light' : 'dark')}
+                  className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-all rounded-sm bg-[#1b1e26]/30 border border-[#2a2f3b]/40"
+                >
+                  <span className="font-mono">{lang === 'ru' ? 'СВЕТЛАЯ ТЕМА' : 'LIGHT THEME'}</span>
+                  <div className="w-9 h-5 bg-black border border-[#2a2f3b] rounded-full p-0.5 relative flex items-center shrink-0">
+                    <motion.div
+                      layout
+                      animate={{ x: appTheme === 'light' ? 16 : 0 }}
+                      className={`w-3.5 h-3.5 rounded-full ${appTheme === 'light' ? 'bg-[#cd412b]' : 'bg-gray-500'}`}
+                    />
+                  </div>
+                </button>
+              </div>
               
               {/* Mobile Donation button */}
               <button
@@ -961,6 +961,24 @@ export default function App() {
                   </button>
                 );
               })}
+
+              {/* High-quality theme toggle in navigation section */}
+              <div className="pt-2 border-t border-[#2a2f3b]/60 mt-1.5">
+                <button
+                  onClick={() => setAppTheme(appTheme === 'dark' ? 'light' : 'dark')}
+                  className="w-full flex items-center justify-between px-3 py-2 text-[9px] font-bold font-mono uppercase transition-all duration-150 cursor-pointer text-gray-400 hover:text-white hover:bg-white/5 border border-transparent rounded-none"
+                  title={lang === 'ru' ? 'Переключить тему оформления' : 'Toggle application theme'}
+                >
+                  <span>{lang === 'ru' ? 'СВЕТЛАЯ ТЕМА' : 'LIGHT THEME'}</span>
+                  <div className="w-8 h-4 bg-[#1b1e26] border border-[#2a2f3b] rounded-full p-0.5 relative flex items-center shrink-0">
+                    <motion.div
+                      layout
+                      animate={{ x: appTheme === 'light' ? 14 : 0 }}
+                      className={`w-2.5 h-2.5 rounded-full ${appTheme === 'light' ? 'bg-[#cd412b]' : 'bg-gray-500'}`}
+                    />
+                  </div>
+                </button>
+              </div>
             </div>
             
             {/* System Status Info block in sidebar */}
@@ -1024,7 +1042,7 @@ export default function App() {
                 </p>
 
                 {/* Suggestions & Feedback Terminal Banner */}
-                <div className="relative overflow-hidden bg-[#1b1e26]/90 border border-[#2a2f3b] p-3 sm:p-4 max-w-xl mx-auto rounded-none text-left space-y-1 sm:space-y-1.5 shadow-md">
+                <div id="suggestions-feedback-banner" className="relative overflow-hidden bg-[#1b1e26]/90 border border-[#2a2f3b] p-3 sm:p-4 max-w-xl mx-auto rounded-none text-left space-y-1 sm:space-y-1.5 shadow-md">
                   <div className="absolute top-0 right-0 w-2 h-full bg-[#cd412b] opacity-40" />
                   <div className="flex items-start gap-3">
                     <div className="bg-[#cd412b]/10 text-[#cd412b] p-1.5 border border-[#cd412b]/20 mt-0.5">
@@ -1049,7 +1067,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-center gap-3">
+                <div id="banner-tactical-buttons" className="flex flex-wrap items-center justify-center gap-3">
                   <button
                     onClick={() => handleTabChange('errors')}
                     className="px-5 py-2.5 bg-[#1b1e26] hover:bg-white/5 border border-[#2a2f3b] hover:border-gray-500 rounded-none text-xs font-bold uppercase tracking-wider transition-all cursor-pointer text-white"
@@ -1069,6 +1087,7 @@ export default function App() {
                     {appTranslations.bannerBtnRaid[lang]}
                   </button>
                   <button
+                    id="support-dev-btn"
                     onClick={() => setDonationOpen(true)}
                     className="px-3 py-1.5 bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/30 text-amber-500/90 hover:text-amber-400 rounded text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1 font-mono"
                   >
@@ -1153,6 +1172,31 @@ export default function App() {
               )}
 
               {/* Global Warfare 4 Event Section */}
+              {/* Jungle Fever Spoiler Block */}
+              {showJungleFeverSpoiler && (
+                <div className="mb-8 p-6 bg-[#0c0d10] border border-[#2a2f3b] shadow-2xl relative overflow-hidden">
+                  <div className="rust-bracket-tl" />
+                  <div className="rust-bracket-tr" />
+                  <div className="rust-bracket-bl" />
+                  <div className="rust-bracket-br" />
+                  <img src="https://i.ytimg.com/vi/RxS0ISoktOY/maxresdefault.jpg" alt="Jungle Fever Part 1" className="w-full h-32 object-cover mb-4" />
+                  <h4 className="text-lg font-black text-white font-sans uppercase mb-2">
+                    {lang === 'ru' ? 'Jungle Fever - Серия фильмов Solo Rust' : 'Jungle Fever - Solo Rust Movie Series'}
+                  </h4>
+                  <p className="text-xs text-gray-300 font-sans mb-4">
+                    {lang === 'ru' ? 'Первая часть моей серии фильмов Jungle Fever!' : 'First part of my Jungle Fever movie series!'}
+                  </p>
+                  <a
+                    href="https://youtu.be/RxS0ISoktOY"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-4 py-2 bg-[#cd412b] text-white text-[10px] font-bold uppercase tracking-widest font-mono"
+                  >
+                    {lang === 'ru' ? 'СМОТРЕТЬ ПЕРВУЮ ЧАСТЬ' : 'WATCH PART 1'}
+                  </a>
+                </div>
+              )}
+
               <div className="bg-[#14171e]/90 border border-[#2a2f3b] rounded-none p-6 sm:p-8 shadow-xl relative overflow-hidden rust-metal-pattern">
                 {/* Tactical Corner Brackets */}
                 <div className="rust-bracket-tl" />
@@ -1182,7 +1226,7 @@ export default function App() {
                     />
                     
                     {/* Date Badge Overlay */}
-                    <div className="absolute bottom-4 left-4 right-4 bg-black/85 border-l-2 border-l-[#cd412b] border-y border-r border-[#2a2f3b] px-3.5 py-2 z-20">
+                    <div id="global-warfare-dates-badge" className="absolute bottom-4 left-4 right-4 bg-black/85 border-l-2 border-l-[#cd412b] border-y border-r border-[#2a2f3b] px-3.5 py-2 z-20">
                       <span className="block text-[8px] text-gray-500 uppercase font-bold tracking-wider font-mono">
                         {lang === 'ru' ? 'Даты Проведения' : 'Event Dates'}
                       </span>
@@ -1336,6 +1380,7 @@ export default function App() {
                     {/* Social profiles row with tactile, beautifully designed masked link buttons */}
                     <div className="flex flex-wrap items-center gap-3 pt-3">
                       <motion.a
+                        id="steam-profile-btn"
                         href="https://steamcommunity.com/id/EACCHEATER"
                         target="_blank"
                         rel="noopener noreferrer"

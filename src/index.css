@@ -219,6 +219,460 @@
   --tw-gradient-to: #040507 var(--tw-gradient-to-position) !important;
 }
 
+/* Light theme overrides */
+.light-theme {
+  --color-app-bg: #f0f4f8 !important; /* Snowy light frost background */
+  --color-panel-bg: #ffffff !important; /* Crisp white cards */
+  --color-inner-bg: #f1f5f9 !important; /* Elegant light-grey slate boxes */
+  --color-border-dark: #cbd5e1 !important; /* Steel-grey clean borders */
+  --color-brand: #cd412b !important; /* Classic tactical brand red */
+  color: #0f172a !important; /* Darkest slate-blue text for ultimate contrast */
+  background-color: #f0f4f8 !important;
+}
+
+/* Remove stripes, scanlines, and grid/metal patterns in light theme for a pristine snowy look */
+.light-theme,
+.light-theme.scanlines,
+.light-theme .scanlines,
+.light-theme .rust-metal-pattern,
+.light-theme .rust-hazard-dark,
+.light-theme .scanline-overlay {
+  background: none !important;
+  background-image: none !important;
+  background-size: auto !important;
+  box-shadow: none !important;
+}
+
+/* Beautiful light-blue arctic frost gradient background for the body wrapper */
+.light-theme div[class*="bg-[radial-gradient"] {
+  background: radial-gradient(circle at top, rgba(205, 65, 43, 0.05) 0%, #f0f4f8 50%, #e2e8f0 100%) !important;
+}
+
+/* Elegant arctic grid overlay (slate colored with high transparency) */
+.light-theme div[class*="bg-[linear-gradient"] {
+  background-image: linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px) !important;
+}
+
+/* Specific elements adjustments for light theme to optimize readability */
+.light-theme .text-white,
+.light-theme .text-zinc-100,
+.light-theme .text-zinc-200,
+.light-theme .text-zinc-300,
+.light-theme .text-zinc-400,
+.light-theme .text-zinc-500,
+.light-theme .text-zinc-600,
+.light-theme .text-gray-100,
+.light-theme .text-gray-200,
+.light-theme .text-gray-300,
+.light-theme .text-gray-400,
+.light-theme .text-gray-500,
+.light-theme .text-gray-600,
+.light-theme .text-[#cd412b],
+.light-theme .text-emerald-400,
+.light-theme .text-emerald-500,
+.light-theme .text-red-400,
+.light-theme .text-red-500,
+.light-theme .text-blue-400,
+.light-theme .text-blue-500 {
+  color: #000000 !important;
+}
+
+/* Suggestions & Proposals banner - MUST ALWAYS STAY DARK with white/red text */
+#suggestions-feedback-banner {
+  background-color: #12141c !important;
+  border-color: rgba(205, 65, 43, 0.4) !important;
+}
+#suggestions-feedback-banner * {
+  color: #cbd5e1 !important;
+}
+#suggestions-feedback-banner h4 {
+  color: #ffffff !important;
+}
+#suggestions-feedback-banner a {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+}
+#suggestions-feedback-banner a:hover {
+  color: #cd412b !important;
+}
+
+/* Global Warfare Dates Badge Overlay - MUST ALWAYS STAY DARK with white/red text */
+#global-warfare-dates-badge {
+  background-color: rgba(12, 13, 16, 0.95) !important;
+  border-color: #2a2f3b !important;
+}
+#global-warfare-dates-badge span {
+  color: #ffffff !important;
+}
+#global-warfare-dates-badge span:last-child {
+  color: #cd412b !important;
+}
+
+/* Tactical buttons inside hero header - MUST BE BLACK with white text in light mode */
+.light-theme #banner-tactical-buttons button,
+.light-theme #banner-tactical-buttons a {
+  background-color: #14171e !important;
+  color: #ffffff !important;
+  border-color: #2a2f3b !important;
+}
+.light-theme #banner-tactical-buttons button:hover,
+.light-theme #banner-tactical-buttons a:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Ensure Steam Profile button and Support Development button always stay dark/black and have white text and white icons in light mode */
+.light-theme #steam-profile-btn,
+.light-theme #support-dev-btn {
+  background-color: #14171e !important;
+  border-color: #2a2f3b !important;
+}
+
+.light-theme #steam-profile-btn *,
+.light-theme #support-dev-btn * {
+  color: #ffffff !important;
+}
+
+.light-theme #steam-profile-btn svg,
+.light-theme #support-dev-btn svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.light-theme #steam-profile-btn:hover,
+.light-theme #support-dev-btn:hover {
+  background-color: #000000 !important;
+}
+
+/* Ensure all news, errors, binds, fps, raid tab texts are darker and bolder in light theme */
+.light-theme main h1,
+.light-theme main h2,
+.light-theme main h3,
+.light-theme main h4,
+.light-theme main h5,
+.light-theme main h6,
+.light-theme main p,
+.light-theme main span:not(.text-white):not([class*="text-white"]):not([class*="bg-"]):not([class*="text-amber-"]):not([class*="text-emerald-"]):not([class*="text-red-"]),
+.light-theme main div:not([class*="bg-[#cd412b]"]):not([class*="bg-purple-"]):not([class*="bg-red-"]):not([class*="bg-emerald-"]):not([class*="bg-amber-"]):not([class*="bg-zinc-900"]):not([id="suggestions-feedback-banner"]):not([id="global-warfare-dates-badge"]) *,
+.light-theme main strong,
+.light-theme main li,
+.light-theme main a:not([class*="bg-[#cd412b]"]):not([class*="bg-purple-"]) {
+  color: #000000 !important;
+}
+
+/* Ensure news desk text stays visible/white in light mode */
+.light-theme #news-desk-header,
+.light-theme #news-desk-body,
+.light-theme #news-desk-title {
+  color: #ffffff !important;
+}
+
+/* Ensure headings and text inside light theme also have high contrast black colors */
+.light-theme h1,
+.light-theme h2,
+.light-theme h3,
+.light-theme h4,
+.light-theme h5,
+.light-theme h6,
+.light-theme .font-teko,
+.light-theme .font-black {
+  color: #000000 !important;
+  -webkit-text-stroke: 0px !important;
+  -webkit-text-fill-color: initial !important;
+  text-shadow: none !important;
+}
+
+/* Make text a bit bolder ("literally by a millimeter") */
+.light-theme p,
+.light-theme li,
+.light-theme a,
+.light-theme span:not(.animate-ping),
+.light-theme button,
+.light-theme label,
+.light-theme div:not([class*="bg-[#cd412b]"]) {
+  font-weight: 600 !important;
+}
+
+/* Make text slightly larger across utility scales */
+.light-theme .text-xs {
+  font-size: 0.8rem !important; /* baseline 0.75rem */
+}
+.light-theme .text-sm {
+  font-size: 0.925rem !important; /* baseline 0.875rem */
+}
+.light-theme .text-base {
+  font-size: 1.05rem !important; /* baseline 1rem */
+}
+.light-theme .text-lg {
+  font-size: 1.2rem !important; /* baseline 1.125rem */
+}
+
+/* Keep white text inside standard tactical red/colored buttons and badges in light mode for readability */
+.light-theme .bg-\[\#cd412b\] .text-white,
+.light-theme .bg-\[\#cd412b\]\/10 .text-white,
+.light-theme .bg-\[\#cd412b\]\/15 .text-white,
+.light-theme .bg-\[\#cd412b\]\/20 .text-white,
+.light-theme .bg-\[\#cd412b\]\/25 .text-white,
+.light-theme .bg-\[\#cd412b\]\/30 .text-white,
+.light-theme .bg-gradient-to-r .text-white,
+.light-theme .bg-blue-600 .text-white,
+.light-theme [class*="bg-gradient"] .text-white,
+.light-theme [class*="from-"] .text-white,
+.light-theme .bg-\[\#cd412b\] .text-white *,
+.light-theme .bg-gradient-to-r .text-white *,
+.light-theme .bg-blue-600 .text-white *,
+.light-theme [class*="bg-gradient"] .text-white *,
+.light-theme [class*="from-"] .text-white *,
+.light-theme .hover\:text-white:hover {
+  color: #ffffff !important;
+}
+
+.light-theme .text-slate-200,
+.light-theme .text-slate-300,
+.light-theme .text-slate-400 {
+  color: #000000 !important;
+}
+
+/* Soft color overrides for indicators for light theme contrast */
+.light-theme .text-emerald-400,
+.light-theme .text-emerald-500 {
+  color: #047857 !important;
+}
+.light-theme .text-red-400,
+.light-theme .text-red-500 {
+  color: #b91c1c !important;
+}
+.light-theme .text-blue-400,
+.light-theme .text-blue-500 {
+  color: #1d4ed8 !important;
+}
+
+/* Escape-safe, high-precision background overrides for the light/snowy theme */
+.light-theme .bg-black {
+  background-color: #f1f5f9 !important;
+}
+.light-theme .bg-black\/40 {
+  background-color: rgba(226, 232, 240, 0.75) !important;
+}
+.light-theme .bg-black\/50 {
+  background-color: rgba(226, 232, 240, 0.8) !important;
+}
+.light-theme .bg-\[\#0c0d10\] {
+  background-color: #f1f5f9 !important;
+}
+.light-theme .bg-\[\#14171e\] {
+  background-color: #ffffff !important;
+}
+.light-theme .bg-\[\#14171e\]\/90 {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+}
+.light-theme .bg-\[\#14171e\]\/95 {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+}
+.light-theme .bg-\[\#1b1e26\] {
+  background-color: #edf2f7 !important;
+}
+.light-theme .bg-\[\#1b1e26\]\/30 {
+  background-color: rgba(237, 242, 247, 0.5) !important;
+}
+.light-theme .bg-\[\#1b1e26\]\/40 {
+  background-color: rgba(237, 242, 247, 0.75) !important;
+}
+.light-theme .bg-\[\#1b1e26\]\/80 {
+  background-color: rgba(226, 232, 240, 0.9) !important;
+}
+.light-theme .bg-\[\#0c0e14\]\/90 {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+}
+.light-theme .bg-\[\#171a22\]\/60 {
+  background-color: #f1f5f9 !important;
+}
+.light-theme .bg-\[\#08090d\] {
+  background-color: #f8fafc !important;
+}
+.light-theme .bg-\[\#0b0c0f\] {
+  background-color: #f0f4f8 !important;
+}
+.light-theme .bg-\[\#171a21\]\/95 {
+  background-color: #ffffff !important;
+}
+
+/* Escape-safe, high-precision border overrides for the light/snowy theme */
+.light-theme .border-\[\#1f232e\] {
+  border-color: #cbd5e1 !important;
+}
+.light-theme .border-\[\#2a2f3b\] {
+  border-color: #cbd5e1 !important;
+}
+.light-theme .border-\[\#2a2f3b\]\/50 {
+  border-color: rgba(148, 163, 184, 0.4) !important;
+}
+.light-theme .border-\[\#2a2f3b\]\/30 {
+  border-color: rgba(148, 163, 184, 0.2) !important;
+}
+.light-theme .border-\[\#2a2f3b\]\/70 {
+  border-color: rgba(148, 163, 184, 0.5) !important;
+}
+.light-theme .border-gray-800 {
+  border-color: #cbd5e1 !important;
+}
+
+/* Clean caret indicator/scroller overlays in light mode */
+.light-theme .rust-bracket-tl,
+.light-theme .rust-bracket-tr,
+.light-theme .rust-bracket-bl,
+.light-theme .rust-bracket-br {
+  border-color: #94a3b8 !important; /* Soft steel brackets instead of red */
+}
+
+/* Keep Dark Section overrides - preserves pristine dark design for player dossier / card previews even in light mode */
+.light-theme .keep-dark {
+  background-color: #0c0d10 !important;
+  border-color: #2a2f3b !important;
+}
+
+.light-theme .keep-dark.bg-gradient-to-br,
+.light-theme .keep-dark[class*="bg-gradient"],
+.light-theme .keep-dark [class*="bg-gradient"] {
+  background-image: var(--tw-gradient-stops) !important;
+}
+
+.light-theme .keep-dark .bg-black { background-color: #000000 !important; }
+.light-theme .keep-dark .bg-black\/40 { background-color: rgba(0, 0, 0, 0.4) !important; }
+.light-theme .keep-dark .bg-black\/50 { background-color: rgba(0, 0, 0, 0.5) !important; }
+.light-theme .keep-dark .bg-black\/60 { background-color: rgba(0, 0, 0, 0.6) !important; }
+.light-theme .keep-dark .bg-black\/85 { background-color: rgba(0, 0, 0, 0.85) !important; }
+
+.light-theme .keep-dark .bg-\[\#0c0d10\] { background-color: #0c0d10 !important; }
+.light-theme .keep-dark .bg-\[\#14171e\] { background-color: #14171e !important; }
+.light-theme .keep-dark .bg-\[\#14171e\]\/90 { background-color: rgba(20, 23, 30, 0.9) !important; }
+.light-theme .keep-dark .bg-\[\#14171e\]\/95 { background-color: rgba(20, 23, 30, 0.95) !important; }
+.light-theme .keep-dark .bg-\[\#1b1e26\] { background-color: #1b1e26 !important; }
+.light-theme .keep-dark .bg-\[\#1b1e26\]\/30 { background-color: rgba(27, 30, 38, 0.3) !important; }
+.light-theme .keep-dark .bg-\[\#1b1e26\]\/40 { background-color: rgba(27, 30, 38, 0.4) !important; }
+.light-theme .keep-dark .bg-\[\#1b1e26\]\/80 { background-color: rgba(27, 30, 38, 0.8) !important; }
+.light-theme .keep-dark .bg-\[\#0b0c0f\] { background-color: #0b0c0f !important; }
+.light-theme .keep-dark .bg-\[\#0b0c0f\]\/80 { background-color: rgba(11, 12, 15, 0.8) !important; }
+.light-theme .keep-dark .bg-\[\#0b0c0f\]\/40 { background-color: rgba(11, 12, 15, 0.4) !important; }
+.light-theme .keep-dark .bg-\[\#171a21\]\/95 { background-color: rgba(23, 26, 33, 0.95) !important; }
+
+/* Keep dark text colors intact inside dossier card elements */
+.light-theme .keep-dark h1,
+.light-theme .keep-dark h2,
+.light-theme .keep-dark h3,
+.light-theme .keep-dark h4,
+.light-theme .keep-dark h5,
+.light-theme .keep-dark h6,
+.light-theme .keep-dark p,
+.light-theme .keep-dark span,
+.light-theme .keep-dark label,
+.light-theme .keep-dark li,
+.light-theme .keep-dark a,
+.light-theme .keep-dark strong,
+.light-theme .keep-dark div,
+.light-theme .keep-dark button {
+  font-weight: 500 !important;
+}
+
+.light-theme .keep-dark h1 *,
+.light-theme .keep-dark h2 *,
+.light-theme .keep-dark h3 *,
+.light-theme .keep-dark h4 *,
+.light-theme .keep-dark h5 *,
+.light-theme .keep-dark h6 *,
+.light-theme .keep-dark p *,
+.light-theme .keep-dark span * {
+  color: inherit;
+}
+
+.light-theme .keep-dark .text-white,
+.light-theme .keep-dark .text-zinc-100 { color: #f4f4f5 !important; }
+.light-theme .keep-dark .text-zinc-200 { color: #e4e4e7 !important; }
+.light-theme .keep-dark .text-zinc-300 { color: #d4d4d8 !important; }
+.light-theme .keep-dark .text-zinc-400 { color: #a1a1aa !important; }
+.light-theme .keep-dark .text-zinc-500 { color: #71717a !important; }
+.light-theme .keep-dark .text-zinc-600 { color: #52525b !important; }
+
+.light-theme .keep-dark .text-gray-100 { color: #f3f4f6 !important; }
+.light-theme .keep-dark .text-gray-200 { color: #e5e7eb !important; }
+.light-theme .keep-dark .text-gray-300 { color: #d1d5db !important; }
+.light-theme .keep-dark .text-gray-400 { color: #9ca3af !important; }
+.light-theme .keep-dark .text-gray-500 { color: #6b7280 !important; }
+.light-theme .keep-dark .text-gray-600 { color: #4b5563 !important; }
+
+.light-theme .keep-dark .text-\[\#cd412b\] { color: #cd412b !important; }
+.light-theme .keep-dark .text-emerald-400 { color: #34d399 !important; }
+.light-theme .keep-dark .text-emerald-500 { color: #10b981 !important; }
+.light-theme .keep-dark .text-red-400 { color: #f87171 !important; }
+.light-theme .keep-dark .text-red-500 { color: #ef4444 !important; }
+.light-theme .keep-dark .text-blue-400 { color: #60a5fa !important; }
+.light-theme .keep-dark .text-blue-500 { color: #3b82f6 !important; }
+.light-theme .keep-dark .text-amber-400 { color: #fbbf24 !important; }
+.light-theme .keep-dark .text-amber-500 { color: #f59e0b !important; }
+
+/* Keep original brackets */
+.light-theme .keep-dark .rust-bracket-tl,
+.light-theme .keep-dark .rust-bracket-tr,
+.light-theme .keep-dark .rust-bracket-bl,
+.light-theme .keep-dark .rust-bracket-br {
+  border-color: #cd412b !important;
+}
+
+/* Reset border colors */
+.light-theme .keep-dark .border-\[\#2a2f3b\] { border-color: #2a2f3b !important; }
+.light-theme .keep-dark .border-\[\#2a2f3b\]\/50 { border-color: rgba(42, 47, 59, 0.5) !important; }
+.light-theme .keep-dark .border-\[\#2a2f3b\]\/30 { border-color: rgba(42, 47, 59, 0.3) !important; }
+.light-theme .keep-dark .border-\[\#2a2f3b\]\/70 { border-color: rgba(42, 47, 59, 0.7) !important; }
+.light-theme .keep-dark .border-zinc-800 { border-color: #27272a !important; }
+.light-theme .keep-dark .border-zinc-800\/25 { border-color: rgba(39, 39, 42, 0.25) !important; }
+.light-theme .keep-dark .border-zinc-800\/20 { border-color: rgba(39, 39, 42, 0.2) !important; }
+.light-theme .keep-dark .border-zinc-800\/40 { border-color: rgba(39, 39, 42, 0.4) !important; }
+.light-theme .keep-dark .border-zinc-700 { border-color: #3f3f46 !important; }
+
+/* Styling for buttons under 3. SURVIVOR AVATAR and 4. CARD THEME & LAYOUT in light mode */
+.light-theme .cabinet-modal-container button[type="button"] {
+  background-color: #0c0d10 !important;
+  color: #a1a1aa !important;
+  border-color: #2a2f3b !important;
+}
+
+.light-theme .cabinet-modal-container button[type="button"]:hover {
+  border-color: #52525b !important;
+  color: #f4f4f5 !important;
+}
+
+/* Active or selected button state */
+.light-theme .cabinet-modal-container button[type="button"].border-\[\#cd412b\] {
+  background-color: rgba(205, 65, 43, 0.15) !important;
+  border-color: #cd412b !important;
+  color: #ffffff !important;
+}
+
+/* Specific text inside the buttons (suit title, role, etc) */
+.light-theme .cabinet-modal-container button[type="button"] span {
+  color: inherit !important;
+}
+
+.light-theme .cabinet-modal-container button[type="button"] .text-white,
+.light-theme .cabinet-modal-container button[type="button"] span.text-white {
+  color: #ffffff !important;
+}
+
+.light-theme .cabinet-modal-container button[type="button"] .text-zinc-500,
+.light-theme .cabinet-modal-container button[type="button"] span.text-zinc-500 {
+  color: #71717a !important;
+}
+
+.light-theme .cabinet-modal-container button[type="button"].border-\[\#cd412b\] span {
+  color: #ffffff !important;
+}
+
+.light-theme .cabinet-modal-container button[type="button"].border-\[\#cd412b\] .text-[#cd412b],
+.light-theme .cabinet-modal-container button[type="button"].border-\[\#cd412b\] span.text-[#cd412b] {
+  color: #cd412b !important;
+}
+
 
 
 

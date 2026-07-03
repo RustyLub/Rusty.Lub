@@ -42,7 +42,7 @@ import {
   arrayRemove,
   getDoc
 } from '../firebase';
-import { CUSTOM_AVATARS } from '../customAvatars';
+import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 import { CustomUser } from '../types';
 import UserProfileModal, { BADGES, PROFILE_THEMES } from './UserProfileModal';
 
@@ -92,6 +92,7 @@ export default function CabinetModal({
   const [favoriteWeapon, setFavoriteWeapon] = useState('AK-47');
   const [customTheme, setCustomTheme] = useState('slate');
   const [customAvatarUrl, setCustomAvatarUrl] = useState('');
+  const [steamLink, setSteamLink] = useState('');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   // Friend search and add direct states
@@ -117,6 +118,8 @@ export default function CabinetModal({
   const [twitchClientId, setTwitchClientId] = useState('');
   const [twitchClientSecret, setTwitchClientSecret] = useState('');
   const [isSavingTwitch, setIsSavingTwitch] = useState(false);
+  const [jungleFeverSpoiler, setJungleFeverSpoiler] = useState(false);
+  const [isSavingSpoiler, setIsSavingSpoiler] = useState(false);
 
   const [fullProfile, setFullProfile] = useState<CustomUser | null>(null);
 
@@ -133,7 +136,7 @@ export default function CabinetModal({
           uid: docSnap.id,
           displayName: data.displayName || docSnap.id,
           photoURL: data.photoURL || '',
-          avatarClass: data.avatarClass || 'hazmat',
+          avatarClass: data.avatarClass || 'whiteout',
           bio: data.bio || '',
           clanTag: data.clanTag || '',
           hoursPlayed: Number(data.hoursPlayed) || 0,
@@ -146,7 +149,8 @@ export default function CabinetModal({
           friendRequestsSent: data.friendRequestsSent || [],
           friendRequestsReceived: data.friendRequestsReceived || [],
           badges: data.badges || [],
-          customTheme: data.customTheme || 'slate'
+          customTheme: data.customTheme || 'slate',
+          steamLink: data.steamLink || ''
         };
         setFullProfile(profile);
 
@@ -158,6 +162,7 @@ export default function CabinetModal({
         setFavoriteWeapon(profile.favoriteWeapon || 'AK-47');
         setCustomTheme(profile.customTheme || 'slate');
         setCustomAvatarUrl(profile.photoURL || '');
+        setSteamLink(profile.steamLink || '');
       }
     });
 
@@ -176,7 +181,7 @@ export default function CabinetModal({
           username: docSnap.id,
           displayName: data.displayName || docSnap.id,
           photoURL: data.photoURL || '',
-          avatarClass: data.avatarClass || 'hazmat',
+          avatarClass: data.avatarClass || 'whiteout',
           role: data.role || 'user',
           isBlocked: !!data.isBlocked,
           isVip: !!data.isVip
@@ -224,6 +229,19 @@ export default function CabinetModal({
     return () => unsubscribe();
   }, [isOpen, isAdmin]);
 
+  // Subscribe to jungle fever spoiler setting
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const unsubscribe = onSnapshot(doc(db, 'site_settings', 'jungle_fever_spoiler'), (docSnap) => {
+      if (docSnap.exists()) {
+        setJungleFeverSpoiler(!!docSnap.data().jungleFeverSpoiler);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [isOpen]);
+
   if (!isOpen || !user) return null;
 
   // Save Extended Profile custom state
@@ -238,16 +256,6 @@ export default function CabinetModal({
         lang === 'ru' 
           ? 'Использование клан-тега EAC разрешено только владельцу сайта!' 
           : 'Using the EAC clan tag is permitted only for the site owner!',
-        'error'
-      );
-      setIsSavingProfile(false);
-      return;
-    }
-
-    // Strict ban on developer avatar URL for regular users
-    if (customAvatarUrl && customAvatarUrl.includes('developer_cat_avatar') && !isAdmin) {
-      onToast(
-        lang === 'ru' ? 'Вы не можете использовать аватарку Разработчика!' : 'You cannot use the Developer avatar!',
         'error'
       );
       setIsSavingProfile(false);
@@ -281,13 +289,14 @@ export default function CabinetModal({
         playstyle,
         favoriteWeapon,
         customTheme,
+        steamLink: steamLink || '',
         badges: updatedBadges
       };
 
       if (customAvatarUrl && customAvatarUrl !== user.photoURL) {
         updatePayload.photoURL = customAvatarUrl;
         // Trigger parent state synchronization
-        onAvatarChange(fullProfile?.avatarClass || 'hazmat', customAvatarUrl);
+        onAvatarChange(fullProfile?.avatarClass || 'whiteout', customAvatarUrl);
       }
 
       await updateDoc(userRef, updatePayload);
@@ -306,11 +315,6 @@ export default function CabinetModal({
 
   // Change active avatar handler
   const handleSelectAvatar = async (avatarId: string) => {
-    if (avatarId === 'developer' && !isAdmin) {
-      onToast(lang === 'ru' ? 'Доступ к роли Разработчик ограничен!' : 'Access to Developer role is restricted!', 'error');
-      return;
-    }
-
     const matchedAvatar = CUSTOM_AVATARS.find(a => a.id === avatarId);
     if (!matchedAvatar) return;
 
@@ -546,6 +550,25 @@ export default function CabinetModal({
     }
   };
 
+  // Save Jungle Fever spoiler setting
+  const handleSaveSpoiler = async () => {
+    setIsSavingSpoiler(true);
+    try {
+      await setDoc(doc(db, 'site_settings', 'jungle_fever_spoiler'), {
+        jungleFeverSpoiler: !jungleFeverSpoiler
+      }, { merge: true });
+      onToast(
+        lang === 'ru' ? 'Настройки спойлера обновлены!' : 'Spoiler settings updated!',
+        'success'
+      );
+    } catch (err) {
+      console.error(err);
+      onToast(lang === 'ru' ? 'Ошибка сохранения спойлера.' : 'Failed to save spoiler settings.', 'error');
+    } finally {
+      setIsSavingSpoiler(false);
+    }
+  };
+
   // Save Twitch stream configuration settings
   const handleSaveTwitchSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -585,7 +608,7 @@ export default function CabinetModal({
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="w-full max-w-4xl bg-[#14171e] border-2 border-[#2a2f3b] rounded-none overflow-hidden shadow-2xl rust-metal-pattern flex flex-col md:flex-row h-[90vh] md:h-[650px] relative"
+        className="w-full max-w-6xl bg-[#14171e] border-2 border-[#2a2f3b] rounded-none overflow-hidden shadow-2xl rust-metal-pattern flex flex-col md:flex-row h-[95vh] md:h-[760px] relative cabinet-modal-container"
       >
         {/* Tactical Corner Brackets */}
         <div className="rust-bracket-tl" />
@@ -599,9 +622,9 @@ export default function CabinetModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors cursor-pointer z-50"
+          className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors cursor-pointer z-50 bg-black/40 p-1.5 border border-[#2a2f3b]/60 hover:border-zinc-500"
         >
-          <X size={20} />
+          <X size={18} />
         </button>
 
         {/* CABINET SIDEBAR */}
@@ -610,7 +633,7 @@ export default function CabinetModal({
             {/* User Profile Header Mini */}
             <div className="flex items-center gap-3 border-b border-[#2a2f3b]/60 pb-4 cursor-pointer hover:bg-white/5 p-1 transition-all" onClick={() => setInspectUserId(user.uid)}>
               <img 
-                src={fullProfile?.photoURL || user.photoURL} 
+                src={getAvatarUrl(fullProfile?.photoURL || user.photoURL, fullProfile?.avatarClass || user.avatarClass)} 
                 alt={user.displayName} 
                 className="w-10 h-10 rounded-full border border-gray-700 bg-zinc-950 object-cover"
               />
@@ -706,7 +729,7 @@ export default function CabinetModal({
         </div>
 
         {/* CABINET MAIN CONTENT CONTAINER */}
-        <div className="flex-1 bg-[#14171e]/90 p-6 overflow-y-auto flex flex-col relative pt-12 md:pt-6">
+        <div className="flex-1 bg-[#14171e]/90 p-6 overflow-y-auto flex flex-col relative pt-14 md:pt-14">
           <AnimatePresence mode="wait">
             
             {/* PROFILE TAB */}
@@ -737,185 +760,318 @@ export default function CabinetModal({
                   </button>
                 </div>
 
-                <form onSubmit={handleSaveProfile} className="space-y-6">
-                  {/* Grid layout */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Left Column: Stats & Information */}
-                    <div className="space-y-4">
-                      {/* Biometric logs */}
-                      <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-3">
-                        <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1">
-                          {lang === 'ru' ? '1. ИГРОВЫЕ ПАРАМЕТРЫ (ВИЗИТКА)' : '1. SURVIVOR STATS CARD'}
-                        </span>
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+                  
+                  {/* Left Column: Form inputs (Span 7) */}
+                  <form onSubmit={handleSaveProfile} className="xl:col-span-7 space-y-6 order-2 xl:order-1">
+                    {/* Grid layout */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {/* Left Column: Stats & Information */}
+                      <div className="space-y-5">
+                        {/* Biometric logs */}
+                        <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
+                          <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5">
+                            {lang === 'ru' ? '1. ИГРОВЫЕ ПАРАМЕТРЫ (ВИЗИТКА)' : '1. SURVIVOR STATS CARD'}
+                          </span>
 
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Клан-Тег (До 5 симв.)' : 'Clan Tag (Max 5)'}</label>
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <div className="space-y-1.5">
+                              <label className="text-[9px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Клан-Тег (До 5 симв.)' : 'Clan Tag (Max 5)'}</label>
+                              <input 
+                                type="text" 
+                                maxLength={5}
+                                value={clanTag}
+                                onChange={(e) => setClanTag(e.target.value)}
+                                className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-zinc-700"
+                                placeholder="STG"
+                              />
+                            </div>
+
+                            <div className="space-y-1.5">
+                              <label className="text-[9px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Часы в Rust' : 'Rust Hours'}</label>
+                              <input 
+                                type="number" 
+                                value={hoursPlayed}
+                                onChange={(e) => setHoursPlayed(Math.max(0, parseInt(e.target.value) || 0))}
+                                className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-zinc-700"
+                                placeholder="2500"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <div className="space-y-1.5">
+                              <label className="text-[9px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Стиль Игры' : 'Playstyle'}</label>
+                              <select
+                                value={playstyle}
+                                onChange={(e) => setPlaystyle(e.target.value)}
+                                className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-zinc-700 cursor-pointer"
+                              >
+                                {['Solo', 'Duo/Trio', 'Clan PVP', 'Base Builder', 'Farmer', 'Casual', 'Roleplay'].map(s => (
+                                  <option key={s} value={s}>{s}</option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div className="space-y-1.5">
+                              <label className="text-[9px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Любимое Оружие' : 'Fav Weapon'}</label>
+                              <select
+                                value={favoriteWeapon}
+                                onChange={(e) => setFavoriteWeapon(e.target.value)}
+                                className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-zinc-700 cursor-pointer"
+                              >
+                                {['AK-47', 'LR-300', 'M249', 'Bolt Rifle', 'SAR', 'MP5A4', 'Custom SMG', 'Python', 'Double Barrel', 'Pump Shotgun', 'Compound Bow'].map(w => (
+                                  <option key={w} value={w}>{w}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Bio status */}
+                        <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-3.5">
+                          <label className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5">
+                            {lang === 'ru' ? '2. ОПИСАНИЕ И СОЦСЕТИ ВЫЖИВШЕГО' : '2. SURVIVOR STATUS & BIO'}
+                          </label>
+                          <textarea
+                            rows={3}
+                            maxLength={300}
+                            value={bio}
+                            onChange={(e) => setBio(e.target.value)}
+                            placeholder={lang === 'ru' ? 'Расскажите о себе, ищите тиммейтов, рекламируйте свой магазин на сервере...' : 'Tell about yourself, recruit crew members, write base coords...'}
+                            className="w-full bg-[#14171e] border border-zinc-800 text-xs font-mono p-3 text-zinc-200 focus:border-zinc-700 outline-none transition-all placeholder-zinc-700 resize-none"
+                          />
+                          <div className="space-y-1.5 pt-1">
+                            <label className="text-[9px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Ссылка на Steam профиль' : 'Steam Profile URL'}</label>
                             <input 
                               type="text" 
-                              maxLength={5}
-                              value={clanTag}
-                              onChange={(e) => setClanTag(e.target.value)}
-                              className="w-full bg-[#14171e] border border-zinc-800 p-2 text-xs font-mono text-white outline-none focus:border-zinc-700"
-                              placeholder="STG"
+                              value={steamLink}
+                              onChange={(e) => setSteamLink(e.target.value)}
+                              className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-zinc-700"
+                              placeholder="https://steamcommunity.com/id/your_steam_id"
                             />
                           </div>
+                        </div>
+                      </div>
 
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Часы в Rust' : 'Rust Hours'}</label>
+                      {/* Right Column: Customization and Presets */}
+                      <div className="space-y-5">
+                        {/* Avatar Custom URL or Preset selector */}
+                        <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
+                          <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5">
+                            {lang === 'ru' ? '3. ВНЕШНИЙ ВИД (ПРЕСЕТЫ)' : '3. SURVIVOR AVATAR'}
+                          </span>
+
+                          {/* Custom avatar URL */}
+                          <div className="space-y-1.5">
+                            <label className="text-[8px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Ссылка на свою аватарку (URL)' : 'Custom Avatar Image URL'}</label>
                             <input 
-                              type="number" 
-                              value={hoursPlayed}
-                              onChange={(e) => setHoursPlayed(Math.max(0, parseInt(e.target.value) || 0))}
-                              className="w-full bg-[#14171e] border border-zinc-800 p-2 text-xs font-mono text-white outline-none focus:border-zinc-700"
-                              placeholder="2500"
+                              type="text" 
+                              value={customAvatarUrl}
+                              onChange={(e) => setCustomAvatarUrl(e.target.value)}
+                              className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-[10px] font-mono text-white outline-none focus:border-zinc-700"
+                              placeholder="https://example.com/avatar.png"
                             />
                           </div>
-                        </div>
 
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Стиль Игры' : 'Playstyle'}</label>
-                            <select
-                              value={playstyle}
-                              onChange={(e) => setPlaystyle(e.target.value)}
-                              className="w-full bg-[#14171e] border border-zinc-800 p-2 text-xs font-mono text-white outline-none focus:border-zinc-700 cursor-pointer"
-                            >
-                              {['Solo', 'Duo/Trio', 'Clan PVP', 'Base Builder', 'Farmer', 'Casual', 'Roleplay'].map(s => (
-                                <option key={s} value={s}>{s}</option>
-                              ))}
-                            </select>
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Любимое Оружие' : 'Fav Weapon'}</label>
-                            <select
-                              value={favoriteWeapon}
-                              onChange={(e) => setFavoriteWeapon(e.target.value)}
-                              className="w-full bg-[#14171e] border border-zinc-800 p-2 text-xs font-mono text-white outline-none focus:border-zinc-700 cursor-pointer"
-                            >
-                              {['AK-47', 'LR-300', 'M249', 'Bolt Rifle', 'SAR', 'MP5A4', 'Custom SMG', 'Python', 'Double Barrel', 'Pump Shotgun', 'Compound Bow'].map(w => (
-                                <option key={w} value={w}>{w}</option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Bio status */}
-                      <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-2">
-                        <label className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1">
-                          {lang === 'ru' ? '2. ОПИСАНИЕ И СТАТУС ПРОФИЛЯ' : '2. SURVIVOR STATUS & BIO'}
-                        </label>
-                        <textarea
-                          rows={3}
-                          maxLength={300}
-                          value={bio}
-                          onChange={(e) => setBio(e.target.value)}
-                          placeholder={lang === 'ru' ? 'Расскажите о себе, ищите тиммейтов, рекламируйте свой магазин на сервере...' : 'Tell about yourself, recruit crew members, write base coords...'}
-                          className="w-full bg-[#14171e] border border-zinc-800 text-xs font-mono p-2.5 text-zinc-200 focus:border-zinc-700 outline-none transition-all placeholder-zinc-700 resize-none"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Right Column: Customization and Steam Link */}
-                    <div className="space-y-4">
-                      {/* Avatar Custom URL or Preset selector */}
-                      <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-3">
-                        <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1">
-                          {lang === 'ru' ? '3. ВНЕШНИЙ ВИД (ПРЕСЕТЫ)' : '3. SURVIVOR AVATAR'}
-                        </span>
-
-                        {/* Custom avatar URL */}
-                        <div className="space-y-1">
-                          <label className="text-[8px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Ссылка на свою аватарку (URL)' : 'Custom Avatar Image URL'}</label>
-                          <input 
-                            type="text" 
-                            value={customAvatarUrl}
-                            onChange={(e) => setCustomAvatarUrl(e.target.value)}
-                            className="w-full bg-[#14171e] border border-zinc-800 p-2 text-[10px] font-mono text-white outline-none focus:border-zinc-700"
-                            placeholder="https://example.com/avatar.png"
-                          />
-                        </div>
-
-                        {/* Preset avatars scrollbar */}
-                        <div className="space-y-1">
-                          <label className="text-[8px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Выберите аватарку' : 'Pick an avatar'}</label>
-                          <div className="grid grid-cols-1 gap-1.5 max-h-[300px] overflow-y-auto pr-1">
-                            {CUSTOM_AVATARS.map((avatar) => {
-                              const isCurrent = fullProfile && fullProfile.avatarClass === avatar.id;
-                              return (
-                                <button
-                                  key={avatar.id}
-                                  type="button"
-                                  onClick={() => {
-                                    handleSelectAvatar(avatar.id);
-                                    if (fullProfile) {
-                                      setFullProfile({ ...fullProfile, avatarClass: avatar.id, photoURL: avatar.url });
-                                    }
-                                  }}
-                                  className={`p-1.5 border text-left flex items-center justify-between cursor-pointer transition-all rounded-sm ${
-                                    isCurrent 
-                                      ? 'border-[#cd412b] bg-[#cd412b]/10' 
-                                      : 'border-[#2a2f3b] bg-[#14171e]/50 hover:border-zinc-600'
-                                  }`}
-                                >
-                                  <div className="flex items-center gap-2">
+                          {/* Preset avatars grid */}
+                          <div className="space-y-2">
+                            <label className="text-[8px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Выберите тактический костюм' : 'Select tactical suit'}</label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-1">
+                              {CUSTOM_AVATARS.map((avatar) => {
+                                const isCurrent = fullProfile && fullProfile.avatarClass === avatar.id;
+                                return (
+                                  <button
+                                    key={avatar.id}
+                                    type="button"
+                                    onClick={() => {
+                                      handleSelectAvatar(avatar.id);
+                                      if (fullProfile) {
+                                        setFullProfile({ ...fullProfile, avatarClass: avatar.id, photoURL: avatar.url });
+                                      }
+                                    }}
+                                    className={`p-2 border text-left flex items-center gap-2.5 cursor-pointer transition-all rounded-sm relative ${
+                                      isCurrent 
+                                        ? 'border-[#cd412b] bg-[#cd412b]/10' 
+                                        : 'border-[#2a2f3b] bg-[#14171e]/50 hover:border-zinc-600'
+                                    }`}
+                                  >
                                     <img 
                                       src={avatar.url} 
                                       alt={avatar.name[lang]} 
-                                      className="w-5 h-5 rounded-full object-cover bg-black"
+                                      className="w-9 h-9 border border-zinc-800 object-cover bg-black shrink-0"
                                     />
-                                    <span className="text-[8px] font-bold text-white block">
-                                      {avatar.name[lang]}
-                                    </span>
-                                  </div>
-                                  {isCurrent && <CheckCircle2 size={11} className="text-[#cd412b]" />}
+                                    <div className="min-w-0 flex-1">
+                                      <span className="block text-[8.5px] font-black text-white leading-tight truncate">
+                                        {avatar.name[lang]}
+                                      </span>
+                                      <span className="block text-[6.5px] font-mono text-zinc-500 truncate">
+                                        {avatar.role[lang]}
+                                      </span>
+                                    </div>
+                                    {isCurrent && <CheckCircle2 size={11} className="text-[#cd412b] shrink-0" />}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Theme selection */}
+                        <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-3.5">
+                          <label className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5">
+                            {lang === 'ru' ? '4. СТИЛЬ ВИЗИТКИ (ТЕМЫ ПРОФИЛЯ)' : '4. CARD THEME & LAYOUT'}
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {PROFILE_THEMES.map((theme) => {
+                              const isSel = customTheme === theme.id;
+                              return (
+                                <button
+                                  key={theme.id}
+                                  type="button"
+                                  onClick={() => setCustomTheme(theme.id)}
+                                  className={`p-2.5 border text-[9.5px] font-mono font-bold uppercase tracking-wider text-center cursor-pointer transition-all ${
+                                    isSel 
+                                      ? 'bg-[#cd412b]/20 border-[#cd412b] text-white' 
+                                      : 'border-zinc-800/80 bg-zinc-950/40 hover:border-zinc-600 text-zinc-400'
+                                  }`}
+                                >
+                                  {theme.name[lang]}
                                 </button>
                               );
                             })}
                           </div>
                         </div>
                       </div>
+                    </div>
 
-                      {/* Theme selection */}
-                      <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-2">
-                        <label className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1">
-                          {lang === 'ru' ? '4. СТИЛЬ ВИЗИТКИ (ТЕМЫ ПРОФИЛЯ)' : '4. CARD THEME & LAYOUT'}
-                        </label>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          {PROFILE_THEMES.map((theme) => {
-                            const isSel = customTheme === theme.id;
-                            return (
-                              <button
-                                key={theme.id}
-                                type="button"
-                                onClick={() => setCustomTheme(theme.id)}
-                                className={`p-2 border text-[9px] font-mono font-bold uppercase tracking-wider text-center cursor-pointer transition-all ${
-                                  isSel 
-                                    ? 'bg-[#cd412b]/20 border-[#cd412b] text-white' 
-                                    : 'border-zinc-800/80 bg-zinc-950/40 hover:border-zinc-600 text-zinc-400'
-                                }`}
-                              >
-                                {theme.name[lang]}
-                              </button>
-                            );
-                          })}
+                    {/* Save profile block */}
+                    <button
+                      type="submit"
+                      disabled={isSavingProfile}
+                      className="w-full py-3 bg-[#cd412b] hover:bg-[#b03825] text-white font-black text-xs uppercase tracking-widest font-mono cursor-pointer transition-all flex items-center justify-center gap-2 border border-[#cd412b]/65 hover:border-white shadow-lg"
+                    >
+                      <Save size={14} />
+                      <span>{isSavingProfile ? (lang === 'ru' ? 'ОБНОВЛЕНИЕ БИОСИСТЕМЫ...' : 'TRANSMITTING CODES...') : (lang === 'ru' ? 'ЗАФИКСИРОВАТЬ ПАРАМЕТРЫ ПРОФИЛЯ' : 'COMMIT BIO-SYSTEM PARAMETERS')}</span>
+                    </button>
+                  </form>
+
+                  {/* Right Column: Live Card Preview (Span 5) */}
+                  <div className="xl:col-span-5 space-y-3.5 order-1 xl:order-2 xl:sticky xl:top-0 bg-black/40 p-4 border border-[#2a2f3b]/50">
+                    <span className="text-[10px] font-mono text-[#cd412b] font-black uppercase tracking-widest block flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping" />
+                      {lang === 'ru' ? 'ЖИВОЙ ПРЕДПРОСМОТР ВИЗИТКИ' : 'LIVE CARD TELEMETRY'}
+                    </span>
+                    
+                    <div className={`border-2 border-[#2a2f3b] rounded-none overflow-hidden shadow-2xl relative flex flex-col p-0 rust-metal-pattern keep-dark ${selectedTheme.class}`}>
+                      {/* Sleek Tactical Header Bar */}
+                      <div className="bg-[#0b0c0f] border-b border-[#2a2f3b] px-3 py-1.5 flex items-center justify-between text-[8px] font-mono tracking-widest text-zinc-400 select-none">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
+                          <span className="font-bold text-red-500">RUSTY.LUB // TELEMETRY PREVIEW</span>
+                        </div>
+                        <span className="text-[7px] text-emerald-500 font-bold">LINK ACTIVE</span>
+                      </div>
+
+                      {/* Corner Brackets */}
+                      <div className="rust-bracket-tl" />
+                      <div className="rust-bracket-tr" />
+                      <div className="rust-bracket-bl" />
+                      <div className="rust-bracket-br" />
+
+                      <div className="p-4 space-y-3.5">
+                        {/* Avatar & Identifiers Split */}
+                        <div className="flex gap-4 items-stretch pb-3.5 border-b border-[#2a2f3b]/50">
+                          <div className="relative shrink-0">
+                            <div className="border border-[#2a2f3b] p-1 bg-black w-24 h-24 relative overflow-hidden group">
+                              <img 
+                                src={getAvatarUrl(customAvatarUrl, fullProfile?.avatarClass)} 
+                                alt="Live Preview" 
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                              <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-white/[0.01] to-transparent bg-[size:100%_4px]" />
+                              
+                              {/* Micro Crosshairs */}
+                              <div className="absolute top-1 left-1 w-2 h-2 border-t border-l border-[#cd412b]/60" />
+                              <div className="absolute top-1 right-1 w-2 h-2 border-t border-r border-[#cd412b]/60" />
+                              <div className="absolute bottom-1 left-1 w-2 h-2 border-b border-l border-[#cd412b]/60" />
+                              <div className="absolute bottom-1 right-1 w-2 h-2 border-b border-r border-[#cd412b]/60" />
+                            </div>
+                            
+                            {clanTag && (
+                              <span className="absolute -top-1.5 -right-1.5 bg-[#cd412b] border border-red-500 text-[8px] font-black text-white px-1.5 py-0.5 font-mono shadow uppercase tracking-wider">
+                                [{clanTag}]
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="min-w-0 flex-1 flex flex-col justify-between">
+                            <div>
+                              <span className="text-[7.5px] font-mono text-[#cd412b] uppercase tracking-widest block mb-0.5">
+                                {lang === 'ru' ? 'КОДОВОЕ ИМЯ' : 'CALLSIGN'}
+                              </span>
+                              <span className="text-lg font-black text-white uppercase tracking-wide truncate block font-sans">
+                                {fullProfile.displayName}
+                              </span>
+                            </div>
+
+                            <div className="bg-[#0b0c0f]/80 border border-[#2a2f3b] p-1.5 text-left">
+                              <span className="text-[7px] font-mono text-zinc-500 uppercase block mb-0.5">
+                                {lang === 'ru' ? 'КОМПЛЕКТАЦИЯ КОСТЮМА' : 'EQUIPPED SKIN'}
+                              </span>
+                              <span className="text-[9px] font-bold text-zinc-200 font-mono block truncate uppercase">
+                                {(CUSTOM_AVATARS.find(a => a.id === fullProfile.avatarClass) || CUSTOM_AVATARS[0]).name[lang]}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Survival Telemetry HUD inside Preview */}
+                        <div className="bg-black/60 border border-[#2a2f3b]/50 p-2.5 space-y-1.5 text-left">
+                          <div className="flex justify-between text-[7px] font-mono text-zinc-400">
+                            <span>SURVIVAL HP STATUS</span>
+                            <span className="text-emerald-400 font-bold">100 / 100</span>
+                          </div>
+                          <div className="h-1 bg-zinc-900 overflow-hidden">
+                            <div className="h-full bg-emerald-500 w-full" />
+                          </div>
+                        </div>
+
+                        {/* Bio Status description */}
+                        <div className="bg-black/50 border border-[#2a2f3b]/30 p-2.5 text-left relative overflow-hidden">
+                          <span className="text-[7.5px] font-mono text-[#cd412b] block uppercase tracking-wider mb-1">
+                            {lang === 'ru' ? 'РАДИОФОННЫЙ ЖУРНАЛ' : 'DECRYPTED LOG'}
+                          </span>
+                          <p className="text-[10px] text-zinc-300 font-mono leading-relaxed italic break-words whitespace-pre-line max-h-16 overflow-y-auto">
+                            {bio || (lang === 'ru' ? '«Описание не заполнено...»' : '"This log is empty..."')}
+                          </p>
+                        </div>
+
+                        {/* Stats grid */}
+                        <div className="grid grid-cols-3 gap-1.5">
+                          <div className="bg-[#0b0c0f]/40 border border-[#2a2f3b]/40 p-2 text-center">
+                            <span className="text-[7px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ЧАСЫ' : 'HOURS'}</span>
+                            <span className="text-[11px] font-black font-mono text-zinc-100 block mt-0.5">
+                              {hoursPlayed?.toLocaleString() || 0} H
+                            </span>
+                          </div>
+                          <div className="bg-[#0b0c0f]/40 border border-[#2a2f3b]/40 p-2 text-center">
+                            <span className="text-[7px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ОРУЖИЕ' : 'WEAPON'}</span>
+                            <span className="text-[9px] font-bold text-[#cd412b] block mt-0.5 truncate font-mono">
+                              {favoriteWeapon || 'AK-47'}
+                            </span>
+                          </div>
+                          <div className="bg-[#0b0c0f]/40 border border-[#2a2f3b]/40 p-2 text-center">
+                            <span className="text-[7px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ТАКТИКА' : 'TACTICS'}</span>
+                            <span className="text-[9px] font-bold text-zinc-200 block mt-0.5 truncate font-mono">
+                              {playstyle || 'Solo'}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-
-                  {/* Save profile block */}
-                  <button
-                    type="submit"
-                    disabled={isSavingProfile}
-                    className="w-full py-3 bg-[#cd412b] hover:bg-[#b03825] text-white font-black text-xs uppercase tracking-widest font-mono cursor-pointer transition-all flex items-center justify-center gap-2 border border-[#cd412b]/65 hover:border-white shadow-lg"
-                  >
-                    <Save size={14} />
-                    <span>{isSavingProfile ? (lang === 'ru' ? 'ОБНОВЛЕНИЕ БИОСИСТЕМЫ...' : 'TRANSMITTING CODES...') : (lang === 'ru' ? 'ЗАФИКСИРОВАТЬ ПАРАМЕТРЫ ПРОФИЛЯ' : 'COMMIT BIO-SYSTEM PARAMETERS')}</span>
-                  </button>
-                </form>
+                </div>
               </motion.div>
             )}
 
@@ -974,7 +1130,7 @@ export default function CabinetModal({
                             <div key={reqId} className="py-2 flex items-center justify-between gap-3 text-xs">
                               <div className="flex items-center gap-2 min-w-0 cursor-pointer" onClick={() => setInspectUserId(reqId)}>
                                 <img 
-                                  src={reqUser?.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${reqId}`} 
+                                  src={reqUser ? getAvatarUrl(reqUser.photoURL, reqUser.avatarClass) : `https://api.dicebear.com/7.x/bottts/svg?seed=${reqId}`} 
                                   alt={reqId} 
                                   className="w-6 h-6 rounded-full object-cover bg-black"
                                 />
@@ -1052,7 +1208,7 @@ export default function CabinetModal({
                             <div key={fId} className="py-2 flex items-center justify-between gap-3 text-xs">
                               <div className="flex items-center gap-2.5 min-w-0 cursor-pointer" onClick={() => setInspectUserId(fId)}>
                                 <img 
-                                  src={fUser?.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${fId}`} 
+                                  src={fUser ? getAvatarUrl(fUser.photoURL, fUser.avatarClass) : `https://api.dicebear.com/7.x/bottts/svg?seed=${fId}`} 
                                   alt={fId} 
                                   className="w-7 h-7 rounded-full object-cover bg-black border border-zinc-800"
                                 />
@@ -1137,7 +1293,7 @@ export default function CabinetModal({
                         <div key={rUser.username} className="p-3 flex items-center justify-between gap-3 text-xs">
                           <div className="flex items-center gap-2.5 min-w-0 cursor-pointer" onClick={() => setInspectUserId(rUser.username)}>
                             <img 
-                              src={rUser.photoURL || avatarData.url} 
+                              src={getAvatarUrl(rUser.photoURL, rUser.avatarClass)} 
                               alt={rUser.displayName} 
                               className="w-8 h-8 rounded-full border border-gray-700 bg-black object-cover shrink-0"
                             />
@@ -1248,6 +1404,27 @@ export default function CabinetModal({
                     {lang === 'ru' ? 'Настройка глобального объявления на всем сайте для всех пользователей' : 'Set up a global announcement banner visible instantly to all site visitors'}
                   </p>
                 </div>
+
+                  {/* Jungle Fever Spoiler Admin Setting */}
+                  <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-4 mb-4">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#2a2f3b]/60">
+                      <span className="text-[10px] font-mono text-gray-400 font-bold uppercase tracking-wider">
+                        {lang === 'ru' ? 'СПОЙЛЕР "JUNGLE FEVER"' : 'JUNGLE FEVER SPOILER'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleSaveSpoiler}
+                        disabled={isSavingSpoiler}
+                        className={`px-3 py-1 text-[10px] font-mono font-bold uppercase border cursor-pointer transition-colors ${
+                          jungleFeverSpoiler 
+                            ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400' 
+                            : 'bg-red-500/10 border-red-500/40 text-red-400'
+                        }`}
+                      >
+                        {jungleFeverSpoiler ? (lang === 'ru' ? 'Включен' : 'Enabled') : (lang === 'ru' ? 'Отключен' : 'Disabled')}
+                      </button>
+                    </div>
+                  </div>
 
                 <form onSubmit={handleSaveSiteSettings} className="space-y-4 bg-[#0c0d10] border border-[#2a2f3b] p-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-[#2a2f3b]/60">

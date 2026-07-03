@@ -61,5 +61,6 @@ export interface CustomUser {
   badges?: string[];
   customTheme?: string;
   gender?: 'male' | 'female';
+  steamLink?: string;
 }
 

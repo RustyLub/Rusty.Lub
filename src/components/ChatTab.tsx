@@ -55,9 +55,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { CustomUser } from '../types';
 import UserProfileModal from './UserProfileModal';
-
-// @ts-ignore
-import developerCatAvatar from '../assets/images/developer_cat_avatar_1782899645243.jpg';
+import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 
 interface ChatTabProps {
   lang: 'ru' | 'en';
@@ -91,24 +89,6 @@ interface RegisteredUser {
 
 export const SURVIVOR_AVATARS = [
   {
-    id: 'developer',
-    name: { ru: 'Разработчик', en: 'Developer' },
-    role: { ru: 'Создатель Системы', en: 'System Architect' },
-    url: developerCatAvatar,
-    color: '#10b981',
-    borderClass: 'border-[#10b981]/40 bg-[#10b981]/10 text-emerald-100',
-    tagClass: 'bg-[#10b981]/20 border-[#10b981]/40 text-emerald-400'
-  },
-  {
-    id: 'hazmat',
-    name: { ru: 'Рад-Костюм Hazmat', en: 'Hazmat Radsuit' },
-    role: { ru: 'Мародер РТшек', en: 'Radtown Looter' },
-    url: 'https://images.unsplash.com/photo-1584467541268-b040f83be3fd?w=150&auto=format&fit=crop&q=80',
-    color: '#cd412b',
-    borderClass: 'border-[#cd412b]/40 bg-[#cd412b]/10 text-red-100',
-    tagClass: 'bg-[#cd412b]/20 border-[#cd412b]/40 text-[#cd412b]'
-  },
-  {
     id: 'heavy_plate',
     name: { ru: 'Тяжелый Бронекостюм', en: 'Heavy Juggernaut' },
     role: { ru: 'PVP Дефендер', en: 'Raid Juggernaut' },
@@ -117,33 +97,87 @@ export const SURVIVOR_AVATARS = [
     borderClass: 'border-[#4f5e71]/40 bg-[#4f5e71]/10 text-slate-100',
     tagClass: 'bg-[#4f5e71]/20 border-[#4f5e71]/40 text-[#a0aec0]'
   },
-  {
-    id: 'bandit',
-    name: { ru: 'Груб в Бандитке', en: 'DB Shotgun Grub' },
-    role: { ru: 'Скрытный засадовец', en: 'Stealth Ambusher' },
-    url: 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=150&auto=format&fit=crop&q=80',
-    color: '#10b981',
-    borderClass: 'border-[#10b981]/40 bg-[#10b981]/10 text-emerald-100',
-    tagClass: 'bg-[#10b981]/20 border-[#10b981]/40 text-emerald-400'
-  },
-  {
-    id: 'scientist',
-    name: { ru: 'Кобальт Исследователь', en: 'Cobalt Scientist' },
-    role: { ru: 'Охрана Монумента', en: 'Monument Guard' },
-    url: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=150&auto=format&fit=crop&q=80',
-    color: '#3b82f6',
-    borderClass: 'border-[#3b82f6]/40 bg-[#3b82f6]/10 text-blue-100',
-    tagClass: 'bg-[#3b82f6]/20 border-[#3b82f6]/40 text-[#60a5fa]'
-  },
-  {
-    id: 'solo',
-    name: { ru: 'Выживший с Камнем', en: 'Naked Solo' },
-    role: { ru: 'Легенда с пляжа', en: 'Beach Spawn Legend' },
-    url: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80',
-    color: '#f59e0b',
-    borderClass: 'border-[#f59e0b]/40 bg-[#f59e0b]/10 text-amber-100',
-    tagClass: 'bg-[#f59e0b]/20 border-[#f59e0b]/40 text-amber-400'
-  }
+  ...CUSTOM_AVATARS.map((avatar) => {
+    let color = '#cd412b';
+    let borderClass = 'border-[#cd412b]/40 bg-[#cd412b]/10 text-red-100';
+    let tagClass = 'bg-[#cd412b]/20 border-[#cd412b]/40 text-[#cd412b]';
+
+    if (avatar.id === 'builder') {
+      color = '#eab308';
+      borderClass = 'border-amber-500/40 bg-amber-500/10 text-amber-100';
+      tagClass = 'bg-amber-500/20 border-amber-500/40 text-amber-400';
+    } else if (avatar.id === 'solo_player') {
+      color = '#a855f7';
+      borderClass = 'border-purple-500/40 bg-purple-500/10 text-purple-100';
+      tagClass = 'bg-purple-500/20 border-purple-500/40 text-purple-400';
+    } else if (avatar.id === 'clan_player') {
+      color = '#3b82f6';
+      borderClass = 'border-blue-500/40 bg-blue-500/10 text-blue-100';
+      tagClass = 'bg-blue-500/20 border-blue-500/40 text-blue-400';
+    } else if (avatar.id === 'newbie') {
+      color = '#10b981';
+      borderClass = 'border-emerald-500/40 bg-emerald-500/10 text-emerald-100';
+      tagClass = 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400';
+    } else if (avatar.id === 'pve_player') {
+      color = '#14b8a6';
+      borderClass = 'border-teal-500/40 bg-teal-500/10 text-teal-100';
+      tagClass = 'bg-teal-500/20 border-teal-500/40 text-teal-400';
+    } else if (avatar.id === 'pvp_player') {
+      color = '#f97316';
+      borderClass = 'border-orange-500/40 bg-orange-500/10 text-orange-100';
+      tagClass = 'bg-orange-500/20 border-orange-500/40 text-orange-400';
+    } else if (avatar.id === 'whiteout') {
+      color = '#38bdf8';
+      borderClass = 'border-sky-500/40 bg-sky-500/10 text-sky-100';
+      tagClass = 'bg-sky-500/20 border-sky-500/40 text-sky-400';
+    } else if (avatar.id === 'clown') {
+      color = '#8b5cf6';
+      borderClass = 'border-violet-500/40 bg-violet-500/10 text-violet-100';
+      tagClass = 'bg-violet-500/20 border-violet-500/40 text-violet-400';
+    } else if (avatar.id === 'skull_text') {
+      color = '#71717a';
+      borderClass = 'border-zinc-500/40 bg-zinc-500/10 text-zinc-100';
+      tagClass = 'bg-zinc-500/20 border-zinc-500/40 text-zinc-400';
+    } else if (avatar.id === 'rocket_launcher') {
+      color = '#64748b';
+      borderClass = 'border-slate-500/40 bg-slate-500/10 text-slate-100';
+      tagClass = 'bg-slate-500/20 border-slate-500/40 text-slate-400';
+    } else if (avatar.id === 'santa_girl') {
+      color = '#ef4444';
+      borderClass = 'border-red-500/40 bg-red-500/10 text-red-100';
+      tagClass = 'bg-red-500/20 border-red-500/40 text-red-400';
+    } else if (avatar.id === 'putin_rust') {
+      color = '#eab308';
+      borderClass = 'border-yellow-500/40 bg-yellow-500/10 text-yellow-100';
+      tagClass = 'bg-yellow-500/20 border-yellow-500/40 text-yellow-400';
+    } else if (avatar.id === 'white_mask') {
+      color = '#6366f1';
+      borderClass = 'border-indigo-500/40 bg-indigo-500/10 text-indigo-100';
+      tagClass = 'bg-indigo-500/20 border-indigo-500/40 text-indigo-400';
+    } else if (avatar.id === 'cat_mask') {
+      color = '#ec4899';
+      borderClass = 'border-pink-500/40 bg-pink-500/10 text-pink-100';
+      tagClass = 'bg-pink-500/20 border-pink-500/40 text-pink-400';
+    } else if (avatar.id === 'rust_logo_avatar') {
+      color = '#dc2626';
+      borderClass = 'border-red-600/40 bg-red-600/10 text-red-100';
+      tagClass = 'bg-red-600/20 border-red-600/40 text-red-500';
+    } else if (avatar.id === 'wolf_sunset') {
+      color = '#f97316';
+      borderClass = 'border-amber-600/40 bg-amber-600/10 text-amber-100';
+      tagClass = 'bg-amber-600/20 border-amber-600/40 text-amber-500';
+    }
+
+    return {
+      id: avatar.id,
+      name: avatar.name,
+      role: avatar.role,
+      url: avatar.url,
+      color,
+      borderClass,
+      tagClass,
+    };
+  }),
 ];
 
 export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast }: ChatTabProps) {
@@ -159,7 +193,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [displayNameInput, setDisplayNameInput] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState('hazmat');
+  const [selectedAvatar, setSelectedAvatar] = useState('whiteout');
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [authLoading, setAuthLoading] = useState(false);
 
@@ -300,7 +334,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
           role: data.role || 'user',
           displayName: data.displayName || doc.id,
           photoURL: data.photoURL || '',
-          avatarClass: data.avatarClass || 'hazmat',
+          avatarClass: data.avatarClass || 'whiteout',
           clanTag: data.clanTag || '',
           voiceChannel: data.voiceChannel || null
         };
@@ -308,7 +342,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
           username: doc.id,
           displayName: data.displayName || doc.id,
           photoURL: data.photoURL || '',
-          avatarClass: data.avatarClass || 'hazmat',
+          avatarClass: data.avatarClass || 'whiteout',
           role: data.role || 'user',
           isBlocked: !!data.isBlocked,
           isVip: !!data.isVip,
@@ -565,7 +599,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
         uid: user.uid,
         displayName: user.displayName,
         photoURL: user.photoURL,
-        avatarClass: user.avatarClass || 'hazmat',
+        avatarClass: user.avatarClass || 'whiteout',
         channel: activeChannel,
         createdAt: serverTimestamp(),
         replyTo: replyTo ? {
@@ -901,7 +935,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                         <div key={vUser.username} className="flex items-center justify-between py-1 px-1.5 rounded bg-zinc-800/15 border border-zinc-800/5 gap-2">
                           <div className="flex items-center gap-2 truncate">
                             <img
-                              src={vUser.photoURL || vAvatar.url}
+                              src={getAvatarUrl(vUser.photoURL, vUser.avatarClass)}
                               alt={vUser.displayName}
                               className="w-5 h-5 rounded-full object-cover bg-zinc-950"
                             />
@@ -967,7 +1001,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
               <div className="flex items-center gap-2 truncate">
                 <div className="relative flex-shrink-0">
                   <img
-                    src={user.photoURL}
+                    src={getAvatarUrl(user.photoURL, user.avatarClass)}
                     alt="User profile"
                     className="w-8 h-8 rounded-full border border-zinc-700 object-cover bg-zinc-950"
                   />
@@ -1236,7 +1270,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                         onClick={() => setInspectUserId(msg.uid)}
                       >
                         <img 
-                          src={usersMap[msg.uid]?.photoURL || msg.photoURL || avatarConfig.url} 
+                          src={getAvatarUrl(usersMap[msg.uid]?.photoURL || msg.photoURL, usersMap[msg.uid]?.avatarClass || msg.avatarClass)} 
                           alt="Avatar" 
                           className="w-10 h-10 rounded-full border border-zinc-700 bg-zinc-900 object-cover"
                           referrerPolicy="no-referrer"
@@ -1500,7 +1534,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                           <div className="flex items-center gap-2 truncate">
                             <div className="relative">
                               <img 
-                                src={u.photoURL || userAvatar.url} 
+                                src={getAvatarUrl(u.photoURL, u.avatarClass)} 
                                 alt={u.displayName} 
                                 className="w-7 h-7 rounded-full object-cover bg-zinc-950 border border-zinc-800"
                               />

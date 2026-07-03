@@ -53,7 +53,7 @@ interface NewsTabProps {
 
 export default function NewsTab({ lang }: NewsTabProps) {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'updates' | 'blogs' | 'events'>('all');
-  const [activeNewsId, setActiveNewsId] = useState<string>('july-update-2022');
+  const [activeNewsId, setActiveNewsId] = useState<string>('jungle-fever-rust-solo-movies');
 
   const categories = [
     { id: 'all', label: { ru: 'Все публикации', en: 'All Posts' } },
@@ -63,6 +63,49 @@ export default function NewsTab({ lang }: NewsTabProps) {
   ];
 
   const newsItems = [
+    {
+      id: 'jungle-fever-rust-solo-movies',
+      category: 'blogs',
+      title: {
+        ru: 'Jungle Fever - Серия фильмов Solo Rust',
+        en: 'Jungle Fever - Solo Rust Movies'
+      },
+      date: '03.07.2026',
+      author: 'Community Member',
+      badge: { ru: 'Видео', en: 'Video' },
+      isFeatured: true,
+      coverImage: 'https://i.ytimg.com/vi/RxS0ISoktOY/maxresdefault.jpg',
+      summary: {
+        ru: 'Новая серия видео от моего друга: Jungle Fever - Solo Rust.',
+        en: 'New video series by my friend: Jungle Fever - Solo Rust.'
+      },
+      content: {
+        ru: [
+          {
+            sectionTitle: '🎥 JUNGLE FEVER - SOLO RUST - PART 1',
+            text: 'Посмотрите первую часть приключений в одиночном Rust.',
+            highlights: ['https://youtu.be/RxS0ISoktOY']
+          },
+          {
+            sectionTitle: '🎥 JUNGLE FEVER - RUST SOLO MOVIE P2',
+            text: 'Продолжение захватывающего путешествия.',
+            highlights: ['https://www.youtube.com/watch?v=2PNW1LO0bfQ']
+          }
+        ],
+        en: [
+          {
+            sectionTitle: '🎥 JUNGLE FEVER - SOLO RUST - PART 1',
+            text: 'Check out the first part of these solo Rust adventures.',
+            highlights: ['https://youtu.be/RxS0ISoktOY']
+          },
+          {
+            sectionTitle: '🎥 JUNGLE FEVER - RUST SOLO MOVIE P2',
+            text: 'Continuing the exciting journey.',
+            highlights: ['https://www.youtube.com/watch?v=2PNW1LO0bfQ']
+          }
+        ]
+      }
+    },
     {
       id: 'july-update-2022',
       category: 'updates',
@@ -337,14 +380,14 @@ export default function NewsTab({ lang }: NewsTabProps) {
             <span className="p-1 bg-gradient-to-r from-blue-500/10 to-red-500/10 text-purple-400 border border-purple-500/20">
               <Compass size={16} />
             </span>
-            <span className="text-[10px] font-mono uppercase tracking-widest text-gray-400 font-bold">
+            <span id="news-desk-header" className="text-[10px] font-mono uppercase tracking-widest text-gray-400 font-bold">
               {lang === 'ru' ? 'Служба новостей Facepunch' : 'Facepunch News Desk'}
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-white font-teko uppercase tracking-wider leading-none">
+          <h2 id="news-desk-title" className="text-2xl sm:text-3xl font-black text-white font-teko uppercase tracking-wider leading-none">
             {lang === 'ru' ? 'НОВОСТИ И ОБНОВЛЕНИЯ RUST' : 'RUST NEWS & UPDATES'}
           </h2>
-          <p className="text-xs text-gray-400 font-medium max-w-xl">
+          <p id="news-desk-body" className="text-xs text-gray-400 font-medium max-w-xl">
             {lang === 'ru' 
               ? 'Официальные патчноуты, изменения баланса, киберспортивные анонсы и девблоги напрямую с передовой разработки выживания.' 
               : 'Official patch logs, balancing, esports announcements, and devblogs straight from the frontlines of survival development.'}
@@ -446,7 +489,15 @@ export default function NewsTab({ lang }: NewsTabProps) {
                       {sec.highlights.map((h, hIdx) => (
                         <li key={hIdx} className="flex items-start gap-2.5 text-[11px] text-gray-300 font-sans font-medium">
                           <CheckCircle2 size={13} className="text-purple-400 shrink-0 mt-0.5" />
-                          <span>{h}</span>
+                          <span>
+                            {h.startsWith('http') ? (
+                              <a href={h} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">
+                                {h}
+                              </a>
+                            ) : (
+                              h
+                            )}
+                          </span>
                         </li>
                       ))}
                     </ul>
