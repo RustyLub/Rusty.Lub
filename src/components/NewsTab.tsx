@@ -64,6 +64,49 @@ export default function NewsTab({ lang }: NewsTabProps) {
 
   const newsItems = [
     {
+      id: 'updates-03072026',
+      category: 'updates',
+      title: {
+        ru: 'Обновления RustHub: 03.07.2026',
+        en: 'RustHub Updates: 03.07.2026'
+      },
+      date: '03.07.2026',
+      author: 'Admin Team',
+      badge: { ru: 'Обновление', en: 'Update' },
+      isFeatured: false,
+      coverImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/252490/header.jpg',
+      summary: {
+        ru: 'Улучшения интерфейса, оптимизация панели управления и исправления ошибок.',
+        en: 'Interface improvements, control panel optimization, and bug fixes.'
+      },
+      content: {
+        ru: [
+          {
+            sectionTitle: '🌐 УЛУЧШЕНИЯ ИНТЕРФЕЙСА',
+            text: 'Мы внесли ряд изменений в дизайн главной страницы, сделав навигацию более интуитивной и удобной.',
+            highlights: ['Обновлен стиль навигационной панели.', 'Исправлены отступы на мобильных устройствах.']
+          },
+          {
+            sectionTitle: '⚙️ ОПТИМИЗАЦИЯ ПАНЕЛИ УПРАВЛЕНИЯ',
+            text: 'Исправлена работа некоторых функций в админ-панели, улучшена отзывчивость кнопок и настроек.',
+            highlights: ['Ускорена загрузка конфигураций.', 'Исправлена ошибка сохранения спойлеров.']
+          }
+        ],
+        en: [
+          {
+            sectionTitle: '🌐 INTERFACE IMPROVEMENTS',
+            text: 'We have made several changes to the design of the main page, making navigation more intuitive and convenient.',
+            highlights: ['Updated navigation bar style.', 'Fixed spacing issues on mobile devices.']
+          },
+          {
+            sectionTitle: '⚙️ CONTROL PANEL OPTIPMIZATION',
+            text: 'Improved the functionality of some features in the admin panel, enhanced the responsiveness of buttons and settings.',
+            highlights: ['Faster configuration loading.', 'Fixed spoiler saving bug.']
+          }
+        ]
+      }
+    },
+    {
       id: 'jungle-fever-rust-solo-movies',
       category: 'blogs',
       title: {
