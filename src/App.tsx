@@ -140,8 +140,8 @@ const appTranslations = {
   joinClan: { ru: 'Присоединиться к клану', en: 'Join our Clan' },
   discordWidgetTitle: { ru: 'Наше Rust-Сообщество', en: 'Our Rust Community' },
   discordWidgetDesc: {
-    ru: 'Присоединяйтесь к нашему Discord-серверу для поиска тиммейтов, обсуждения последних обновлений игры, клановых наборов или получения индивидуальной технической помощи!',
-    en: 'Join our Discord server to find teammates, discuss the latest game updates, participate in clan recruitments, or get one-on-one technical assistance!'
+    ru: 'Присоединяйтесь к нашему Discord-серверу для поиска тиммейтов, обсуждения последних обновлений игры, клановых наборов или получения технической помощи! Узнавайте о новых фишках сайта (свои фоны визиток, прозрачный UI) первыми!',
+    en: 'Join our Discord server to find teammates, discuss the latest game updates, participate in clan recruitments, or get technical assistance! Be the first to know about new site features (custom profile backgrounds, transparent UI)!'
   },
   openDiscord: { ru: 'ОТКРЫТЬ DISCORD', en: 'OPEN DISCORD' },
   features: {
@@ -850,7 +850,7 @@ export default function App() {
                   onClick={() => setCabinetModalOpen(true)}
                   className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold bg-gray-100 hover:bg-gray-200 border border-gray-200 hover:border-gray-300 text-black hover:text-black transition-all cursor-pointer rounded-md font-mono uppercase shrink-0"
                 >
-                  <img 
+                  <img referrerPolicy="no-referrer" 
                     src={getAvatarUrl(currentUser.photoURL, currentUser.avatarClass)} 
                     alt={currentUser.displayName} 
                     className="w-4 h-4 rounded-full object-cover border border-gray-300 bg-gray-200 shrink-0"
@@ -891,7 +891,7 @@ export default function App() {
                   className="p-1.5 bg-[#1b1e26] border border-[#2a2f3b] rounded-sm shrink-0"
                   title={lang === 'ru' ? 'Кабинет' : 'Profile'}
                 >
-                  <img 
+                  <img referrerPolicy="no-referrer" 
                     src={getAvatarUrl(currentUser.photoURL, currentUser.avatarClass)} 
                     alt={currentUser.displayName} 
                     className="w-5 h-5 rounded-full object-cover border border-gray-700 bg-black"
@@ -947,7 +947,7 @@ export default function App() {
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white bg-[#cd412b]/10 border border-[#cd412b]/35 rounded-sm"
                 >
-                  <img 
+                  <img referrerPolicy="no-referrer" 
                     src={getAvatarUrl(currentUser.photoURL, currentUser.avatarClass)} 
                     alt={currentUser.displayName} 
                     className="w-6 h-6 rounded-full object-cover border border-gray-700 bg-black shrink-0"
@@ -1294,7 +1294,7 @@ export default function App() {
                   <div className="rust-bracket-tr" />
                   <div className="rust-bracket-bl" />
                   <div className="rust-bracket-br" />
-                  <img src="https://i.ytimg.com/vi/RxS0ISoktOY/maxresdefault.jpg" alt="Jungle Fever Part 1" className="w-full h-32 object-cover mb-4" />
+                  <img referrerPolicy="no-referrer" src="https://i.ytimg.com/vi/RxS0ISoktOY/maxresdefault.jpg" alt="Jungle Fever Part 1" className="w-full h-32 object-cover mb-4" />
                   <h4 className="text-lg font-black text-white font-sans uppercase mb-2">
                     {lang === 'ru' ? 'Jungle Fever - Серия фильмов Solo Rust' : 'Jungle Fever - Solo Rust Movie Series'}
                   </h4>

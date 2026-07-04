@@ -1344,7 +1344,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                         className="relative flex-shrink-0 mt-0.5 cursor-pointer hover:opacity-85 transition-opacity"
                         onClick={() => setInspectUserId(msg.uid)}
                       >
-                        <img 
+                        <img referrerPolicy="no-referrer" 
                           src={getAvatarUrl(usersMap[msg.uid]?.photoURL || msg.photoURL, usersMap[msg.uid]?.avatarClass || msg.avatarClass)} 
                           alt="Avatar" 
                           className={`w-10 h-10 rounded-full border bg-zinc-900 object-cover ${
@@ -1352,7 +1352,6 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                               ? 'border-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]'
                               : 'border-zinc-700'
                           }`}
-                          referrerPolicy="no-referrer"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             if (target.src !== avatarConfig.url) {
@@ -1612,7 +1611,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                 {/* Admin user display */}
                 <div className="flex items-center gap-2 px-1.5 py-1 hover:bg-zinc-700/20 rounded cursor-pointer group">
                   <div className="relative">
-                    <img 
+                    <img referrerPolicy="no-referrer" 
                       src="https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=150&auto=format&fit=crop&q=80" 
                       alt="serustqs" 
                       className="w-7 h-7 rounded-full object-cover bg-zinc-950 border border-red-500/30"
@@ -1650,7 +1649,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                         >
                           <div className="flex items-center gap-2 truncate">
                             <div className="relative">
-                              <img 
+                              <img referrerPolicy="no-referrer" 
                                 src={getAvatarUrl(u.photoURL, u.avatarClass)} 
                                 alt={u.displayName} 
                                 className="w-7 h-7 rounded-full object-cover bg-zinc-950 border border-zinc-800"

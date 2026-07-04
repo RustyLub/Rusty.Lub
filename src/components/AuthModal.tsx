@@ -320,7 +320,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                               : 'border-[#2a2f3b] bg-[#0c0d10] hover:border-gray-500'
                           }`}
                         >
-                          <img 
+                          <img referrerPolicy="no-referrer" 
                             src={avatar.url} 
                             alt={avatar.name[lang]} 
                             className="w-6 h-6 rounded-full object-cover bg-zinc-950"

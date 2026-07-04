@@ -554,7 +554,7 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
                 <div key={rUser.id} className="p-3 hover:bg-white/5 transition space-y-2">
                 <div className="flex items-center justify-between gap-3 text-[10px]">
                 <div className="flex items-center gap-3">
-                    <img src={getAvatarUrl(rUser.photoURL, rUser.avatarClass)} className="w-8 h-8 rounded-full border border-zinc-800" />
+                    <img referrerPolicy="no-referrer" src={getAvatarUrl(rUser.photoURL, rUser.avatarClass)} className="w-8 h-8 rounded-full border border-zinc-800" />
                     <div>
                         <div className="flex items-center gap-1.5">
                             <span className="font-bold text-gray-200">{rUser.displayName}</span>
@@ -782,7 +782,7 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
                                 </div>
                                 <div className="relative aspect-video rounded-sm overflow-hidden border border-zinc-800 bg-black/40 group">
                                     {newsForm.coverImage ? (
-                                        <img src={newsForm.coverImage} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                                        <img referrerPolicy="no-referrer" src={newsForm.coverImage} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center text-[10px] font-mono text-zinc-600">NO IMAGE PREVIEW</div>
                                     )}

@@ -321,15 +321,14 @@ export default function UserProfileModal({
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         className={`w-full max-w-2xl border-2 rounded-none overflow-hidden shadow-2xl relative flex flex-col p-0 rust-metal-pattern keep-dark ${vipBorder('border-[#2a2f3b]', 'border-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.25)]')} ${selectedTheme.class}`}
-        style={targetUser?.customBackground ? {
-          backgroundImage: `linear-gradient(to bottom, rgba(12, 13, 16, 0.5), rgba(20, 23, 30, 0.65)), url(${targetUser.customBackground})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        } : undefined}
       >
+        {targetUser?.customBackground && (
+          <img referrerPolicy="no-referrer" src={targetUser.customBackground} alt="Background" className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-60 mix-blend-screen" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0c0d10]/80 to-[#14171e]/65 pointer-events-none" style={{ zIndex: 0 }} />
+
         {/* Sleek Tactical Header Bar */}
-        <div className={`bg-[#0b0c0f] border-b px-4 py-2 flex items-center justify-between text-[9px] font-mono tracking-widest select-none ${vipBorder('border-[#2a2f3b] text-zinc-400', 'border-amber-500/60 text-amber-400')}`}>
+        <div className={`bg-[#0b0c0f]/60 backdrop-blur-sm border-b px-4 py-2 flex items-center justify-between text-[9px] font-mono tracking-widest select-none relative z-10 ${vipBorder('border-[#2a2f3b] text-zinc-400', 'border-amber-500/60 text-amber-400')}`}>
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isTargetVipSub ? 'bg-amber-400' : 'bg-red-500'}`}></span>
@@ -379,7 +378,7 @@ export default function UserProfileModal({
             </button>
           </div>
         ) : (
-          <div className="p-6 space-y-5 max-h-[85vh] overflow-y-auto">
+          <div className="p-6 space-y-5 relative z-10 max-h-[85vh] overflow-y-auto">
             {/* Split layout: Avatar & Gauges on Left, Bio & Identity on Right */}
             <div className={`grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch border-b pb-5 ${vipBorder('border-[#2a2f3b]/50', 'border-amber-500/40')}`}>
               
@@ -390,7 +389,7 @@ export default function UserProfileModal({
                   onClick={() => setIsFullscreenAvatar(true)}
                 >
                   <div className="relative overflow-hidden aspect-square bg-zinc-950">
-                    <img 
+                    <img referrerPolicy="no-referrer" 
                       src={getAvatarUrl(targetUser.photoURL, targetUser.avatarClass)} 
                       alt={targetUser.displayName} 
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -428,7 +427,7 @@ export default function UserProfileModal({
                 </button>
 
                 {/* Tactical Status Bars (Simulated Survival HUD) */}
-                <div className={`w-full bg-black/60 border p-3 space-y-2 select-none text-left ${vipBorder('border-[#2a2f3b]/70', 'border-amber-500/40')}`}>
+                <div className={`w-full bg-black/30 backdrop-blur-sm border p-3 space-y-2 select-none text-left ${vipBorder('border-[#2a2f3b]/70', 'border-amber-500/40')}`}>
                   <span className="text-[7.5px] font-mono text-zinc-500 uppercase tracking-widest block border-b border-zinc-900 pb-1">
                     {lang === 'ru' ? 'ПОКАЗАТЕЛИ ЖИЗНЕДЕЯТЕЛЬНОСТИ' : 'VITAL TELEMETRY STATUS'}
                   </span>
@@ -530,7 +529,7 @@ export default function UserProfileModal({
                   </div>
 
                   {/* Character Suit Spec Description */}
-                  <div className={`bg-[#0b0c0f]/80 border p-3 text-left ${vipBorder('border-[#2a2f3b]', 'border-amber-500/40')}`}>
+                  <div className={`bg-[#0b0c0f]/40 backdrop-blur-sm border p-3 text-left ${vipBorder('border-[#2a2f3b]', 'border-amber-500/40')}`}>
                     <span className="text-[7.5px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">
                       {lang === 'ru' ? 'СПЕЦИФИКАЦИЯ ЭКИПИРОВАННОГО КОСТЮМА' : 'EQUIPPED SKIN SPECIFICATION'}
                     </span>
@@ -547,7 +546,7 @@ export default function UserProfileModal({
                 </div>
 
                 {/* Personal Telex Log (Bio text area) */}
-                <div className={`bg-black/50 border p-3.5 text-left relative overflow-hidden ${vipBorder('border-[#2a2f3b]/50', 'border-amber-500/30')}`}>
+                <div className={`bg-black/20 backdrop-blur-sm border p-3.5 text-left relative overflow-hidden ${vipBorder('border-[#2a2f3b]/50', 'border-amber-500/30')}`}>
                   <div className="absolute top-0 right-0 p-1 text-[7px] font-mono text-zinc-600 uppercase">SYS_LOG_V2</div>
                   <span className={`text-[8px] font-mono block uppercase tracking-wider mb-1.5 border-b border-zinc-900 pb-1 ${vipBorder('text-[#cd412b]', 'text-amber-400')}`}>
                     {lang === 'ru' ? 'РАДИОФОННЫЙ ЖУРНАЛ' : 'DECRYPTED TRANSMISSION LOG'}

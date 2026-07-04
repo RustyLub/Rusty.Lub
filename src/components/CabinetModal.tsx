@@ -655,7 +655,7 @@ export default function CabinetModal({
           <div className="space-y-5">
             {/* User Profile Header Mini */}
             <div className="flex items-center gap-3 border-b border-[#2a2f3b]/60 pb-4 cursor-pointer hover:bg-white/5 p-1 transition-all" onClick={() => setInspectUserId(user.uid)}>
-              <img 
+              <img referrerPolicy="no-referrer" 
                 src={getAvatarUrl(fullProfile?.photoURL || user.photoURL, fullProfile?.avatarClass || user.avatarClass)} 
                 alt={user.displayName} 
                 className="w-10 h-10 rounded-full border border-gray-700 bg-zinc-950 object-cover"
@@ -936,7 +936,7 @@ export default function CabinetModal({
                                         : 'border-[#2a2f3b] bg-[#14171e]/50 hover:border-zinc-600'
                                     }`}
                                   >
-                                    <img 
+                                    <img referrerPolicy="no-referrer" 
                                       src={avatar.url} 
                                       alt={avatar.name[lang]} 
                                       className="w-9 h-9 border border-zinc-800 object-cover bg-black shrink-0"
@@ -984,72 +984,85 @@ export default function CabinetModal({
                         </div>
 
                         {/* Custom background image */}
-                        <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-3.5">
-                          <label className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5">
-                            {lang === 'ru' ? '5. СВОЙ ФОН ВИЗИТКИ (ФОТО)' : '5. CUSTOM CARD BACKGROUND (PHOTO)'}
+                        <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-3.5 relative overflow-hidden">
+                          <label className="text-[10px] font-mono flex justify-between items-center text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5">
+                            <span>{lang === 'ru' ? '5. СВОЙ ФОН ВИЗИТКИ (ФОТО)' : '5. CUSTOM CARD BACKGROUND (PHOTO)'}</span>
+                            {!fullProfile?.isVip && <Crown size={12} className="text-amber-500" />}
                           </label>
                           
-                          <div className="space-y-3">
-                            {/* File Upload Button */}
-                            <div className="flex flex-col gap-2">
-                              <label className="text-[8px] text-zinc-500 font-mono uppercase block">
-                                {lang === 'ru' ? 'Загрузить файл с устройства (До 700KB)' : 'Upload file from device (Max 700KB)'}
-                              </label>
-                              <div className="flex items-center gap-2">
-                                <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-dashed border-zinc-700 hover:border-zinc-500 bg-zinc-900/40 text-[10px] font-mono font-bold text-zinc-400 hover:text-zinc-200 uppercase tracking-wider cursor-pointer transition-all">
-                                  <Upload size={12} />
-                                  <span>{lang === 'ru' ? 'Выбрать фото' : 'Choose Photo'}</span>
-                                  <input 
-                                    type="file" 
-                                    accept="image/*"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) {
-                                        if (file.size > 700 * 1024) {
-                                          onToast(lang === 'ru' ? 'Размер файла превышает 700KB!' : 'File size exceeds 700KB!', 'warning');
-                                          return;
-                                        }
-                                        const reader = new FileReader();
-                                        reader.onloadend = () => {
-                                          setCustomBackground(reader.result as string);
-                                          onToast(lang === 'ru' ? 'Фото успешно загружено!' : 'Photo successfully loaded!', 'success');
-                                        };
-                                        reader.readAsDataURL(file);
-                                      }
-                                    }}
-                                    className="hidden"
-                                  />
+                          {fullProfile?.isVip ? (
+                            <div className="space-y-3">
+                              {/* File Upload Button */}
+                              <div className="flex flex-col gap-2">
+                                <label className="text-[8px] text-zinc-500 font-mono uppercase block">
+                                  {lang === 'ru' ? 'Загрузить файл с устройства (До 700KB)' : 'Upload file from device (Max 700KB)'}
                                 </label>
-                                
-                                {customBackground && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setCustomBackground('');
-                                      onToast(lang === 'ru' ? 'Фон сброшен!' : 'Background reset!', 'success');
-                                    }}
-                                    className="px-2.5 py-2 border border-red-500/30 hover:border-red-500 bg-red-900/10 text-red-400 text-[10px] font-mono font-bold uppercase tracking-wider cursor-pointer"
-                                  >
-                                    {lang === 'ru' ? 'Сбросить' : 'Reset'}
-                                  </button>
-                                )}
+                                <div className="flex items-center gap-2">
+                                  <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-dashed border-zinc-700 hover:border-zinc-500 bg-zinc-900/40 text-[10px] font-mono font-bold text-zinc-400 hover:text-zinc-200 uppercase tracking-wider cursor-pointer transition-all">
+                                    <Upload size={12} />
+                                    <span>{lang === 'ru' ? 'Выбрать фото' : 'Choose Photo'}</span>
+                                    <input 
+                                      type="file" 
+                                      accept="image/*"
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          if (file.size > 700 * 1024) {
+                                            onToast(lang === 'ru' ? 'Размер файла превышает 700KB!' : 'File size exceeds 700KB!', 'warning');
+                                            return;
+                                          }
+                                          const reader = new FileReader();
+                                          reader.onloadend = () => {
+                                            setCustomBackground(reader.result as string);
+                                            onToast(lang === 'ru' ? 'Фото успешно загружено!' : 'Photo successfully loaded!', 'success');
+                                          };
+                                          reader.readAsDataURL(file);
+                                        }
+                                      }}
+                                      className="hidden"
+                                    />
+                                  </label>
+                                  
+                                  {customBackground && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setCustomBackground('');
+                                        onToast(lang === 'ru' ? 'Фон сброшен!' : 'Background reset!', 'success');
+                                      }}
+                                      className="px-2.5 py-2 border border-red-500/30 hover:border-red-500 bg-red-900/10 text-red-400 text-[10px] font-mono font-bold uppercase tracking-wider cursor-pointer"
+                                    >
+                                      {lang === 'ru' ? 'Сбросить' : 'Reset'}
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+  
+                              {/* Or paste image URL */}
+                              <div className="space-y-1.5">
+                                <label className="text-[8px] text-zinc-500 font-mono uppercase block">
+                                  {lang === 'ru' ? 'Или вставьте прямую ссылку на фото (URL)' : 'Or paste direct image URL'}
+                                </label>
+                                <input 
+                                  type="text" 
+                                  value={customBackground}
+                                  onChange={(e) => setCustomBackground(e.target.value)}
+                                  className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-[10px] font-mono text-white outline-none focus:border-zinc-700"
+                                  placeholder="https://example.com/background.jpg"
+                                />
                               </div>
                             </div>
-
-                            {/* Or paste image URL */}
-                            <div className="space-y-1.5">
-                              <label className="text-[8px] text-zinc-500 font-mono uppercase block">
-                                {lang === 'ru' ? 'Или вставьте прямую ссылку на фото (URL)' : 'Or paste direct image URL'}
-                              </label>
-                              <input 
-                                type="text" 
-                                value={customBackground}
-                                onChange={(e) => setCustomBackground(e.target.value)}
-                                className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-[10px] font-mono text-white outline-none focus:border-zinc-700"
-                                placeholder="https://example.com/background.jpg"
-                              />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center py-6 text-center">
+                              <Crown size={24} className="text-amber-500/50 mb-2" />
+                              <span className="text-[10px] font-mono text-amber-500 font-bold uppercase">
+                                {lang === 'ru' ? 'Доступно по VIP подписке' : 'Available with VIP subscription'}
+                              </span>
+                              <span className="text-[9px] text-zinc-500 mt-1 max-w-[200px]">
+                                {lang === 'ru' ? 'Поддержите проект в разделе "Донат", чтобы загружать свои фоны.' : 'Support the project in the "Donation" section to upload custom backgrounds.'}
+                              </span>
                             </div>
-                          </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1074,15 +1087,13 @@ export default function CabinetModal({
                     
                     <div 
                       className={`border-2 border-[#2a2f3b] rounded-none overflow-hidden shadow-2xl relative flex flex-col p-0 rust-metal-pattern keep-dark ${selectedTheme.class}`}
-                      style={customBackground ? {
-                        backgroundImage: `linear-gradient(to bottom, rgba(12, 13, 16, 0.5), rgba(20, 23, 30, 0.65)), url(${customBackground})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat'
-                      } : undefined}
                     >
+                      {customBackground && (
+                        <img referrerPolicy="no-referrer" src={customBackground} alt="Background" className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-60 mix-blend-screen" />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-b from-[#0c0d10]/80 to-[#14171e]/65 pointer-events-none -z-10" />
                       {/* Sleek Tactical Header Bar */}
-                      <div className="bg-[#0b0c0f] border-b border-[#2a2f3b] px-3 py-1.5 flex items-center justify-between text-[8px] font-mono tracking-widest text-zinc-400 select-none">
+                      <div className="bg-[#0b0c0f]/60 backdrop-blur-sm border-b border-[#2a2f3b] px-3 py-1.5 flex items-center justify-between text-[8px] font-mono tracking-widest text-zinc-400 select-none relative z-10">
                         <div className="flex items-center gap-1.5">
                           <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
                           <span className="font-bold text-red-500">RUSTY.LUB // TELEMETRY PREVIEW</span>
@@ -1096,12 +1107,12 @@ export default function CabinetModal({
                       <div className="rust-bracket-bl" />
                       <div className="rust-bracket-br" />
 
-                      <div className="p-4 space-y-3.5">
+                      <div className="p-4 space-y-3.5 relative z-10">
                         {/* Avatar & Identifiers Split */}
                         <div className="flex gap-4 items-stretch pb-3.5 border-b border-[#2a2f3b]/50">
                           <div className="relative shrink-0">
                             <div className="border border-[#2a2f3b] p-1 bg-black w-24 h-24 relative overflow-hidden group">
-                              <img 
+                              <img referrerPolicy="no-referrer" 
                                 src={getAvatarUrl(customAvatarUrl, fullProfile?.avatarClass)} 
                                 alt="Live Preview" 
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -1132,7 +1143,7 @@ export default function CabinetModal({
                               </span>
                             </div>
 
-                            <div className="bg-[#0b0c0f]/80 border border-[#2a2f3b] p-1.5 text-left">
+                            <div className="bg-[#0b0c0f]/40 backdrop-blur-sm border border-[#2a2f3b] p-1.5 text-left">
                               <span className="text-[7px] font-mono text-zinc-500 uppercase block mb-0.5">
                                 {lang === 'ru' ? 'КОМПЛЕКТАЦИЯ КОСТЮМА' : 'EQUIPPED SKIN'}
                               </span>
@@ -1144,7 +1155,7 @@ export default function CabinetModal({
                         </div>
 
                         {/* Survival Telemetry HUD inside Preview */}
-                        <div className="bg-black/60 border border-[#2a2f3b]/50 p-2.5 space-y-1.5 text-left">
+                        <div className="bg-black/30 backdrop-blur-sm border border-[#2a2f3b]/50 p-2.5 space-y-1.5 text-left">
                           <div className="flex justify-between text-[7px] font-mono text-zinc-400">
                             <span>SURVIVAL HP STATUS</span>
                             <span className="text-emerald-400 font-bold">100 / 100</span>
@@ -1155,7 +1166,7 @@ export default function CabinetModal({
                         </div>
 
                         {/* Bio Status description */}
-                        <div className="bg-black/50 border border-[#2a2f3b]/30 p-2.5 text-left relative overflow-hidden">
+                        <div className="bg-black/20 backdrop-blur-sm border border-[#2a2f3b]/30 p-2.5 text-left relative overflow-hidden">
                           <span className="text-[7.5px] font-mono text-[#cd412b] block uppercase tracking-wider mb-1">
                             {lang === 'ru' ? 'РАДИОФОННЫЙ ЖУРНАЛ' : 'DECRYPTED LOG'}
                           </span>
@@ -1246,7 +1257,7 @@ export default function CabinetModal({
                           return (
                             <div key={reqId} className="py-2 flex items-center justify-between gap-3 text-xs">
                               <div className="flex items-center gap-2 min-w-0 cursor-pointer" onClick={() => setInspectUserId(reqId)}>
-                                <img 
+                                <img referrerPolicy="no-referrer" 
                                   src={reqUser ? getAvatarUrl(reqUser.photoURL, reqUser.avatarClass) : `https://api.dicebear.com/7.x/bottts/svg?seed=${reqId}`} 
                                   alt={reqId} 
                                   className="w-6 h-6 rounded-full object-cover bg-black"
@@ -1324,7 +1335,7 @@ export default function CabinetModal({
                           return (
                             <div key={fId} className="py-2 flex items-center justify-between gap-3 text-xs">
                               <div className="flex items-center gap-2.5 min-w-0 cursor-pointer" onClick={() => setInspectUserId(fId)}>
-                                <img 
+                                <img referrerPolicy="no-referrer" 
                                   src={fUser ? getAvatarUrl(fUser.photoURL, fUser.avatarClass) : `https://api.dicebear.com/7.x/bottts/svg?seed=${fId}`} 
                                   alt={fId} 
                                   className="w-7 h-7 rounded-full object-cover bg-black border border-zinc-800"
