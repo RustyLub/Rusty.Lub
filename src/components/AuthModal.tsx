@@ -1,7 +1,18 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, User, Lock, Crosshair, Sparkles, Mars, Venus } from 'lucide-react';
-import { doc, getDoc, setDoc, query, collection, where, getDocs, db, auth } from '../firebase';
+import { X, User, Lock, Crosshair, Sparkles, Mars, Venus, Github } from 'lucide-react';
+import { 
+  doc, 
+  getDoc, 
+  setDoc, 
+  query, 
+  collection, 
+  where, 
+  getDocs, 
+  deleteDoc,
+  db, 
+  auth
+} from '../firebase';
 import { CUSTOM_AVATARS } from '../customAvatars';
 import { CustomUser } from '../types';
 
@@ -51,103 +62,22 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
     setAuthLoading(true);
 
     try {
-      const userRef = doc(db, 'chat_users', cleanUsername);
-      const userSnap = await getDoc(userRef);
-
       if (authMode === 'register') {
-        // Register Mode
+        const userRef = doc(db, 'chat_users', cleanUsername);
+        const userSnap = await getDoc(userRef);
+
         if (userSnap.exists()) {
           onToast(lang === 'ru' ? 'Этот логин уже занят!' : 'Username is already taken!', 'error');
           setAuthLoading(false);
           return;
         }
 
-        if (cleanDisplayName.length < 3 || cleanDisplayName.length > 40) {
-          onToast(
-            lang === 'ru' ? 'Позывной должен быть от 3 до 40 символов!' : 'Callsign must be between 3 and 40 characters!', 
-            'warning'
-          );
-          setAuthLoading(false);
-          return;
-        }
-
-        // Check if the displayName (username/nickname) is already registered
-        const nameQuery = query(
-          collection(db, 'chat_users'),
-          where('displayName', '==', cleanDisplayName)
-        );
-        const nameQuerySnap = await getDocs(nameQuery);
-        if (!nameQuerySnap.empty) {
-          onToast(
-            lang === 'ru' ? 'Этот позывной (никнейм) уже занят!' : 'This callsign is already taken!',
-            'error'
-          );
-          setAuthLoading(false);
-          return;
-        }
-
-        // Case-insensitive double check for any matching display name or username
-        const allUsersSnap = await getDocs(collection(db, 'chat_users'));
-        let isNameTaken = false;
-        allUsersSnap.forEach((doc) => {
-          const data = doc.data();
-          if (data.displayName && data.displayName.toLowerCase() === cleanDisplayName.toLowerCase()) {
-            isNameTaken = true;
-          }
-          if (data.username && data.username.toLowerCase() === cleanUsername.toLowerCase()) {
-            isNameTaken = true;
-          }
-        });
-
-        if (isNameTaken) {
-          onToast(
-            lang === 'ru' ? 'Этот логин или позывной уже занят!' : 'This login or callsign is already taken!',
-            'error'
-          );
-          setAuthLoading(false);
-          return;
-        }
-
-        const matchedAvatar = CUSTOM_AVATARS.find(a => a.id === selectedAvatar) || CUSTOM_AVATARS[0];
-        
-        // Prevent mimicry of 'seo-rustylub' and related admin terms
-        const lowerUser = cleanUsername.toLowerCase();
-        const lowerDisplay = cleanDisplayName.toLowerCase();
-        const isMimic = 
-          lowerUser.includes('rusty') || 
-          lowerUser.includes('seo') || 
-          lowerDisplay.includes('rusty') || 
-          lowerDisplay.includes('seo');
-
-        if (isMimic && cleanUsername !== 'serustqs') {
-          onToast(
-            lang === 'ru' 
-              ? 'Логины и никнеймы, содержащие SEO или RUSTY, защищены от копирования!' 
-              : 'Usernames and nicknames containing SEO or RUSTY are protected from mimicry!',
-            'error'
-          );
-          setAuthLoading(false);
-          return;
-        }
-
-        // Strict ban on EAC tag/abbreviation in user nicknames
-        const isEacMimic = lowerDisplay.includes('eac') || lowerUser.includes('eac');
-        if (isEacMimic && cleanUsername !== 'serustqs') {
-          onToast(
-            lang === 'ru' 
-              ? 'Использование клан-тега или аббревиатуры EAC в никнейме строго запрещено!' 
-              : 'Using the EAC clan tag or abbreviation in your nickname is strictly prohibited!',
-            'error'
-          );
-          setAuthLoading(false);
-          return;
-        }
-
         const isSystemAdmin = cleanUsername === 'serustqs';
+        const matchedAvatar = CUSTOM_AVATARS.find(a => a.id === selectedAvatar) || CUSTOM_AVATARS[0];
 
         const newUserData = {
           username: cleanUsername,
-          password: cleanPassword,
+          password: cleanPassword, // Stored in plain text, old behavior
           displayName: isSystemAdmin ? 'SEO-RustyLub' : cleanDisplayName,
           avatarClass: isSystemAdmin ? 'heavy_plate' : selectedAvatar,
           photoURL: matchedAvatar.url,
@@ -160,59 +90,49 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
         await setDoc(userRef, newUserData);
         
         onUserLogin({
-          uid: cleanUsername,
+          uid: cleanUsername, // Store username as uid in session
           displayName: newUserData.displayName,
           photoURL: newUserData.photoURL,
-          avatarClass: newUserData.avatarClass
+          avatarClass: newUserData.avatarClass,
+          role: newUserData.role as 'admin' | 'user'
         });
 
-        onToast(
-          lang === 'ru' ? 'Регистрация прошла успешно! Вы в эфире.' : 'Registration successful! Connected to beacon.',
-          'success'
-        );
+        onToast(lang === 'ru' ? 'Регистрация прошла успешно!' : 'Registration successful!', 'success');
         onClose();
       } else {
-        // Login Mode
-        if (!userSnap.exists()) {
-          onToast(lang === 'ru' ? 'Пользователь не найден!' : 'Survivor callsign not registered!', 'error');
-          setAuthLoading(false);
-          return;
+        // LOGIN MODE
+        const userRef = doc(db, 'chat_users', cleanUsername);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          if (data.password === cleanPassword) {
+            if (data.isBlocked) {
+              onToast(lang === 'ru' ? 'Аккаунт заблокирован!' : 'Account is blocked!', 'error');
+              setAuthLoading(false);
+              return;
+            }
+
+            onUserLogin({
+              uid: cleanUsername,
+              displayName: data.displayName,
+              photoURL: data.photoURL,
+              avatarClass: data.avatarClass,
+              role: (data.role || 'user') as 'admin' | 'user'
+            });
+
+            onToast(lang === 'ru' ? 'С возвращением!' : 'Welcome back!', 'success');
+            onClose();
+          } else {
+             onToast(lang === 'ru' ? 'Неверные данные!' : 'Incorrect credentials!', 'error');
+          }
+        } else {
+           onToast(lang === 'ru' ? 'Неверные данные!' : 'Incorrect credentials!', 'error');
         }
-
-        const dbUser = userSnap.data();
-        if (dbUser.password !== cleanPassword) {
-          onToast(lang === 'ru' ? 'Неверный пароль!' : 'Incorrect credentials!', 'error');
-          setAuthLoading(false);
-          return;
-        }
-
-        if (dbUser.isBlocked) {
-          onToast(
-            lang === 'ru' 
-              ? 'Ваш аккаунт заблокирован администратором за нарушение правил!' 
-              : 'Your account has been banned by an administrator!', 
-            'error'
-          );
-          setAuthLoading(false);
-          return;
-        }
-
-        onUserLogin({
-          uid: cleanUsername,
-          displayName: dbUser.displayName,
-          photoURL: dbUser.photoURL,
-          avatarClass: dbUser.avatarClass
-        });
-
-        onToast(
-          lang === 'ru' ? 'С возвращением в сеть, боец!' : 'Welcome back to the grid, survivor!',
-          'success'
-        );
-        onClose();
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      onToast(lang === 'ru' ? 'Произошла критическая ошибка базы данных.' : 'Database error occurred.', 'error');
+      onToast(lang === 'ru' ? 'Ошибка авторизации' : 'Auth error', 'error');
     } finally {
       setAuthLoading(false);
     }

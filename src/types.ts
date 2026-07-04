@@ -1,3 +1,19 @@
+export interface NewsItem {
+  id: string;
+  category: 'updates' | 'blogs' | 'events';
+  title: { ru: string; en: string };
+  date: string;
+  author: string;
+  badge: { ru: string; en: string };
+  isFeatured: boolean;
+  coverImage: string;
+  summary: { ru: string; en: string };
+  content: {
+    ru: { sectionTitle: string; text: string; highlights: string[] }[];
+    en: { sectionTitle: string; text: string; highlights: string[] }[];
+  };
+}
+
 export interface ErrorItem {
   category: 'critical' | 'network' | 'eac' | 'graphics';
   title: string;
@@ -45,6 +61,7 @@ export interface ToastType {
 export interface CustomUser {
   uid: string;
   displayName: string;
+  email?: string;
   photoURL: string;
   avatarClass?: string;
   bio?: string;
@@ -62,5 +79,10 @@ export interface CustomUser {
   customTheme?: string;
   gender?: 'male' | 'female';
   steamLink?: string;
+  role?: 'admin' | 'user';
+  notifications?: {
+    news: boolean;
+    streams: boolean;
+  };
 }
 

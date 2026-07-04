@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { db, handleFirestoreError, OperationType } from '../firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { motion } from 'motion/react';
+import { NewsItem } from '../types';
 import { 
   Compass, 
   Calendar, 
@@ -53,7 +56,8 @@ interface NewsTabProps {
 
 export default function NewsTab({ lang }: NewsTabProps) {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'updates' | 'blogs' | 'events'>('all');
-  const [activeNewsId, setActiveNewsId] = useState<string>('jungle-fever-rust-solo-movies');
+  const [activeNewsId, setActiveNewsId] = useState<string>('');
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
 
   const categories = [
     { id: 'all', label: { ru: 'Все публикации', en: 'All Posts' } },
@@ -62,331 +66,20 @@ export default function NewsTab({ lang }: NewsTabProps) {
     { id: 'events', label: { ru: 'События', en: 'Events' } }
   ];
 
-  const newsItems = [
-    {
-      id: 'updates-03072026',
-      category: 'updates',
-      title: {
-        ru: 'Обновления RustHub: 03.07.2026',
-        en: 'RustHub Updates: 03.07.2026'
-      },
-      date: '03.07.2026',
-      author: 'Admin Team',
-      badge: { ru: 'Обновление', en: 'Update' },
-      isFeatured: false,
-      coverImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/252490/header.jpg',
-      summary: {
-        ru: 'Улучшения интерфейса, оптимизация панели управления и исправления ошибок.',
-        en: 'Interface improvements, control panel optimization, and bug fixes.'
-      },
-      content: {
-        ru: [
-          {
-            sectionTitle: '🌐 УЛУЧШЕНИЯ ИНТЕРФЕЙСА',
-            text: 'Мы внесли ряд изменений в дизайн главной страницы, сделав навигацию более интуитивной и удобной.',
-            highlights: ['Обновлен стиль навигационной панели.', 'Исправлены отступы на мобильных устройствах.']
-          },
-          {
-            sectionTitle: '⚙️ ОПТИМИЗАЦИЯ ПАНЕЛИ УПРАВЛЕНИЯ',
-            text: 'Исправлена работа некоторых функций в админ-панели, улучшена отзывчивость кнопок и настроек.',
-            highlights: ['Ускорена загрузка конфигураций.', 'Исправлена ошибка сохранения спойлеров.']
-          }
-        ],
-        en: [
-          {
-            sectionTitle: '🌐 INTERFACE IMPROVEMENTS',
-            text: 'We have made several changes to the design of the main page, making navigation more intuitive and convenient.',
-            highlights: ['Updated navigation bar style.', 'Fixed spacing issues on mobile devices.']
-          },
-          {
-            sectionTitle: '⚙️ CONTROL PANEL OPTIPMIZATION',
-            text: 'Improved the functionality of some features in the admin panel, enhanced the responsiveness of buttons and settings.',
-            highlights: ['Faster configuration loading.', 'Fixed spoiler saving bug.']
-          }
-        ]
-      }
-    },
-    {
-      id: 'jungle-fever-rust-solo-movies',
-      category: 'blogs',
-      title: {
-        ru: 'Jungle Fever - Серия фильмов Solo Rust',
-        en: 'Jungle Fever - Solo Rust Movies'
-      },
-      date: '03.07.2026',
-      author: 'Community Member',
-      badge: { ru: 'Видео', en: 'Video' },
-      isFeatured: true,
-      coverImage: 'https://i.ytimg.com/vi/RxS0ISoktOY/maxresdefault.jpg',
-      summary: {
-        ru: 'Новая серия видео от моего друга: Helicopter Time.',
-        en: 'New video series by my friend: Helicopter Time.'
-      },
-      content: {
-        ru: [
-          {
-            sectionTitle: '🎥 HELICOPTER TIME - PART 1',
-            text: 'Посмотрите первую часть приключений Helicopter Time.',
-            highlights: ['https://youtu.be/RxS0ISoktOY']
-          },
-          {
-            sectionTitle: '🎥 JUNGLE FEVER - RUST SOLO MOVIE P2',
-            text: 'Продолжение захватывающего путешествия.',
-            highlights: ['https://www.youtube.com/watch?v=2PNW1LO0bfQ']
-          }
-        ],
-        en: [
-          {
-            sectionTitle: '🎥 JUNGLE FEVER - SOLO RUST - PART 1',
-            text: 'Check out the first part of these solo Rust adventures.',
-            highlights: ['https://youtu.be/RxS0ISoktOY']
-          },
-          {
-            sectionTitle: '🎥 JUNGLE FEVER - RUST SOLO MOVIE P2',
-            text: 'Continuing the exciting journey.',
-            highlights: ['https://www.youtube.com/watch?v=2PNW1LO0bfQ']
-          }
-        ]
-      }
-    },
-    {
-      id: 'july-update-2022',
-      category: 'updates',
-      title: {
-        ru: 'Июльское обновление: Надземные поезда и оптимизация загрузки',
-        en: 'July Update: Above-Ground Trains & Fast Load Times'
-      },
-      date: '07.07.2022',
-      author: 'Facepunch Staff',
-      badge: { ru: 'Крупный патч', en: 'Major Patch' },
-      isFeatured: true,
-      coverImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/252490/header.jpg',
-      summary: {
-        ru: 'Главной темой июльского обновления Rust стали надземные поезда с новой механикой сцепки вагонов, масштабная оптимизация скорости загрузки игры, а также QoL-улучшения для зиплайнов, тонкая калибровка новой отдачи оружия и встроенные фильтры чата.',
-        en: 'The July update brings above-ground trains with a brand new railway coupling system, massive game load-time optimizations, zipline quality-of-life additions, weapon recoil follow-up adjustments, and optional chat filters.'
-      },
-      content: {
-        ru: [
-          {
-            sectionTitle: '🚂 НАДЗЕМНЫЕ ЖЕЛЕЗНЫЕ ДОРОГИ И СЦЕПКА ВАГОНОВ',
-            text: 'В этом месяце мы вывели поезда на надземные рельсы острова! Для первой итерации были адаптированы существующие ассеты, чтобы вы могли опробовать механику. Дизельный локомотив (Work Cart) теперь оснащен магнитными сцепными устройствами с обоих концов, что позволяет формировать полноценные составы, толкая или притягивая различные типы вагонов (пассажирские, грузовые, цистерны). Сцепка происходит автоматически при медленном столкновении локомотива с вагоном.',
-            highlights: [
-              'Вагоны сцепляются автоматически при медленном сближении составов.',
-              'Вы можете расцепить вагоны вручную, подойдя к стыку и нажав кнопку разблокировки на буфере.',
-              'Управление поездами надземной сети аналогично подземным локомотивам, но требует повышенной бдительности на переездах.'
-            ]
-          },
-          {
-            sectionTitle: '⚡ МОДЕРНИЗАЦИЯ СИСТЕМЫ ЗИПЛАЙНОВ (ZIPLINE QOL)',
-            text: 'Зиплайны теперь генерируются гораздо более органично на процедурных картах, подключаясь к опорным линиям электропередач. Игроки получили возможность соединять несколько зиплайнов в цепочку для непрерывного быстрого перемещения на огромные дистанции. Кроме того, добавлены новые элементы управления скоростью во время скольжения.',
-            highlights: [
-              'Удерживайте W, чтобы значительно ускориться во время скольжения.',
-              'Удерживайте S, чтобы замедлить скольжение или подготовиться к безопасному приземлению.',
-              'Исправлены резкие рывки камеры при переходе между соединенными линиями.'
-            ]
-          },
-          {
-            sectionTitle: '🎯 КАЛИБРОВКА ОТДАЧИ И БАЛАНС PVP',
-            text: 'Вслед за крупным июньским изменением перестрелок, мы внесли пакет доработок на основе отзывов сообщества. Скорректирована кривая отдачи для штурмовой винтовки SAR, пулемета M249, пистолетов-пулеметов Custom SMG и Thompson, а также уменьшена горизонтальная тряска при ведении затяжного огня.',
-            highlights: [
-              'Уменьшена базовая дисперсия пуль (bloom) для штурмовых винтовок.',
-              'Добавлены гибкие настройки прицела (толщина линий, цвет, масштаб перекрестия).',
-              'Улучшена читаемость прицельных сеток holo-sights на фоне ярких текстур окружения.'
-            ]
-          },
-          {
-            sectionTitle: '🚀 ЭКСТРЕМАЛЬНОЕ УСКОРЕНИЕ ЗАГРУЗКИ',
-            text: 'Проведена титаническая работа по оптимизации процесса подключения к серверам. За счет оптимизации файлового ввода-вывода, распараллеливания декомпрессии ассетов на все доступные потоки процессора и предварительного кэширования префабов, время загрузки "Asset Warmup" сократилось почти в два раза.',
-            highlights: [
-              'Время ожидания на этапе Asset Warmup сокращено в среднем на 40-50% на большинстве систем.',
-              'Оптимизирована память при подгрузке текстур в процессе игры, что убирает микро-фризы при быстром беге.',
-              'Исправлен баг, при котором игра могла аварийно завершиться при загрузке монументов.'
-            ]
-          }
-        ],
-        en: [
-          {
-            sectionTitle: '🚂 ABOVE-GROUND RAILWAYS & TRAIN COUPLING',
-            text: 'We wanted to get some trains onto the above-ground rails this month. For this initial release, we are reusing existing assets so players can get a feel for the mechanics. The above-ground Work Cart (locomotive) closely resembles the underground one, but now has magnetic coupling points at each end. This allows players to couple up a chain of carriages (passenger cars, coal/ore beds, fuel wagons) by simply driving into them slowly.',
-            highlights: [
-              'Carts couple automatically upon a slow collision between carriages.',
-              'Uncouple cars manually by interacting with the coupling lever on the physical bumper.',
-              'Added shunting and cab controls for high-speed railway logistics.'
-            ]
-          },
-          {
-            sectionTitle: '⚡ ZIPLINE QUALITY OF LIFE OVERHAUL',
-            text: 'Ziplines have received some major generation upgrades and now link directly onto electrical power poles. Players can now seamlessly ride multi-stage connected ziplines over great distances. Additional movement controls have been added to give players options during transit.',
-            highlights: [
-              'Hold W while riding to speed up slide velocity.',
-              'Hold S to decelerate or prepare for a strategic, safe dismount.',
-              'Smoothed camera rotation sweeps at connection junctions.'
-            ]
-          },
-          {
-            sectionTitle: '🎯 WEAPON RECOIL FOLLOW-UP ADJUSTMENTS',
-            text: 'Following June\'s combat overhaul, we have rolled out a balanced suite of adjustments. Handled specific weapon recoil curve feedback for the Semi-Automatic Rifle (SAR), Custom SMG, Thompson, and M249 to make sustained firing patterns feel more consistent and skill-rewarding.',
-            highlights: [
-              'SAR & Custom SMG: Reduced early horizontal sway during full spray bursts.',
-              'Crosshairs: Expanded support for custom thickness, gap, and color options.',
-              'Iron Sights: Adjusted center alignment coordinates on selected models.'
-            ]
-          },
-          {
-            sectionTitle: '🚀 SIGNIFICANT LOAD TIME REDUCTIONS',
-            text: 'We have made a massive push on optimizing server joining times. By parallelizing asset file decompression across multiple CPU threads, streaming static textures, and preloading high-frequency prefabs, the infamous "Asset Warmup" stage is now twice as fast.',
-            highlights: [
-              'Asset Warmup phase speeds boosted by 40-50% depending on SSD specifications.',
-              'Streamlined memory garbage collection to avoid micro-stutters during high-speed travel.',
-              'Fixed client freeze issues that would occasionally cause crashes while loading large monuments.'
-            ]
-          }
-        ]
-      }
-    },
-    {
-      id: 'rust-security-protocols',
-      category: 'blogs',
-      title: {
-        ru: 'Улучшения EAC и борьба с запрещенным ПО в 2026 году',
-        en: 'EAC Anti-Cheat Advancements & Security Roadmap 2026'
-      },
-      date: '28.06.2026',
-      author: 'Facepunch Security',
-      badge: { ru: 'Безопасность', en: 'Security' },
-      isFeatured: false,
-      coverImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/252490/header.jpg',
-      summary: {
-        ru: 'Обзор новых серверных алгоритмов проверки траектории пуль и автоматического выявления мышек с аппаратной эмуляцией отдачи.',
-        en: 'Overview of new server-authoritative bullet trajectory verification algorithms and automatic detection of recoil-emulating hardware mice.'
-      },
-      content: {
-        ru: [
-          {
-            sectionTitle: '🛡️ АНАЛИЗ ТРАЕКТОРИИ ПУЛЬ НА СЕРВЕРЕ (SERVER-AUTHORITATIVE)',
-            text: 'Мы внедрили глубокий анализ векторов стрельбы на стороне сервера. Раньше часть проверок доверялась клиенту, что создавало уязвимости для сложного ПО. Теперь каждый выстрел просчитывается и валидируется сервером в реальном времени с учетом пинга, преград и баллистики.',
-            highlights: [
-              'Полностью исключены мгновенные убийства сквозь стены (magic bullet).',
-              'Погрешность сетевой задержки теперь динамически компенсируется без ложных срабатываний.',
-              'Автоматическая блокировка аккаунтов при систематическом несовпадении хитбоксов.'
-            ]
-          },
-          {
-            sectionTitle: '🖱️ АППАРАТНАЯ ЭМУЛЯЦИЯ И СВЕРХМАКРОСЫ',
-            text: 'Особое внимание в этом обновлении уделено устройствам, эмулирующим ввод мыши на физическом уровне (платы сцепления, специальные скрипты). Наша новая эвристическая модель анализирует микро-задержки и паттерны перемещения курсора, безошибочно выявляя идеальные зажимы отдачи.',
-            highlights: [
-              'Обнаружение скрытых виртуальных портов ввода.',
-              'Анализ случайного разброса (jitter) для разделения человека от алгоритма.',
-              'Специальные маркеры "Shadow-Ban" для калибровки точности детекта на серверах.'
-            ]
-          }
-        ],
-        en: [
-          {
-            sectionTitle: '🛡️ SERVER-AUTHORITATIVE BULLET TRAJECTORY',
-            text: 'We have fully migrated bullet validation steps to be server-authoritative. Previously, partial verifications relied on client predictions, which opened doors to sophisticated cheating software. Every single shot is now recalculated and validated on the server side in real time, accounting for network ping, geometric covers, and ballistic drop.',
-            highlights: [
-              'Completely eliminated "magic bullet" scenarios where players are shot through solid terrain.',
-              'Network latency corrections are now dynamically applied, ensuring clean register without false flags.',
-              'Automated bans triggered upon consistent server-client alignment mismatch.'
-            ]
-          },
-          {
-            sectionTitle: '🖱️ HARDWARE MOUSE EMULATION & SCRIPT MITIGATION',
-            text: 'Our primary focus with this security patch is physical input hardware (like emulation boards or macro-injected controller devices). The updated heuristic model observes micro-delays between packets and tracks uniform cursor positioning, identifying superhuman recoil patterns.',
-            highlights: [
-              'Detection of masked virtual COM/HID interfaces.',
-              'Dynamic jitter and entropy analysis to differentiate human fingers from programmatic scripts.',
-              'Temporary shadow-ban pools for profiling anomalous combat behaviors without false bans.'
-            ]
-          }
-        ]
-      }
-    },
-    {
-      id: 'twitch-drops-gw4',
-      category: 'events',
-      title: {
-        ru: 'Твич Дропсы к турниру Global Warfare 4: Как получить скины',
-        en: 'Global Warfare 4 Twitch Drops: Exclusive Skins Campaign'
-      },
-      date: '25.06.2026',
-      author: 'Community Team',
-      badge: { ru: 'Дропсы', en: 'Drops' },
-      isFeatured: false,
-      coverImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/252490/header.jpg',
-      summary: {
-        ru: 'Официальные награды за просмотр стримов турнира. Уникальный спальный мешок, железная дверь с подсветкой и кастомный худи лидера клана.',
-        en: 'Official rewards for watching the tournament streams. Claim a glowing metal door, a tactical sleeping bag, and a unique leader hoodie.'
-      },
-      content: {
-        ru: [
-          {
-            sectionTitle: '🎁 ТВИЧ ДРОПСЫ К ТУРНИРУ GLOBAL WARFARE 4',
-            text: 'Очередной этап легендарного турнира Global Warfare возвращается на экраны! Вас ждут 9 уникальных скинов, которые можно получить абсолютно бесплатно, просто просматривая трансляции официальных стримеров. Подключите свой Facepunch аккаунт к Twitch и приготовьтесь забирать награды.',
-            highlights: [
-              'Общие дропсы доступны на любом стриме в категории Rust.',
-              'Эксклюзивные скины стримеров выдаются за просмотр определенных каналов в течение 2-3 часов.',
-              'Все награды автоматически зачисляются в ваш инвентарь Steam после клейма.'
-            ]
-          },
-          {
-            sectionTitle: '🎒 СПИСОК ДОСТУПНЫХ НАГРАД И СРОКИ ПРОВЕДЕНИЯ',
-            text: 'Кампания продлится с 25 июня по 2 июля. Не упустите шанс украсить свой инвентарь редкими предметами, которые больше никогда не будут доступны для покупки или обмена.',
-            highlights: [
-              'Светящаяся железная дверь (3 часа просмотра официального канала).',
-              'Тактический спальный мешок GW4 (2 часа просмотра общих трансляций).',
-              'Кастомная толстовка лидера клана с уникальной вышивкой на спине.'
-            ]
-          },
-          {
-            sectionTitle: '🎮 ПОШАГОВАЯ ИНСТРУКЦИЯ: КАК ПОЛУЧИТЬ ДРОПСЫ',
-            text: 'Чтобы ваши часы просмотра корректно засчитывались, а скины без проблем добавились в Steam, выполните следующие шаги:',
-            highlights: [
-              'Шаг 1: Авторизуйтесь под своим Steam-аккаунтом, на котором куплена игра Rust, на официальном портале Twitch Drops.',
-              'Шаг 2: Подключите ваш личный Twitch-аккаунт на этой же странице, чтобы связать профили.',
-              'Шаг 3: Нажмите кнопку «Activate Drops» для запуска отслеживания прогресса просмотра на Twitch.',
-              'Шаг 4: Смотрите трансляции стримеров по игре Rust с включенной отметкой «Drops Enabled» (прогресс можно проверять в меню профиля).',
-              'Шаг 5: По достижении 100% времени зайдите в Инвентарь Drops на Twitch и обязательно нажмите кнопку «Получить» (Claim).',
-              'Шаг 6: Зайдите в игру. Если предмет не пришел в течение 10 минут, зайдите на сайт связки и нажмите «Check for Missing Drops».'
-            ]
-          }
-        ],
-        en: [
-          {
-            sectionTitle: '🎁 TWITCH DROPS: GLOBAL WARFARE 4 EVENT',
-            text: 'The legendary Global Warfare tournament is back on our screens! This season features 9 brand new, custom-designed item skins that you can claim for free by simply watching participating streamers. Link your Facepunch account to your Twitch profile and start earning rewards.',
-            highlights: [
-              'General drops can be earned on any active stream in the Rust directory.',
-              'Streamer-specific rewards require 2-3 hours of watch time on their designated channels.',
-              'Drops are transferred straight to your Steam Inventory once claimed in the Twitch inventory.'
-            ]
-          },
-          {
-            sectionTitle: '🎒 REWARDS POOL & DATES',
-            text: 'The Twitch Drops campaign runs from June 25 to July 2. Grab these limited-edition skins while you can, as they will never be sold or tradable on the Steam Community Market.',
-            highlights: [
-              'Glowing Sheet Metal Door (3 hours watch time on official main stream).',
-              'GW4 Tactical Sleeping Bag (2 hours watch time on any participating channel).',
-              'Custom Clan Leader Hoodie with high-contrast shoulder emblems.'
-            ]
-          },
-          {
-            sectionTitle: '🎮 STEP-BY-STEP CLAIM GUIDE',
-            text: 'To ensure your watch time is tracked accurately and rewards are successfully delivered to your Steam library, follow these instructions:',
-            highlights: [
-              'Step 1: Sign in with your Steam account (where you own Rust) on the official Rust Twitch Drops web portal.',
-              'Step 2: Link your personal Twitch account on the same interface to pair the profiles.',
-              'Step 3: Click the "Activate Drops" button to authorize progress tracking on Twitch.',
-              'Step 4: Watch participating Rust channels with the active "Drops Enabled" tag.',
-              'Step 5: Once 100% progress is reached, navigate to your Twitch Drops Inventory and click "Claim" on earned items.',
-              'Step 6: Launch Rust. If items fail to appear within 10 minutes, click the "Check for Missing Drops" button on the link page.'
-            ]
-          }
-        ]
-      }
-    }
-  ];
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'news'), (snapshot) => {
+        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NewsItem));
+        // Sort by date descending
+        items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setNewsItems(items);
+        if (items.length > 0 && !activeNewsId) {
+            setActiveNewsId(items[0].id);
+        }
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'news');
+    });
+    return () => unsubscribe();
+  }, [activeNewsId]);
 
   const filteredNews = selectedCategory === 'all' 
     ? newsItems 
@@ -482,7 +175,7 @@ export default function NewsTab({ lang }: NewsTabProps) {
                   </span>
                   <span className="flex items-center gap-1.5 text-[10px] font-mono text-gray-500 font-bold">
                     <Calendar size={12} />
-                    {activeItem.date}
+                    {new Date(activeItem.date).toLocaleDateString()}
                   </span>
                 </div>
                 <span className="flex items-center gap-1 text-[10px] font-mono text-gray-500 font-bold uppercase">
@@ -592,7 +285,7 @@ export default function NewsTab({ lang }: NewsTabProps) {
                       {item.badge[lang]}
                     </span>
                     <span className="text-[9px] font-mono text-gray-500 font-medium">
-                      {item.date}
+                      {new Date(item.date).toLocaleDateString()}
                     </span>
                   </div>
 

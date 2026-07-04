@@ -40,7 +40,9 @@ import {
   updateDoc,
   arrayUnion,
   arrayRemove,
-  getDoc
+  getDoc,
+  handleFirestoreError,
+  OperationType
 } from '../firebase';
 import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 import { CustomUser } from '../types';
@@ -94,6 +96,7 @@ export default function CabinetModal({
   const [customAvatarUrl, setCustomAvatarUrl] = useState('');
   const [steamLink, setSteamLink] = useState('');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [jungleFeverSpoiler, setJungleFeverSpoiler] = useState(false);
 
   // Friend search and add direct states
   const [friendSearchId, setFriendSearchId] = useState('');
@@ -103,27 +106,10 @@ export default function CabinetModal({
 
   // Registered users for admin view and quick friends listing
   const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([]);
-  const [userSearch, setUserSearch] = useState('');
-  
-  // Admin site settings states
-  const [announcementText, setAnnouncementText] = useState('');
-  const [announcementActive, setAnnouncementActive] = useState(false);
-  const [announcementType, setAnnouncementType] = useState<'info' | 'hazard' | 'important'>('hazard');
-  const [savingSiteSettings, setSavingSiteSettings] = useState(false);
-
-  // Twitch local states
-  const [twitchChannel, setTwitchChannel] = useState('');
-  const [twitchManualLive, setTwitchManualLive] = useState(false);
-  const [twitchStreamTitle, setTwitchStreamTitle] = useState('');
-  const [twitchClientId, setTwitchClientId] = useState('');
-  const [twitchClientSecret, setTwitchClientSecret] = useState('');
-  const [isSavingTwitch, setIsSavingTwitch] = useState(false);
-  const [jungleFeverSpoiler, setJungleFeverSpoiler] = useState(false);
-  const [isSavingSpoiler, setIsSavingSpoiler] = useState(false);
 
   const [fullProfile, setFullProfile] = useState<CustomUser | null>(null);
 
-  const isAdmin = user && (user.uid === 'serustqs' || (fullProfile && fullProfile.badges?.includes('founder')));
+  const isAdmin = user && (user.uid === 'serustqs' || user.email === 'misterzet556@gmail.com' || (fullProfile && fullProfile.badges?.includes('founder')));
 
   // Subscribe to logged-in user's own profile doc live
   useEffect(() => {
@@ -169,7 +155,7 @@ export default function CabinetModal({
     return () => unsubscribe();
   }, [isOpen, user]);
 
-  // Subscribe to all registered users for admin view and quick add
+  // Subscribe to all registered users for quick friends listing
   useEffect(() => {
     if (!isOpen) return;
 
@@ -195,40 +181,6 @@ export default function CabinetModal({
     return () => unsubscribe();
   }, [isOpen]);
 
-  // Subscribe to site settings for admin edit
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const unsubscribe = onSnapshot(doc(db, 'site_settings', 'announcement'), (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data() as SiteAnnouncement;
-        setAnnouncementText(data.text || '');
-        setAnnouncementActive(!!data.active);
-        setAnnouncementType(data.type || 'hazard');
-      }
-    });
-
-    return () => unsubscribe();
-  }, [isOpen]);
-
-  // Subscribe to twitch site settings for admin edit
-  useEffect(() => {
-    if (!isOpen || !isAdmin) return;
-
-    const unsubscribe = onSnapshot(doc(db, 'site_settings', 'twitch'), (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setTwitchChannel(data.channelName || '');
-        setTwitchManualLive(!!data.isManualLive);
-        setTwitchStreamTitle(data.streamTitle || '');
-        setTwitchClientId(data.clientId || '');
-        setTwitchClientSecret(data.clientSecret || '');
-      }
-    });
-
-    return () => unsubscribe();
-  }, [isOpen, isAdmin]);
-
   // Subscribe to jungle fever spoiler setting
   useEffect(() => {
     if (!isOpen) return;
@@ -251,7 +203,7 @@ export default function CabinetModal({
 
     // Strict ban on EAC or [EAC] clan tag for regular users
     const isEacTag = clanTag.toLowerCase().includes('eac');
-    if (isEacTag && user.uid !== 'serustqs') {
+    if (isEacTag && user.uid !== 'serustqs' && user.email !== 'misterzet556@gmail.com') {
       onToast(
         lang === 'ru' 
           ? 'Использование клан-тега EAC разрешено только владельцу сайта!' 
@@ -445,7 +397,7 @@ export default function CabinetModal({
         'success'
       );
     } catch (err) {
-      console.error(err);
+      handleFirestoreError(err, OperationType.UPDATE, `chat_users/${targetUsername}`);
       onToast(lang === 'ru' ? 'Не удалось изменить статус блокировки.' : 'Failed to change block status.', 'error');
     }
   };
@@ -525,79 +477,6 @@ export default function CabinetModal({
       onToast(lang === 'ru' ? 'Ошибка удаления.' : 'Delete failed.', 'error');
     }
   };
-
-  // Save announcement / site settings
-  const handleSaveSiteSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSavingSiteSettings(true);
-    try {
-      await setDoc(doc(db, 'site_settings', 'announcement'), {
-        text: announcementText,
-        active: announcementActive,
-        type: announcementType,
-        author: user.displayName,
-        updatedAt: serverTimestamp()
-      });
-      onToast(
-        lang === 'ru' ? 'Настройки сайта и объявление успешно сохранены!' : 'Site settings and broadcast successfully saved!',
-        'success'
-      );
-    } catch (err) {
-      console.error(err);
-      onToast(lang === 'ru' ? 'Ошибка сохранения настроек сайта.' : 'Failed to save site settings.', 'error');
-    } finally {
-      setSavingSiteSettings(false);
-    }
-  };
-
-  // Save Jungle Fever spoiler setting
-  const handleSaveSpoiler = async () => {
-    setIsSavingSpoiler(true);
-    try {
-      await setDoc(doc(db, 'site_settings', 'jungle_fever_spoiler'), {
-        jungleFeverSpoiler: !jungleFeverSpoiler
-      }, { merge: true });
-      onToast(
-        lang === 'ru' ? 'Настройки спойлера обновлены!' : 'Spoiler settings updated!',
-        'success'
-      );
-    } catch (err) {
-      console.error(err);
-      onToast(lang === 'ru' ? 'Ошибка сохранения спойлера.' : 'Failed to save spoiler settings.', 'error');
-    } finally {
-      setIsSavingSpoiler(false);
-    }
-  };
-
-  // Save Twitch stream configuration settings
-  const handleSaveTwitchSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSavingTwitch(true);
-    try {
-      await setDoc(doc(db, 'site_settings', 'twitch'), {
-        channelName: twitchChannel.trim(),
-        isManualLive: twitchManualLive,
-        streamTitle: twitchStreamTitle,
-        clientId: twitchClientId.trim(),
-        clientSecret: twitchClientSecret.trim(),
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-      onToast(
-        lang === 'ru' ? 'Настройки Twitch успешно обновлены!' : 'Twitch configurations successfully updated!',
-        'success'
-      );
-    } catch (err) {
-      console.error(err);
-      onToast(lang === 'ru' ? 'Ошибка сохранения настроек Twitch.' : 'Failed to save Twitch settings.', 'error');
-    } finally {
-      setIsSavingTwitch(false);
-    }
-  };
-
-  const filteredUsers = registeredUsers.filter(u => 
-    u.username.toLowerCase().includes(userSearch.toLowerCase()) ||
-    u.displayName.toLowerCase().includes(userSearch.toLowerCase())
-  );
 
   const selectedTheme = PROFILE_THEMES.find(t => t.id === customTheme) || PROFILE_THEMES[0];
 
@@ -1251,138 +1130,8 @@ export default function CabinetModal({
                 exit={{ opacity: 0, x: -10 }}
                 className="space-y-4"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <h3 className="text-xl font-bold text-white tracking-wider font-teko uppercase">
-                      {lang === 'ru' ? 'УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ' : 'USER DATABASE COMMANDS'}
-                    </h3>
-                    <p className="text-xs text-gray-500 font-mono">
-                      {lang === 'ru' ? 'Мониторинг, выдача VIP статусов и блокировка нарушителей' : 'Audit access credentials, grant VIP nodes, or issue radiation bans'}
-                    </p>
-                  </div>
-
-                  {/* Users Counter */}
-                  <div className="text-[9px] font-mono text-gray-400">
-                    {lang === 'ru' ? 'Зарегистрировано' : 'Registered'}: <span className="text-[#cd412b] font-black">{registeredUsers.length}</span>
-                  </div>
-                </div>
-
-                {/* Search users */}
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500" size={13} />
-                  <input
-                    type="text"
-                    value={userSearch}
-                    onChange={(e) => setUserSearch(e.target.value)}
-                    placeholder={lang === 'ru' ? 'Поиск по никнейму или логину...' : 'Search by nickname or login...'}
-                    className="w-full bg-[#0c0d10] border border-[#2a2f3b] text-xs font-mono py-2 pl-8 pr-4 text-white outline-none focus:border-gray-500 transition-all placeholder-gray-600"
-                  />
-                </div>
-
-                {/* Users List Box */}
-                <div className="border border-[#2a2f3b] bg-[#0c0d10] divide-y divide-[#2a2f3b]/60 overflow-y-auto max-h-[300px] pr-1">
-                  {filteredUsers.length === 0 ? (
-                    <div className="p-8 text-center text-xs text-gray-600 font-mono uppercase">
-                      {lang === 'ru' ? 'Никто не найден' : 'No survivors found'}
-                    </div>
-                  ) : (
-                    filteredUsers.map((rUser) => {
-                      const isTargetSelf = rUser.username === user.uid;
-                      const avatarData = CUSTOM_AVATARS.find(a => a.id === rUser.avatarClass) || CUSTOM_AVATARS[0];
-                      return (
-                        <div key={rUser.username} className="p-3 flex items-center justify-between gap-3 text-xs">
-                          <div className="flex items-center gap-2.5 min-w-0 cursor-pointer" onClick={() => setInspectUserId(rUser.username)}>
-                            <img 
-                              src={getAvatarUrl(rUser.photoURL, rUser.avatarClass)} 
-                              alt={rUser.displayName} 
-                              className="w-8 h-8 rounded-full border border-gray-700 bg-black object-cover shrink-0"
-                            />
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-black text-white uppercase block truncate max-w-[120px] font-sans">
-                                  {rUser.displayName}
-                                </span>
-                                {rUser.isVip && (
-                                  <span title="VIP Status">
-                                    <Crown size={10} className="text-amber-500 fill-amber-500/20" />
-                                  </span>
-                                )}
-                                {rUser.role === 'admin' && (
-                                  <span className="text-[7px] font-bold text-red-400 bg-red-500/10 px-1 border border-red-500/20 font-mono">ADM</span>
-                                )}
-                              </div>
-                              <span className="text-[8px] text-gray-500 font-mono block mt-0.5 truncate leading-none">
-                                {rUser.username}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Quick Admin Actions Row */}
-                          <div className="flex items-center gap-1 shrink-0">
-                            {/* Inspect user profile card */}
-                            <button
-                              onClick={() => setInspectUserId(rUser.username)}
-                              className="p-1.5 border border-zinc-800 hover:border-zinc-500 bg-zinc-900 text-zinc-400 hover:text-white transition-all cursor-pointer rounded-sm text-[9px] font-mono uppercase"
-                              title={lang === 'ru' ? 'Посмотреть профиль' : 'View Profile'}
-                            >
-                              Card
-                            </button>
-
-                            {/* VIP Toggle */}
-                            <button
-                              onClick={() => handleToggleVip(rUser.username, !!rUser.isVip)}
-                              className={`p-1.5 border transition-all cursor-pointer rounded-sm ${
-                                rUser.isVip
-                                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-500 hover:bg-amber-500 hover:text-black'
-                                  : 'border-[#2a2f3b] bg-[#14171e] text-gray-500 hover:text-white hover:border-gray-500'
-                              }`}
-                              title={rUser.isVip ? (lang === 'ru' ? 'Забрать VIP' : 'Remove VIP') : (lang === 'ru' ? 'Выдать VIP' : 'Grant VIP')}
-                            >
-                              <Crown size={11} />
-                            </button>
-
-                            {/* Block Toggle */}
-                            <button
-                              onClick={() => handleToggleBlock(rUser.username, !!rUser.isBlocked)}
-                              disabled={isTargetSelf}
-                              className={`p-1.5 border transition-all cursor-pointer rounded-sm disabled:opacity-30 ${
-                                rUser.isBlocked
-                                  ? 'bg-red-500/15 border-red-500/40 text-red-500 hover:bg-red-500 hover:text-white'
-                                  : 'border-[#2a2f3b] bg-[#14171e] text-gray-500 hover:text-red-400 hover:border-red-500/40'
-                              }`}
-                              title={rUser.isBlocked ? (lang === 'ru' ? 'Разблокировать' : 'Unblock') : (lang === 'ru' ? 'Заблокировать' : 'Block User')}
-                            >
-                              <Ban size={11} />
-                            </button>
-
-                            {/* Role Toggle */}
-                            <button
-                              onClick={() => handleToggleRole(rUser.username, rUser.role)}
-                              disabled={isTargetSelf}
-                              className={`p-1.5 border transition-all cursor-pointer text-[9px] font-mono font-bold uppercase rounded-sm disabled:opacity-30 ${
-                                rUser.role === 'admin'
-                                  ? 'bg-red-500/20 border-red-500/40 text-red-400 hover:bg-zinc-700 hover:text-white'
-                                  : 'border-[#2a2f3b] bg-[#14171e] text-gray-500 hover:text-white hover:border-gray-500'
-                              }`}
-                              title={rUser.role === 'admin' ? (lang === 'ru' ? 'Сделать пользователем' : 'Demote to user') : (lang === 'ru' ? 'Сделать админом' : 'Promote to Admin')}
-                            >
-                              <span>{rUser.role === 'admin' ? 'A' : 'U'}</span>
-                            </button>
-
-                            {/* Delete User */}
-                            <button
-                              onClick={() => handleDeleteUser(rUser.username)}
-                              disabled={isTargetSelf}
-                              className="p-1.5 border border-[#2a2f3b] bg-[#14171e] text-gray-500 hover:text-red-400 hover:border-red-500/40 transition-all cursor-pointer rounded-sm disabled:opacity-30"
-                              title={lang === 'ru' ? 'Удалить аккаунт навсегда' : 'Delete Account Permanently'}
-                            >
-                              <Trash2 size={11} />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
+                <div className="p-8 text-center text-gray-500 font-mono">
+                    {lang === 'ru' ? 'Управление пользователями перемещено в Админ Панель' : 'User management moved to Admin Panel'}
                 </div>
               </motion.div>
             )}
@@ -1396,226 +1145,9 @@ export default function CabinetModal({
                 exit={{ opacity: 0, x: -10 }}
                 className="space-y-6"
               >
-                <div>
-                  <h3 className="text-xl font-bold text-white tracking-wider font-teko uppercase">
-                    {lang === 'ru' ? 'УПРАВЛЕНИЕ САЙТОМ' : 'WEBSITE SYSTEM PANEL'}
-                  </h3>
-                  <p className="text-xs text-gray-500 font-mono">
-                    {lang === 'ru' ? 'Настройка глобального объявления на всем сайте для всех пользователей' : 'Set up a global announcement banner visible instantly to all site visitors'}
-                  </p>
+                <div className="p-8 text-center text-gray-500 font-mono">
+                    {lang === 'ru' ? 'Управление сайтом перемещено в Админ Панель' : 'Site management moved to Admin Panel'}
                 </div>
-
-                  {/* Jungle Fever Spoiler Admin Setting */}
-                  <div className="bg-[#0c0d10] border border-[#2a2f3b] p-4 space-y-4 mb-4">
-                    <div className="flex items-center justify-between pb-2 border-b border-[#2a2f3b]/60">
-                      <span className="text-[10px] font-mono text-gray-400 font-bold uppercase tracking-wider">
-                        {lang === 'ru' ? 'СПОЙЛЕР "JUNGLE FEVER"' : 'JUNGLE FEVER SPOILER'}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={handleSaveSpoiler}
-                        disabled={isSavingSpoiler}
-                        className={`px-3 py-1 text-[10px] font-mono font-bold uppercase border cursor-pointer transition-colors ${
-                          jungleFeverSpoiler 
-                            ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400' 
-                            : 'bg-red-500/10 border-red-500/40 text-red-400'
-                        }`}
-                      >
-                        {jungleFeverSpoiler ? (lang === 'ru' ? 'Включен' : 'Enabled') : (lang === 'ru' ? 'Отключен' : 'Disabled')}
-                      </button>
-                    </div>
-                  </div>
-
-                <form onSubmit={handleSaveSiteSettings} className="space-y-4 bg-[#0c0d10] border border-[#2a2f3b] p-4">
-                  <div className="flex items-center gap-2 pb-2 border-b border-[#2a2f3b]/60">
-                    <Megaphone size={16} className="text-[#cd412b] animate-bounce" />
-                    <span className="text-[10px] font-mono text-gray-400 font-bold uppercase tracking-wider">
-                      {lang === 'ru' ? 'ОБЪЯВЛЕНИЕ / СТРОКА ОПОВЕЩЕНИЯ' : 'COMMUNITY BROADCAST MESSAGE'}
-                    </span>
-                  </div>
-
-                  {/* Toggle Announcement status */}
-                  <div className="flex items-center justify-between py-1">
-                    <span className="text-xs font-bold text-gray-300 font-sans">
-                      {lang === 'ru' ? 'Показывать объявление на сайте' : 'Display banner on website'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setAnnouncementActive(!announcementActive)}
-                      className={`px-3 py-1 text-[10px] font-mono font-bold uppercase border cursor-pointer transition-colors ${
-                        announcementActive 
-                          ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400' 
-                          : 'bg-red-500/10 border-red-500/40 text-red-400'
-                      }`}
-                    >
-                      {announcementActive ? (lang === 'ru' ? 'Активно' : 'Active') : (lang === 'ru' ? 'Отключено' : 'Disabled')}
-                    </button>
-                  </div>
-
-                  {/* Announcement type selector */}
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block font-mono">
-                      {lang === 'ru' ? 'СТИЛЬ ОПОВЕЩЕНИЯ' : 'BROADCAST VISUAL STYLE'}
-                    </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {[
-                        { id: 'hazard', label: { ru: 'Опасность', en: 'Hazard Stripes' }, border: 'border-yellow-500/30 text-yellow-400' },
-                        { id: 'important', label: { ru: 'Важное (Красный)', en: 'Important (Red)' }, border: 'border-red-500/30 text-red-400' },
-                        { id: 'info', label: { ru: 'Инфо (Синий)', en: 'Info (Blue)' }, border: 'border-blue-500/30 text-blue-400' }
-                      ].map((type) => {
-                        const isSel = announcementType === type.id;
-                        return (
-                          <button
-                            key={type.id}
-                            type="button"
-                            onClick={() => setAnnouncementType(type.id as any)}
-                            className={`p-2 border text-[10px] font-mono font-bold uppercase tracking-wider text-center cursor-pointer transition-all ${
-                              isSel 
-                                ? 'bg-[#cd412b]/15 border-[#cd412b]' 
-                                : `bg-[#14171e]/50 hover:border-gray-500 ${type.border}`
-                            }`}
-                          >
-                            {type.label[lang]}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Input Announcement Text */}
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block font-mono">
-                      {lang === 'ru' ? 'Текст объявления (выводится бегущей строкой)' : 'Broadcast Text (scrolls as marquee)'}
-                    </label>
-                    <textarea
-                      value={announcementText}
-                      onChange={(e) => setAnnouncementText(e.target.value)}
-                      placeholder={lang === 'ru' ? 'Вайп сегодня в 18:00 по МСК! Всем выжившим приготовиться к раздаче ресурсов на Сфере...' : 'Server wipe at 18:00 UTC today! Survivors get ready for resource drops...'}
-                      rows={3}
-                      maxLength={180}
-                      className="w-full bg-[#0c0d10] border border-[#2a2f3b] text-xs font-mono p-3 text-white focus:border-[#cd412b]/60 outline-none transition-all placeholder-gray-700"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={savingSiteSettings}
-                    className="w-full py-2 bg-[#cd412b] hover:bg-[#b03825] text-white font-black text-xs uppercase tracking-widest font-mono cursor-pointer transition-colors"
-                  >
-                    {savingSiteSettings ? (lang === 'ru' ? 'СОХРАНЕНИЕ...' : 'SAVING...') : (lang === 'ru' ? 'ПРИМЕНИТЬ НАСТРОЙКИ САЙТА' : 'APPLY SYSTEM BROADCAST')}
-                  </button>
-                </form>
-
-                {/* Twitch Configuration Form */}
-                <form onSubmit={handleSaveTwitchSettings} className="space-y-4 bg-[#0c0d10] border border-[#2a2f3b] p-4 mt-4">
-                  <div className="flex items-center gap-2 pb-2 border-b border-[#2a2f3b]/60">
-                    <span className="text-base text-purple-500">📺</span>
-                    <span className="text-[10px] font-mono text-gray-400 font-bold uppercase tracking-wider">
-                      {lang === 'ru' ? 'КОНФИГУРАЦИЯ TWITCH СТРИМА' : 'TWITCH STREAM CONFIGURATION'}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Channel Name */}
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block font-mono">
-                        {lang === 'ru' ? 'НИКНЕЙМ КАНАЛА TWITCH' : 'TWITCH CHANNEL USERNAME'}
-                      </label>
-                      <input
-                        type="text"
-                        value={twitchChannel}
-                        onChange={(e) => setTwitchChannel(e.target.value)}
-                        placeholder="e.g. misterzet"
-                        className="w-full bg-[#14171e] border border-[#2a2f3b] text-xs font-mono p-2.5 text-white focus:border-purple-500 outline-none transition-all"
-                      />
-                    </div>
-
-                    {/* Stream Title Override */}
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block font-mono">
-                        {lang === 'ru' ? 'ЗАГОЛОВОК СТРИМА (ДЛЯ ПОДМЕНЫ)' : 'STREAM TITLE OVERRIDE'}
-                      </label>
-                      <input
-                        type="text"
-                        value={twitchStreamTitle}
-                        onChange={(e) => setTwitchStreamTitle(e.target.value)}
-                        placeholder="RUSTY.LUB LIVE!"
-                        className="w-full bg-[#14171e] border border-[#2a2f3b] text-xs font-mono p-2.5 text-white focus:border-purple-500 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Manual Live Switch */}
-                  <div className="flex items-center justify-between py-1 border-t border-[#2a2f3b]/30 pt-3">
-                    <div className="space-y-0.5">
-                      <span className="text-xs font-bold text-gray-300 font-sans block">
-                        {lang === 'ru' ? 'Принудительный статус стрима: LIVE' : 'Manual Live Stream Override'}
-                      </span>
-                      <span className="text-[9px] text-gray-500 font-mono block">
-                        {lang === 'ru' ? 'Включает статус трансляции вручную без проверки по API' : 'Manually forces live status banner on without API check'}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setTwitchManualLive(!twitchManualLive)}
-                      className={`px-3 py-1 text-[10px] font-mono font-bold uppercase border cursor-pointer transition-colors ${
-                        twitchManualLive 
-                          ? 'bg-purple-600/20 border-purple-500 text-purple-400' 
-                          : 'bg-zinc-800 border-zinc-700 text-zinc-400'
-                      }`}
-                    >
-                      {twitchManualLive ? (lang === 'ru' ? 'ВКЛЮЧЕН (LIVE)' : 'FORCED LIVE') : (lang === 'ru' ? 'ОТКЛЮЧЕН' : 'NORMAL / API')}
-                    </button>
-                  </div>
-
-                  {/* Advanced API Config (Optional) */}
-                  <div className="border-t border-[#2a2f3b]/40 pt-3 space-y-3">
-                    <span className="text-[8px] font-mono text-zinc-500 font-bold uppercase tracking-wider block">
-                      {lang === 'ru' ? '🔑 АВТОМАТИЧЕСКАЯ ИНТЕГРАЦИЯ TWITCH HELIX API (ОПЦИОНАЛЬНО)' : '🔑 AUTOMATIC TWITCH HELIX API INTEGRATION (OPTIONAL)'}
-                    </span>
-                    <p className="text-[9px] text-zinc-400 leading-normal font-mono">
-                      {lang === 'ru' 
-                        ? 'Заполните эти данные из Twitch Developer Console, чтобы сайт автоматически запрашивал статус стрима в реальном времени.' 
-                        : 'Fill these from your Twitch Developer Portal to enable fully automated, real-time live status tracking.'}
-                    </p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block font-mono">
-                          Twitch Client ID
-                        </label>
-                        <input
-                          type="text"
-                          value={twitchClientId}
-                          onChange={(e) => setTwitchClientId(e.target.value)}
-                          placeholder="Client ID"
-                          className="w-full bg-[#14171e] border border-[#2a2f3b] text-xs font-mono p-2 text-zinc-300 focus:border-purple-500 outline-none"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block font-mono">
-                          Twitch Client Secret
-                        </label>
-                        <input
-                          type="password"
-                          value={twitchClientSecret}
-                          onChange={(e) => setTwitchClientSecret(e.target.value)}
-                          placeholder="Client Secret"
-                          className="w-full bg-[#14171e] border border-[#2a2f3b] text-xs font-mono p-2 text-zinc-300 focus:border-purple-500 outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSavingTwitch}
-                    className="w-full py-2 bg-purple-600/85 hover:bg-purple-700 text-white font-black text-xs uppercase tracking-widest font-mono cursor-pointer transition-colors"
-                  >
-                    {isSavingTwitch ? (lang === 'ru' ? 'СОХРАНЕНИЕ...' : 'SAVING...') : (lang === 'ru' ? 'СОХРАНИТЬ НАСТРОЙКИ TWITCH' : 'SAVE TWITCH SETTINGS')}
-                  </button>
-                </form>
               </motion.div>
             )}
           </AnimatePresence>

@@ -689,6 +689,49 @@ export default function UserProfileModal({
               </div>
             </div>
 
+            {/* Notification Settings */}
+            <div className="space-y-1.5 pt-4 border-t border-[#2a2f3b]">
+              <span className="text-[9px] font-mono text-zinc-500 block uppercase tracking-wider">
+                {lang === 'ru' ? 'НАСТРОЙКИ УВЕДОМЛЕНИЙ' : 'NOTIFICATION SETTINGS'}
+              </span>
+              <div className="grid grid-cols-1 gap-2">
+                <button
+                  onClick={async () => {
+                    if (!targetUser) return;
+                    setActionLoading(true);
+                    await updateDoc(doc(db, 'chat_users', targetUser.uid), {
+                      'notifications.news': !targetUser.notifications?.news
+                    });
+                    setActionLoading(false);
+                  }}
+                  disabled={actionLoading}
+                  className={`flex items-center justify-between p-2 text-[10px] font-mono border ${
+                    targetUser.notifications?.news ? 'bg-emerald-900/20 border-emerald-500/30' : 'bg-black/40 border-zinc-800'
+                  }`}
+                >
+                  <span>{lang === 'ru' ? 'Новости' : 'News'}</span>
+                  {targetUser.notifications?.news ? <Check size={12} className="text-emerald-500" /> : <X size={12} className="text-zinc-500" />}
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!targetUser) return;
+                    setActionLoading(true);
+                    await updateDoc(doc(db, 'chat_users', targetUser.uid), {
+                      'notifications.streams': !targetUser.notifications?.streams
+                    });
+                    setActionLoading(false);
+                  }}
+                  disabled={actionLoading}
+                  className={`flex items-center justify-between p-2 text-[10px] font-mono border ${
+                    targetUser.notifications?.streams ? 'bg-emerald-900/20 border-emerald-500/30' : 'bg-black/40 border-zinc-800'
+                  }`}
+                >
+                  <span>{lang === 'ru' ? 'Стримы' : 'Streams'}</span>
+                  {targetUser.notifications?.streams ? <Check size={12} className="text-emerald-500" /> : <X size={12} className="text-zinc-500" />}
+                </button>
+              </div>
+            </div>
+
             {/* Friends List inside Inspector */}
             <div className="space-y-1.5">
               <span className="text-[9px] font-mono text-zinc-500 block uppercase tracking-wider">

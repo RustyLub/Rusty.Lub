@@ -56,6 +56,35 @@
           "description": "Show/Hide Jungle Fever spoiler"
         }
       }
+    },
+    "NewsItem": {
+      "title": "NewsItem",
+      "description": "A news post in the news feed",
+      "type": "object",
+      "properties": {
+        "category": { "type": "string", "enum": ["updates", "blogs", "events"] },
+        "title": { "type": "object" },
+        "date": { "type": "string" },
+        "author": { "type": "string" },
+        "badge": { "type": "object" },
+        "isFeatured": { "type": "boolean" },
+        "coverImage": { "type": "string" },
+        "summary": { "type": "object" },
+        "content": { "type": "object" }
+      }
+    },
+    "ChatUser": {
+      "title": "ChatUser",
+      "description": "Profile data for chat participants",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "avatarClass": { "type": "string" },
+        "role": { "type": "string" },
+        "isBlocked": { "type": "boolean" },
+        "isVip": { "type": "boolean" }
+      }
     }
   },
   "firestore": {
@@ -70,6 +99,32 @@
     "/site_settings/{docId}": {
       "schema": "SiteSettings",
       "description": "Global site settings"
+    },
+    "/news/{newsId}": {
+      "schema": "NewsItem",
+      "description": "Game news and updates"
+    },
+    "/chat_users/{userId}": {
+      "schema": "ChatUser",
+      "description": "User profiles and permissions"
+    },
+    "/messages/{messageId}": {
+      "description": "Chat messages"
+    },
+    "/presence/{userId}": {
+      "description": "User presence tracking"
+    },
+    "/site_settings/announcement": {
+      "description": "Global announcement"
+    },
+    "/site_settings/twitch": {
+      "description": "Twitch integration settings"
+    },
+    "/site_settings/jungle_fever_spoiler": {
+      "description": "Spoiler visibility toggle"
+    },
+    "/site_settings/maintenance_mode": {
+      "description": "Global maintenance mode toggle"
     }
   }
 }

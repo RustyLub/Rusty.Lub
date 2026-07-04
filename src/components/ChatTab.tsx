@@ -14,7 +14,9 @@ import {
   getDoc,
   getDocs,
   deleteDoc,
-  writeBatch
+  writeBatch,
+  handleFirestoreError,
+  OperationType
 } from '../firebase';
 import { 
   Send, 
@@ -559,7 +561,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     }, (error) => {
-      console.error("Firestore message channel loading error:", error);
+      handleFirestoreError(error, OperationType.LIST, 'messages');
       setLoading(false);
     });
 
@@ -607,6 +609,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
           displayName: replyTo.displayName
         } : null
       });
+
       setNewMessage('');
       setReplyTo(null);
     } catch (error) {
@@ -817,7 +820,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   }, [user]);
 
   // Check if user is Admin
-  const isAdmin = user && user.uid === 'serustqs';
+  const isAdmin = user && (user.uid === 'serustqs' || user.email === 'misterzet556@gmail.com');
 
   const filteredMessages = messages.filter((msg: any) => {
     const msgChannel = msg.channel || 'rust-russian';

@@ -11,6 +11,7 @@ import {
   Sparkles,
   ExternalLink,
   ShieldAlert,
+  Activity,
   Clock,
   Menu,
   X,
@@ -21,7 +22,6 @@ import {
   Check,
   Server,
   Layers,
-  Activity,
   Wifi,
   Battery,
   MapPin,
@@ -51,11 +51,17 @@ import { ToastType, CustomUser } from './types';
 import { 
   doc, 
   setDoc, 
+  getDoc,
   db, 
+  auth,
+  onAuthStateChanged,
+  signOut,
   serverTimestamp, 
   collection, 
   onSnapshot, 
-  query
+  query,
+  handleFirestoreError,
+  OperationType
 } from './firebase';
 
 // Tab Components
@@ -67,6 +73,7 @@ import ElectricalSimulatorTab from './components/ElectricalSimulatorTab';
 import WeaponGuidesTab from './components/WeaponGuidesTab';
 import ChatTab from './components/ChatTab';
 import NewsTab from './components/NewsTab';
+import AdminTab from './components/AdminTab';
 import AuthModal from './components/AuthModal';
 import CabinetModal from './components/CabinetModal';
 // @ts-ignore
@@ -192,7 +199,7 @@ const appTranslations = {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news' | 'admin'>('home');
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lang, setLang] = useState<'ru' | 'en'>('en');
@@ -233,6 +240,8 @@ export default function App() {
     }
   });
   const [onlineCount, setOnlineCount] = useState<number>(0);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const isAdmin = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'admin');
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [cabinetModalOpen, setCabinetModalOpen] = useState(false);
@@ -265,7 +274,7 @@ export default function App() {
         setAnnouncement(null);
       }
     }, (err) => {
-      console.warn("Announcement sync error:", err);
+      handleFirestoreError(err, OperationType.GET, 'site_settings/announcement');
     });
     return () => unsubscribe();
   }, []);
@@ -277,6 +286,52 @@ export default function App() {
         setShowJungleFeverSpoiler(!!docSnap.data().jungleFeverSpoiler);
       } else {
         setShowJungleFeverSpoiler(false);
+      }
+    }, (err) => {
+      handleFirestoreError(err, OperationType.GET, 'site_settings/jungle_fever_spoiler');
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Real-time Auth state sync
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setIsAuthLoading(false);
+      if (firebaseUser) {
+        // User is signed in to Firebase
+        const userRef = doc(db, 'chat_users', firebaseUser.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          const customUser: CustomUser = {
+            uid: firebaseUser.uid,
+            displayName: data.displayName || firebaseUser.displayName || 'Survivor',
+            email: firebaseUser.email || data.email || '',
+            photoURL: data.photoURL || firebaseUser.photoURL || '',
+            avatarClass: data.avatarClass || 'heavy_plate',
+            role: data.role || 'user'
+          };
+          setCurrentUser(customUser);
+          localStorage.setItem('rust_survivor_user', JSON.stringify(customUser));
+        } else {
+          // If profile doc doesn't exist anymore, sign out of Firebase and clear local storage
+          await signOut(auth);
+          setCurrentUser(null);
+          localStorage.removeItem('rust_survivor_user');
+        }
+      } else {
+        // User is signed out of Firebase - clear sensitive flags
+        if (localStorage.getItem('rust_survivor_user')) {
+          const saved = JSON.parse(localStorage.getItem('rust_survivor_user') || '{}');
+          if (saved.email || saved.role === 'admin') {
+            const updated = { ...saved, email: '', role: 'user' };
+            setCurrentUser(updated);
+            localStorage.setItem('rust_survivor_user', JSON.stringify(updated));
+          }
+        } else {
+          setCurrentUser(null);
+        }
       }
     });
     return () => unsubscribe();
@@ -308,7 +363,7 @@ export default function App() {
         });
       }
     }, (err) => {
-      console.warn("Twitch sync error:", err);
+      handleFirestoreError(err, OperationType.GET, 'site_settings/twitch');
     });
     return () => unsubscribe();
   }, []);
@@ -407,7 +462,7 @@ export default function App() {
       // Fallback: at least 1 if the current user is active, or a natural base line of users online
       setOnlineCount(Math.max(activeCount, currentUser ? 1 : 0));
     }, (error) => {
-      console.warn("Presence sync error:", error);
+      handleFirestoreError(error, OperationType.LIST, 'presence');
     });
 
     return () => unsubscribe();
@@ -456,7 +511,7 @@ export default function App() {
     }, 550);
   };
 
-  const handleTabChange = (tabId: 'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news') => {
+  const handleTabChange = (tabId: 'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news' | 'admin') => {
     setActiveTab(tabId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -657,7 +712,8 @@ export default function App() {
     { id: 'raid', label: appTranslations.tabs.raid[lang], icon: <Flame size={16} /> },
     { id: 'electrical', label: appTranslations.tabs.electrical[lang], icon: <Zap size={16} /> },
     { id: 'weapons', label: appTranslations.tabs.weapons[lang], icon: <Target size={16} /> },
-    { id: 'chat', label: lang === 'ru' ? 'Чат' : 'Chat', icon: <MessageSquare size={16} /> }
+    { id: 'chat', label: lang === 'ru' ? 'Чат' : 'Chat', icon: <MessageSquare size={16} /> },
+    ...(isAdmin ? [{ id: 'admin', label: 'ADMIN', icon: <ShieldCheck size={16} /> }] : [])
   ] as const;
 
   return (
@@ -874,7 +930,7 @@ export default function App() {
                   <button
                     key={tab.id}
                     onClick={() => {
-                      handleTabChange(tab.id);
+                      handleTabChange(tab.id as any);
                       setMobileMenuOpen(false);
                     }}
                     className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold uppercase tracking-wider transition-all rounded-sm ${
@@ -945,7 +1001,7 @@ export default function App() {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => handleTabChange(tab.id)}
+                    onClick={() => handleTabChange(tab.id as any)}
                     className={`w-full flex items-center gap-3 px-3 py-3 text-[10px] font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer rounded-none relative overflow-hidden font-mono group ${
                       isActive
                         ? 'bg-gradient-to-r from-blue-600/10 to-[#ff4d30]/10 text-white border border-[#cd412b]/40 shadow-sm font-black'
@@ -1001,6 +1057,28 @@ export default function App() {
           {/* Main Content Area */}
           <div className="flex-1 min-w-0 w-full">
             <AnimatePresence mode="wait">
+          {activeTab === 'admin' && isAdmin && (
+            <motion.div
+              key="admin"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-8"
+            >
+              <AdminTab 
+                currentUser={currentUser} 
+                lang={lang} 
+                onToast={(msg, type) => {
+                  const id = Math.random().toString(36).substring(2, 9);
+                  setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : 'success' }]);
+                  setTimeout(() => {
+                    setToasts(prev => prev.filter(t => t.id !== id));
+                  }, 3000);
+                }}
+              />
+            </motion.div>
+          )}
           {activeTab === 'home' && (
             <motion.div
               key="home"
@@ -1923,9 +2001,14 @@ export default function App() {
                   setCurrentUser(user);
                   localStorage.setItem('rust_survivor_user', JSON.stringify(user));
                 }}
-                onUserLogout={() => {
+                onUserLogout={async () => {
                   setCurrentUser(null);
                   localStorage.removeItem('rust_survivor_user');
+                  try {
+                    await signOut(auth);
+                  } catch (e) {
+                    console.error(e);
+                  }
                 }}
                 onToast={(msg, type) => {
                   const id = Math.random().toString(36).substring(2, 9);
@@ -2218,9 +2301,14 @@ export default function App() {
             onClose={() => setCabinetModalOpen(false)}
             lang={lang}
             user={currentUser}
-            onUserLogout={() => {
+            onUserLogout={async () => {
               setCurrentUser(null);
               localStorage.removeItem('rust_survivor_user');
+              try {
+                await signOut(auth);
+              } catch (e) {
+                console.error(e);
+              }
             }}
             onAvatarChange={(avatarId, photoURL) => {
               if (currentUser) {

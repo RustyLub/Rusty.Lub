@@ -297,6 +297,29 @@ async function startServer() {
     }
   });
 
+  // API route to send Discord notification
+  app.post("/api/discord/notify", async (req, res) => {
+    try {
+      const { message } = req.body;
+      const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+      if (!webhookUrl) {
+        return res.status(500).json({ error: "DISCORD_WEBHOOK_URL not configured" });
+      }
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: message }),
+      });
+      if (!response.ok) {
+        throw new Error(`Discord returned ${response.status}`);
+      }
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("Discord API Error:", err);
+      res.status(500).json({ error: err.message || "Failed to send notification" });
+    }
+  });
+
   // Vite middleware for development or static serving for production
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
