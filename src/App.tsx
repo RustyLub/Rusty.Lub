@@ -1590,13 +1590,13 @@ export default function App() {
                         </span>
                         <h4 className="text-xs font-black text-white uppercase tracking-wide leading-snug">
                           {lang === 'ru' 
-                            ? 'Июльское обновление 2026: Военная Верфь и Энергетический Прорыв' 
-                            : 'July Update 2026: Military Shipyard & Power Grid Breakthrough'}
+                            ? 'Июльское обновление Rust и новые функции Rusty.Lub' 
+                            : 'July Rust Update & New Rusty.Lub Features'}
                         </h4>
-                        <p className="text-[10.5px] text-gray-400 font-sans leading-normal line-clamp-3">
+                        <p className="text-[10.5px] text-gray-400 font-sans leading-normal line-clamp-5">
                           {lang === 'ru'
-                            ? 'Глобальный патч: новый монумент высокой опасности Tier 3, автоматизация жидкотопливных генераторов и оптимизация Unity Job System.'
-                            : 'Global patch: brand new Tier 3 high-danger monument, liquid fuel generators automation, and Unity Job System optimizations.'}
+                            ? 'Глобальный патч Rust. ПЛЮС ОБНОВЛЕНИЕ САЙТА: Добавлена возможность загружать свой фон визитки в кабинете, а интерфейс стал более прозрачным!'
+                            : 'Global Rust patch. PLUS SITE UPDATE: Added the ability to upload a custom profile card background, and the UI is now more transparent!'}
                         </p>
                       </div>
 
