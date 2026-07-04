@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { doc, updateDoc, collection, onSnapshot, deleteDoc, serverTimestamp, getDoc, setDoc, addDoc, getCountFromServer, writeBatch, query, limit, getDocs, where } from 'firebase/firestore';
-import { ShieldCheck, Send, Search, Crown, Ban, Trash2, Users, Settings, Megaphone, EyeOff, Tv, PlusCircle, Activity, MessageSquare, AlertTriangle, ShieldAlert, IdCard, List, BarChart3 } from 'lucide-react';
+import { ShieldCheck, Send, Search, Crown, Star, Ban, Trash2, Users, Settings, Megaphone, EyeOff, Tv, PlusCircle, Activity, MessageSquare, AlertTriangle, ShieldAlert, IdCard, List, BarChart3 } from 'lucide-react';
 import { CustomUser, NewsItem } from '../types';
 import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 import UserProfileModal from './UserProfileModal';
@@ -13,13 +13,15 @@ interface AdminTabProps {
 
 interface RegisteredUser {
   id: string; // Document ID
-  username: string;
+  username?: string;
   displayName: string;
   photoURL: string;
   avatarClass: string;
   role: string;
   isBlocked: boolean;
   isVip?: boolean;
+  isChatVip?: boolean;
+  vipUntil?: string;
 }
 
 export default function AdminTab({ currentUser, lang }: AdminTabProps) {
@@ -237,18 +239,45 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
     }
   };
 
+  const [vipManagerUserId, setVipManagerUserId] = useState<string | null>(null);
+
   const filteredUsers = registeredUsers.filter(u => 
     u.displayName.toLowerCase().includes(userSearch.toLowerCase()) || 
-    u.username.toLowerCase().includes(userSearch.toLowerCase())
+    (u.username && u.username.toLowerCase().includes(userSearch.toLowerCase())) ||
+    u.id.toLowerCase().includes(userSearch.toLowerCase())
   );
 
-  const handleToggleVip = async (uid: string, currentVip: boolean) => {
+  const handleToggleVip = (uid: string) => {
+    setVipManagerUserId(prev => prev === uid ? null : uid);
+  };
+
+  const handleSetVipDuration = async (uid: string, days: number) => {
     try {
-      await updateDoc(doc(db, 'chat_users', uid), { isVip: !currentVip });
+      if (days === 0) {
+        await updateDoc(doc(db, 'chat_users', uid), { 
+          isVip: false,
+          vipUntil: ''
+        });
+      } else {
+        const vipUntilDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+        await updateDoc(doc(db, 'chat_users', uid), { 
+          isVip: true,
+          vipUntil: vipUntilDate
+        });
+      }
+      setVipManagerUserId(null);
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, `chat_users/${uid}`);
     }
   };
+  const handleToggleChatVip = async (uid: string, currentChatVip: boolean) => {
+    try {
+      await updateDoc(doc(db, 'chat_users', uid), { isChatVip: !currentChatVip });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `chat_users/${uid}`);
+    }
+  };
+
   const handleToggleBlock = async (uid: string, currentBlocked: boolean) => {
     try {
       await updateDoc(doc(db, 'chat_users', uid), { isBlocked: !currentBlocked });
@@ -522,21 +551,88 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
             </div>
             <div className="border border-[#2a2f3b] bg-black/20 divide-y divide-[#2a2f3b] overflow-y-auto max-h-[400px] rounded-sm">
             {filteredUsers.map((rUser) => (
-                <div key={rUser.id} className="p-3 flex items-center justify-between gap-3 text-[10px] hover:bg-white/5 transition">
+                <div key={rUser.id} className="p-3 hover:bg-white/5 transition space-y-2">
+                <div className="flex items-center justify-between gap-3 text-[10px]">
                 <div className="flex items-center gap-3">
                     <img src={getAvatarUrl(rUser.photoURL, rUser.avatarClass)} className="w-8 h-8 rounded-full border border-zinc-800" />
                     <div>
-                        <div className="font-bold text-gray-200">{rUser.displayName}</div>
-                        <div className="text-zinc-500 font-mono">{rUser.username || rUser.id}</div>
+                        <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-gray-200">{rUser.displayName}</span>
+                            {rUser.isChatVip && (
+                                <span className="px-1 py-0.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 text-[8px] font-bold rounded uppercase">CHAT VIP</span>
+                            )}
+                            {rUser.isVip && (
+                                <span className="px-1 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[8px] font-bold rounded uppercase">VIP SUB</span>
+                            )}
+                        </div>
+                        <div className="text-zinc-500 font-mono">
+                            {rUser.username || rUser.id}
+                            {rUser.isVip && rUser.vipUntil && (
+                                <span className="text-amber-500/80 font-bold ml-1.5">
+                                    ({lang === 'ru' ? 'подписка до' : 'subscription until'}: {new Date(rUser.vipUntil).toLocaleDateString()})
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={() => handleToggleVip(rUser.id, !!rUser.isVip)} className={`p-1.5 border rounded-sm ${rUser.isVip ? 'border-amber-500 text-amber-500 bg-amber-500/10' : 'border-zinc-700 text-zinc-500'}`} title="VIP"><Crown size={12} /></button>
+                    {/* Chat VIP simple toggle */}
+                    <button 
+                        onClick={() => handleToggleChatVip(rUser.id, !!rUser.isChatVip)} 
+                        className={`p-1.5 border rounded-sm transition-all cursor-pointer ${rUser.isChatVip ? 'border-blue-500 text-blue-500 bg-blue-500/10' : 'border-zinc-700 text-zinc-500'}`} 
+                        title={lang === 'ru' ? 'VIP Чат' : 'Chat VIP'}
+                    >
+                        <Star size={12} />
+                    </button>
+                    {/* VIP Subscription issue button */}
+                    <button 
+                        onClick={() => handleToggleVip(rUser.id)} 
+                        className={`p-1.5 border rounded-sm transition-all cursor-pointer ${vipManagerUserId === rUser.id ? 'border-amber-400 bg-amber-400/20 text-amber-300' : (rUser.isVip ? 'border-amber-500 text-amber-500 bg-amber-500/10' : 'border-zinc-700 text-zinc-500')}`} 
+                        title={lang === 'ru' ? 'Выдача VIP Подписки' : 'Issue VIP Subscription'}
+                    >
+                        <Crown size={12} />
+                    </button>
                     <button onClick={() => handleToggleBlock(rUser.id, !!rUser.isBlocked)} className={`p-1.5 border rounded-sm ${rUser.isBlocked ? 'border-red-500 text-red-500 bg-red-500/10' : 'border-zinc-700 text-zinc-500'}`} title="Block"><Ban size={12} /></button>
                     <button onClick={() => handleToggleRole(rUser.id, rUser.role)} className={`p-1.5 border rounded-sm ${rUser.role === 'admin' ? 'border-purple-500 text-purple-500 bg-purple-500/10' : 'border-zinc-700 text-zinc-500'}`} title="Role">{rUser.role === 'admin' ? 'A' : 'U'}</button>
                     <button onClick={() => setInspectUserId(rUser.id)} className="p-1.5 border border-zinc-700 text-zinc-500 hover:text-emerald-500 hover:border-emerald-500 rounded-sm" title={lang === 'ru' ? 'Визитка' : 'Card'}><IdCard size={12} /></button>
                     <button onClick={() => handleDeleteUser(rUser.id)} className="p-1.5 border border-zinc-700 text-zinc-500 hover:text-red-500 hover:border-red-500 rounded-sm" title="Delete"><Trash2 size={12} /></button>
                 </div>
+                </div>
+
+                {/* Inline VIP duration management panel */}
+                {vipManagerUserId === rUser.id && (
+                    <div className="bg-black/40 border border-amber-500/20 p-2 rounded-sm flex flex-col gap-1.5">
+                        <div className="text-[9px] font-mono uppercase tracking-wider text-amber-500 font-bold">
+                            {lang === 'ru' ? '⚙️ Управление подпиской VIP' : '⚙️ Manage VIP Subscription'}
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                            <button 
+                                onClick={() => handleSetVipDuration(rUser.id, 45)}
+                                className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[8px] font-bold uppercase transition cursor-pointer"
+                            >
+                                {lang === 'ru' ? '45 дней подписки' : '45 Days VIP'}
+                            </button>
+                            <button 
+                                onClick={() => handleSetVipDuration(rUser.id, 9999)}
+                                    className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[8px] font-bold uppercase transition cursor-pointer"
+                            >
+                                {lang === 'ru' ? 'Навсегда' : 'Infinite'}
+                            </button>
+                            <button 
+                                onClick={() => handleSetVipDuration(rUser.id, 0)}
+                                    className="px-2 py-0.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-[8px] font-bold uppercase transition cursor-pointer"
+                            >
+                                {lang === 'ru' ? 'Снять VIP' : 'Remove VIP'}
+                            </button>
+                            <button 
+                                onClick={() => setVipManagerUserId(null)}
+                                className="px-2 py-0.5 bg-zinc-800 hover:bg-zinc-700 text-gray-300 text-[8px] font-bold uppercase transition ml-auto cursor-pointer"
+                            >
+                                {lang === 'ru' ? 'Отмена' : 'Cancel'}
+                            </button>
+                        </div>
+                    </div>
+                )}
                 </div>
             ))}
             </div>
@@ -880,6 +976,7 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
           targetUserId={inspectUserId}
           currentUser={currentUser}
           lang={lang}
+          onToast={(msg) => console.log(msg)}
         />
       )}
     </div>

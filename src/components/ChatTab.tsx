@@ -85,6 +85,7 @@ interface RegisteredUser {
   role: string;
   isBlocked: boolean;
   isVip?: boolean;
+  isChatVip?: boolean;
   clanTag?: string;
   voiceChannel?: string | null;
 }
@@ -202,12 +203,13 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   // Admin controls & list
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([]);
-  const [usersMap, setUsersMap] = useState<Record<string, { isBlocked: boolean; isVip?: boolean; role: string; displayName: string; photoURL: string; avatarClass: string; clanTag?: string; voiceChannel?: string | null }>>({});
+  const [usersMap, setUsersMap] = useState<Record<string, { isBlocked: boolean; isVip?: boolean; isChatVip?: boolean; role: string; displayName: string; photoURL: string; avatarClass: string; clanTag?: string; voiceChannel?: string | null }>>({});
   const [searchUserQuery, setSearchUserQuery] = useState('');
   const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showMembers, setShowMembers] = useState(true);
-  const [activeChannel, setActiveChannel] = useState<'rust-russian' | 'rust-english'>('rust-russian');
+  const [activeChannel, setActiveChannel] = useState<'rust-russian' | 'rust-english' | 'rust-vip'>('rust-russian');
+  const [highlightNextMessage, setHighlightNextMessage] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -326,13 +328,14 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   // Real-time subscribe to registered users to dynamically retrieve VIP status, blocks, and roles
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'chat_users'), (snapshot) => {
-      const uMap: Record<string, { isBlocked: boolean; isVip?: boolean; role: string; displayName: string; photoURL: string; avatarClass: string; clanTag?: string; voiceChannel?: string | null }> = {};
+      const uMap: Record<string, { isBlocked: boolean; isVip?: boolean; isChatVip?: boolean; role: string; displayName: string; photoURL: string; avatarClass: string; clanTag?: string; voiceChannel?: string | null }> = {};
       const usersList: RegisteredUser[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
         uMap[doc.id] = {
           isBlocked: !!data.isBlocked,
           isVip: !!data.isVip,
+          isChatVip: !!data.isChatVip,
           role: data.role || 'user',
           displayName: data.displayName || doc.id,
           photoURL: data.photoURL || '',
@@ -348,6 +351,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
           role: data.role || 'user',
           isBlocked: !!data.isBlocked,
           isVip: !!data.isVip,
+          isChatVip: !!data.isChatVip,
           clanTag: data.clanTag || '',
           voiceChannel: data.voiceChannel || null
         });
@@ -596,6 +600,13 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
         return;
       }
 
+      // Security Check: is sending in rust-vip restricted?
+      if (activeChannel === 'rust-vip' && !isCurrentVipSub) {
+        onToast(lang === 'ru' ? 'Доступ запрещен! Чат только для VIP-подписчиков.' : 'Access Denied! VIP Subscribers only.', 'error');
+        setSending(false);
+        return;
+      }
+
       await addDoc(collection(db, 'messages'), {
         text: newMessage.trim(),
         uid: user.uid,
@@ -604,6 +615,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
         avatarClass: user.avatarClass || 'whiteout',
         channel: activeChannel,
         createdAt: serverTimestamp(),
+        isHighlighted: !!(isCurrentVipSub && highlightNextMessage),
         replyTo: replyTo ? {
           text: replyTo.text,
           displayName: replyTo.displayName
@@ -661,11 +673,11 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
 
     setAdminActionLoading(true);
     try {
-      await setDoc(doc(db, 'chat_users', targetUid), { isVip: !currentlyVip }, { merge: true });
+      await setDoc(doc(db, 'chat_users', targetUid), { isChatVip: !currentlyVip }, { merge: true });
       onToast(
         currentlyVip 
-          ? (lang === 'ru' ? 'VIP статус снят' : 'VIP status заменен на обычный')
-          : (lang === 'ru' ? 'Пользователю успешно выдан статус VIP!' : 'VIP status granted successfully!'),
+          ? (lang === 'ru' ? 'VIP статус чата снят' : 'Chat VIP status removed')
+          : (lang === 'ru' ? 'Пользователю успешно выдан статус VIP в чате!' : 'Chat VIP status granted successfully!'),
         'success'
       );
     } catch (err) {
@@ -822,6 +834,21 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   // Check if user is Admin
   const isAdmin = user && (user.uid === 'serustqs' || user.email === 'misterzet556@gmail.com');
 
+  // Check if current user is VIP Subscriber or Admin
+  const isCurrentVipSub = user && (
+    user.uid === 'serustqs' || 
+    !!usersMap[user.uid]?.isVip || 
+    user.role === 'admin' || 
+    user.email === 'misterzet556@gmail.com'
+  );
+
+  // Security guard: redirect if non-VIP tries to access rust-vip
+  useEffect(() => {
+    if (activeChannel === 'rust-vip' && !isCurrentVipSub) {
+      setActiveChannel('rust-russian');
+    }
+  }, [activeChannel, isCurrentVipSub]);
+
   const filteredMessages = messages.filter((msg: any) => {
     const msgChannel = msg.channel || 'rust-russian';
     return msgChannel === activeChannel;
@@ -882,6 +909,26 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                   </span>
                   <span className="text-[9px] text-blue-400 font-bold tracking-wider font-mono bg-blue-500/10 px-1 rounded">EN</span>
                 </button>
+
+                {/* VIP Channel (Only visible to VIP subscribers and Admins) */}
+                {isCurrentVipSub && (
+                  <button
+                    onClick={() => setActiveChannel('rust-vip')}
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 text-xs rounded transition-all duration-200 group cursor-pointer ${
+                      activeChannel === 'rust-vip'
+                        ? 'bg-gradient-to-r from-amber-500/20 to-blue-500/10 border-l-2 border-amber-500 text-white font-bold pl-2'
+                        : 'text-zinc-400 hover:bg-zinc-700/20 hover:text-zinc-200'
+                    }`}
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <Star size={14} className={activeChannel === 'rust-vip' ? 'text-amber-400 animate-pulse' : 'text-amber-500'} />
+                      <span className="bg-gradient-to-r from-amber-400 to-blue-400 bg-clip-text text-transparent font-black">rust-vip</span>
+                    </span>
+                    <span className="text-[9px] text-amber-400 font-bold tracking-wider font-mono bg-amber-500/10 border border-amber-500/20 px-1 rounded uppercase">
+                      {lang === 'ru' ? 'ПОДПИСКА' : 'SUB'}
+                    </span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -933,7 +980,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                     .map((vUser) => {
                       const vAvatar = SURVIVOR_AVATARS.find(a => a.id === vUser.avatarClass) || SURVIVOR_AVATARS[0];
                       const isVUserAdmin = vUser.username === 'serustqs';
-                      const isVUserVip = !!vUser.isVip;
+                      const isVUserVip = !!vUser.isChatVip;
                       return (
                         <div key={vUser.username} className="flex items-center justify-between py-1 px-1.5 rounded bg-zinc-800/15 border border-zinc-800/5 gap-2">
                           <div className="flex items-center gap-2 truncate">
@@ -1075,7 +1122,9 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
               <span className="hidden sm:inline text-[11px] text-zinc-400 border-l border-zinc-700 pl-3">
                 {activeChannel === 'rust-russian' 
                   ? (lang === 'ru' ? 'Чат выживших на русском языке' : 'Russian language survivors broadcast')
-                  : (lang === 'ru' ? 'Чат выживших на английском языке' : 'English language survivors broadcast')}
+                  : activeChannel === 'rust-english'
+                    ? (lang === 'ru' ? 'Чат выживших на английском языке' : 'English language survivors broadcast')
+                    : (lang === 'ru' ? '⭐️ Закрытый чат для VIP-подписчиков и администрации' : '⭐️ Private channel for VIP Subscribers and Admins')}
               </span>
             </div>
 
@@ -1146,6 +1195,22 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
               <span>rust-english</span>
               <span className="text-[8px] text-blue-400 font-extrabold bg-blue-500/10 px-0.5 rounded ml-0.5 font-mono">EN</span>
             </button>
+
+            {/* VIP Channel Button */}
+            {isCurrentVipSub && (
+              <button
+                onClick={() => setActiveChannel('rust-vip')}
+                className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded font-bold transition-all duration-200 cursor-pointer ${
+                  activeChannel === 'rust-vip'
+                    ? 'bg-gradient-to-r from-amber-500/25 to-blue-500/15 border border-amber-500/35 text-white font-black'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
+                }`}
+              >
+                <Star size={13} className={activeChannel === 'rust-vip' ? 'text-amber-400 animate-pulse' : 'text-amber-500'} />
+                <span className="bg-gradient-to-r from-amber-400 to-blue-400 bg-clip-text text-transparent font-black">rust-vip</span>
+                <span className="text-[8px] text-amber-400 font-extrabold bg-amber-500/10 px-0.5 rounded ml-0.5 font-mono uppercase">VIP</span>
+              </button>
+            )}
 
             {/* Voice Channel Connection Toggle */}
             <button
@@ -1258,14 +1323,20 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                 {filteredMessages.map((msg) => {
                   const isOwnMessage = msg.uid === user.uid;
                   const avatarConfig = SURVIVOR_AVATARS.find(a => a.id === msg.avatarClass) || SURVIVOR_AVATARS[0];
-                  const msgUser = usersMap[msg.uid] || { role: 'user', isVip: false };
-                  const isMsgVip = !!msgUser.isVip;
+                  const msgUser = usersMap[msg.uid] || { role: 'user', isVip: false, isChatVip: false };
+                  const isMsgChatVip = !!msgUser.isChatVip;
+                  const isMsgVipSub = msg.uid === 'serustqs' || !!msgUser.isVip || msgUser.role === 'admin';
                   const isMsgFounder = msg.uid === 'serustqs';
+                  const isHighlighted = !!msg.isHighlighted || (activeChannel === 'rust-vip');
 
                   return (
                     <div 
                       key={msg.id} 
-                      className="flex items-start gap-4 hover:bg-[#2e3035]/60 px-4 py-2.5 transition-all duration-150 relative group select-text"
+                      className={`flex items-start gap-4 px-4 py-2.5 transition-all duration-150 relative group select-text border-l-2 ${
+                        isHighlighted 
+                          ? 'bg-gradient-to-r from-amber-500/10 via-blue-500/5 to-transparent border-amber-500 shadow-[inset_1px_0_10px_rgba(245,158,11,0.03)]' 
+                          : 'hover:bg-[#2e3035]/60 border-transparent'
+                      }`}
                     >
                       {/* Avatar */}
                       <div 
@@ -1275,7 +1346,11 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                         <img 
                           src={getAvatarUrl(usersMap[msg.uid]?.photoURL || msg.photoURL, usersMap[msg.uid]?.avatarClass || msg.avatarClass)} 
                           alt="Avatar" 
-                          className="w-10 h-10 rounded-full border border-zinc-700 bg-zinc-900 object-cover"
+                          className={`w-10 h-10 rounded-full border bg-zinc-900 object-cover ${
+                            isMsgVipSub && !isMsgFounder
+                              ? 'border-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]'
+                              : 'border-zinc-700'
+                          }`}
                           referrerPolicy="no-referrer"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
@@ -1286,7 +1361,15 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                         />
                         <div 
                           className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border border-[#2b2d31] shadow-sm" 
-                          style={{ backgroundColor: isMsgFounder ? '#f87171' : isMsgVip ? '#60a5fa' : '#828292' }} 
+                          style={{ 
+                            backgroundColor: isMsgFounder 
+                              ? '#f87171' 
+                              : isMsgVipSub 
+                                ? '#f59e0b' 
+                                : isMsgChatVip 
+                                  ? '#60a5fa' 
+                                  : '#828292' 
+                          }} 
                         />
                       </div>
                       
@@ -1295,20 +1378,24 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <span 
                             onClick={() => setInspectUserId(msg.uid)}
-                            className={`text-[13px] font-bold cursor-pointer hover:underline flex items-center gap-1 ${
-                              isMsgFounder 
-                                ? 'text-[#f87171]' 
-                                : isMsgVip 
-                                  ? 'text-[#60a5fa]' 
-                                  : 'text-zinc-200'
-                            }`}
+                            className="text-[13px] font-bold cursor-pointer hover:underline flex items-center gap-1"
                           >
                             {usersMap[msg.uid]?.clanTag && (
                               <span className="text-[#cd412b] font-black font-mono">
                                 [{usersMap[msg.uid].clanTag}]
                               </span>
                             )}
-                            <span>{usersMap[msg.uid]?.displayName || msg.displayName}</span>
+                            <span className={
+                              isMsgFounder 
+                                ? 'text-[#f87171]' 
+                                : isMsgVipSub 
+                                  ? 'bg-gradient-to-r from-amber-400 via-yellow-200 to-blue-400 bg-clip-text text-transparent font-black tracking-wide drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]' 
+                                  : isMsgChatVip 
+                                    ? 'text-[#60a5fa]' 
+                                    : 'text-zinc-200'
+                            }>
+                              {usersMap[msg.uid]?.displayName || msg.displayName}
+                            </span>
                           </span>
                           
                           {/* Role tag badge - Discord style */}
@@ -1316,7 +1403,11 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                             <span className="px-1.5 py-0.2 bg-[#f87171]/10 border border-[#f87171]/20 text-[#f87171] text-[8px] font-black tracking-wide uppercase rounded-md flex items-center gap-0.5">
                               👑 {t.adminTag[lang]}
                             </span>
-                          ) : isMsgVip ? (
+                          ) : isMsgVipSub ? (
+                            <span className="px-1.5 py-0.2 bg-gradient-to-r from-amber-500/10 to-blue-500/10 border border-amber-500/30 text-amber-300 text-[8px] font-black tracking-wide uppercase rounded-md flex items-center gap-0.5 shadow-[0_0_6px_rgba(245,158,11,0.15)]">
+                              ⭐ {lang === 'ru' ? 'VIP ПОДПИСКА' : 'VIP SUB'}
+                            </span>
+                          ) : isMsgChatVip ? (
                             <span className="px-1.5 py-0.2 bg-[#60a5fa]/10 border border-[#60a5fa]/20 text-[#60a5fa] text-[8px] font-black tracking-wide uppercase rounded-md flex items-center gap-0.5">
                               ⭐ {t.vipTag[lang]}
                             </span>
@@ -1422,6 +1513,28 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
 
                   {/* Character counter & Emoji Trigger inside input */}
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                    {isCurrentVipSub && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setHighlightNextMessage(!highlightNextMessage);
+                          onToast(
+                            !highlightNextMessage 
+                              ? (lang === 'ru' ? 'Выделение сообщения включено' : 'Message highlighting enabled')
+                              : (lang === 'ru' ? 'Выделение сообщения выключено' : 'Message highlighting disabled'), 
+                            'success'
+                          );
+                        }}
+                        className={`p-1 cursor-pointer transition-all duration-200 rounded flex items-center justify-center ${
+                          highlightNextMessage 
+                            ? 'text-amber-400 bg-amber-500/10 border border-amber-500/20 scale-110 shadow-[0_0_8px_rgba(245,158,11,0.2)] animate-pulse' 
+                            : 'text-zinc-400 hover:text-amber-400 hover:scale-105'
+                        }`}
+                        title={lang === 'ru' ? 'Выделить сообщение' : 'Highlight message'}
+                      >
+                        <Sparkles size={16} />
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -1527,7 +1640,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                     .filter(u => u.username !== 'serustqs')
                     .map((u) => {
                       const userAvatar = SURVIVOR_AVATARS.find(a => a.id === u.avatarClass) || SURVIVOR_AVATARS[0];
-                      const isVip = !!u.isVip;
+                      const isChatVip = !!u.isChatVip;
                       return (
                         <div 
                           key={u.username} 
@@ -1545,12 +1658,12 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                             </div>
                             <div className="text-left min-w-0">
                               <span className={`text-xs font-bold block truncate ${
-                                isVip ? 'text-blue-400' : 'text-zinc-300'
+                                isChatVip ? 'text-blue-400' : 'text-zinc-300'
                               }`}>
                                 {u.displayName}
                               </span>
                               <span className="text-[8px] text-zinc-500 block truncate font-mono leading-none">
-                                {isVip ? '⭐ VIP SURVIVOR' : userAvatar.name[lang]}
+                                {isChatVip ? '⭐ VIP SURVIVOR' : userAvatar.name[lang]}
                               </span>
                             </div>
                           </div>
@@ -1571,14 +1684,14 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                                 EAC
                               </button>
                               <button
-                                onClick={(e) => { e.stopPropagation(); handleToggleVipUser(u.username, !!u.isVip); }}
+                                onClick={(e) => { e.stopPropagation(); handleToggleVipUser(u.username, !!u.isChatVip); }}
                                 disabled={adminActionLoading}
                                 className={`p-1 border rounded text-[8px] font-black uppercase transition-colors cursor-pointer ${
-                                  u.isVip 
+                                  u.isChatVip 
                                     ? 'bg-blue-600/20 border-blue-500/40 text-blue-400' 
                                     : 'bg-zinc-800 border-zinc-700 text-gray-400 hover:text-white'
                                 }`}
-                                title={u.isVip ? t.unvipBtn[lang] : t.vipBtn[lang]}
+                                title={u.isChatVip ? t.unvipBtn[lang] : t.vipBtn[lang]}
                               >
                                 VIP
                               </button>

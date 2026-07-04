@@ -27,7 +27,11 @@ import {
   Link,
   Save,
   UserPlus,
-  Upload
+  Upload,
+  Wallet,
+  Copy,
+  ExternalLink,
+  RefreshCw
 } from 'lucide-react';
 import { 
   doc, 
@@ -84,8 +88,43 @@ export default function CabinetModal({
   onAvatarChange, 
   onToast 
 }: CabinetModalProps) {
-  const [activeTab, setActiveTab] = useState<'profile' | 'friends' | 'admin_users' | 'admin_site'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'friends' | 'admin_users' | 'admin_site' | 'vip'>('profile');
   
+  // USDT TRC20 Payment states
+  const [usdtTxId, setUsdtTxId] = useState('');
+  const [selectedPlanId, setSelectedPlanId] = useState('diamond');
+  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'verifying' | 'success' | 'error'>('idle');
+  const [isSandbox, setIsSandbox] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
+
+  const VIP_PLANS = [
+    {
+      id: 'diamond',
+      name: { ru: 'Diamond VIP', en: 'Diamond VIP' },
+      price: 3,
+      perks: {
+        ru: [
+          'Персонализация профиля (кастомные темы и аватары)',
+          'Радар игроков: отслеживание истории серверов Rust по SteamID64 через BattleMetrics',
+          'Анимированная фиолетовая корона 👑 в чате',
+          'Все платные аватары и профильные темы открыты',
+          'Добавление в почетный список спонсоров проекта',
+          'Выделенный золотой никнейм и иконка ⭐ в глобальном чате'
+        ],
+        en: [
+          'Profile personalization (custom themes & avatars)',
+          'Player Radar: track Rust server history via BattleMetrics by SteamID64',
+          'Animated purple crown 👑 in chat messages',
+          'All premium survival avatars & themes unlocked',
+          'Inclusion in the honorary project sponsors wall',
+          'Highlighted gold username and star icon ⭐ in global chat'
+        ]
+      },
+      badgeId: 'vip_diamond'
+    }
+  ];
+
   // Customization local states
   const [bio, setBio] = useState('');
   const [clanTag, setClanTag] = useState('');
@@ -136,7 +175,10 @@ export default function CabinetModal({
           friendRequestsReceived: data.friendRequestsReceived || [],
           badges: data.badges || [],
           customTheme: data.customTheme || 'slate',
-          steamLink: data.steamLink || ''
+          steamLink: data.steamLink || '',
+          isVip: !!data.isVip,
+          vipUntil: data.vipUntil || '',
+          role: data.role || 'user'
         };
         setFullProfile(profile);
 
@@ -380,6 +422,104 @@ export default function CabinetModal({
     }
   };
 
+  const handleVerifyUsdtPayment = async () => {
+    const trimmedTxId = usdtTxId.trim();
+    if (!trimmedTxId) {
+      onToast(lang === 'ru' ? 'Пожалуйста, введите ID транзакции (TxID)!' : 'Please enter the Transaction ID (TxID)!', 'error');
+      return;
+    }
+
+    const activePlan = VIP_PLANS.find(p => p.id === selectedPlanId) || VIP_PLANS[0];
+    const isActuallySandbox = isSandbox || trimmedTxId.toLowerCase().startsWith('demo_');
+
+    setIsVerifyingPayment(true);
+    setPaymentStatus('verifying');
+    setPaymentError('');
+
+    try {
+      // Step 1: Query the Express server verification endpoint
+      const response = await fetch('/api/payment/verify-usdt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          txId: trimmedTxId,
+          plan: activePlan.name[lang],
+          amount: activePlan.price,
+          userId: user.uid,
+          isSandbox: isActuallySandbox
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        setPaymentStatus('error');
+        setPaymentError(data.error || (lang === 'ru' ? 'Ошибка верификации платежа на сервере.' : 'Server payment verification error.'));
+        onToast(data.error || (lang === 'ru' ? 'Ошибка верификации!' : 'Verification failed!'), 'error');
+        return;
+      }
+
+      // Calculate 45 days expiration from now
+      const now = new Date();
+      const expiresAt = new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000);
+      const vipUntilIso = expiresAt.toISOString();
+
+      // Step 2: Write transaction log & update VIP status in Firestore
+      const paymentRef = doc(db, 'payments', trimmedTxId);
+      await setDoc(paymentRef, {
+        txId: trimmedTxId,
+        userId: user.uid,
+        userDisplayName: fullProfile?.displayName || user.displayName,
+        amount: activePlan.price,
+        plan: activePlan.id,
+        status: 'approved',
+        isSandbox: isActuallySandbox,
+        createdAt: now.toISOString(),
+        expiresAt: vipUntilIso
+      });
+
+      // Update user document
+      const userRef = doc(db, 'chat_users', user.uid);
+      const updatedBadges = [...(fullProfile?.badges || [])];
+      if (!updatedBadges.includes(activePlan.badgeId)) {
+        updatedBadges.push(activePlan.badgeId);
+      }
+      if (!updatedBadges.includes('vip')) {
+        updatedBadges.push('vip');
+      }
+
+      // Automatically unlock premium settings if user buys Gold or Diamond
+      let premiumTheme = fullProfile?.customTheme || 'slate';
+      if (activePlan.id === 'gold') premiumTheme = 'amber';
+      if (activePlan.id === 'diamond') premiumTheme = 'matrix';
+
+      await updateDoc(userRef, {
+        isVip: true,
+        vipUntil: vipUntilIso,
+        badges: updatedBadges,
+        customTheme: premiumTheme
+      });
+
+      setPaymentStatus('success');
+      setUsdtTxId('');
+      onToast(
+        lang === 'ru' 
+          ? 'Оплата подтверждена! VIP статус и бонусы успешно активированы! 🎉' 
+          : 'Payment verified! VIP status and rewards successfully activated! 🎉', 
+        'success'
+      );
+
+    } catch (err: any) {
+      console.error("[USDT VERIFICATION CLIENT ERROR]", err);
+      setPaymentStatus('error');
+      setPaymentError(lang === 'ru' ? 'Не удалось связаться с сервером верификации.' : 'Could not contact the verification server.');
+    } finally {
+      setIsVerifyingPayment(false);
+    }
+  };
+
   // Toggle user block handler
   const handleToggleBlock = async (targetUsername: string, currentBlocked: boolean) => {
     if (targetUsername === user.uid) {
@@ -558,6 +698,23 @@ export default function CabinetModal({
                 {fullProfile?.friendRequestsReceived && fullProfile.friendRequestsReceived.length > 0 && (
                   <span className="ml-auto bg-red-500 text-white text-[9px] px-1 rounded-sm font-bold animate-pulse font-mono">
                     +{fullProfile.friendRequestsReceived.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setActiveTab('vip')}
+                className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
+                  activeTab === 'vip'
+                    ? 'bg-amber-500/10 border-amber-500/40 text-amber-500 font-black'
+                    : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Crown size={13} className={fullProfile?.isVip ? 'text-amber-500 animate-pulse' : ''} />
+                <span>{lang === 'ru' ? 'VIP Подписка' : 'VIP Subscription'}</span>
+                {fullProfile?.isVip && (
+                  <span className="ml-auto bg-amber-500 text-black text-[8px] px-1 font-black font-mono uppercase tracking-widest rounded-sm">
+                    {lang === 'ru' ? 'АКТИВНО' : 'ACTIVE'}
                   </span>
                 )}
               </button>
@@ -1118,6 +1275,290 @@ export default function CabinetModal({
                     </div>
                   </div>
                 </div>
+              </motion.div>
+            )}
+
+            {/* VIP SUBSCRIPTION TAB */}
+            {activeTab === 'vip' && (
+              <motion.div
+                key="vip"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="space-y-6 text-left"
+              >
+                {/* Header Banner */}
+                <div className="bg-gradient-to-r from-amber-600/10 via-amber-500/5 to-transparent border border-amber-500/20 p-5 relative overflow-hidden">
+                  <div className="absolute right-4 top-4 text-amber-500/10 rotate-12">
+                    <Crown size={80} />
+                  </div>
+                  <div className="relative z-10 space-y-1">
+                    <h2 className="text-sm font-black font-mono text-amber-500 uppercase tracking-widest flex items-center gap-2">
+                      <Crown size={18} className="text-amber-400" />
+                      {lang === 'ru' ? 'RUSTHUB VIP ПРИВИЛЕГИИ' : 'RUSTHUB VIP PRIVILEGES'}
+                    </h2>
+                    <p className="text-xs text-zinc-300 max-w-xl leading-relaxed">
+                      {lang === 'ru' 
+                        ? 'Поддержите развитие проекта и получите эксклюзивный статус на сайте и в чате с моментальной автоматической активацией!' 
+                        : 'Support the project development and unlock exclusive premium status on the site and in chat with instant transaction processing!'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* If already VIP */}
+                {fullProfile?.isVip && (
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                      <CheckCircle2 size={18} />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-emerald-400 uppercase tracking-wider font-mono">
+                        {lang === 'ru' ? 'ВАШ VIP-СТАТУС АКТИВЕН!' : 'YOUR VIP STATUS IS ACTIVE!'}
+                      </h4>
+                      <p className="text-[10px] text-zinc-400 mt-0.5">
+                        {lang === 'ru' 
+                          ? 'Спасибо большое за вашу поддержку! Все премиум-привилегии и темы уже разблокированы в вашем профиле.' 
+                          : 'Thank you immensely for your sponsorship! All premium privileges and card designs are unlocked.'}
+                      </p>
+                      {fullProfile?.vipUntil && (
+                        <div className="text-[10px] font-mono font-black text-amber-500 uppercase tracking-wider mt-1.5 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                          <span>
+                            {lang === 'ru' ? 'АКТИВЕН ДО:' : 'ACTIVE UNTIL:'} {new Date(fullProfile.vipUntil).toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Plans Selection Grid */}
+                <div className="grid grid-cols-1 max-w-md mx-auto gap-4">
+                  {VIP_PLANS.map((plan) => {
+                    const isSelected = selectedPlanId === plan.id;
+                    return (
+                      <div
+                        key={plan.id}
+                        onClick={() => {
+                          setSelectedPlanId(plan.id);
+                          setPaymentStatus('idle');
+                          setPaymentError('');
+                        }}
+                        className={`border p-4 flex flex-col justify-between cursor-pointer transition-all duration-300 relative ${
+                          isSelected
+                            ? 'bg-amber-500/5 border-amber-500 shadow-lg shadow-amber-950/10'
+                            : 'bg-zinc-950/40 border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/30'
+                        }`}
+                      >
+                        <span className="absolute -top-2.5 right-3 bg-amber-500 text-black text-[8px] font-black font-mono px-2 py-0.5 uppercase tracking-wider">
+                          {lang === 'ru' ? '🔥 ВСЁ ВКЛЮЧЕНО' : '🔥 ALL INCLUDED'}
+                        </span>
+                        <div className="space-y-3">
+                          <div>
+                            <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block">
+                              {plan.id.toUpperCase()} PLAN
+                            </span>
+                            <h3 className="text-sm font-black text-white font-mono uppercase mt-0.5">
+                              {plan.name[lang]}
+                            </h3>
+                          </div>
+
+                          <div className="text-2xl font-black text-amber-500 font-mono">
+                            {plan.price} <span className="text-xs text-zinc-400 font-bold font-sans">USDT / {lang === 'ru' ? '45 дней' : '45 days'}</span>
+                          </div>
+
+                          <ul className="space-y-1.5 pt-2 border-t border-zinc-900/40">
+                            {plan.perks[lang].map((perk, i) => (
+                              <li key={i} className="text-[10px] text-zinc-400 flex items-start gap-1.5 leading-relaxed font-medium">
+                                <span className="text-amber-500 mt-0.5 select-none font-bold">✓</span>
+                                <span>{perk}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Checkout & Payment Section */}
+                {(() => {
+                  const activePlan = VIP_PLANS.find(p => p.id === selectedPlanId) || VIP_PLANS[0];
+                  const merchantAddress = "TRAgQoGMAThBaSxkRaYvfzLtH92Fq89DSQ";
+                  return (
+                    <div className="bg-[#0c0d10] border border-zinc-850 p-5 space-y-5">
+                      <div className="space-y-4 w-full">
+                        <div className="space-y-1">
+                          <h3 className="text-xs font-black text-zinc-300 uppercase tracking-wide font-mono">
+                            1. {lang === 'ru' ? 'ОТПРАВЬТЕ USDT TRC20 (СЕТЬ TRON)' : 'SEND USDT TRC20 (TRON NETWORK)'}
+                          </h3>
+                          <p className="text-[10px] text-zinc-500 leading-relaxed font-medium">
+                            {lang === 'ru'
+                              ? 'Сделайте перевод точной суммы с любого удобного кошелька (Binance, Trust Wallet, Tonkeeper, HTX и т.д.) на указанный TRC20 адрес.'
+                              : 'Make a transfer of the exact amount from any wallet (Binance, Trust Wallet, Tonkeeper, etc.) to the specified TRC20 wallet.'}
+                          </p>
+                        </div>
+
+                        {/* Plan Details Summary */}
+                        <div className="bg-zinc-950 p-3 border border-zinc-900 flex justify-between items-center text-xs">
+                          <span className="font-bold text-zinc-400 font-mono uppercase">
+                            {lang === 'ru' ? 'Выбранный план:' : 'Selected Plan:'} {activePlan.name[lang]}
+                          </span>
+                          <span className="font-black text-amber-500 font-mono text-sm">
+                            {activePlan.price}.00 USDT
+                          </span>
+                        </div>
+
+                        {/* Target Address Copy Box */}
+                        <div className="space-y-1.5">
+                          <span className="text-[9px] font-mono text-zinc-500 font-bold uppercase tracking-wider">
+                            {lang === 'ru' ? 'АДРЕС ПОЛУЧАТЕЛЯ (TRC20)' : 'RECIPIENT TRC20 ADDRESS'}
+                          </span>
+                          <div className="flex bg-zinc-950 border border-zinc-900 p-1 rounded-sm gap-2">
+                            <input
+                              type="text"
+                              readOnly
+                              value={merchantAddress}
+                              className="bg-transparent border-0 text-zinc-300 font-mono text-[11px] flex-1 px-2 select-all focus:ring-0 focus:outline-none"
+                            />
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(merchantAddress);
+                                onToast(lang === 'ru' ? 'Адрес скопирован!' : 'Address copied!', 'success');
+                              }}
+                              className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-black text-[10px] font-black font-mono uppercase tracking-wider cursor-pointer transition-colors"
+                            >
+                              <Copy size={11} className="inline mr-1" />
+                              {lang === 'ru' ? 'КОПИРОВАТЬ' : 'COPY'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Verification Form Column */}
+                      <div className="border-t border-zinc-900 pt-5 space-y-4">
+                        <div className="space-y-1">
+                          <h3 className="text-xs font-black text-zinc-300 uppercase tracking-wide font-mono flex items-center justify-between">
+                            <span>2. {lang === 'ru' ? 'ПОДТВЕРДИТЕ ТРАНЗАКЦИЮ' : 'VERIFY TRANSACTION'}</span>
+                            {/* Sandbox Toggle */}
+                            <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={isSandbox}
+                                onChange={(e) => {
+                                  setIsSandbox(e.target.checked);
+                                  if (e.target.checked) {
+                                    setUsdtTxId('demo_tx_' + Array.from({length: 16}, () => Math.floor(Math.random()*16).toString(16)).join(''));
+                                  } else {
+                                    setUsdtTxId('');
+                                  }
+                                }}
+                                className="rounded border-zinc-850 bg-zinc-900 text-amber-500 focus:ring-amber-500/20 w-3.5 h-3.5"
+                              />
+                              <span className="text-[10px] text-amber-500 font-mono uppercase font-black">
+                                {lang === 'ru' ? 'Песочница (Тест)' : 'Sandbox Mode'}
+                              </span>
+                            </label>
+                          </h3>
+                          <p className="text-[10px] text-zinc-500 leading-relaxed font-medium">
+                            {lang === 'ru'
+                              ? 'Вставьте хеш выполненной транзакции (TxID / Hash) в поле ниже и нажмите проверить. Система автоматически сопоставит платеж на блокчейне.'
+                              : 'Paste your Transaction Hash (TxID) below and click verify. Our system will instantly fetch and validate it on the TRON ledger.'}
+                          </p>
+                        </div>
+
+                        {/* TxID Input box */}
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <input
+                            type="text"
+                            disabled={isVerifyingPayment}
+                            value={usdtTxId}
+                            onChange={(e) => setUsdtTxId(e.target.value)}
+                            placeholder={lang === 'ru' ? "Вставьте Hash транзакции (TxID, 64 символа)..." : "Paste Transaction Hash (TxID, 64 hex chars)..."}
+                            className="flex-1 bg-zinc-950 border border-zinc-900 hover:border-zinc-800 focus:border-amber-500 px-3 py-2 text-xs font-mono text-zinc-300 focus:ring-0 focus:outline-none transition-colors"
+                          />
+                          <button
+                            onClick={handleVerifyUsdtPayment}
+                            disabled={isVerifyingPayment}
+                            className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-zinc-800 disabled:to-zinc-900 disabled:text-zinc-600 font-black font-mono text-xs uppercase tracking-wider text-black cursor-pointer transition-all flex items-center justify-center gap-2"
+                          >
+                            {isVerifyingPayment ? (
+                              <>
+                                <RefreshCw size={12} className="animate-spin" />
+                                <span>{lang === 'ru' ? 'ПРОВЕРКА...' : 'VERIFYING...'}</span>
+                              </>
+                            ) : (
+                              <>
+                                <Check size={13} />
+                                <span>{lang === 'ru' ? 'ПРОВЕРИТЬ ОПЛАТУ' : 'VERIFY PAYMENT'}</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+
+                        {/* Payment Verification Messages */}
+                        <AnimatePresence mode="wait">
+                          {paymentStatus === 'verifying' && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -5 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -5 }}
+                              className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-mono uppercase font-bold tracking-wide flex items-center gap-2"
+                            >
+                              <RefreshCw size={12} className="animate-spin text-amber-400" />
+                              <span>
+                                {lang === 'ru'
+                                  ? 'СВЯЗЫВАЕМСЯ С СЕТЬЮ TRON ДЛЯ ПРОВЕРКИ ТРАНЗАКЦИИ... ОПЕРАЦИЯ ЗАНУЛИВАЕТ ДВОЙНЫЕ ТРАТЫ.'
+                                  : 'CONTACTING THE TRON MAINNET FOR VERIFICATION... AVOIDING DOUBLE-SPENDS.'}
+                              </span>
+                            </motion.div>
+                          )}
+
+                          {paymentStatus === 'success' && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -5 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -5 }}
+                              className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex flex-col gap-1 text-left"
+                            >
+                              <div className="font-black font-mono uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
+                                <CheckCircle2 size={14} className="text-emerald-400" />
+                                {lang === 'ru' ? 'ОПЛАТА УСПЕШНО ПОДТВЕРЖДЕНА! 🎉' : 'PAYMENT SUCCESSFULLY VERIFIED! 🎉'}
+                              </div>
+                              <p className="text-[10px] text-zinc-400 mt-1 leading-relaxed font-medium">
+                                {lang === 'ru'
+                                  ? 'Ваш VIP статус и все внутриигровые бонусы мгновенно активированы! Вы можете закрыть кабинет и наслаждаться игровым процессом с новыми правами.'
+                                  : 'Your VIP status and server perks have been permanently mapped. Close your profile page to enjoy survival with your newfound privileges.'}
+                              </p>
+                            </motion.div>
+                          )}
+
+                          {paymentStatus === 'error' && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -5 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -5 }}
+                              className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex flex-col gap-1 text-left"
+                            >
+                              <div className="font-black font-mono uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
+                                <AlertTriangle size={14} className="text-red-400" />
+                                {lang === 'ru' ? 'ОШИБКА ПОДТВЕРЖДЕНИЯ ПЛАТЕЖА' : 'PAYMENT VERIFICATION FAILED'}
+                              </div>
+                              <p className="text-[10px] text-zinc-350 font-mono bg-black/30 p-2 border border-red-500/10 mt-1 leading-relaxed select-all">
+                                {paymentError}
+                              </p>
+                              <p className="text-[9px] text-zinc-500 mt-1 font-medium leading-relaxed">
+                                {lang === 'ru'
+                                  ? 'Рекомендация: Проверьте правильность выбранного тарифного плана, TxID транзакции и отправленной суммы USDT TRC20.'
+                                  : 'Resolution: Please review your selected subscription tier, TxID hash correctness, and sent amount.'}
+                              </p>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  );
+                })()}
               </motion.div>
             )}
 

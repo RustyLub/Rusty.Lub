@@ -85,9 +85,28 @@
         "isBlocked": { "type": "boolean" },
         "isVip": { "type": "boolean" }
       }
+    },
+    "Payment": {
+      "title": "Payment",
+      "description": "USDT TRC20 Payment verification details",
+      "type": "object",
+      "properties": {
+        "txId": { "type": "string" },
+        "userId": { "type": "string" },
+        "amount": { "type": "number" },
+        "plan": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "verifiedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["txId", "userId", "amount", "plan", "status", "createdAt"]
     }
   },
   "firestore": {
+    "/payments/{txId}": {
+      "schema": "Payment",
+      "description": "USDT TRC20 Payments and subscriptions tracker"
+    },
     "/messages/{messageId}": {
       "schema": "Message",
       "description": "Global chat messages collection"

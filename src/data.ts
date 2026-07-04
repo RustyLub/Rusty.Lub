@@ -1,4 +1,4 @@
-import { ErrorItem, BindItem, RaidWeapon, RaidTarget } from './types';
+import { ErrorItem, BindItem, RaidWeapon, RaidTarget, AdminCommandItem } from './types';
 
 export const errorDatabase: ErrorItem[] = [
   // --- CRITICAL ERRORS ---
@@ -435,7 +435,427 @@ export const errorDatabase: ErrorItem[] = [
 ];
 
 export const bindsDatabase: BindItem[] = [
+  // --- ОСНОВЫ РАБОТЫ ---
+  {
+    category: 'УПРАВЛЕНИЕ',
+    cmd: 'bind <клавиша>',
+    desc: 'Проверить привязку клавиши',
+    explanation: 'Показывает в консоли, какая команда привязана к указанной клавише.'
+  },
+  {
+    category: 'УПРАВЛЕНИЕ',
+    cmd: 'unbind <клавиша>',
+    desc: 'Удалить бинд с клавиши',
+    explanation: 'Полностью удаляет команду, назначенную на указанную клавишу.'
+  },
+  {
+    category: 'УПРАВЛЕНИЕ',
+    cmd: 'bind <клавиша> ""',
+    desc: 'Очистить бинд',
+    explanation: 'Очищает бинд на клавишу (также можно использовать bind <клавиша> clear).'
+  },
+
+  // --- ПЕРЕДВИЖЕНИЕ ---
+  {
+    category: 'УПРАВЛЕНИЕ',
+    cmd: 'bind x "forward;sprint"',
+    desc: 'Автобег (альтернативный вариант на X)',
+    explanation: 'Автоматический бег. Нажмите X для активации, для остановки нажмите W.'
+  },
+  {
+    category: 'УПРАВЛЕНИЕ',
+    cmd: 'bind j "buttons.forward; buttons.sprint; buttons.jump"',
+    desc: 'Автоплавание',
+    explanation: 'Персонаж автоматически плывет вперед и удерживается на поверхности воды.'
+  },
+  {
+    category: 'УПРАВЛЕНИЕ',
+    cmd: 'bind c "~duck;+duck"',
+    desc: 'Приседание с удержанием (Toggle)',
+    explanation: 'Переключение режима приседания по нажатию клавиши C.'
+  },
+
+  // --- БОЕВЫЕ ---
+  {
+    category: 'PVP',
+    cmd: 'bind z "attack;duck"',
+    desc: 'Автоатака + приседание',
+    explanation: 'Персонаж приседает и начинает непрерывно атаковать или стрелять.'
+  },
+  {
+    category: 'PVP',
+    cmd: 'bind z "+attack;+duck"',
+    desc: 'Автоатака при удержании',
+    explanation: 'При зажатии клавиши Z персонаж приседает и ведет огонь.'
+  },
+  {
+    category: 'PVP',
+    cmd: 'bind p "+attack; +jump"',
+    desc: 'Автоатака с прыжком',
+    explanation: 'Персонаж непрерывно прыгает и атакует.'
+  },
+  {
+    category: 'PVP',
+    cmd: 'bind r "reload; attack; duck"',
+    desc: 'Стрельба с авто-перезарядкой',
+    explanation: 'При перезарядке персонаж автоматически приседает и атакует.'
+  },
+  {
+    category: 'PVP',
+    cmd: 'bind mouse1 "+attack2;+input.sensitivity .45;input.sensitivity .2"',
+    desc: 'Понижение чувствительности при прицеливании (ADS)',
+    explanation: 'Снижает чувствительность мыши при зажатии ПКМ (прицеливании) для точного контроля отдачи.'
+  },
+  {
+    category: 'PVP',
+    cmd: 'bind mouse1 "+lighttoggle;+attack2"',
+    desc: 'Включение фонарика/лазера при прицеливании (ПКМ)',
+    explanation: 'Автоматически активирует лазер или фонарик во время прицеливания.'
+  },
+  {
+    category: 'PVP',
+    cmd: 'bind x "graphics.vm_horizontal_flip true"',
+    desc: 'Смена рук (оружие слева/справа)',
+    explanation: 'Переключает оружие в левую руку. Для возврата используйте значение false.'
+  },
+
+  // --- КАРТА И ИНТЕРФЕЙС ---
+  {
+    category: 'QOL',
+    cmd: 'bind g "+map;+focusmap"',
+    desc: 'Открыть карту с автофокусом',
+    explanation: 'Открывает карту и сразу фокусирует камеру на вашем персонаже.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'bind c "cinematic_view 1;cinematic_view 0"',
+    desc: 'Отключение HUD (Кинематографический режим)',
+    explanation: 'Убирает весь игровой интерфейс для создания красивых скриншотов или видео.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'bind f9 "streamermode true;streamermode false"',
+    desc: 'Режим стримера',
+    explanation: 'Включает или выключает режим скрытия никнеймов и названий серверов.'
+  },
+
+  // --- БЫСТРЫЕ ДЕЙСТВИЯ И КРАФТ ---
+  {
+    category: 'ФАРМ',
+    cmd: 'bind mouse3 "+buttons.hoverloot"',
+    desc: 'Быстрый лут на колесико мыши',
+    explanation: 'Позволяет быстро собирать предметы из ящиков/трупов при зажатии колесика мыши.'
+  },
+  {
+    category: 'PVP',
+    cmd: 'bind c "+buttons.hoverloot; +altlook"',
+    desc: 'Быстрая экипировка одежды',
+    explanation: 'Помогает мгновенно надеть броню/одежду из открытого ящика.'
+  },
+  {
+    category: 'МЕДИЦИНА',
+    cmd: 'bind 3 "+buttons.slot3; +buttons.attack"',
+    desc: 'Быстрое использование предмета из слота 3',
+    explanation: 'Моментально выбирает и активирует (например, прожимает шприц) предмет из 3 слота хотбара.'
+  },
+  {
+    category: 'МЕДИЦИНА',
+    cmd: 'bind h "craft.add -2072273936 1"',
+    desc: 'Быстрый крафт 1 бинта',
+    explanation: 'Моментально добавляет в очередь крафта 1 медицинский бинт.'
+  },
+  {
+    category: 'МЕДИЦИНА',
+    cmd: 'bind h "craft.add -2072273936 10"',
+    desc: 'Быстрый крафт 10 бинтов',
+    explanation: 'Добавляет в очередь крафта сразу 10 медицинских бинтов.'
+  },
+  {
+    category: 'МЕДИЦИНА',
+    cmd: 'bind c "craft.add 1079279582 1"',
+    desc: 'Быстрый крафт шприца',
+    explanation: 'Моментально ставит на крафт один медицинский шприц.'
+  },
+  {
+    category: 'ФАРМ',
+    cmd: 'bind p "craft.add -946369541 1"',
+    desc: 'Быстрый крафт бобовой гранаты',
+    explanation: 'Ставит на крафт одну бобовую гранату.'
+  },
+  {
+    category: 'СТРОЙКА',
+    cmd: 'bind u "craft.add 1248356124 1"',
+    desc: 'Быстрый крафт C4',
+    explanation: 'Моментально ставит на крафт одну таймерную взрывчатку (C4).'
+  },
+  {
+    category: 'ФАРМ',
+    cmd: 'bind y "craft.add -265876753 999"',
+    desc: 'Быстрый крафт пороха',
+    explanation: 'Запускает крафт пороха в максимально доступном количестве (999 шт).'
+  },
+  {
+    category: 'PVP',
+    cmd: 'bind j "craft.add -1211166256 100"',
+    desc: 'Быстрый крафт патронов 5.56',
+    explanation: 'Ставит на крафт 100 патронов калибра 5.56.'
+  },
+  {
+    category: 'СТРОЙКА',
+    cmd: 'bind n "craft.add -592016202 100"',
+    desc: 'Быстрый крафт взрывчатки (экспы)',
+    explanation: 'Запускает крафт 100 единиц взрывчатки.'
+  },
+
+  // --- КОНСОЛЬ И ОТЛАДКА ---
+  {
+    category: 'QOL',
+    cmd: 'bind f1 "consoletoggle;combatlog;ping"',
+    desc: 'Открыть консоль с CombatLog и пингом',
+    explanation: 'При открытии консоли автоматически отображаются логи боя и ваш пинг.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'bind f2 "consoletoggle;combatlog_outgoing;ping"',
+    desc: 'Только исходящий урон в CombatLog + Пинг',
+    explanation: 'Показывает только тот урон, который нанесли вы, помогая быстро оценить ситуацию.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'bind f3 "perf 1"',
+    desc: 'Показать FPS (на клавишу F3)',
+    explanation: 'Включает отображение счетчика FPS и сетевой задержки.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'bind p "disconnect"',
+    desc: 'Отключиться от сервера',
+    explanation: 'Мгновенно выходит с сервера в главное меню по нажатию клавиши P.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'bind k "kill"',
+    desc: 'Самоубийство (Respawn)',
+    explanation: 'Быстро совершает самоубийство для респавна на спальном мешке.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'bind o "pool.clear_assets;pool.clear_memory;pool.clear_prefabs;gc.collect"',
+    desc: 'Очистка кэша и памяти (Буст FPS)',
+    explanation: 'Полностью очищает оперативную память, префабы и ассеты, устраняя фризы.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'bind k "audio.master 0.1"',
+    desc: 'Громкость на минимум (10%)',
+    explanation: 'Снижает общую громкость игры до 10%, чтобы слышать тиммейтов во время полета или рейда.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'bind l "audio.master 0.8"',
+    desc: 'Громкость на максимум (80%)',
+    explanation: 'Возвращает стандартный высокий уровень громкости игры.'
+  },
+
+  // --- РАСШИРЕННЫЕ БИНДЫ ---
+  {
+    category: 'УПРАВЛЕНИЕ',
+    cmd: 'bind L "~meta.exec \\"client.lookatradius 0\\" \\"chat.add 0 0 MIN\\"; meta.exec \\"client.lookatradius 0.2\\" \\"chat.add 0 0 DEFAULT\\"; meta.exec \\"client.lookatradius 10\\" \\"chat.add 0 0 MAX\\""',
+    desc: 'Динамический радиус взаимодействия',
+    explanation: 'Переключает радиус взаимодействия (поднятие предметов, открытие дверей) между минимальным, стандартным и максимальным.'
+  },
+  {
+    category: 'УПРАВЛЕНИЕ',
+    cmd: 'bind j "+graphics.fov 90; +graphics.hud 1; graphics.fov 70; graphics.hud 0"',
+    desc: 'Зум экрана (Приближение на J)',
+    explanation: 'Временный зум для стрельбы на дальние дистанции или разведки.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'bind insert "~fps.limit 2;fps.limit 5;fps.limit -1"',
+    desc: 'Ограничение FPS',
+    explanation: 'Позволяет быстро переключать лимит кадров в секунду.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'bind f12 "~audio.master 0.1;audio.master 0.5"',
+    desc: 'Быстрое переключение громкости',
+    explanation: 'Тумблер громкости между 10% и 50% на клавишу F12.'
+  },
+
+  // --- МОДОВЫЕ СЕРВЕРЫ ---
+  {
+    category: 'МОДОВЫЕ',
+    cmd: 'bind h "chat.say \\"/home home\\""',
+    desc: 'Телепорт домой (/home)',
+    explanation: 'Автоматически отправляет в чат команду для телепортации на вашу точку "home".'
+  },
+  {
+    category: 'МОДОВЫЕ',
+    cmd: 'bind t "chat.say \\"/tpa\\""',
+    desc: 'Принять телепорт (/tpa)',
+    explanation: 'Быстро принимает запрос на телепортацию от другого игрока.'
+  },
+  {
+    category: 'МОДОВЫЕ',
+    cmd: 'bind c "chat.say \\"/tpc\\""',
+    desc: 'Отмена телепорта (/tpc)',
+    explanation: 'Отменяет текущую телепортацию.'
+  },
+  {
+    category: 'МОДОВЫЕ',
+    cmd: 'bind k "chat.say \\"/kit\\""',
+    desc: 'Открыть меню китов (/kit)',
+    explanation: 'Автоматически вводит в чат команду для выбора стартовых наборов ресурсов.'
+  },
+  {
+    category: 'МОДОВЫЕ',
+    cmd: 'bind r "chat.say \\"/remove\\""',
+    desc: 'Режим удаления построек (/remove)',
+    explanation: 'Включает или выключает режим удаления строительных блоков.'
+  },
+  {
+    category: 'МОДОВЫЕ',
+    cmd: 'bind u "building.upgrade"',
+    desc: 'Мгновенный апгрейд всей постройки',
+    explanation: 'Автоматически улучшает строительный блок, на который вы смотрите, до максимально доступного уровня.'
+  },
+
+  // --- NEW BINDS ---
+  {
+    category: 'УПРАВЛЕНИЕ',
+    cmd: 'bind f2 meta.exec "client.lookatradius 0.01" "chat.add 0 0 0 LOWrad"',
+    desc: 'Установить минимальный радиус взаимодействия',
+    explanation: 'Уменьшает радиус взаимодействия до минимума, отображает сообщение в чате.'
+  },
+  {
+    category: 'УПРАВЛЕНИЕ',
+    cmd: 'bind f3 meta.exec "client.lookatradius 0.2" "chat.add 0 0 MEDrad"',
+    desc: 'Установить средний радиус взаимодействия',
+    explanation: 'Устанавливает радиус взаимодействия на среднее значение.'
+  },
+  {
+    category: 'УПРАВЛЕНИЕ',
+    cmd: 'bind f4 meta.exec "client.lookatradius 10" "chat.add 0 0 MAXrad"',
+    desc: 'Установить максимальный радиус взаимодействия',
+    explanation: 'Увеличивает радиус взаимодействия до максимума.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'effects.maxgibdist 0',
+    desc: 'Отключить обломки',
+    explanation: 'Полностью отключает отображение обломков в игре.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'client.headlerp 4',
+    desc: 'Ускорить поворот головы (ALT)',
+    explanation: 'Ускоряет переход с бокового зрения (ALT). Дефолт: 1.'
+  },
+  {
+    category: 'УПРАВЛЕНИЕ',
+    cmd: 'bind e "+nextskin;+use;+hoverloot"',
+    desc: 'Быстрое лутание',
+    explanation: 'Дополняет стандартное использование E и H, ускоряя лутание.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'mesh.quality 28',
+    desc: 'Снизить детализацию объектов',
+    explanation: 'Немного снижает детализацию для стрельбы с новых позиций.'
+  },
+  {
+    category: 'PVP',
+    cmd: 'hitnotify.notification_level 2',
+    desc: 'Улучшенная регистрация попаданий',
+    explanation: 'Работает на 99.9% для регистрации урона по врагу.'
+  },
+  {
+    category: 'PVP',
+    cmd: 'bind mouse0 "+lighttoggle;+attack"',
+    desc: 'Авто-свет при стрельбе',
+    explanation: 'Включает фонарь/лазер при стрельбе.'
+  },
+  {
+    category: 'УПРАВЛЕНИЕ',
+    cmd: 'bind b "forward;sprint"',
+    desc: 'Постоянный бег',
+    explanation: 'Автоматический бег.'
+  },
+  {
+    category: 'ФАРМ',
+    cmd: 'bind l "attack"',
+    desc: 'Бесконечный удар',
+    explanation: 'Бесконечные удары инструментом.'
+  },
+  {
+    category: 'УПРАВЛЕНИЕ',
+    cmd: 'bind end "kill"',
+    desc: 'Самоубийство',
+    explanation: 'Клавиша END для быстрой смерти.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'bind f1 "consoletoggle;console.clear;combatlog"',
+    desc: 'Консоль + Combatlog',
+    explanation: 'Открывает консоль с уже прописанным комбатлогом.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'graphics.vm_fov_scale 0',
+    desc: 'Изменение положения оружия',
+    explanation: 'Настройка положения оружия в руках.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'physics.steps 60',
+    desc: 'Увеличение высоты прыжка',
+    explanation: 'Увеличивает высоту прыжка.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'bind 0 "gc.collect"',
+    desc: 'Очистить кэш игры',
+    explanation: 'Очистка оперативной памяти и кэша.'
+  },
+  {
+    category: 'PVP',
+    cmd: 'bind leftalt "+altlook; +headlerp 6775;headlerp 0"',
+    desc: 'Имбо-бинд на зум',
+    explanation: 'Сильный зум при использовании ALT и ПКМ.'
+  },
+  {
+    category: 'PVP',
+    cmd: 'input.bind x "+graphics.fov 90; +graphics.hud 1; graphics.fov 70; graphics.hud 0"',
+    desc: 'Зум FOV X',
+    explanation: 'При зажатии X зум увеличивается (FOV 70).'
+  },
+  {
+    category: 'PVP',
+    cmd: 'input.bind z "+graphics.fov 90; +graphics.hud 1; graphics.fov 70; graphics.hud 0"',
+    desc: 'Зум FOV Z',
+    explanation: 'При зажатии Z зум увеличивается (FOV 70).'
+  },
+  {
+    category: 'ФАРМ',
+    cmd: 'input.bind 0 "craft.add -97956382 1; craft.add 15388698 2; craft.add 1390353317 5"',
+    desc: 'Быстрый крафт из лута',
+    explanation: 'Автоматически ставит на крафт базовые предметы при открытии чужого инвентаря.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'bind f6 "~meta.exec \\"audio.speakers 1\\";meta.exec \\"audio.speakers 2\\""',
+    desc: 'Вкл/Выкл звуки окружения',
+    explanation: 'Моно/стерео режим для управления звуками окружения.'
+  },
+  {
+    category: 'QOL',
+    cmd: 'input.bind 11 "+global.hudcomponent BinocularOverlay 1; global.hudcomponent BinocularOverlay 0"',
+    desc: 'Отключение худа бинокля',
+    explanation: 'Включение/выключение наложения бинокля.'
+  },
   // --- PVP ---
+
   {
     category: 'PVP',
     cmd: 'bind z "attack"',
@@ -945,5 +1365,310 @@ export const raidTargets: RaidTarget[] = [
     satchel: 1,
     explosive_ammo: 15,
     beancan: 4
+  }
+];
+
+export const adminCommandsDatabase: AdminCommandItem[] = [
+  // --- УПРАВЛЕНИЕ ПРАВАМИ АДМИНИСТРАТОРА ---
+  {
+    category: 'ПРАВА',
+    cmd: 'ownerid <Steam64ID> "<Имя>"',
+    desc: 'Назначить владельца (Owner)',
+    explanation: 'Выдает игроку максимальные права администратора (auth level 2) по его Steam64ID.'
+  },
+  {
+    category: 'ПРАВА',
+    cmd: 'moderatorid <Steam64ID> "<Имя>"',
+    desc: 'Назначить модератора (Moderator)',
+    explanation: 'Выдает игроку права модератора (auth level 1) по его Steam64ID.'
+  },
+  {
+    category: 'ПРАВА',
+    cmd: 'removeowner <Steam64ID>',
+    desc: 'Снять права владельца',
+    explanation: 'Лишает игрока прав администратора (auth level 2).'
+  },
+  {
+    category: 'ПРАВА',
+    cmd: 'removemoderator <Steam64ID>',
+    desc: 'Снять права модератора',
+    explanation: 'Лишает игрока прав модератора (auth level 1).'
+  },
+  {
+    category: 'ПРАВА',
+    cmd: 'server.writecfg',
+    desc: 'Сохранить права в конфиг',
+    explanation: 'Важно! Сохраняет все изменения прав администраторов и модераторов в конфигурационный файл сервера, чтобы они не сбросились после рестарта.'
+  },
+
+  // --- МОДЕРАЦИЯ ИГРОКОВ ---
+  {
+    category: 'МОДЕРАЦИЯ',
+    cmd: 'ban "<Имя>" "<Причина>"',
+    desc: 'Забанить игрока по имени',
+    explanation: 'Навсегда блокирует доступ к серверу игроку с указанным именем.'
+  },
+  {
+    category: 'МОДЕРАЦИЯ',
+    cmd: 'banid <Steam64ID> "<Причина>"',
+    desc: 'Забанить игрока по SteamID',
+    explanation: 'Блокирует игрока по его SteamID (работает, даже если игрока сейчас нет на сервере).'
+  },
+  {
+    category: 'МОДЕРАЦИЯ',
+    cmd: 'unban <Steam64ID>',
+    desc: 'Разбанить игрока',
+    explanation: 'Снимает блокировку с игрока по его SteamID.'
+  },
+  {
+    category: 'МОДЕРАЦИЯ',
+    cmd: 'banlistex',
+    desc: 'Список забаненных игроков',
+    explanation: 'Выводит в консоль список всех заблокированных игроков с указанием причин бана.'
+  },
+  {
+    category: 'МОДЕРАЦИЯ',
+    cmd: 'kick "<Имя>" "<Причина>"',
+    desc: 'Кикнуть игрока с сервера',
+    explanation: 'Принудительно отключает игрока от сервера с выводом причины на экран.'
+  },
+  {
+    category: 'МОДЕРАЦИЯ',
+    cmd: 'kickall "<Причина>"',
+    desc: 'Кикнуть всех игроков',
+    explanation: 'Принудительно отключает ВСЕХ находящихся на сервере игроков.'
+  },
+  {
+    category: 'МОДЕРАЦИЯ',
+    cmd: 'mutevoice <Steam64ID>',
+    desc: 'Заглушить микрофон (Mute Voice)',
+    explanation: 'Запрещает указанному игроку использовать голосовой чат.'
+  },
+  {
+    category: 'МОДЕРАЦИЯ',
+    cmd: 'unmutevoice <Steam64ID>',
+    desc: 'Включить микрофон (Unmute Voice)',
+    explanation: 'Разрешает указанному игроку снова использовать голосовой чат.'
+  },
+  {
+    category: 'МОДЕРАЦИЯ',
+    cmd: 'mutechat <Steam64ID>',
+    desc: 'Заглушить текстовый чат (Mute Chat)',
+    explanation: 'Запрещает указанному игроку отправлять текстовые сообщения в общий чат.'
+  },
+  {
+    category: 'МОДЕРАЦИЯ',
+    cmd: 'unmutechat <Steam64ID>',
+    desc: 'Включить текстовый чат (Unmute Chat)',
+    explanation: 'Разрешает игроку снова писать в текстовый чат.'
+  },
+  {
+    category: 'МОДЕРАЦИЯ',
+    cmd: 'status',
+    desc: 'Список игроков и статус сервера',
+    explanation: 'Показывает подробный список игроков на сервере, их SteamID, пинг, IP-адрес и общие показатели сервера (также можно использовать команду players).'
+  },
+
+  // --- РЕЖИМЫ БОГА И ПОЛЁТА ---
+  {
+    category: 'РЕЖИМЫ',
+    cmd: 'god true',
+    desc: 'Включить режим Бога',
+    explanation: 'Включает бессмертие. Персонаж не теряет здоровье, не испытывает голод и жажду (для выключения: god false).'
+  },
+  {
+    category: 'РЕЖИМЫ',
+    cmd: 'noclip',
+    desc: 'Режим полета (Noclip)',
+    explanation: 'Включает/выключает полет персонажа и позволяет проходить сквозь любые текстуры и стены.'
+  },
+  {
+    category: 'РЕЖИМЫ',
+    cmd: 'heal <Число>',
+    desc: 'Вылечить себя',
+    explanation: 'Мгновенно восстанавливает указанное количество очков здоровья (HP).'
+  },
+  {
+    category: 'РЕЖИМЫ',
+    cmd: 'refillvitals',
+    desc: 'Восстановить все показатели',
+    explanation: 'Полностью восстанавливает здоровье до 100%, а также шкалы еды и воды.'
+  },
+
+  // --- ТЕЛЕПОРТАЦИЯ ---
+  {
+    category: 'ТЕЛЕПОРТ',
+    cmd: 'teleport "<Имя1>" "<Имя2>"',
+    desc: 'Телепортировать игрока к игроку',
+    explanation: 'Переносит первого указанного игрока к местоположению второго игрока.'
+  },
+  {
+    category: 'ТЕЛЕПОРТ',
+    cmd: 'teleport2me "<Имя>"',
+    desc: 'Телепортировать игрока к себе',
+    explanation: 'Мгновенно переносит указанного игрока к вам.'
+  },
+  {
+    category: 'ТЕЛЕПОРТ',
+    cmd: 'teleportpos <x> <y> <z>',
+    desc: 'Телепортация по координатам',
+    explanation: 'Переносит вашего персонажа в точную точку на карте по координатам X Y Z.'
+  },
+  {
+    category: 'ТЕЛЕПОРТ',
+    cmd: 'teleport2marker',
+    desc: 'Телепорт к метке на карте',
+    explanation: 'Мгновенно переносит вас к установленной вами метке на карте (ПКМ по карте).'
+  },
+  {
+    category: 'ТЕЛЕПОРТ',
+    cmd: 'teleportlos',
+    desc: 'Телепорт по взгляду (LOS)',
+    explanation: 'Телепортирует вашего персонажа точно на поверхность объекта или земли, на которую направлен ваш прицел.'
+  },
+
+  // --- ВЫДАЧА ПРЕДМЕТОВ И ЧЕРТЕЖЕЙ ---
+  {
+    category: 'ВЫДАЧА',
+    cmd: 'inventory.give "<Предмет>" <Кол-во>',
+    desc: 'Выдать предмет себе',
+    explanation: 'Добавляет указанный предмет в ваш инвентарь.',
+    example: 'inventory.give "rifle.ak" 1'
+  },
+  {
+    category: 'ВЫДАЧА',
+    cmd: 'inventory.giveto "<Имя>" "<Предмет>" <Кол-во>',
+    desc: 'Выдать предмет игроку',
+    explanation: 'Добавляет указанный предмет в инвентарь выбранного игрока.',
+    example: 'inventory.giveto "Player1" "wood" 1000'
+  },
+  {
+    category: 'ВЫДАЧА',
+    cmd: 'inventory.giveall "<Предмет>" <Кол-во>',
+    desc: 'Выдать предмет ВСЕМ игрокам',
+    explanation: 'Выдает указанный предмет абсолютно всем игрокам, находящимся в данный момент в сети.',
+    example: 'inventory.giveall "bandage" 5'
+  },
+  {
+    category: 'ВЫДАЧА',
+    cmd: 'inventory.givebp "<Предмет>"',
+    desc: 'Выдать чертеж предмета',
+    explanation: 'Выдает вам изученный рецепт (Blueprint) указанного предмета.',
+    example: 'inventory.givebp "rifle.ak"'
+  },
+  {
+    category: 'ВЫДАЧА',
+    cmd: 'inventory.givebpall',
+    desc: 'Изучить все чертежи',
+    explanation: 'Мгновенно разблокирует и изучает абсолютно все существующие чертежи в игре для вашего персонажа.'
+  },
+
+  // --- УПРАВЛЕНИЕ МИРОМ ---
+  {
+    category: 'МИР',
+    cmd: 'env.time <0-24>',
+    desc: 'Установить время суток',
+    explanation: 'Меняет время суток на сервере (например, env.time 12 — полдень, env.time 0 — полночь).'
+  },
+  {
+    category: 'МИР',
+    cmd: 'env.addtime <Часы>',
+    desc: 'Добавить часы / Промотать время',
+    explanation: 'Проматывает время на сервере вперед на указанное число часов.'
+  },
+  {
+    category: 'МИР',
+    cmd: 'weather.rain <0-1>',
+    desc: 'Интенсивность дождя',
+    explanation: 'Устанавливает силу дождя от 0 (нет дождя) до 1 (сильный дождь).'
+  },
+  {
+    category: 'МИР',
+    cmd: 'weather.fog <0-1>',
+    desc: 'Плотность тумана',
+    explanation: 'Устанавливает интенсивность тумана на сервере (0 - ясно, 1 - максимальный туман).'
+  },
+  {
+    category: 'МИР',
+    cmd: 'weather.wind <0-1>',
+    desc: 'Сила ветра',
+    explanation: 'Меняет силу ветра на сервере.'
+  },
+  {
+    category: 'МИР',
+    cmd: 'heli.call',
+    desc: 'Вызвать патрульный вертолет',
+    explanation: 'Принудительно запускает игровое событие с патрульным вертолетом (он летит на карту).'
+  },
+  {
+    category: 'МИР',
+    cmd: 'heli.calltome',
+    desc: 'Вызвать вертолет к себе',
+    explanation: 'Вызывает патрульный вертолет непосредственно к вашей текущей геопозиции.'
+  },
+  {
+    category: 'МИР',
+    cmd: 'bradley.quickrespawn',
+    desc: 'Мгновенный респавн танка Bradley',
+    explanation: 'Мгновенно спавнит танк Брэдли на космодроме (Launch Site).'
+  },
+  {
+    category: 'МИР',
+    cmd: 'supply.call',
+    desc: 'Вызвать Air Drop (Самолет)',
+    explanation: 'Вызывает грузовой самолет, который сбросит аирдроп на случайную точку карты (также можно использовать supply.drop).'
+  },
+
+  // --- УПРАВЛЕНИЕ СУЩНОСТЯМИ ---
+  {
+    category: 'СУЩНОСТИ',
+    cmd: 'ent kill',
+    desc: 'Удалить объект перед собой',
+    explanation: 'Осторожно! Навсегда удаляет объект (стену, дверь, ящик, печку, шкаф, коптер), на который направлен ваш взгляд.'
+  },
+  {
+    category: 'СУЩНОСТИ',
+    cmd: 'ent who',
+    desc: 'Узнать владельца объекта',
+    explanation: 'Выводит в консоль SteamID и имя игрока, который установил или застроил объект перед вашим прицелом.'
+  },
+  {
+    category: 'СУЩНОСТИ',
+    cmd: 'ent lock',
+    desc: 'Заблокировать замок/дверь',
+    explanation: 'Принудительно закрывает/блокирует выбранный кодовый или ключевой замок (для разблокировки: ent unlock).'
+  },
+  {
+    category: 'СУЩНОСТИ',
+    cmd: 'spawn "<Сущность>"',
+    desc: 'Заспавнить сущность',
+    explanation: 'Спавнит выбранную сущность перед вами (например, животных, бочки, ящики, ученых).',
+    example: 'spawn "bear"'
+  },
+
+  // --- СООБЩЕНИЯ И ИНФОРМАЦИЯ ---
+  {
+    category: 'ИНФО',
+    cmd: 'say "<Текст>"',
+    desc: 'Объявление от лица сервера (Say)',
+    explanation: 'Отправляет в чат глобальное сообщение, стилизованное под серверное оповещение (выделяется красным цветом).'
+  },
+  {
+    category: 'ИНФО',
+    cmd: 'find "<Слово>"',
+    desc: 'Поиск консольных команд',
+    explanation: 'Помогает найти нужную консольную команду или переменную по ключевому слову.'
+  },
+  {
+    category: 'ИНФО',
+    cmd: 'serverinfo',
+    desc: 'Системная информация о сервере',
+    explanation: 'Выводит в консоль данные о времени непрерывной работы сервера (Uptime), текущем FPS, занятой оперативной памяти и количестве сущностей.'
+  },
+  {
+    category: 'ИНФО',
+    cmd: 'sv stats',
+    desc: 'Статистика игроков',
+    explanation: 'Выводит подробную игровую статистику игроков (убийства, смерти, время нахождения на сервере).'
   }
 ];

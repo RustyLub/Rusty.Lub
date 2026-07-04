@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Home,
@@ -75,6 +75,7 @@ import NewsTab from './components/NewsTab';
 import AdminTab from './components/AdminTab';
 import AuthModal from './components/AuthModal';
 import CabinetModal from './components/CabinetModal';
+import PlayerTrackerTab from './components/PlayerTrackerTab';
 // @ts-ignore
 import globalWarfareLogo from './assets/images/global_warfare_logo_1782807450573.jpg';
 // @ts-ignore
@@ -198,7 +199,7 @@ const appTranslations = {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news' | 'admin'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news' | 'admin' | 'tracker'>('home');
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lang, setLang] = useState<'ru' | 'en'>('en');
@@ -241,6 +242,19 @@ export default function App() {
   const [onlineCount, setOnlineCount] = useState<number>(0);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const isAdmin = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'admin');
+  const isVip = useMemo(() => {
+    if (isAdmin) return true;
+    if (!currentUser) return false;
+    if (currentUser.isVip) return true;
+    if (currentUser.vipUntil) {
+      try {
+        return new Date(currentUser.vipUntil).getTime() > Date.now();
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  }, [currentUser, isAdmin]);
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [cabinetModalOpen, setCabinetModalOpen] = useState(false);
@@ -294,44 +308,66 @@ export default function App() {
 
   // Real-time Auth state sync
   useEffect(() => {
+    let unsubUserDoc: (() => void) | null = null;
+    
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setIsAuthLoading(false);
+      if (unsubUserDoc) {
+        unsubUserDoc();
+        unsubUserDoc = null;
+      }
+      
       if (firebaseUser) {
-        // User is signed in to Firebase
-        const userRef = doc(db, 'chat_users', firebaseUser.uid);
-        const userSnap = await getDoc(userRef);
-        
-        if (userSnap.exists()) {
-          const data = userSnap.data();
-          const customUser: CustomUser = {
-            uid: firebaseUser.uid,
-            displayName: data.displayName || firebaseUser.displayName || 'Survivor',
-            email: firebaseUser.email || data.email || '',
-            photoURL: data.photoURL || firebaseUser.photoURL || '',
-            avatarClass: data.avatarClass || 'heavy_plate',
-            role: data.role || 'user'
-          };
-          setCurrentUser(customUser);
-          localStorage.setItem('rust_survivor_user', JSON.stringify(customUser));
-        } else {
-          // If profile doc doesn't exist but auth exists
-          const customUser: CustomUser = {
-            uid: firebaseUser.uid,
-            displayName: firebaseUser.displayName || 'Survivor',
-            email: firebaseUser.email || '',
-            photoURL: firebaseUser.photoURL || '',
-            avatarClass: 'heavy_plate',
-            role: 'user'
-          };
-          setCurrentUser(customUser);
-          localStorage.setItem('rust_survivor_user', JSON.stringify(customUser));
-        }
+        // Subscribe to user document in Firestore in real-time
+        unsubUserDoc = onSnapshot(doc(db, 'chat_users', firebaseUser.uid), (userSnap) => {
+          if (userSnap.exists()) {
+            const data = userSnap.data();
+            const customUser: CustomUser = {
+              uid: firebaseUser.uid,
+              displayName: data.displayName || firebaseUser.displayName || 'Survivor',
+              email: firebaseUser.email || firebaseUser.email || '',
+              photoURL: data.photoURL || firebaseUser.photoURL || '',
+              avatarClass: data.avatarClass || 'heavy_plate',
+              bio: data.bio || '',
+              clanTag: data.clanTag || '',
+              hoursPlayed: data.hoursPlayed || 0,
+              playstyle: data.playstyle || '',
+              favoriteWeapon: data.favoriteWeapon || '',
+              steamId: data.steamId || '',
+              steamName: data.steamName || '',
+              steamAvatar: data.steamAvatar || '',
+              customTheme: data.customTheme || 'default',
+              role: data.role || 'user',
+              isVip: !!data.isVip,
+              isChatVip: !!data.isChatVip,
+              vipUntil: data.vipUntil || ''
+            };
+            setCurrentUser(customUser);
+            localStorage.setItem('rust_survivor_user', JSON.stringify(customUser));
+          } else {
+            const customUser: CustomUser = {
+              uid: firebaseUser.uid,
+              displayName: firebaseUser.displayName || 'Survivor',
+              email: firebaseUser.email || '',
+              photoURL: firebaseUser.photoURL || '',
+              avatarClass: 'heavy_plate',
+              role: 'user',
+              isVip: false,
+              isChatVip: false,
+              vipUntil: ''
+            };
+            setCurrentUser(customUser);
+            localStorage.setItem('rust_survivor_user', JSON.stringify(customUser));
+          }
+        }, (err) => {
+          handleFirestoreError(err, OperationType.GET, `chat_users/${firebaseUser.uid}`);
+        });
       } else {
         // User is signed out of Firebase - clear sensitive flags
         if (localStorage.getItem('rust_survivor_user')) {
           const saved = JSON.parse(localStorage.getItem('rust_survivor_user') || '{}');
-          if (saved.email || saved.role === 'admin') {
-            const updated = { ...saved, email: '', role: 'user' };
+          if (saved.email || saved.role === 'admin' || saved.isVip || saved.isChatVip) {
+            const updated = { ...saved, email: '', role: 'user', isVip: false, isChatVip: false, vipUntil: '' };
             setCurrentUser(updated);
             localStorage.setItem('rust_survivor_user', JSON.stringify(updated));
           }
@@ -340,7 +376,11 @@ export default function App() {
         }
       }
     });
-    return () => unsubscribe();
+    
+    return () => {
+      unsubscribe();
+      if (unsubUserDoc) unsubUserDoc();
+    };
   }, []);
 
   // Real-time Twitch stream settings subscription
@@ -517,7 +557,7 @@ export default function App() {
     }, 550);
   };
 
-  const handleTabChange = (tabId: 'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news' | 'admin') => {
+  const handleTabChange = (tabId: 'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news' | 'admin' | 'tracker') => {
     setActiveTab(tabId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -719,6 +759,7 @@ export default function App() {
     { id: 'electrical', label: appTranslations.tabs.electrical[lang], icon: <Zap size={16} /> },
     { id: 'weapons', label: appTranslations.tabs.weapons[lang], icon: <Target size={16} /> },
     { id: 'chat', label: lang === 'ru' ? 'Чат' : 'Chat', icon: <MessageSquare size={16} /> },
+    ...(isVip ? [{ id: 'tracker', label: lang === 'ru' ? 'Радар игроков' : 'Player Radar', icon: <Search size={16} /> }] : []),
     ...(isAdmin ? [{ id: 'admin', label: 'ADMIN', icon: <ShieldCheck size={16} /> }] : [])
   ] as const;
 
@@ -2008,6 +2049,29 @@ export default function App() {
                     setToasts(prev => prev.filter(t => t.id !== id));
                   }, 3000);
                 }} 
+              />
+            </motion.div>
+          )}
+
+          {activeTab === 'tracker' && (
+            <motion.div
+              key="tracker"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <PlayerTrackerTab
+                currentUser={currentUser}
+                lang={lang}
+                onToast={(msg, type) => {
+                  const id = Math.random().toString(36).substring(2, 9);
+                  setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : (type === 'info' ? 'info' : 'success') }]);
+                  setTimeout(() => {
+                    setToasts(prev => prev.filter(t => t.id !== id));
+                  }, 4000);
+                }}
+                openCabinet={() => setCabinetModalOpen(true)}
               />
             </motion.div>
           )}

@@ -22,9 +22,17 @@ export interface ErrorItem {
 }
 
 export interface BindItem {
-  category: 'PVP' | 'МЕДИЦИНА' | 'ФАРМ' | 'СТРОЙКА' | 'УПРАВЛЕНИЕ' | 'QOL';
+  category: 'PVP' | 'МЕДИЦИНА' | 'ФАРМ' | 'СТРОЙКА' | 'УПРАВЛЕНИЕ' | 'QOL' | 'МОДОВЫЕ';
   cmd: string;
   desc: string;
+  explanation?: string;
+}
+
+export interface AdminCommandItem {
+  category: 'ПРАВА' | 'МОДЕРАЦИЯ' | 'РЕЖИМЫ' | 'ТЕЛЕПОРТ' | 'ВЫДАЧА' | 'МИР' | 'СУЩНОСТИ' | 'ИНФО';
+  cmd: string;
+  desc: string;
+  example?: string;
   explanation?: string;
 }
 
@@ -80,6 +88,9 @@ export interface CustomUser {
   gender?: 'male' | 'female';
   steamLink?: string;
   role?: 'admin' | 'user';
+  isVip?: boolean;
+  isChatVip?: boolean;
+  vipUntil?: string;
   notifications?: {
     news: boolean;
     streams: boolean;

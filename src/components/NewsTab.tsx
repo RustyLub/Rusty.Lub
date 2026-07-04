@@ -59,6 +59,8 @@ export default function NewsTab({ lang }: NewsTabProps) {
   const [activeNewsId, setActiveNewsId] = useState<string>('');
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
 
+  console.log('NewsTab render - activeNewsId:', activeNewsId, 'newsItems count:', newsItems.length);
+
   const categories = [
     { id: 'all', label: { ru: 'Все публикации', en: 'All Posts' } },
     { id: 'updates', label: { ru: 'Обновления', en: 'Game Updates' } },
@@ -79,7 +81,7 @@ export default function NewsTab({ lang }: NewsTabProps) {
         handleFirestoreError(error, OperationType.LIST, 'news');
     });
     return () => unsubscribe();
-  }, [activeNewsId]);
+  }, []);
 
   const filteredNews = selectedCategory === 'all' 
     ? newsItems 
@@ -226,7 +228,17 @@ export default function NewsTab({ lang }: NewsTabProps) {
                         <li key={hIdx} className="flex items-start gap-2.5 text-[11px] text-gray-300 font-sans font-medium">
                           <CheckCircle2 size={13} className="text-purple-400 shrink-0 mt-0.5" />
                           <span>
-                            {h.startsWith('http') ? (
+                            {h.startsWith('BUTTON:') ? (
+                              <button 
+                                onClick={() => {
+                                    console.log('Button clicked, setting activeNewsId to:', h.split(':')[2]);
+                                    setActiveNewsId(h.split(':')[2]);
+                                }}
+                                className="text-blue-400 hover:text-blue-300 underline font-bold cursor-pointer"
+                              >
+                                {h.split(':')[1]}
+                              </button>
+                            ) : h.startsWith('http') ? (
                               <a href={h} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">
                                 {h}
                               </a>
@@ -241,15 +253,6 @@ export default function NewsTab({ lang }: NewsTabProps) {
                 ))}
               </div>
 
-              {/* Interactive bottom notice */}
-              <div className="flex items-center gap-3 bg-amber-500/5 border border-amber-500/20 p-4 font-mono text-[11px] text-amber-500">
-                <Info size={16} className="shrink-0" />
-                <p className="font-bold">
-                  {lang === 'ru' 
-                    ? 'Внимание: Данные изменения уже применились на всех официальных серверах Facepunch и Rustoria. Перезагрузите клиент игры для скачивания патча.'
-                    : 'Notice: These changes have already taken effect across all official Facepunch and Rustoria servers. Restart your client to download the patch.'}
-                </p>
-              </div>
             </div>
           ) : (
             <div className="text-center p-12 bg-[#14171e] border border-[#2a2f3b] text-gray-500 font-mono text-xs uppercase">

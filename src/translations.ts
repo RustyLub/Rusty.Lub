@@ -145,11 +145,246 @@ export const bindsCategoryMap: Record<string, Record<'ru' | 'en', string>> = {
   'ФАРМ': { ru: 'Фарм', en: 'Farming' },
   'СТРОЙКА': { ru: 'Стройка', en: 'Building' },
   'УПРАВЛЕНИЕ': { ru: 'Управление', en: 'Controls' },
-  'QOL': { ru: 'QoL / Комфорт', en: 'QoL / Comfort' }
+  'QOL': { ru: 'QoL / Комфорт', en: 'QoL / Comfort' },
+  'МОДОВЫЕ': { ru: 'Модовые', en: 'Modded' },
+  // Admin Categories
+  'ПРАВА': { ru: '👑 Права', en: '👑 Permissions' },
+  'МОДЕРАЦИЯ': { ru: '🚨 Модерация', en: '🚨 Moderation' },
+  'РЕЖИМЫ': { ru: '🧙‍♂️ Режимы', en: '🧙‍♂️ Modes' },
+  'ТЕЛЕПОРТ': { ru: '💫 Телепорт', en: '💫 Teleport' },
+  'ВЫДАЧА': { ru: '🎁 Выдача', en: '🎁 Give Items' },
+  'МИР': { ru: '🌦️ Мир', en: '🌦️ World' },
+  'СУЩНОСТИ': { ru: '⚙️ Сущности', en: '⚙️ Entities' },
+  'ИНФО': { ru: '📢 Инфо', en: '📢 Chat & Info' }
 };
 
 // Translate Binds Data
-export const bindsTranslationMap: Record<string, { desc: string; explanation?: string; category: string }> = {
+export const bindsTranslationMap: Record<string, { desc: string; explanation?: string; category: string; example?: string }> = {
+  'bind <клавиша>': {
+    category: 'УПРАВЛЕНИЕ',
+    desc: 'Check key binding',
+    explanation: 'Shows in the console what command is currently bound to the specified key.'
+  },
+  'unbind <клавиша>': {
+    category: 'УПРАВЛЕНИЕ',
+    desc: 'Remove key bind',
+    explanation: 'Completely deletes the command assigned to the specified key.'
+  },
+  'bind <клавиша> ""': {
+    category: 'УПРАВЛЕНИЕ',
+    desc: 'Clear key bind',
+    explanation: 'Clears the bind on a key (alternative to "bind <key> clear").'
+  },
+  'bind x "forward;sprint"': {
+    category: 'УПРАВЛЕНИЕ',
+    desc: 'Auto-sprint (alternative on X)',
+    explanation: 'Automatic running forward. Press X to toggle, and press W to stop.'
+  },
+  'bind j "buttons.forward; buttons.sprint; buttons.jump"': {
+    category: 'УПРАВЛЕНИЕ',
+    desc: 'Auto-swimming',
+    explanation: 'Forces the character to automatically swim forward and float on the water surface.'
+  },
+  'bind c "~duck;+duck"': {
+    category: 'УПРАВЛЕНИЕ',
+    desc: 'Crouch hold toggle',
+    explanation: 'Toggles between crouching and standing on pressing the C key.'
+  },
+  'bind z "attack;duck"': {
+    category: 'PVP',
+    desc: 'Auto-attack + crouch',
+    explanation: 'The character crouches down and starts continuously attacking/firing.'
+  },
+  'bind z "+attack;+duck"': {
+    category: 'PVP',
+    desc: 'Hold key to auto-attack + crouch',
+    explanation: 'While holding down the Z key, the character crouches and fires continuously.'
+  },
+  'bind p "+attack; +jump"': {
+    category: 'PVP',
+    desc: 'Auto-attack with jumping',
+    explanation: 'Continuously jumps and attacks at the same time.'
+  },
+  'bind r "reload; attack; duck"': {
+    category: 'PVP',
+    desc: 'Shoot with auto-reload',
+    explanation: 'Automatically crouches and attacks while performing weapon reloads.'
+  },
+  'bind mouse1 "+attack2;+input.sensitivity .45;input.sensitivity .2"': {
+    category: 'PVP',
+    desc: 'Low mouse sensitivity during ADS',
+    explanation: 'Lowers mouse sensitivity when aiming down sights (holding Right Mouse Button) for precise recoil control.'
+  },
+  'bind mouse1 "+lighttoggle;+attack2"': {
+    category: 'PVP',
+    desc: 'Toggle flashlight/laser during ADS',
+    explanation: 'Automatically activates weapon flashlight or laser sight only while aiming.'
+  },
+  'bind x "graphics.vm_horizontal_flip true"': {
+    category: 'PVP',
+    desc: 'Switch weapon hand (left/right)',
+    explanation: 'Switches the weapon model to the left hand. Use "false" to return it to the right hand.'
+  },
+  'bind g "+map;+focusmap"': {
+    category: 'QOL',
+    desc: 'Open map with autofocus',
+    explanation: 'Opens the map and instantly centers the camera on your current position.'
+  },
+  'bind c "cinematic_view 1;cinematic_view 0"': {
+    category: 'QOL',
+    desc: 'Disable HUD (Cinematic View)',
+    explanation: 'Hides all UI elements for beautiful, immersive screenshots or video clips.'
+  },
+  'bind f9 "streamermode true;streamermode false"': {
+    category: 'QOL',
+    desc: 'Streamer Mode toggle',
+    explanation: 'Hides server information, player names, and other sensitive details.'
+  },
+  'bind mouse3 "+buttons.hoverloot"': {
+    category: 'ФАРМ',
+    desc: 'Quick hoverloot on Middle Click',
+    explanation: 'Hold down the middle mouse button (scroll wheel click) to quickly transfer items from boxes/corpses.'
+  },
+  'bind c "+buttons.hoverloot; +altlook"': {
+    category: 'PVP',
+    desc: 'Quick gear equip',
+    explanation: 'Allows you to immediately equip clothes and armor from an open crate.'
+  },
+  'bind 3 "+buttons.slot3; +buttons.attack"': {
+    category: 'МЕДИЦИНА',
+    desc: 'Quick item use from Slot 3',
+    explanation: 'Instantly selects and activates (e.g. injects syringe) the item located in hotbar slot 3.'
+  },
+  'bind h "craft.add -2072273936 1"': {
+    category: 'МЕДИЦИНА',
+    desc: 'Quick craft 1 bandage',
+    explanation: 'Instantly adds one medical bandage to your craft queue.'
+  },
+  'bind h "craft.add -2072273936 10"': {
+    category: 'МЕДИЦИНА',
+    desc: 'Quick craft 10 bandages',
+    explanation: 'Puts 10 medical bandages into the craft queue instantly.'
+  },
+  'bind c "craft.add 1079279582 1"': {
+    category: 'МЕДИЦИНА',
+    desc: 'Quick craft medical syringe',
+    explanation: 'Immediately starts crafting one medical syringe.'
+  },
+  'bind p "craft.add -946369541 1"': {
+    category: 'ФАРМ',
+    desc: 'Quick craft beancan grenade',
+    explanation: 'Puts one beancan grenade into your craft queue.'
+  },
+  'bind u "craft.add 1248356124 1"': {
+    category: 'СТРОЙКА',
+    desc: 'Quick craft C4 charge',
+    explanation: 'Instantly starts crafting one Timed Explosive Charge (C4).'
+  },
+  'bind y "craft.add -265876753 999"': {
+    category: 'ФАРМ',
+    desc: 'Quick craft gunpowder (999)',
+    explanation: 'Enqueues crafting of gunpowder up to the maximum limit (999 units).'
+  },
+  'bind j "craft.add -1211166256 100"': {
+    category: 'PVP',
+    desc: 'Quick craft 100x 5.56 ammo',
+    explanation: 'Adds 100 pieces of 5.56 rifle ammunition to the craft queue.'
+  },
+  'bind n "craft.add -592016202 100"': {
+    category: 'СТРОЙКА',
+    desc: 'Quick craft explosives (100)',
+    explanation: 'Starts crafting 100 units of military-grade explosives.'
+  },
+  'bind f1 "consoletoggle;combatlog;ping"': {
+    category: 'QOL',
+    desc: 'Console + CombatLog + Ping',
+    explanation: 'Opens the console and displays combat logs and network ping at the same time.'
+  },
+  'bind f2 "consoletoggle;combatlog_outgoing;ping"': {
+    category: 'QOL',
+    desc: 'Outgoing CombatLog + Ping',
+    explanation: 'Displays only the damage hits you have dealt, plus your network ping.'
+  },
+  'bind f3 "perf 1"': {
+    category: 'QOL',
+    desc: 'Show FPS (F3 key)',
+    explanation: 'Displays the internal frames-per-second (FPS) counter and ping overlay.'
+  },
+  'bind p "disconnect"': {
+    category: 'QOL',
+    desc: 'Quick disconnect from server',
+    explanation: 'Instantly disconnects you from the server and goes back to the main menu.'
+  },
+  'bind k "kill"': {
+    category: 'QOL',
+    desc: 'Respawn / Suicide',
+    explanation: 'Instantly commits suicide so you can respawn at a sleeping bag or bed.'
+  },
+  'bind o "pool.clear_assets;pool.clear_memory;pool.clear_prefabs;gc.collect"': {
+    category: 'QOL',
+    desc: 'Flush cache and memory (FPS boost)',
+    explanation: 'Clears Unity assets, prefabs, and unused RAM to fix microstutters and improve performance.'
+  },
+  'bind k "audio.master 0.1"': {
+    category: 'QOL',
+    desc: 'Lower game volume to 10%',
+    explanation: 'Instantly dims the master volume so you can hear your teammates on Discord during loud mini flights or raids.'
+  },
+  'bind l "audio.master 0.8"': {
+    category: 'QOL',
+    desc: 'Restore game volume to 80%',
+    explanation: 'Restores master audio level back to default high volume.'
+  },
+  'bind L "~meta.exec \\"client.lookatradius 0\\" \\"chat.add 0 0 MIN\\"; meta.exec \\"client.lookatradius 0.2\\" \\"chat.add 0 0 DEFAULT\\"; meta.exec \\"client.lookatradius 10\\" \\"chat.add 0 0 MAX\\""': {
+    category: 'УПРАВЛЕНИЕ',
+    desc: 'Interactive lookup radius toggle',
+    explanation: 'Switches look-at interaction distance between minimum, default, and maximum.'
+  },
+  'bind j "+graphics.fov 90; +graphics.hud 1; graphics.fov 70; graphics.hud 0"': {
+    category: 'УПРАВЛЕНИЕ',
+    desc: 'Zoom in (Press J)',
+    explanation: 'A quick field-of-view toggle to zoom in on targets for distant scouting or long-range shooting.'
+  },
+  'bind insert "~fps.limit 2;fps.limit 5;fps.limit -1"': {
+    category: 'QOL',
+    desc: 'FPS Limit toggle',
+    explanation: 'Allows switching frame limits on insert keypress.'
+  },
+  'bind f12 "~audio.master 0.1;audio.master 0.5"': {
+    category: 'QOL',
+    desc: 'Quick volume step toggle',
+    explanation: 'Toggles master volume directly between 10% and 50%.'
+  },
+  'bind h "chat.say \\"/home home\\""': {
+    category: 'МОДОВЫЕ',
+    desc: 'Teleport Home (/home)',
+    explanation: 'Automatically types the home teleportation command into global chat.'
+  },
+  'bind t "chat.say \\"/tpa\\""': {
+    category: 'МОДОВЫЕ',
+    desc: 'Accept teleport request (/tpa)',
+    explanation: 'Quickly accepts pending teleportation requests from other players.'
+  },
+  'bind c "chat.say \\"/tpc\\""': {
+    category: 'МОДОВЫЕ',
+    desc: 'Cancel teleport request (/tpc)',
+    explanation: 'Cancels your active teleportation countdown.'
+  },
+  'bind k "chat.say \\"/kit\\""': {
+    category: 'МОДОВЫЕ',
+    desc: 'Open Kits Menu (/kit)',
+    explanation: 'Automatically sends /kit command to chat to open the kits selection interface.'
+  },
+  'bind r "chat.say \\"/remove\\""': {
+    category: 'МОДОВЫЕ',
+    desc: 'Enable remove mode (/remove)',
+    explanation: 'Activates or deactivates structural blocks removal mode.'
+  },
+  'bind u "building.upgrade"': {
+    category: 'МОДОВЫЕ',
+    desc: 'Instant full building upgrade',
+    explanation: 'Upgrades the targeted structure block to the maximum available tier instantly.'
+  },
   'bind z "attack"': {
     category: 'PVP',
     desc: 'Automatic continuous attack (AFK attack)',
@@ -369,6 +604,247 @@ export const bindsTranslationMap: Record<string, { desc: string; explanation?: s
     category: 'QOL',
     desc: 'Emergency server disconnect',
     explanation: 'Disconnects you from the server instantly, returning you to the main lobby on pressing "*".'
+  },
+  // --- ADMIN COMMANDS TRANSLATIONS ---
+  'ownerid <Steam64ID> "<Имя>"': {
+    category: 'ПРАВА',
+    desc: 'Grant Owner Permissions (auth level 2)',
+    explanation: 'Promotes specified player to server owner using their Steam64ID.'
+  },
+  'moderatorid <Steam64ID> "<Имя>"': {
+    category: 'ПРАВА',
+    desc: 'Grant Moderator Permissions (auth level 1)',
+    explanation: 'Promotes specified player to server moderator using their Steam64ID.'
+  },
+  'removeowner <Steam64ID>': {
+    category: 'ПРАВА',
+    desc: 'Remove Owner Permissions',
+    explanation: 'Demotes specified server owner back to regular player.'
+  },
+  'removemoderator <Steam64ID>': {
+    category: 'ПРАВА',
+    desc: 'Remove Moderator Permissions',
+    explanation: 'Demotes specified server moderator back to regular player.'
+  },
+  'server.writecfg': {
+    category: 'ПРАВА',
+    desc: 'Save Permissions to Config',
+    explanation: 'Saves current active admins and moderators list to the server configuration files so they persist after reboots.'
+  },
+  'ban "<Имя>" "<Причина>"': {
+    category: 'МОДЕРАЦИЯ',
+    desc: 'Ban Player by Username',
+    explanation: 'Permanently bans a player with the specified nickname from the server.'
+  },
+  'banid <Steam64ID> "<Причина>"': {
+    category: 'МОДЕРАЦИЯ',
+    desc: 'Ban Player by SteamID',
+    explanation: 'Bans a player by Steam64ID (works even if they are currently offline).'
+  },
+  'unban <Steam64ID>': {
+    category: 'МОДЕРАЦИЯ',
+    desc: 'Unban Player by SteamID',
+    explanation: 'Pardons a banned player and restores their access to the server.'
+  },
+  'banlistex': {
+    category: 'МОДЕРАЦИЯ',
+    desc: 'View Banned Players List',
+    explanation: 'Prints a complete list of all banned accounts alongside their ban reasons to the console.'
+  },
+  'kick "<Имя>" "<Причина>"': {
+    category: 'МОДЕРАЦИЯ',
+    desc: 'Kick Player from Server',
+    explanation: 'Forces player disconnect with a custom reason shown on their screen.'
+  },
+  'kickall "<Причина>"': {
+    category: 'МОДЕРАЦИЯ',
+    desc: 'Kick All Active Players',
+    explanation: 'Forces disconnect for every player currently active on the server.'
+  },
+  'mutevoice <Steam64ID>': {
+    category: 'МОДЕРАЦИЯ',
+    desc: 'Mute Voice Chat',
+    explanation: 'Restricts the selected player from transmitting voice chat.'
+  },
+  'unmutevoice <Steam64ID>': {
+    category: 'МОДЕРАЦИЯ',
+    desc: 'Unmute Voice Chat',
+    explanation: 'Restores voice chat permissions for the selected player.'
+  },
+  'mutechat <Steam64ID>': {
+    category: 'МОДЕРАЦИЯ',
+    desc: 'Mute Text Chat',
+    explanation: 'Restricts the selected player from sending text chat messages.'
+  },
+  'unmutechat <Steam64ID>': {
+    category: 'МОДЕРАЦИЯ',
+    desc: 'Unmute Text Chat',
+    explanation: 'Restores text chat permissions for the selected player.'
+  },
+  'status': {
+    category: 'МОДЕРАЦИЯ',
+    desc: 'Server Status & Active Players',
+    explanation: 'Prints a detailed status report including uptime, active count, SteamID list, IP addresses, and ping (alternative: players).'
+  },
+  'god true': {
+    category: 'РЕЖИМЫ',
+    desc: 'Enable God Mode',
+    explanation: 'Enables invincibility. Prevents HP loss, hunger, and dehydration (disable via "god false").'
+  },
+  'noclip': {
+    category: 'РЕЖИМЫ',
+    desc: 'Toggle Noclip Flight',
+    explanation: 'Toggles flight mode, allowing you to fly and pass through solid terrain or walls.'
+  },
+  'heal <Число>': {
+    category: 'РЕЖИМЫ',
+    desc: 'Heal Yourself',
+    explanation: 'Restores specified amount of health points (HP) immediately.'
+  },
+  'refillvitals': {
+    category: 'РЕЖИМЫ',
+    desc: 'Refill All Vital Stats',
+    explanation: 'Instantly restores health, hunger, and hydration to 100% capacity.'
+  },
+  'teleport "<Имя1>" "<Имя2>"': {
+    category: 'ТЕЛЕПОРТ',
+    desc: 'Teleport Player to Player',
+    explanation: 'Moves the first specified player directly to the location of the second player.'
+  },
+  'teleport2me "<Имя>"': {
+    category: 'ТЕЛЕПОРТ',
+    desc: 'Teleport Player to Yourself',
+    explanation: 'Instantly summons the specified player to your current position.'
+  },
+  'teleportpos <x> <y> <z>': {
+    category: 'ТЕЛЕПОРТ',
+    desc: 'Teleport to Exact Coordinates',
+    explanation: 'Transports your character to the precise X Y Z space coordinates on the map.'
+  },
+  'teleport2marker': {
+    category: 'ТЕЛЕПОРТ',
+    desc: 'Teleport to Map Marker',
+    explanation: 'Instantly warps you to the location marked on your map (Right Click on Map screen).'
+  },
+  'teleportlos': {
+    category: 'ТЕЛЕПОРТ',
+    desc: 'Teleport to Line of Sight (LOS)',
+    explanation: 'Warps you directly to the precise surface or object your crosshair is pointing at.'
+  },
+  'inventory.give "<Предмет>" <Кол-во>': {
+    category: 'ВЫДАЧА',
+    desc: 'Give Item to Yourself',
+    explanation: 'Spawns the specified item in your personal inventory.',
+    example: 'inventory.give "rifle.ak" 1'
+  },
+  'inventory.giveto "<Имя>" "<Предмет>" <Кол-во>': {
+    category: 'ВЫДАЧА',
+    desc: 'Give Item to Selected Player',
+    explanation: 'Spawns the specified item inside the inventory of the chosen player.',
+    example: 'inventory.giveto "Player1" "wood" 1000'
+  },
+  'inventory.giveall "<Предмет>" <Кол-во>': {
+    category: 'ВЫДАЧА',
+    desc: 'Give Item to All Active Players',
+    explanation: 'Spawns the specified item in the inventories of all players currently connected to the server.',
+    example: 'inventory.giveall "bandage" 5'
+  },
+  'inventory.givebp "<Предмет>"': {
+    category: 'ВЫДАЧА',
+    desc: 'Give Item Blueprint',
+    explanation: 'Unlocks and teaches you the blueprint item recipe for crafting.',
+    example: 'inventory.givebp "rifle.ak"'
+  },
+  'inventory.givebpall': {
+    category: 'ВЫДАЧА',
+    desc: 'Learn All Blueprints',
+    explanation: 'Instantly unlocks every single crafting blueprint item for your character.'
+  },
+  'env.time <0-24>': {
+    category: 'МИР',
+    desc: 'Set World Time',
+    explanation: 'Changes current time on the server (e.g. env.time 12 for noon, env.time 0 for midnight).'
+  },
+  'env.addtime <Часы>': {
+    category: 'МИР',
+    desc: 'Fast Forward Time',
+    explanation: 'Speeds up the server time forward by the specified amount of hours.'
+  },
+  'weather.rain <0-1>': {
+    category: 'МИР',
+    desc: 'Set Rain Density',
+    explanation: 'Controls server rain intensity from 0 (clear skies) to 1 (pouring rain).'
+  },
+  'weather.fog <0-1>': {
+    category: 'МИР',
+    desc: 'Set Fog Density',
+    explanation: 'Controls fog intensity on the server (0 for none, 1 for dense mist).'
+  },
+  'weather.wind <0-1>': {
+    category: 'МИР',
+    desc: 'Set Wind Speed',
+    explanation: 'Changes current wind strength on the server.'
+  },
+  'heli.call': {
+    category: 'МИР',
+    desc: 'Call Patrol Helicopter',
+    explanation: 'Triggers the standard server-wide Patrol Helicopter event.'
+  },
+  'heli.calltome': {
+    category: 'МИР',
+    desc: 'Call Helicopter directly to Yourself',
+    explanation: 'Spawns and forces the Patrol Helicopter event straight to your current coordinates.'
+  },
+  'bradley.quickrespawn': {
+    category: 'МИР',
+    desc: 'Instant Bradley APC Respawn',
+    explanation: 'Instantly respawns the Bradley APC tank at the Launch Site monument.'
+  },
+  'supply.call': {
+    category: 'МИР',
+    desc: 'Call Cargo Airdrop Plane',
+    explanation: 'Summons a cargo transport aircraft to deliver an airdrop crate to a random map spot (alternative: supply.drop).'
+  },
+  'ent kill': {
+    category: 'СУЩНОСТИ',
+    desc: 'Delete Highlighted Entity',
+    explanation: 'Warning! Permanently destroys the target asset (wall, chest, sleeping bag, door, mini) you are looking at.'
+  },
+  'ent who': {
+    category: 'СУЩНОСТИ',
+    desc: 'Identify Entity Placer/Owner',
+    explanation: 'Prints the Steam64ID and name of the player who placed or owns the targeted building block or deployable.'
+  },
+  'ent lock': {
+    category: 'СУЩНОСТИ',
+    desc: 'Force Lock/Unlock Entity Lock',
+    explanation: 'Locks the targeted door or lock system instantly (unlock via "ent unlock").'
+  },
+  'spawn "<Сущность>"': {
+    category: 'СУЩНОСТИ',
+    desc: 'Spawn Game Asset / Entity',
+    explanation: 'Spawns chosen entity directly in front of you (animals, barrels, scientist NPCs, etc.).',
+    example: 'spawn "bear"'
+  },
+  'say "<Текст>"': {
+    category: 'ИНФО',
+    desc: 'Server Chat Broadcast',
+    explanation: 'Sends a global server announcement message directly to the global text chat (highlighted in red).'
+  },
+  'find "<Слово>"': {
+    category: 'ИНФО',
+    desc: 'Search Server Commands',
+    explanation: 'Helps locate specific console commands or parameters matching your keyword.'
+  },
+  'serverinfo': {
+    category: 'ИНФО',
+    desc: 'Get Detailed Server Performance Info',
+    explanation: 'Displays server system status including active uptime, current tickrate FPS, allocated memory, and loaded entities.'
+  },
+  'sv stats': {
+    category: 'ИНФО',
+    desc: 'Print Player Stats Tracker',
+    explanation: 'Prints a comprehensive leaderboard/statistics overview of players kills, deaths, and session uptimes.'
   }
 };
 
