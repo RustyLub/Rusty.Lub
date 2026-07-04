@@ -9,7 +9,6 @@ import UserProfileModal from './UserProfileModal';
 interface AdminTabProps {
   currentUser: CustomUser | null;
   lang: 'ru' | 'en';
-  onToast?: (msg: string, type: 'success' | 'warning' | 'error') => void;
 }
 
 interface RegisteredUser {
@@ -23,7 +22,7 @@ interface RegisteredUser {
   isVip?: boolean;
 }
 
-export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) {
+export default function AdminTab({ currentUser, lang }: AdminTabProps) {
   const [announcementText, setAnnouncementText] = useState('');
   const [announcementActive, setAnnouncementActive] = useState(false);
   const [announcementType, setAnnouncementType] = useState<'info' | 'hazard' | 'important'>('info');
@@ -881,7 +880,6 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
           targetUserId={inspectUserId}
           currentUser={currentUser}
           lang={lang}
-          onToast={onToast || (() => {})}
         />
       )}
     </div>

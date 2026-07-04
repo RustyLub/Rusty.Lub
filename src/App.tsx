@@ -55,7 +55,6 @@ import {
   db, 
   auth,
   onAuthStateChanged,
-  signOut,
   serverTimestamp, 
   collection, 
   onSnapshot, 
@@ -315,10 +314,17 @@ export default function App() {
           setCurrentUser(customUser);
           localStorage.setItem('rust_survivor_user', JSON.stringify(customUser));
         } else {
-          // If profile doc doesn't exist anymore, sign out of Firebase and clear local storage
-          await signOut(auth);
-          setCurrentUser(null);
-          localStorage.removeItem('rust_survivor_user');
+          // If profile doc doesn't exist but auth exists
+          const customUser: CustomUser = {
+            uid: firebaseUser.uid,
+            displayName: firebaseUser.displayName || 'Survivor',
+            email: firebaseUser.email || '',
+            photoURL: firebaseUser.photoURL || '',
+            avatarClass: 'heavy_plate',
+            role: 'user'
+          };
+          setCurrentUser(customUser);
+          localStorage.setItem('rust_survivor_user', JSON.stringify(customUser));
         }
       } else {
         // User is signed out of Firebase - clear sensitive flags
@@ -1066,17 +1072,7 @@ export default function App() {
               transition={{ duration: 0.2 }}
               className="space-y-8"
             >
-              <AdminTab 
-                currentUser={currentUser} 
-                lang={lang} 
-                onToast={(msg, type) => {
-                  const id = Math.random().toString(36).substring(2, 9);
-                  setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : 'success' }]);
-                  setTimeout(() => {
-                    setToasts(prev => prev.filter(t => t.id !== id));
-                  }, 3000);
-                }}
-              />
+              <AdminTab currentUser={currentUser} lang={lang} />
             </motion.div>
           )}
           {activeTab === 'home' && (
@@ -2001,14 +1997,9 @@ export default function App() {
                   setCurrentUser(user);
                   localStorage.setItem('rust_survivor_user', JSON.stringify(user));
                 }}
-                onUserLogout={async () => {
+                onUserLogout={() => {
                   setCurrentUser(null);
                   localStorage.removeItem('rust_survivor_user');
-                  try {
-                    await signOut(auth);
-                  } catch (e) {
-                    console.error(e);
-                  }
                 }}
                 onToast={(msg, type) => {
                   const id = Math.random().toString(36).substring(2, 9);
@@ -2301,14 +2292,9 @@ export default function App() {
             onClose={() => setCabinetModalOpen(false)}
             lang={lang}
             user={currentUser}
-            onUserLogout={async () => {
+            onUserLogout={() => {
               setCurrentUser(null);
               localStorage.removeItem('rust_survivor_user');
-              try {
-                await signOut(auth);
-              } catch (e) {
-                console.error(e);
-              }
             }}
             onAvatarChange={(avatarId, photoURL) => {
               if (currentUser) {
