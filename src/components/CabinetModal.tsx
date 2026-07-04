@@ -133,6 +133,7 @@ export default function CabinetModal({
   const [favoriteWeapon, setFavoriteWeapon] = useState('AK-47');
   const [customTheme, setCustomTheme] = useState('slate');
   const [customAvatarUrl, setCustomAvatarUrl] = useState('');
+  const [customBackground, setCustomBackground] = useState('');
   const [steamLink, setSteamLink] = useState('');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [jungleFeverSpoiler, setJungleFeverSpoiler] = useState(false);
@@ -178,7 +179,8 @@ export default function CabinetModal({
           steamLink: data.steamLink || '',
           isVip: !!data.isVip,
           vipUntil: data.vipUntil || '',
-          role: data.role || 'user'
+          role: data.role || 'user',
+          customBackground: data.customBackground || ''
         };
         setFullProfile(profile);
 
@@ -191,6 +193,7 @@ export default function CabinetModal({
         setCustomTheme(profile.customTheme || 'slate');
         setCustomAvatarUrl(profile.photoURL || '');
         setSteamLink(profile.steamLink || '');
+        setCustomBackground(data.customBackground || '');
       }
     });
 
@@ -284,7 +287,8 @@ export default function CabinetModal({
         favoriteWeapon,
         customTheme,
         steamLink: steamLink || '',
-        badges: updatedBadges
+        badges: updatedBadges,
+        customBackground: customBackground || ''
       };
 
       if (customAvatarUrl && customAvatarUrl !== user.photoURL) {
@@ -978,6 +982,75 @@ export default function CabinetModal({
                             })}
                           </div>
                         </div>
+
+                        {/* Custom background image */}
+                        <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-3.5">
+                          <label className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5">
+                            {lang === 'ru' ? '5. СВОЙ ФОН ВИЗИТКИ (ФОТО)' : '5. CUSTOM CARD BACKGROUND (PHOTO)'}
+                          </label>
+                          
+                          <div className="space-y-3">
+                            {/* File Upload Button */}
+                            <div className="flex flex-col gap-2">
+                              <label className="text-[8px] text-zinc-500 font-mono uppercase block">
+                                {lang === 'ru' ? 'Загрузить файл с устройства (До 700KB)' : 'Upload file from device (Max 700KB)'}
+                              </label>
+                              <div className="flex items-center gap-2">
+                                <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-dashed border-zinc-700 hover:border-zinc-500 bg-zinc-900/40 text-[10px] font-mono font-bold text-zinc-400 hover:text-zinc-200 uppercase tracking-wider cursor-pointer transition-all">
+                                  <Upload size={12} />
+                                  <span>{lang === 'ru' ? 'Выбрать фото' : 'Choose Photo'}</span>
+                                  <input 
+                                    type="file" 
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        if (file.size > 700 * 1024) {
+                                          onToast(lang === 'ru' ? 'Размер файла превышает 700KB!' : 'File size exceeds 700KB!', 'warning');
+                                          return;
+                                        }
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                          setCustomBackground(reader.result as string);
+                                          onToast(lang === 'ru' ? 'Фото успешно загружено!' : 'Photo successfully loaded!', 'success');
+                                        };
+                                        reader.readAsDataURL(file);
+                                      }
+                                    }}
+                                    className="hidden"
+                                  />
+                                </label>
+                                
+                                {customBackground && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setCustomBackground('');
+                                      onToast(lang === 'ru' ? 'Фон сброшен!' : 'Background reset!', 'success');
+                                    }}
+                                    className="px-2.5 py-2 border border-red-500/30 hover:border-red-500 bg-red-900/10 text-red-400 text-[10px] font-mono font-bold uppercase tracking-wider cursor-pointer"
+                                  >
+                                    {lang === 'ru' ? 'Сбросить' : 'Reset'}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Or paste image URL */}
+                            <div className="space-y-1.5">
+                              <label className="text-[8px] text-zinc-500 font-mono uppercase block">
+                                {lang === 'ru' ? 'Или вставьте прямую ссылку на фото (URL)' : 'Or paste direct image URL'}
+                              </label>
+                              <input 
+                                type="text" 
+                                value={customBackground}
+                                onChange={(e) => setCustomBackground(e.target.value)}
+                                className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-[10px] font-mono text-white outline-none focus:border-zinc-700"
+                                placeholder="https://example.com/background.jpg"
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -999,7 +1072,15 @@ export default function CabinetModal({
                       {lang === 'ru' ? 'ЖИВОЙ ПРЕДПРОСМОТР ВИЗИТКИ' : 'LIVE CARD TELEMETRY'}
                     </span>
                     
-                    <div className={`border-2 border-[#2a2f3b] rounded-none overflow-hidden shadow-2xl relative flex flex-col p-0 rust-metal-pattern keep-dark ${selectedTheme.class}`}>
+                    <div 
+                      className={`border-2 border-[#2a2f3b] rounded-none overflow-hidden shadow-2xl relative flex flex-col p-0 rust-metal-pattern keep-dark ${selectedTheme.class}`}
+                      style={customBackground ? {
+                        backgroundImage: `linear-gradient(to bottom, rgba(12, 13, 16, 0.5), rgba(20, 23, 30, 0.65)), url(${customBackground})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat'
+                      } : undefined}
+                    >
                       {/* Sleek Tactical Header Bar */}
                       <div className="bg-[#0b0c0f] border-b border-[#2a2f3b] px-3 py-1.5 flex items-center justify-between text-[8px] font-mono tracking-widest text-zinc-400 select-none">
                         <div className="flex items-center gap-1.5">

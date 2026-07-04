@@ -95,5 +95,6 @@ export interface CustomUser {
     news: boolean;
     streams: boolean;
   };
+  customBackground?: string;
 }
 

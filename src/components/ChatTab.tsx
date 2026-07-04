@@ -75,6 +75,7 @@ interface Message {
   photoURL: string;
   avatarClass?: string;
   createdAt: any;
+  isHighlighted?: boolean;
 }
 
 interface RegisteredUser {
