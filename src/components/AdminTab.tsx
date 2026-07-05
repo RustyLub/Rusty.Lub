@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { doc, updateDoc, collection, onSnapshot, deleteDoc, serverTimestamp, getDoc, setDoc, addDoc, getCountFromServer, writeBatch, query, limit, getDocs, where } from 'firebase/firestore';
-import { ShieldCheck, Send, Search, Crown, Star, Ban, Trash2, Users, Settings, Megaphone, EyeOff, Tv, PlusCircle, Activity, MessageSquare, AlertTriangle, ShieldAlert, IdCard, List, BarChart3 } from 'lucide-react';
-import { CustomUser, NewsItem } from '../types';
+import { ShieldCheck, Send, Search, Crown, Star, Ban, Trash2, Users, Settings, Megaphone, EyeOff, Tv, PlusCircle, Activity, MessageSquare, AlertTriangle, ShieldAlert, IdCard, List, BarChart3, Wallet, Clock, Check, X } from 'lucide-react';
+import { CustomUser, NewsItem, VipApplication } from '../types';
 import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 import UserProfileModal from './UserProfileModal';
 
@@ -24,6 +24,9 @@ interface RegisteredUser {
   vipUntil?: string;
   deletionRequested?: boolean;
   deletionRequestedAt?: string;
+  isScam?: boolean;
+  scamReason?: string;
+  scamUntil?: string;
 }
 
 export default function AdminTab({ currentUser, lang }: AdminTabProps) {
@@ -77,6 +80,9 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
   const [userSearch, setUserSearch] = useState('');
   const [userTypeFilter, setUserTypeFilter] = useState<'all' | 'admins' | 'vips' | 'banned' | 'deletions'>('all');
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [vipApps, setVipApps] = useState<VipApplication[]>([]);
+  const [rejectReason, setRejectReason] = useState('');
+  const [processingAppId, setProcessingAppId] = useState<string | null>(null);
 
   const isSuperAdmin = useMemo(() => {
     return currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com';
@@ -217,9 +223,16 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
     loadSettings();
     fetchStats();
     const statsInterval = setInterval(fetchStats, 60000); // Every minute
+
+    const unsubVipApps = onSnapshot(collection(db, 'vip_applications'), (snapshot) => {
+        const apps = snapshot.docs.map(doc => ({ ...doc.data() } as VipApplication));
+        apps.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        setVipApps(apps);
+    });
     
     return () => {
         unsub();
+        unsubVipApps();
         clearInterval(statsInterval);
     };
   }, []);
@@ -295,10 +308,36 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
   };
 
   const handleToggleBlock = async (uid: string, currentBlocked: boolean) => {
+    const reason = !currentBlocked ? prompt(lang === 'ru' ? 'Причина блокировки:' : 'Reason for block:') : '';
+    if (!currentBlocked && reason === null) return;
+
     try {
-      await updateDoc(doc(db, 'chat_users', uid), { isBlocked: !currentBlocked });
+      await updateDoc(doc(db, 'chat_users', uid), { 
+        isBlocked: !currentBlocked,
+        blockedReason: reason || ''
+      });
+      alert(lang === 'ru' ? `Пользователь ${currentBlocked ? 'разблокирован' : 'заблокирован'}` : `User ${currentBlocked ? 'unblocked' : 'blocked'}`);
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, `chat_users/${uid}`);
+    }
+  };
+
+  const handleToggleScam = async (uid: string, currentScam: boolean) => {
+    if (uid === currentUser?.uid) return;
+
+    const reason = !currentScam ? prompt(lang === 'ru' ? 'Причина тега SCAM (на 3 дня):' : 'Reason for SCAM tag (for 3 days):') : '';
+    if (!currentScam && reason === null) return;
+
+    try {
+        const scamUntil = !currentScam ? new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() : null;
+        await updateDoc(doc(db, 'chat_users', uid), {
+            isScam: !currentScam,
+            scamReason: reason || '',
+            scamUntil: scamUntil
+        });
+        alert(lang === 'ru' ? `Тег SCAM ${currentScam ? 'снят' : 'выдан'}` : `SCAM tag ${currentScam ? 'removed' : 'issued'}`);
+    } catch (err) {
+        handleFirestoreError(err, OperationType.UPDATE, `chat_users/${uid}`);
     }
   };
   const handleToggleRole = async (uid: string, currentRole: string) => {
@@ -330,6 +369,71 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
       });
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, `chat_users/${uid}`);
+    }
+  };
+
+  const handleApproveVip = async (app: VipApplication) => {
+    if (!confirm(lang === 'ru' ? `Одобрить VIP для ${app.userDisplayName}?` : `Approve VIP for ${app.userDisplayName}?`)) return;
+    setProcessingAppId(app.id);
+    try {
+        const batch = writeBatch(db);
+        const vipUntilDate = new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString();
+        
+        // Update user
+        batch.update(doc(db, 'chat_users', app.userId), {
+            isVip: true,
+            vipUntil: vipUntilDate,
+            isScam: false // Clear scam if any
+        });
+
+        // Update application
+        batch.update(doc(db, 'vip_applications', app.id), {
+            status: 'approved',
+            processedAt: serverTimestamp(),
+            processedBy: currentUser?.uid
+        });
+
+        await batch.commit();
+        alert(lang === 'ru' ? 'VIP статус активирован!' : 'VIP status activated!');
+    } catch (err) {
+        handleFirestoreError(err, OperationType.UPDATE, `vip_applications/${app.id}`);
+    } finally {
+        setProcessingAppId(null);
+    }
+  };
+
+  const handleRejectVip = async (app: VipApplication, isScam: boolean = false) => {
+    const reason = prompt(lang === 'ru' ? 'Причина отклонения:' : 'Reason for rejection:');
+    if (reason === null) return;
+
+    setProcessingAppId(app.id);
+    try {
+        const batch = writeBatch(db);
+        
+        // Update application
+        batch.update(doc(db, 'vip_applications', app.id), {
+            status: isScam ? 'scam' : 'rejected',
+            rejectionReason: reason,
+            processedAt: serverTimestamp(),
+            processedBy: currentUser?.uid
+        });
+
+        // If scam, mark user
+        if (isScam) {
+            const scamUntil = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+            batch.update(doc(db, 'chat_users', app.userId), {
+                isScam: true,
+                scamReason: reason,
+                scamUntil: scamUntil
+            });
+        }
+
+        await batch.commit();
+        alert(lang === 'ru' ? 'Заявка отклонена.' : 'Application rejected.');
+    } catch (err) {
+        handleFirestoreError(err, OperationType.UPDATE, `vip_applications/${app.id}`);
+    } finally {
+        setProcessingAppId(null);
     }
   };
 
@@ -563,6 +667,109 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
             </div>
         </div>
 
+        {/* VIP Applications Management */}
+        <div className="lg:col-span-3 bg-[#14171e] border border-amber-500/20 p-6 rounded-sm shadow-xl space-y-6 relative overflow-hidden">
+            <div className="absolute right-0 top-0 opacity-5">
+                <Crown size={120} />
+            </div>
+            <div className="flex items-center justify-between border-b border-[#2a2f3b]/60 pb-4 relative z-10">
+                <div className="space-y-1">
+                    <h3 className="text-md font-black text-amber-500 flex items-center gap-2 uppercase tracking-widest">
+                        <Crown size={20} />
+                        {lang === 'ru' ? 'Заявки на VIP подписку' : 'VIP Subscription Applications'}
+                    </h3>
+                    <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider">
+                        {lang === 'ru' ? 'Рассмотрение заявок через DonationAlerts и USDT' : 'Reviewing DonationAlerts and USDT manual claims'}
+                    </p>
+                </div>
+                <div className="bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-[10px] font-mono text-amber-400 font-bold uppercase tracking-widest">
+                    {vipApps.filter(a => a.status === 'pending').length} {lang === 'ru' ? 'В ОЖИДАНИИ' : 'PENDING'}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[400px] overflow-y-auto custom-scrollbar relative z-10">
+                {vipApps.length > 0 ? vipApps.map((app) => (
+                    <div key={app.id} className={`p-4 border rounded-sm space-y-3 transition-all ${
+                        app.status === 'pending' ? 'bg-amber-500/5 border-amber-500/30 shadow-[inset_0_0_20px_rgba(245,158,11,0.05)]' :
+                        app.status === 'approved' ? 'bg-emerald-500/5 border-emerald-500/20 opacity-60' :
+                        'bg-red-500/5 border-red-500/20 opacity-60'
+                    }`}>
+                        <div className="flex justify-between items-start gap-2">
+                            <div className="min-w-0">
+                                <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">{app.id}</div>
+                                <div className="font-bold text-white truncate cursor-pointer hover:text-amber-400 transition-colors" onClick={() => setInspectUserId(app.userId)}>
+                                    {app.userDisplayName}
+                                </div>
+                            </div>
+                            <span className={`px-1.5 py-0.5 rounded-sm text-[8px] font-mono font-black uppercase tracking-widest ${
+                                app.status === 'pending' ? 'bg-amber-500 text-black animate-pulse' :
+                                app.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400' :
+                                'bg-red-500/20 text-red-400'
+                            }`}>
+                                {app.status}
+                            </span>
+                        </div>
+
+                        <div className="bg-black/30 p-2 border border-zinc-800/40 rounded-sm space-y-1">
+                            <div className="flex justify-between text-[9px] font-mono">
+                                <span className="text-zinc-500 uppercase">{lang === 'ru' ? 'Метод:' : 'Method:'}</span>
+                                <span className="text-zinc-300 font-bold uppercase">{app.paymentMethod}</span>
+                            </div>
+                            <div className="flex justify-between text-[9px] font-mono">
+                                <span className="text-zinc-500 uppercase">{lang === 'ru' ? 'Донатер:' : 'Donator:'}</span>
+                                <span className="text-amber-500 font-black truncate max-w-[120px]">{app.donatorNickname}</span>
+                            </div>
+                            <div className="flex justify-between text-[9px] font-mono">
+                                <span className="text-zinc-500 uppercase">{lang === 'ru' ? 'Дата:' : 'Date:'}</span>
+                                <span className="text-zinc-400">{app.createdAt?.seconds ? new Date(app.createdAt.seconds * 1000).toLocaleString() : '...'}</span>
+                            </div>
+                        </div>
+
+                        {app.status === 'pending' && (
+                            <div className="flex flex-col gap-1.5 pt-1">
+                                <button
+                                    onClick={() => handleApproveVip(app)}
+                                    disabled={!!processingAppId}
+                                    className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5"
+                                >
+                                    <Check size={12} />
+                                    {lang === 'ru' ? 'ОДОБРИТЬ VIP' : 'APPROVE VIP'}
+                                </button>
+                                <div className="grid grid-cols-2 gap-1.5">
+                                    <button
+                                        onClick={() => handleRejectVip(app, false)}
+                                        disabled={!!processingAppId}
+                                        className="py-1.5 border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5"
+                                    >
+                                        <X size={12} />
+                                        {lang === 'ru' ? 'ОТКЛОНИТЬ' : 'REJECT'}
+                                    </button>
+                                    <button
+                                        onClick={() => handleRejectVip(app, true)}
+                                        disabled={!!processingAppId}
+                                        className="py-1.5 bg-red-600/10 border border-red-500/30 text-red-500 hover:bg-red-600 hover:text-white text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5"
+                                    >
+                                        <Ban size={12} />
+                                        {lang === 'ru' ? 'SCAM' : 'SCAM'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {app.rejectionReason && (
+                            <div className="text-[8px] font-mono text-red-400 bg-red-500/5 p-1.5 border border-red-500/10 rounded-sm">
+                                REASON: {app.rejectionReason}
+                            </div>
+                        )}
+                    </div>
+                )) : (
+                    <div className="lg:col-span-3 py-12 text-center text-zinc-600 font-mono text-xs uppercase tracking-widest">
+                        {lang === 'ru' ? 'Нет активных заявок' : 'No active applications'}
+                    </div>
+                )}
+            </div>
+        </div>
+
         {/* User Management */}
         <div className="lg:col-span-2 bg-[#14171e] border border-[#2a2f3b] p-6 rounded-sm shadow-xl space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2a2f3b]/60 pb-4">
@@ -663,6 +870,9 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
                                         {rUser.isBlocked && (
                                             <span className="px-1.5 py-0.5 bg-red-500/10 border border-red-500/30 text-red-500 text-[8px] font-bold rounded font-mono uppercase tracking-wider">{lang === 'ru' ? 'БАН' : 'BANNED'}</span>
                                         )}
+                                        {rUser.isScam && (
+                                            <span className="px-1.5 py-0.5 bg-red-900/20 border border-red-600/30 text-red-500 text-[8px] font-bold rounded font-mono uppercase tracking-wider">{lang === 'ru' ? 'SCAM' : 'SCAM'}</span>
+                                        )}
                                     </div>
                                     <div className="text-[10px] text-zinc-500 font-mono flex flex-wrap items-center gap-x-3 gap-y-1">
                                         <span>ID: <span className="text-zinc-400 select-all">{rUser.id}</span></span>
@@ -719,6 +929,16 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
                                 >
                                     <Ban size={11} />
                                     <span>{rUser.isBlocked ? (lang === 'ru' ? 'Разбанить' : 'Unban') : (lang === 'ru' ? 'Бан' : 'Ban')}</span>
+                                </button>
+
+                                {/* SCAM */}
+                                <button 
+                                    onClick={() => handleToggleScam(rUser.id, !!rUser.isScam)} 
+                                    className={`px-2.5 py-1.5 border text-[9px] font-mono font-bold rounded-sm transition-all cursor-pointer flex items-center gap-1.5 ${rUser.isScam ? 'border-amber-500 text-amber-500 bg-amber-500/10' : 'border-red-900/40 text-zinc-500 bg-black/20 hover:border-red-500/40 hover:text-red-400'}`} 
+                                    title={rUser.isScam ? (lang === 'ru' ? 'Снять SCAM' : 'Remove SCAM') : (lang === 'ru' ? 'Выдать SCAM' : 'Issue SCAM')}
+                                >
+                                    <AlertTriangle size={11} />
+                                    <span>SCAM</span>
                                 </button>
 
                                 {/* Toggle Role */}

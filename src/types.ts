@@ -98,6 +98,23 @@ export interface CustomUser {
   customBackground?: string;
   deletionRequested?: boolean;
   deletionRequestedAt?: string;
+  isScam?: boolean;
+  scamReason?: string;
+  scamUntil?: string;
+}
+
+export interface VipApplication {
+  id: string;
+  userId: string;
+  userDisplayName: string;
+  paymentMethod: 'usdt' | 'donationalerts';
+  donatorNickname: string;
+  txId?: string;
+  status: 'pending' | 'approved' | 'rejected' | 'scam';
+  rejectionReason?: string;
+  createdAt: any;
+  processedAt?: any;
+  processedBy?: string;
 }
 
 export interface RadarPlayer {

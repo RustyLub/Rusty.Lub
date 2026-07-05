@@ -13,7 +13,10 @@ import {
   Award, 
   Sparkles, 
   MessageSquare,
-  Bookmark
+  Bookmark,
+  Ban,
+  CheckCircle2,
+  AlertTriangle
 } from 'lucide-react';
 import { doc, db, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot } from '../firebase';
 import { CustomUser } from '../types';
@@ -28,6 +31,34 @@ export interface BadgeInfo {
 }
 
 export const BADGES: BadgeInfo[] = [
+  {
+    id: 'premium_host',
+    icon: '🛰️',
+    color: 'from-orange-500/10 to-red-500/10 border-orange-500/30 text-orange-400',
+    title: { ru: 'Приоритетный Хост', en: 'Priority Host' },
+    desc: { ru: 'Активный VIP-статус в системе Rusty.Lub', en: 'Active VIP status in Rusty.Lub system' }
+  },
+  {
+    id: 'scam',
+    icon: '🚫',
+    color: 'from-red-900/40 to-black border-red-600 text-red-500 shadow-[0_0_15px_rgba(220,38,38,0.5)]',
+    title: { ru: 'SCAMMER / МОШЕННИК', en: 'SCAMMER / FRAUD' },
+    desc: { ru: 'Пользователь уличен в обмане при попытке оплаты VIP', en: 'User caught in fraud during VIP payment attempt' }
+  },
+  {
+    id: 'diamond_survivor',
+    icon: '💎',
+    color: 'from-cyan-400/10 to-blue-500/10 border-cyan-400/30 text-cyan-300',
+    title: { ru: 'Алмазный Выживший', en: 'Diamond Survivor' },
+    desc: { ru: 'Подтвержденный статус элитного выжившего', en: 'Verified elite survivor status' }
+  },
+  {
+    id: 'legendary_raider',
+    icon: '⚔️',
+    color: 'from-red-600/10 to-orange-600/10 border-red-500/40 text-red-500',
+    title: { ru: 'Легендарный Рейдер', en: 'Legendary Raider' },
+    desc: { ru: 'Мастер осад и разрушения баз', en: 'Master of sieges and base destruction' }
+  },
   {
     id: 'first_beacon',
     icon: '🛰️',
@@ -74,6 +105,8 @@ export const BADGES: BadgeInfo[] = [
 
 export const PROFILE_THEMES = [
   { id: 'slate', name: { ru: 'Угольный Сланец', en: 'Charcoal Slate' }, class: 'bg-gradient-to-br from-[#0c0d10] to-[#14171e]' },
+  { id: 'vip_gold', name: { ru: 'Золотая Элита (VIP)', en: 'Gold Elite (VIP)' }, class: 'bg-gradient-to-br from-[#1a1505] to-[#2b2408] border-amber-500/50 shadow-[inset_0_0_20px_rgba(245,158,11,0.1)]' },
+  { id: 'vip_nebula', name: { ru: 'Космическая Туманность (VIP)', en: 'Cosmic Nebula (VIP)' }, class: 'bg-gradient-to-br from-[#0a051a] to-[#1a082b] border-purple-500/50 shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]' },
   { id: 'radiation', name: { ru: 'Зона Радиации', en: 'Radiation Zone' }, class: 'bg-gradient-to-br from-[#1a1505] to-[#261e08] border-yellow-500/30' },
   { id: 'outpost', name: { ru: 'Аванпост', en: 'Outpost' }, class: 'bg-gradient-to-br from-[#051a10] to-[#082618] border-emerald-500/30' },
   { id: 'bandit', name: { ru: 'Лагерь Бандитов', en: 'Bandit Camp' }, class: 'bg-gradient-to-br from-[#1a0f05] to-[#261508] border-amber-500/30' },
@@ -309,6 +342,8 @@ export default function UserProfileModal({
     targetUser.email === 'misterzet556@gmail.com'
   );
 
+  const isScamActive = !!targetUser?.isScam && (!targetUser.scamUntil || new Date(targetUser.scamUntil) > new Date());
+
   // Helper function to return border style conditionally
   const vipBorder = (normalClass: string, vipClass: string = 'border-amber-500/60') => {
     return isTargetVipSub ? vipClass : normalClass;
@@ -320,7 +355,8 @@ export default function UserProfileModal({
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className={`w-full max-w-2xl border-2 rounded-none overflow-hidden shadow-2xl relative flex flex-col p-0 rust-metal-pattern keep-dark ${vipBorder('border-[#2a2f3b]', 'border-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.25)]')} ${selectedTheme.class}`}
+        className={`w-full max-w-2xl border-2 rounded-none overflow-hidden shadow-2xl relative flex flex-col p-0 rust-metal-pattern keep-dark ${vipBorder('border-[#2a2f3b]', 'border-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.25)]')} ${selectedTheme.class} transition-shadow duration-500 ${isTargetVipSub ? 'hover:shadow-[0_0_40px_rgba(245,158,11,0.4)] hover:border-amber-400' : ''}`}
+        whileHover={isTargetVipSub ? { y: -2, scale: 1.002 } : {}}
       >
         {targetUser?.customBackground && (
           <img referrerPolicy="no-referrer" src={targetUser.customBackground} alt="Background" className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-60 mix-blend-screen" />
@@ -475,30 +511,67 @@ export default function UserProfileModal({
                       {lang === 'ru' ? 'КОДОВОЕ ИМЯ ВЫЖИВШЕГО' : 'SURVIVOR ALIAS / CALLSIGN'}
                     </span>
                     <div className="flex items-baseline gap-2">
-                      <span className={`text-2xl sm:text-3xl font-black uppercase tracking-wide leading-none font-sans drop-shadow-md ${isTargetVipSub ? 'bg-gradient-to-r from-amber-400 via-yellow-200 to-blue-400 bg-clip-text text-transparent font-black tracking-wide' : 'text-white'}`}>
+                      <span 
+                        className={`text-2xl sm:text-3xl font-black uppercase tracking-wide leading-none font-sans drop-shadow-md 
+                          ${isScamActive ? 'text-red-500 animate-pulse' : isTargetVipSub ? 'bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 bg-clip-text text-transparent font-black tracking-wide animate-pulse-slow' : 'text-white'}`} 
+                        style={isScamActive ? { filter: 'drop-shadow(0 0 12px rgba(220, 38, 38, 0.6))' } : isTargetVipSub ? { filter: 'drop-shadow(0 0 8px rgba(245, 158, 11, 0.5))' } : {}}
+                      >
                         {targetUser.displayName}
                       </span>
                     </div>
                   </div>
 
+                  {/* SCAM Warning Banner */}
+                  {isScamActive && (
+                    <div className="bg-red-600/20 border-2 border-red-600 p-3 flex flex-col gap-1 shadow-[0_0_20px_rgba(220,38,38,0.3)] animate-pulse">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-red-500 font-black text-xs uppercase tracking-[0.2em]">
+                          <Ban size={16} />
+                          {lang === 'ru' ? 'ВНИМАНИЕ: МОШЕННИК (SCAM)' : 'WARNING: SCAMMER'}
+                        </div>
+                        {targetUser.scamUntil && (
+                          <div className="text-[8px] font-mono text-red-400 font-bold uppercase tracking-widest bg-red-500/10 px-1.5 py-0.5 border border-red-500/20">
+                            {lang === 'ru' ? 'До:' : 'Until:'} {new Date(targetUser.scamUntil).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-[10px] font-mono text-zinc-300 uppercase leading-relaxed">
+                        {lang === 'ru' 
+                          ? (targetUser.scamReason || 'Пользователь внесен в черный список за попытку обмана системы оплаты.')
+                          : (targetUser.scamReason || 'User blacklisted for attempting to defraud the payment system.')}
+                      </p>
+                    </div>
+                  )}
+
                   {/* VIP Subscription Info Line */}
                   {isTargetVipSub && (
-                    <div className="bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent border-l-2 border-amber-500 p-2.5 flex items-center justify-between select-none shadow-[0_0_12px_rgba(245,158,11,0.1)]">
-                      <div className="flex items-center gap-2">
-                        <Sparkles size={14} className="text-amber-400 animate-pulse shrink-0" />
-                        <div>
-                          <span className="block text-[11px] font-black tracking-wider text-amber-300 uppercase leading-none">
-                            {lang === 'ru' ? 'АКТИВНАЯ VIP-ПОДПИСКА' : 'ACTIVE VIP SUBSCRIPTION'}
-                          </span>
-                          <span className="block text-[8px] font-mono text-zinc-400 mt-0.5 uppercase">
-                            {lang === 'ru' ? 'Доступ ко всем привилегиям и закрытым каналам' : 'Access to all privileges and private channels'}
+                    <div className="space-y-1.5">
+                      <div className="bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent border-l-2 border-amber-500 p-2.5 flex items-center justify-between select-none shadow-[0_0_12px_rgba(245,158,11,0.1)]">
+                        <div className="flex items-center gap-2">
+                          <Sparkles size={14} className="text-amber-400 animate-pulse shrink-0" />
+                          <div>
+                            <span className="block text-[11px] font-black tracking-wider text-amber-300 uppercase leading-none">
+                              {lang === 'ru' ? 'АКТИВНАЯ VIP-ПОДПИСКА' : 'ACTIVE VIP SUBSCRIPTION'}
+                            </span>
+                            <span className="block text-[8px] font-mono text-zinc-400 mt-0.5 uppercase">
+                              {lang === 'ru' ? 'Доступ ко всем привилегиям и закрытым каналам' : 'Access to all privileges and private channels'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="inline-block px-1.5 py-0.5 text-[8px] font-mono font-black tracking-widest bg-amber-500/20 border border-amber-500 text-amber-300 uppercase rounded">
+                            VIP LEVEL MAX
                           </span>
                         </div>
                       </div>
-                      <div className="text-right shrink-0">
-                        <span className="inline-block px-1.5 py-0.5 text-[8px] font-mono font-black tracking-widest bg-amber-500/20 border border-amber-500 text-amber-300 uppercase rounded">
-                          VIP LEVEL MAX
+                      
+                      {/* Priority Connection Indicator */}
+                      <div className="flex items-center gap-2 bg-[#0c0d10] border border-emerald-500/20 px-2 py-1.5 text-[8px] font-mono text-emerald-400 uppercase tracking-[0.2em] shadow-[inset_0_0_10px_rgba(16,185,129,0.05)]">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                         </span>
+                        {lang === 'ru' ? 'ПРЯМАЯ СВЯЗЬ: УСТАНОВЛЕНА' : 'PRIORITY CONNECTION: ESTABLISHED'}
                       </div>
                     </div>
                   )}
@@ -714,6 +787,7 @@ export default function UserProfileModal({
                 {BADGES.map((badge) => {
                   const isUnlocked = targetUser.badges?.includes(badge.id) || 
                     (badge.id === 'first_beacon') || 
+                    (badge.id === 'scam' && isScamActive) ||
                     (badge.id === 'founder' && targetUser.uid === 'serustqs') ||
                     (badge.id === 'veteran' && (targetUser.hoursPlayed || 0) >= 1000) ||
                     (badge.id === 'steam_linked' && !!targetUser.steamId);

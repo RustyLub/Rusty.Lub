@@ -32,7 +32,8 @@ import {
   Copy,
   ExternalLink,
   RefreshCw,
-  Lock
+  Lock,
+  ShieldAlert
 } from 'lucide-react';
 import { 
   doc, 
@@ -98,6 +99,8 @@ export default function CabinetModal({
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'verifying' | 'success' | 'error'>('idle');
   const [isSandbox, setIsSandbox] = useState(false);
   const [paymentError, setPaymentError] = useState('');
+  const [daNickname, setDaNickname] = useState('');
+  const [isSubmittingDa, setIsSubmittingDa] = useState(false);
 
   const VIP_PLANS = [
     {
@@ -607,6 +610,40 @@ export default function CabinetModal({
       setPaymentError(lang === 'ru' ? 'Не удалось связаться с сервером верификации.' : 'Could not contact the verification server.');
     } finally {
       setIsVerifyingPayment(false);
+    }
+  };
+
+  const handleDonationSubmit = async () => {
+    if (!daNickname.trim()) {
+      onToast(lang === 'ru' ? 'Введите ваш никнейм из DonationAlerts!' : 'Enter your DonationAlerts nickname!', 'warning');
+      return;
+    }
+
+    setIsSubmittingDa(true);
+    try {
+      const appId = `da_${Date.now()}_${user.uid.slice(0, 4)}`;
+      await setDoc(doc(db, 'vip_applications', appId), {
+        id: appId,
+        userId: user.uid,
+        userDisplayName: fullProfile?.displayName || user.uid,
+        paymentMethod: 'donationalerts',
+        donatorNickname: daNickname.trim(),
+        status: 'pending',
+        createdAt: serverTimestamp()
+      });
+
+      onToast(
+        lang === 'ru' 
+          ? 'Заявка успешно отправлена! Ожидайте проверки администратором.' 
+          : 'Application submitted! Awaiting administrator verification.', 
+        'success'
+      );
+      setDaNickname('');
+    } catch (err) {
+      console.error(err);
+      onToast(lang === 'ru' ? 'Ошибка отправки заявки.' : 'Failed to submit application.', 'error');
+    } finally {
+      setIsSubmittingDa(false);
     }
   };
 
@@ -1177,7 +1214,37 @@ export default function CabinetModal({
                           </div>
 
                           {/* Custom background image (VIP ONLY) */}
-                          {fullProfile?.isVip && (
+                          {!(fullProfile?.isVip || fullProfile?.role === 'admin') ? (
+                            <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4 relative overflow-hidden group">
+                              <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center gap-3 p-4 text-center">
+                                <div className="p-3 bg-amber-500/20 rounded-full border border-amber-500/40 text-amber-500">
+                                  <Lock size={24} />
+                                </div>
+                                <div className="space-y-1">
+                                  <h4 className="text-xs font-black text-amber-500 uppercase tracking-widest font-mono">
+                                    {lang === 'ru' ? 'ФУНКЦИЯ ЗАБЛОКИРОВАНА' : 'FEATURE ENCRYPTED'}
+                                  </h4>
+                                  <p className="text-[9px] text-zinc-400 font-mono uppercase leading-relaxed max-w-[200px]">
+                                    {lang === 'ru' 
+                                      ? 'СВОЙ ФОН ДОСТУПЕН ТОЛЬКО ДЛЯ VIP ПОЛЬЗОВАТЕЛЕЙ' 
+                                      : 'CUSTOM BACKGROUND IS EXCLUSIVE FOR VIP SPONSORS'}
+                                  </p>
+                                </div>
+                                <button
+                                  onClick={() => setActiveTab('vip')}
+                                  className="mt-2 px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-black text-[9px] font-black font-mono uppercase tracking-widest transition-all"
+                                >
+                                  {lang === 'ru' ? 'ПОЛУЧИТЬ VIP' : 'GET VIP ACCESS'}
+                                </button>
+                              </div>
+                              <span className="text-[10px] font-mono flex justify-between items-center text-zinc-600 font-bold uppercase tracking-wider block border-b border-zinc-900 pb-1.5 opacity-30">
+                                <span className="flex items-center gap-1.5">
+                                  <Crown size={12} />
+                                  {lang === 'ru' ? 'СВОЙ ФОН ВИЗИТКИ' : 'CUSTOM BACKGROUND'}
+                                </span>
+                              </span>
+                            </div>
+                          ) : (
                             <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4 relative overflow-hidden">
                               <span className="text-[10px] font-mono flex justify-between items-center text-[#cd412b] font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5">
                                 <span className="flex items-center gap-1.5">
@@ -1201,7 +1268,7 @@ export default function CabinetModal({
                                         onChange={(e) => {
                                           const file = e.target.files?.[0];
                                           if (file) {
-                                            if (file.size > 700 * 1024) {
+                                            const isVip = !!fullProfile?.isVip || fullProfile?.uid === "serustqs" || fullProfile?.role === "admin"; const limit = isVip ? 6 * 1024 * 1024 : 700 * 1024; const limitStr = isVip ? "6MB" : "700KB"; if (file.size > limit) {
                                               onToast(lang === 'ru' ? 'Размер файла превышает 700KB!' : 'File size exceeds 700KB!', 'warning');
                                               return;
                                             }
@@ -1269,7 +1336,30 @@ export default function CabinetModal({
                           transition={{ duration: 0.15 }}
                           className="space-y-4"
                         >
-                          <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
+                          {!(fullProfile?.isVip || fullProfile?.role === 'admin') ? (
+                            <div className="bg-[#0c0d10] border border-[#2a2f3b] p-12 flex flex-col items-center justify-center gap-4 text-center">
+                              <div className="w-16 h-16 bg-red-500/10 border border-red-500/30 rounded-full flex items-center justify-center text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+                                <ShieldAlert size={32} />
+                              </div>
+                              <div className="space-y-2">
+                                <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] font-mono">
+                                  {lang === 'ru' ? 'ДОСТУП ОГРАНИЧЕН' : 'ACCESS DENIED'}
+                                </h3>
+                                <p className="text-[10px] text-zinc-500 font-mono uppercase leading-relaxed max-w-sm">
+                                  {lang === 'ru' 
+                                    ? 'РАСШИРЕННЫЕ ПРОТОКОЛЫ БЕЗОПАСНОСТИ ДОСТУПНЫ ТОЛЬКО ДЛЯ VIP-ПОДРАЗДЕЛЕНИЙ' 
+                                    : 'ADVANCED SECURITY PROTOCOLS ARE RESTRICTED TO VIP OPERATIVES ONLY'}
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => setActiveTab('vip')}
+                                className="px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black text-[10px] font-black font-mono uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)]"
+                              >
+                                {lang === 'ru' ? 'КУПИТЬ VIP ПОДПИСКУ' : 'UPGRADE TO VIP'}
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
                             <span className="text-[10px] font-mono text-[#cd412b] font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5 flex items-center gap-1.5">
                               <ShieldCheck size={12} className="text-[#cd412b]" />
                               {lang === 'ru' ? 'БЕЗОПАСНОСТЬ ПРОФИЛЯ' : 'PROFILE SECURITY PROTOCOLS'}
@@ -1369,8 +1459,9 @@ export default function CabinetModal({
                               </div>
                             </div>
                           </div>
-                        </motion.div>
-                      )}
+                        )}
+                      </motion.div>
+                    )}
                     </AnimatePresence>
 
                   </form>
@@ -1722,7 +1813,37 @@ export default function CabinetModal({
                 )}
 
                 {/* Plans Selection Grid */}
-                <div className="grid grid-cols-1 max-w-md mx-auto gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {/* Free Perks Card */}
+                  <div className="bg-zinc-950/20 border border-zinc-800/40 p-4 space-y-3 relative overflow-hidden group">
+                    <div className="absolute -right-4 -bottom-4 text-zinc-800/10 rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                      <Lock size={60} />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block">
+                        DEFAULT ACCESS
+                      </span>
+                      <h3 className="text-sm font-black text-zinc-300 font-sans uppercase mt-0.5">
+                        {lang === 'ru' ? 'БАЗОВЫЙ ДОСТУП (FREE)' : 'BASIC ACCESS (FREE)'}
+                      </h3>
+                    </div>
+                    <ul className="space-y-1.5 pt-2 border-t border-zinc-800/30">
+                      {[
+                        { ru: 'Глобальный радио-чат RustHub', en: 'Global RustHub radio chat' },
+                        { ru: 'Калькулятор рейдов (базовый)', en: 'Raid calculator (basic)' },
+                        { ru: 'Справочник биндов и консольных команд', en: 'Binds and console command library' },
+                        { ru: 'База ошибок Rust и способы их решения', en: 'Rust error database & fixes' },
+                        { ru: 'Просмотр новостей и блогов', en: 'News and developer blogs' },
+                        { ru: 'Создание своего профиля и списка друзей', en: 'Profile creation and friends list' }
+                      ].map((perk, i) => (
+                        <li key={i} className="text-[9px] text-zinc-500 flex items-start gap-1.5 leading-relaxed">
+                          <Check size={10} className="text-emerald-500/50 mt-0.5 shrink-0" />
+                          <span>{perk[lang]}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
                   {VIP_PLANS.map((plan) => {
                     const isSelected = selectedPlanId === plan.id;
                     return (
@@ -1948,6 +2069,85 @@ export default function CabinetModal({
                     </div>
                   );
                 })()}
+
+                {/* DonationAlerts Alternative Section */}
+                <div className="bg-gradient-to-br from-[#1a1505] to-[#0c0d10] border border-amber-500/30 p-6 space-y-5 relative overflow-hidden">
+                  <div className="absolute right-0 bottom-0 opacity-5 pointer-events-none">
+                    <Wallet size={120} />
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <h3 className="text-xs font-black text-amber-500 uppercase tracking-widest font-mono flex items-center gap-2">
+                      <Wallet size={16} />
+                      {lang === 'ru' ? 'НЕТ КРИПТОВАЛЮТЫ? ОПЛАТА ЧЕРЕЗ DONATIONALERTS' : 'NO CRYPTO? PAY VIA DONATIONALERTS'}
+                    </h3>
+                    <p className="text-[10px] text-zinc-400 max-w-2xl leading-relaxed">
+                      {lang === 'ru'
+                        ? 'Если вы не можете оплатить в USDT, воспользуйтесь сервисом DonationAlerts. Сумма с учетом комиссии составляет 260₽. Обязательно укажите ваш ID в сообщении к донату.'
+                        : 'If you cannot pay via USDT, use DonationAlerts. The total amount including fees is 3.5$. Make sure to include your ID in the donation message.'}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                    <div className="space-y-4">
+                      <div className="bg-black/40 border border-zinc-800 p-4 space-y-3">
+                        <div className="flex justify-between items-center text-[10px] font-mono">
+                          <span className="text-zinc-500 uppercase">{lang === 'ru' ? 'Сумма к оплате:' : 'Amount to pay:'}</span>
+                          <span className="text-amber-500 font-black">{lang === 'ru' ? '260 ₽' : '3.5$'}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[10px] font-mono">
+                          <span className="text-zinc-500 uppercase">{lang === 'ru' ? 'Ваш ID для доната:' : 'Your ID for donation:'}</span>
+                          <span className="text-blue-400 font-black select-all">{user.uid}</span>
+                        </div>
+                        <a 
+                          href="https://www.donationalerts.com/r/rusthub_vip" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-[10px] font-black uppercase tracking-widest transition-all"
+                        >
+                          <ExternalLink size={14} />
+                          {lang === 'ru' ? 'ПЕРЕЙТИ К ОПЛАТЕ' : 'GO TO PAYMENT'}
+                        </a>
+                      </div>
+                      
+                      <div className="flex items-start gap-2 p-3 bg-red-950/20 border border-red-500/20 rounded-sm">
+                        <AlertTriangle size={16} className="text-red-500 shrink-0" />
+                        <p className="text-[9px] text-zinc-400 leading-normal uppercase font-mono">
+                          {lang === 'ru' 
+                            ? 'ВНИМАНИЕ: ЛЮБАЯ ПОПЫТКА ОБМАНА ПРИВЕДЕТ К БЛОКИРОВКЕ И ПОЛУЧЕНИЮ ТЕГА "SCAM" В ПРОФИЛЕ НАВСЕГДА.' 
+                            : 'WARNING: ANY ATTEMPT TO FRAUD WILL RESULT IN A PERMANENT "SCAM" TAG ON YOUR PROFILE AND BAN.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block">
+                        {lang === 'ru' ? 'ПОДАТЬ ЗАЯВКУ ПОСЛЕ ОПЛАТЫ' : 'SUBMIT APPLICATION AFTER PAYMENT'}
+                      </span>
+                      <div className="space-y-3">
+                        <input
+                          type="text"
+                          value={daNickname}
+                          onChange={(e) => setDaNickname(e.target.value)}
+                          placeholder={lang === 'ru' ? 'Ваш никнейм в DonationAlerts...' : 'Your DonationAlerts nickname...'}
+                          className="w-full bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-amber-500/50"
+                        />
+                        <button
+                          onClick={handleDonationSubmit}
+                          disabled={isSubmittingDa}
+                          className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-zinc-800 text-black text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                        >
+                          {isSubmittingDa ? (
+                            <RefreshCw size={14} className="animate-spin" />
+                          ) : (
+                            <Save size={14} />
+                          )}
+                          {lang === 'ru' ? 'ОТПРАВИТЬ ЗАЯВКУ' : 'SUBMIT APPLICATION'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             )}
 
