@@ -31,7 +31,8 @@ import {
   Wallet,
   Copy,
   ExternalLink,
-  RefreshCw
+  RefreshCw,
+  Lock
 } from 'lucide-react';
 import { 
   doc, 
@@ -126,6 +127,8 @@ export default function CabinetModal({
   ];
 
   // Customization local states
+  const [displayName, setDisplayName] = useState('');
+  const [profileSubTab, setProfileSubTab] = useState<'info' | 'appearance' | 'security'>('info');
   const [bio, setBio] = useState('');
   const [clanTag, setClanTag] = useState('');
   const [hoursPlayed, setHoursPlayed] = useState<number>(0);
@@ -194,6 +197,7 @@ export default function CabinetModal({
         setFullProfile(profile);
 
         // Pre-fill fields once
+        setDisplayName(profile.displayName || '');
         setBio(profile.bio || '');
         setClanTag(profile.clanTag || '');
         setHoursPlayed(profile.hoursPlayed || 0);
@@ -270,6 +274,12 @@ export default function CabinetModal({
 
     try {
       const userRef = doc(db, 'chat_users', user.uid);
+
+      if (!displayName.trim()) {
+        onToast(lang === 'ru' ? 'Имя (Позывной) не может быть пустым!' : 'Callsign (Display Name) cannot be empty!', 'warning');
+        setIsSavingProfile(false);
+        return;
+      }
       
       // Calculate dynamic badges
       const badges = fullProfile?.badges || [];
@@ -289,6 +299,7 @@ export default function CabinetModal({
       }
 
       const updatePayload: any = {
+        displayName: displayName.trim(),
         bio,
         clanTag: clanTag.slice(0, 5),
         hoursPlayed: Number(hoursPlayed) || 0,
@@ -878,121 +889,214 @@ export default function CabinetModal({
                 <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
                   
                   {/* Left Column: Form inputs (Span 7) */}
-                  <form onSubmit={handleSaveProfile} className="xl:col-span-7 space-y-6 order-2 xl:order-1">
-                    {/* Grid layout */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      {/* Left Column: Stats & Information */}
-                      <div className="space-y-5">
-                        {/* Biometric logs */}
-                        <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
-                          <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5">
-                            {lang === 'ru' ? '1. ИГРОВЫЕ ПАРАМЕТРЫ (ВИЗИТКА)' : '1. SURVIVOR STATS CARD'}
-                          </span>
+                  <form onSubmit={handleSaveProfile} className="xl:col-span-7 space-y-5 order-2 xl:order-1">
+                    
+                    {/* Sleek Tactical Segmented Tabs for Profile Editing */}
+                    <div className="flex bg-[#0c0d10] p-1 border border-[#2a2f3b] rounded-sm gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setProfileSubTab('info')}
+                        className={`flex-1 py-2 text-[10px] font-bold font-mono uppercase tracking-wider cursor-pointer text-center transition-all flex items-center justify-center gap-1.5 ${
+                          profileSubTab === 'info'
+                            ? 'bg-[#cd412b]/15 border border-[#cd412b]/50 text-white font-black'
+                            : 'border border-transparent text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/30'
+                        }`}
+                      >
+                        <User size={12} className={profileSubTab === 'info' ? 'text-[#cd412b]' : 'text-zinc-600'} />
+                        {lang === 'ru' ? 'Параметры' : 'Parameters'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProfileSubTab('appearance')}
+                        className={`flex-1 py-2 text-[10px] font-bold font-mono uppercase tracking-wider cursor-pointer text-center transition-all flex items-center justify-center gap-1.5 ${
+                          profileSubTab === 'appearance'
+                            ? 'bg-[#cd412b]/15 border border-[#cd412b]/50 text-white font-black'
+                            : 'border border-transparent text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/30'
+                        }`}
+                      >
+                        <Sparkles size={12} className={profileSubTab === 'appearance' ? 'text-[#cd412b]' : 'text-zinc-600'} />
+                        {lang === 'ru' ? 'Внешний вид' : 'Appearance'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProfileSubTab('security')}
+                        className={`flex-1 py-2 text-[10px] font-bold font-mono uppercase tracking-wider cursor-pointer text-center transition-all flex items-center justify-center gap-1.5 ${
+                          profileSubTab === 'security'
+                            ? 'bg-[#cd412b]/15 border border-[#cd412b]/50 text-white font-black'
+                            : 'border border-transparent text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/30'
+                        }`}
+                      >
+                        <ShieldCheck size={12} className={profileSubTab === 'security' ? 'text-[#cd412b]' : 'text-zinc-600'} />
+                        {lang === 'ru' ? 'Безопасность' : 'Security'}
+                      </button>
+                    </div>
 
-                          <div className="grid grid-cols-2 gap-2.5">
-                            <div className="space-y-1.5">
-                              <label className="text-[9px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Клан-Тег (До 5 симв.)' : 'Clan Tag (Max 5)'}</label>
-                              <input 
-                                type="text" 
-                                maxLength={5}
-                                value={clanTag}
-                                onChange={(e) => setClanTag(e.target.value)}
-                                className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-zinc-700"
-                                placeholder="STG"
-                              />
-                            </div>
+                    <AnimatePresence mode="wait">
+                      {profileSubTab === 'info' && (
+                        <motion.div
+                          key="info-tab"
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          transition={{ duration: 0.15 }}
+                          className="space-y-4"
+                        >
+                          <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
+                            <span className="text-[10px] font-mono text-[#cd412b] font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5 flex items-center gap-1.5">
+                              <User size={12} />
+                              {lang === 'ru' ? 'ЛИЧНЫЕ ДАННЫЕ И ИГРОВЫЕ ПАРАМЕТРЫ' : 'PERSONAL DATA & IN-GAME TELEMETRY'}
+                            </span>
 
-                            <div className="space-y-1.5">
-                              <label className="text-[9px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Часы в Rust' : 'Rust Hours'}</label>
-                              <input 
-                                type="number" 
-                                value={hoursPlayed}
-                                onChange={(e) => setHoursPlayed(Math.max(0, parseInt(e.target.value) || 0))}
-                                className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-zinc-700"
-                                placeholder="2500"
-                              />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* Callsign Display Name */}
+                              <div className="space-y-1.5">
+                                <label className="text-[9px] text-zinc-500 font-mono uppercase block">
+                                  {lang === 'ru' ? 'Имя (Позывной выжившего)' : 'Callsign (Display Name)'}
+                                </label>
+                                <div className="relative">
+                                  <input 
+                                    type="text" 
+                                    maxLength={20}
+                                    value={displayName}
+                                    onChange={(e) => setDisplayName(e.target.value)}
+                                    disabled={fullProfile?.role !== 'admin'}
+                                    className="w-full bg-[#14171e] border border-zinc-800 focus:border-zinc-700 p-2.5 text-xs font-mono text-white outline-none disabled:opacity-40 disabled:cursor-not-allowed"
+                                    placeholder={user.uid}
+                                  />
+                                  {fullProfile?.role !== 'admin' && (
+                                    <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                                      <Lock size={10} className="text-zinc-600" />
+                                    </div>
+                                  )}
+                                </div>
+                                {fullProfile?.role !== 'admin' && (
+                                  <span className="text-[7px] text-zinc-600 font-mono uppercase tracking-tight">
+                                    {lang === 'ru' ? 'Изменение доступно только Администрации' : 'Callsign change requires Admin override'}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Clan Tag */}
+                              <div className="space-y-1.5">
+                                <label className="text-[9px] text-zinc-500 font-mono uppercase block">
+                                  {lang === 'ru' ? 'Клан-Тег (До 5 симв.)' : 'Clan Tag (Max 5)'}
+                                </label>
+                                <input 
+                                  type="text" 
+                                  maxLength={5}
+                                  value={clanTag}
+                                  onChange={(e) => setClanTag(e.target.value)}
+                                  className="w-full bg-[#14171e] border border-zinc-800 focus:border-zinc-700 p-2.5 text-xs font-mono text-white outline-none"
+                                  placeholder="STG"
+                                />
+                              </div>
+
+                              {/* Hours in Rust */}
+                              <div className="space-y-1.5">
+                                <label className="text-[9px] text-zinc-500 font-mono uppercase block">
+                                  {lang === 'ru' ? 'Часы в Rust' : 'Hours in Rust'}
+                                </label>
+                                <input 
+                                  type="number" 
+                                  value={hoursPlayed}
+                                  onChange={(e) => setHoursPlayed(Math.max(0, parseInt(e.target.value) || 0))}
+                                  className="w-full bg-[#14171e] border border-zinc-800 focus:border-zinc-700 p-2.5 text-xs font-mono text-white outline-none"
+                                  placeholder="2500"
+                                />
+                              </div>
+
+                              {/* Playstyle */}
+                              <div className="space-y-1.5">
+                                <label className="text-[9px] text-zinc-500 font-mono uppercase block">
+                                  {lang === 'ru' ? 'Стиль Игры' : 'Playstyle'}
+                                </label>
+                                <select
+                                  value={playstyle}
+                                  onChange={(e) => setPlaystyle(e.target.value)}
+                                  className="w-full bg-[#14171e] border border-zinc-800 focus:border-zinc-700 p-2.5 text-xs font-mono text-white outline-none cursor-pointer"
+                                >
+                                  {['Solo', 'Duo/Trio', 'Clan PVP', 'Base Builder', 'Farmer', 'Casual', 'Roleplay'].map(s => (
+                                    <option key={s} value={s}>{s}</option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              {/* Favorite Weapon */}
+                              <div className="space-y-1.5">
+                                <label className="text-[9px] text-zinc-500 font-mono uppercase block">
+                                  {lang === 'ru' ? 'Любимое Оружие' : 'Favorite Weapon'}
+                                </label>
+                                <select
+                                  value={favoriteWeapon}
+                                  onChange={(e) => setFavoriteWeapon(e.target.value)}
+                                  className="w-full bg-[#14171e] border border-zinc-800 focus:border-zinc-700 p-2.5 text-xs font-mono text-white outline-none cursor-pointer"
+                                >
+                                  {['AK-47', 'LR-300', 'M249', 'Bolt Rifle', 'SAR', 'MP5A4', 'Custom SMG', 'Python', 'Double Barrel', 'Pump Shotgun', 'Compound Bow'].map(w => (
+                                    <option key={w} value={w}>{w}</option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              {/* Steam Link */}
+                              <div className="space-y-1.5">
+                                <label className="text-[9px] text-zinc-500 font-mono uppercase block">
+                                  {lang === 'ru' ? 'Ссылка на Steam профиль' : 'Steam Profile URL'}
+                                </label>
+                                <input 
+                                  type="text" 
+                                  value={steamLink}
+                                  onChange={(e) => setSteamLink(e.target.value)}
+                                  className="w-full bg-[#14171e] border border-zinc-800 focus:border-zinc-700 p-2.5 text-xs font-mono text-white outline-none"
+                                  placeholder="https://steamcommunity.com/id/your_steam_id"
+                                />
+                              </div>
+
+                              {/* Bio Status (Full Width) */}
+                              <div className="space-y-1.5 md:col-span-2">
+                                <label className="text-[9.5px] text-zinc-500 font-mono uppercase block">
+                                  {lang === 'ru' ? 'Статус / Описание выжившего (до 300 симв.)' : 'Status / Survivor Bio (max 300 chars)'}
+                                </label>
+                                <textarea
+                                  rows={4}
+                                  maxLength={300}
+                                  value={bio}
+                                  onChange={(e) => setBio(e.target.value)}
+                                  placeholder={lang === 'ru' ? 'Расскажите о себе, ищите тиммейтов, рекламируйте свой магазин на сервере...' : 'Tell about yourself, recruit crew members, write base coords...'}
+                                  className="w-full bg-[#14171e] border border-zinc-800 focus:border-zinc-700 text-xs font-mono p-3 text-zinc-200 outline-none transition-all placeholder-zinc-750 resize-none leading-relaxed"
+                                />
+                              </div>
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-2.5">
-                            <div className="space-y-1.5">
-                              <label className="text-[9px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Стиль Игры' : 'Playstyle'}</label>
-                              <select
-                                value={playstyle}
-                                onChange={(e) => setPlaystyle(e.target.value)}
-                                className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-zinc-700 cursor-pointer"
-                              >
-                                {['Solo', 'Duo/Trio', 'Clan PVP', 'Base Builder', 'Farmer', 'Casual', 'Roleplay'].map(s => (
-                                  <option key={s} value={s}>{s}</option>
-                                ))}
-                              </select>
-                            </div>
+                          {/* Save profile block */}
+                          <button
+                            type="submit"
+                            disabled={isSavingProfile}
+                            className="w-full py-3 bg-[#cd412b] hover:bg-[#b03825] text-white font-black text-xs uppercase tracking-widest font-mono cursor-pointer transition-all flex items-center justify-center gap-2 border border-[#cd412b]/65 hover:border-white shadow-lg"
+                          >
+                            <Save size={14} />
+                            <span>{isSavingProfile ? (lang === 'ru' ? 'ОБНОВЛЕНИЕ БИОСИСТЕМЫ...' : 'TRANSMITTING CODES...') : (lang === 'ru' ? 'СОХРАНИТЬ ПАРАМЕТРЫ ПРОФИЛЯ' : 'SAVE PROFILE PARAMETERS')}</span>
+                          </button>
+                        </motion.div>
+                      )}
 
-                            <div className="space-y-1.5">
-                              <label className="text-[9px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Любимое Оружие' : 'Fav Weapon'}</label>
-                              <select
-                                value={favoriteWeapon}
-                                onChange={(e) => setFavoriteWeapon(e.target.value)}
-                                className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-zinc-700 cursor-pointer"
-                              >
-                                {['AK-47', 'LR-300', 'M249', 'Bolt Rifle', 'SAR', 'MP5A4', 'Custom SMG', 'Python', 'Double Barrel', 'Pump Shotgun', 'Compound Bow'].map(w => (
-                                  <option key={w} value={w}>{w}</option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-                        </div>
+                      {profileSubTab === 'appearance' && (
+                        <motion.div
+                          key="appearance-tab"
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          transition={{ duration: 0.15 }}
+                          className="space-y-4"
+                        >
+                          {/* Choose Tactical Suit */}
+                          <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
+                            <span className="text-[10px] font-mono text-[#cd412b] font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5 flex items-center gap-1.5">
+                              <Sparkles size={12} />
+                              {lang === 'ru' ? 'ВЫБОР ТАКТИЧЕСКОГО КОСТЮМА (АВАТАР)' : 'CHOOSE TACTICAL SUIT (AVATAR)'}
+                            </span>
 
-                        {/* Bio status */}
-                        <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-3.5">
-                          <label className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5">
-                            {lang === 'ru' ? '2. ОПИСАНИЕ И СОЦСЕТИ ВЫЖИВШЕГО' : '2. SURVIVOR STATUS & BIO'}
-                          </label>
-                          <textarea
-                            rows={3}
-                            maxLength={300}
-                            value={bio}
-                            onChange={(e) => setBio(e.target.value)}
-                            placeholder={lang === 'ru' ? 'Расскажите о себе, ищите тиммейтов, рекламируйте свой магазин на сервере...' : 'Tell about yourself, recruit crew members, write base coords...'}
-                            className="w-full bg-[#14171e] border border-zinc-800 text-xs font-mono p-3 text-zinc-200 focus:border-zinc-700 outline-none transition-all placeholder-zinc-700 resize-none"
-                          />
-                          <div className="space-y-1.5 pt-1">
-                            <label className="text-[9px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Ссылка на Steam профиль' : 'Steam Profile URL'}</label>
-                            <input 
-                              type="text" 
-                              value={steamLink}
-                              onChange={(e) => setSteamLink(e.target.value)}
-                              className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-zinc-700"
-                              placeholder="https://steamcommunity.com/id/your_steam_id"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right Column: Customization and Presets */}
-                      <div className="space-y-5">
-                        {/* Avatar Custom URL or Preset selector */}
-                        <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
-                          <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5">
-                            {lang === 'ru' ? '3. ВНЕШНИЙ ВИД (ПРЕСЕТЫ)' : '3. SURVIVOR AVATAR'}
-                          </span>
-
-                          {/* Custom avatar URL */}
-                          <div className="space-y-1.5">
-                            <label className="text-[8px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Ссылка на свою аватарку (URL)' : 'Custom Avatar Image URL'}</label>
-                            <input 
-                              type="text" 
-                              value={customAvatarUrl}
-                              onChange={(e) => setCustomAvatarUrl(e.target.value)}
-                              className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-[10px] font-mono text-white outline-none focus:border-zinc-700"
-                              placeholder="https://example.com/avatar.png"
-                            />
-                          </div>
-
-                          {/* Preset avatars grid */}
-                          <div className="space-y-2">
-                            <label className="text-[8px] text-zinc-500 font-mono uppercase block">{lang === 'ru' ? 'Выберите тактический костюм' : 'Select tactical suit'}</label>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-1">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
                               {CUSTOM_AVATARS.map((avatar) => {
                                 const isCurrent = fullProfile && fullProfile.avatarClass === avatar.id;
                                 return (
@@ -1029,230 +1133,246 @@ export default function CabinetModal({
                                 );
                               })}
                             </div>
-                          </div>
-                        </div>
 
-                        {/* Theme selection */}
-                        <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-3.5">
-                          <label className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5">
-                            {lang === 'ru' ? '4. СТИЛЬ ВИЗИТКИ (ТЕМЫ ПРОФИЛЯ)' : '4. CARD THEME & LAYOUT'}
-                          </label>
-                          <div className="grid grid-cols-2 gap-2">
-                            {PROFILE_THEMES.map((theme) => {
-                              const isSel = customTheme === theme.id;
-                              return (
-                                <button
-                                  key={theme.id}
-                                  type="button"
-                                  onClick={() => setCustomTheme(theme.id)}
-                                  className={`p-2.5 border text-[9.5px] font-mono font-bold uppercase tracking-wider text-center cursor-pointer transition-all ${
-                                    isSel 
-                                      ? 'bg-[#cd412b]/20 border-[#cd412b] text-white' 
-                                      : 'border-zinc-800/80 bg-zinc-950/40 hover:border-zinc-600 text-zinc-400'
-                                  }`}
-                                >
-                                  {theme.name[lang]}
-                                </button>
-                              );
-                            })}
+                            {/* Custom Avatar URL */}
+                            <div className="space-y-1.5 pt-2">
+                              <label className="text-[8.5px] text-zinc-500 font-mono uppercase block">
+                                {lang === 'ru' ? 'Или своя тактическая аватарка по ссылке (URL фото)' : 'Or set custom avatar using image URL'}
+                              </label>
+                              <input 
+                                type="text" 
+                                value={customAvatarUrl}
+                                onChange={(e) => setCustomAvatarUrl(e.target.value)}
+                                className="w-full bg-[#14171e] border border-zinc-800 focus:border-zinc-700 p-2.5 text-xs font-mono text-white outline-none"
+                                placeholder="https://example.com/avatar.png"
+                              />
+                            </div>
                           </div>
-                        </div>
 
-                        {/* Custom background image */}
-                        <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-3.5 relative overflow-hidden">
-                          <label className="text-[10px] font-mono flex justify-between items-center text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5">
-                            <span>{lang === 'ru' ? '5. СВОЙ ФОН ВИЗИТКИ (ФОТО)' : '5. CUSTOM CARD BACKGROUND (PHOTO)'}</span>
-                            {!fullProfile?.isVip && <Crown size={12} className="text-amber-500" />}
-                          </label>
-                          
-                          {fullProfile?.isVip ? (
-                            <div className="space-y-3">
-                              {/* File Upload Button */}
-                              <div className="flex flex-col gap-2">
-                                <label className="text-[8px] text-zinc-500 font-mono uppercase block">
-                                  {lang === 'ru' ? 'Загрузить файл с устройства (До 700KB)' : 'Upload file from device (Max 700KB)'}
-                                </label>
-                                <div className="flex items-center gap-2">
-                                  <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-dashed border-zinc-700 hover:border-zinc-500 bg-zinc-900/40 text-[10px] font-mono font-bold text-zinc-400 hover:text-zinc-200 uppercase tracking-wider cursor-pointer transition-all">
-                                    <Upload size={12} />
-                                    <span>{lang === 'ru' ? 'Выбрать фото' : 'Choose Photo'}</span>
-                                    <input 
-                                      type="file" 
-                                      accept="image/*"
-                                      onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                          if (file.size > 700 * 1024) {
-                                            onToast(lang === 'ru' ? 'Размер файла превышает 700KB!' : 'File size exceeds 700KB!', 'warning');
-                                            return;
-                                          }
-                                          const reader = new FileReader();
-                                          reader.onloadend = () => {
-                                            setCustomBackground(reader.result as string);
-                                            onToast(lang === 'ru' ? 'Фото успешно загружено!' : 'Photo successfully loaded!', 'success');
-                                          };
-                                          reader.readAsDataURL(file);
-                                        }
-                                      }}
-                                      className="hidden"
-                                    />
+                          {/* Theme selection */}
+                          <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
+                            <span className="text-[10px] font-mono text-[#cd412b] font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5 flex items-center gap-1.5">
+                              <Layout size={12} />
+                              {lang === 'ru' ? 'ЦВЕТОВАЯ ГАММА И ТЕМАТИКА ВИЗИТКИ' : 'CARD THEMATIC COLOR PALETTE'}
+                            </span>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                              {PROFILE_THEMES.map((theme) => {
+                                const isSel = customTheme === theme.id;
+                                return (
+                                  <button
+                                    key={theme.id}
+                                    type="button"
+                                    onClick={() => setCustomTheme(theme.id)}
+                                    className={`p-2 border text-[9.5px] font-mono font-bold uppercase tracking-wider text-center cursor-pointer transition-all ${
+                                      isSel 
+                                        ? 'bg-[#cd412b]/20 border-[#cd412b] text-white shadow-[0_0_8px_rgba(205,65,43,0.15)]' 
+                                        : 'border-zinc-800/80 bg-zinc-950/40 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200'
+                                    }`}
+                                  >
+                                    {theme.name[lang]}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Custom background image (VIP ONLY) */}
+                          {fullProfile?.isVip && (
+                            <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4 relative overflow-hidden">
+                              <span className="text-[10px] font-mono flex justify-between items-center text-[#cd412b] font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5">
+                                <span className="flex items-center gap-1.5">
+                                  <Crown size={12} className="text-amber-500" />
+                                  {lang === 'ru' ? 'СВОЙ ФОН ВИЗИТКИ (VIP-ФУНКЦИЯ)' : 'CUSTOM BACKGROUND (VIP FUNCTION)'}
+                                </span>
+                              </span>
+                              
+                              <div className="space-y-3 pt-1">
+                                <div className="flex flex-col gap-2">
+                                  <label className="text-[8px] text-zinc-500 font-mono uppercase block">
+                                    {lang === 'ru' ? 'Загрузить файл с устройства (До 700KB)' : 'Upload file from device (Max 700KB)'}
                                   </label>
-                                  
-                                  {customBackground && (
+                                  <div className="flex items-center gap-2">
+                                    <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-dashed border-zinc-700 hover:border-zinc-500 bg-zinc-900/40 text-[10px] font-mono font-bold text-zinc-400 hover:text-zinc-200 uppercase tracking-wider cursor-pointer transition-all">
+                                      <Upload size={12} />
+                                      <span>{lang === 'ru' ? 'Выбрать фото' : 'Choose Photo'}</span>
+                                      <input 
+                                        type="file" 
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                          const file = e.target.files?.[0];
+                                          if (file) {
+                                            if (file.size > 700 * 1024) {
+                                              onToast(lang === 'ru' ? 'Размер файла превышает 700KB!' : 'File size exceeds 700KB!', 'warning');
+                                              return;
+                                            }
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                              setCustomBackground(reader.result as string);
+                                              onToast(lang === 'ru' ? 'Фото успешно загружено!' : 'Photo successfully loaded!', 'success');
+                                            };
+                                            reader.readAsDataURL(file);
+                                          }
+                                        }}
+                                        className="hidden"
+                                      />
+                                    </label>
+                                    
+                                    {customBackground && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setCustomBackground('');
+                                          onToast(lang === 'ru' ? 'Фон сброшен!' : 'Background reset!', 'success');
+                                        }}
+                                        className="px-2.5 py-2 border border-red-500/30 hover:border-red-500 bg-red-900/10 text-red-400 text-[10px] font-mono font-bold uppercase tracking-wider cursor-pointer"
+                                      >
+                                        {lang === 'ru' ? 'Сбросить' : 'Reset'}
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+    
+                                <div className="space-y-1.5">
+                                  <label className="text-[8px] text-zinc-500 font-mono uppercase block">
+                                    {lang === 'ru' ? 'Или вставьте прямую ссылку на фото (URL)' : 'Or paste direct image URL'}
+                                  </label>
+                                  <input 
+                                    type="text" 
+                                    value={customBackground}
+                                    onChange={(e) => setCustomBackground(e.target.value)}
+                                    className="w-full bg-[#14171e] border border-zinc-800 focus:border-zinc-700 p-2.5 text-[10px] font-mono text-white outline-none"
+                                    placeholder="https://example.com/background.jpg"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Save profile block */}
+                          <button
+                            type="submit"
+                            disabled={isSavingProfile}
+                            className="w-full py-3 bg-[#cd412b] hover:bg-[#b03825] text-white font-black text-xs uppercase tracking-widest font-mono cursor-pointer transition-all flex items-center justify-center gap-2 border border-[#cd412b]/65 hover:border-white shadow-lg"
+                          >
+                            <Save size={14} />
+                            <span>{isSavingProfile ? (lang === 'ru' ? 'ОБНОВЛЕНИЕ БИОСИСТЕМЫ...' : 'TRANSMITTING CODES...') : (lang === 'ru' ? 'СОХРАНИТЬ ПАРАМЕТРЫ ПРОФИЛЯ' : 'SAVE PROFILE PARAMETERS')}</span>
+                          </button>
+                        </motion.div>
+                      )}
+
+                      {profileSubTab === 'security' && (
+                        <motion.div
+                          key="security-tab"
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          transition={{ duration: 0.15 }}
+                          className="space-y-4"
+                        >
+                          <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
+                            <span className="text-[10px] font-mono text-[#cd412b] font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5 flex items-center gap-1.5">
+                              <ShieldCheck size={12} className="text-[#cd412b]" />
+                              {lang === 'ru' ? 'БЕЗОПАСНОСТЬ ПРОФИЛЯ' : 'PROFILE SECURITY PROTOCOLS'}
+                            </span>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1">
+                              {/* Change Password */}
+                              <div className="space-y-3.5">
+                                <span className="text-[9px] text-[#cd412b] font-mono uppercase font-black block tracking-wider">
+                                  {lang === 'ru' ? '1. ИЗМЕНЕНИЕ ПАРОЛЯ' : '1. UPDATE ACCESS CODE (PASSWORD)'}
+                                </span>
+                                <div className="space-y-3">
+                                  <div className="space-y-1">
+                                    <label className="text-[8px] text-zinc-500 font-mono uppercase block">
+                                      {lang === 'ru' ? 'Новый пароль' : 'New Password'}
+                                    </label>
+                                    <input 
+                                      type="password" 
+                                      value={newPassword}
+                                      onChange={(e) => setNewPassword(e.target.value)}
+                                      className="w-full bg-[#14171e] border border-zinc-800 focus:border-zinc-700 p-2.5 text-xs font-mono text-white outline-none"
+                                      placeholder="••••••••"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <label className="text-[8px] text-zinc-500 font-mono uppercase block">
+                                      {lang === 'ru' ? 'Подтвердите новый пароль' : 'Confirm New Password'}
+                                    </label>
+                                    <input 
+                                      type="password" 
+                                      value={confirmPassword}
+                                      onChange={(e) => setConfirmPassword(e.target.value)}
+                                      className="w-full bg-[#14171e] border border-zinc-800 focus:border-zinc-700 p-2.5 text-xs font-mono text-white outline-none"
+                                      placeholder="••••••••"
+                                    />
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={handleUpdatePassword}
+                                    disabled={isUpdatingPassword}
+                                    className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white border border-zinc-700/50 hover:border-zinc-500 text-[10px] font-bold font-mono uppercase tracking-wider cursor-pointer transition-all disabled:opacity-50"
+                                  >
+                                    {isUpdatingPassword ? (lang === 'ru' ? 'ОБНОВЛЕНИЕ...' : 'UPDATING...') : (lang === 'ru' ? 'ИЗМЕНИТЬ ПАРОЛЬ' : 'CHANGE PASSWORD')}
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Deletion Request */}
+                              <div className="space-y-3.5 flex flex-col justify-between">
+                                <div>
+                                  <span className="text-[9px] text-red-500 font-mono uppercase font-black block tracking-wider mb-2">
+                                    {lang === 'ru' ? '2. УДАЛЕНИЕ ПРОФИЛЯ' : '2. PROTOCOL: SELF-DESTRUCTION'}
+                                  </span>
+                                  <p className="text-[10px] text-zinc-400 font-mono leading-relaxed">
+                                    {lang === 'ru' 
+                                      ? 'Вы можете подать заявку на удаление своего профиля на рассмотрение администрации в Control Center.' 
+                                      : 'You can submit a request for your profile deletion to be reviewed by administration in Control Center.'}
+                                  </p>
+                                </div>
+                                
+                                <div className="pt-2">
+                                  {fullProfile?.deletionRequested ? (
+                                    <div className="space-y-3">
+                                      <div className="p-2.5 bg-red-950/20 border border-red-900/50 flex items-center gap-2 rounded-sm">
+                                        <span className="w-2 h-2 bg-red-500 rounded-full animate-ping shrink-0" />
+                                        <div className="min-w-0">
+                                          <span className="block text-[8.5px] font-mono text-red-400 uppercase font-bold leading-tight">
+                                            {lang === 'ru' ? 'ЗАЯВКА НА УДАЛЕНИЕ АКТИВНА' : 'DELETION REQUEST ACTIVE'}
+                                          </span>
+                                          {fullProfile.deletionRequestedAt && (
+                                            <span className="block text-[6.5px] font-mono text-zinc-500">
+                                              {new Date(fullProfile.deletionRequestedAt).toLocaleString()}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={handleCancelDeletion}
+                                        disabled={isCancellingDeletion}
+                                        className="w-full py-2 bg-red-600/10 hover:bg-red-600 border border-red-500/30 hover:border-red-500 text-red-500 hover:text-white text-[10px] font-bold font-mono uppercase tracking-wider cursor-pointer transition-all disabled:opacity-50"
+                                      >
+                                        {isCancellingDeletion ? (lang === 'ru' ? 'ОТМЕНА...' : 'CANCELLING...') : (lang === 'ru' ? 'ОТМЕНИТЬ ЗАЯВКУ НА УДАЛЕНИЕ' : 'CANCEL DELETION REQUEST')}
+                                      </button>
+                                    </div>
+                                  ) : (
                                     <button
                                       type="button"
-                                      onClick={() => {
-                                        setCustomBackground('');
-                                        onToast(lang === 'ru' ? 'Фон сброшен!' : 'Background reset!', 'success');
-                                      }}
-                                      className="px-2.5 py-2 border border-red-500/30 hover:border-red-500 bg-red-900/10 text-red-400 text-[10px] font-mono font-bold uppercase tracking-wider cursor-pointer"
+                                      onClick={handleRequestDeletion}
+                                      disabled={isRequestingDeletion}
+                                      className="w-full py-2 bg-red-600/10 hover:bg-red-600 border border-red-600/20 text-red-500 hover:text-white text-[10px] font-bold font-mono uppercase tracking-wider cursor-pointer transition-all disabled:opacity-50"
                                     >
-                                      {lang === 'ru' ? 'Сбросить' : 'Reset'}
+                                      {isRequestingDeletion ? (lang === 'ru' ? 'ОТПРАВКА...' : 'SUBMITTING...') : (lang === 'ru' ? 'ЗАПРОСИТЬ УДАЛЕНИЕ ПРОФИЛЯ' : 'REQUEST PROFILE DELETION')}
                                     </button>
                                   )}
                                 </div>
                               </div>
-  
-                              {/* Or paste image URL */}
-                              <div className="space-y-1.5">
-                                <label className="text-[8px] text-zinc-500 font-mono uppercase block">
-                                  {lang === 'ru' ? 'Или вставьте прямую ссылку на фото (URL)' : 'Or paste direct image URL'}
-                                </label>
-                                <input 
-                                  type="text" 
-                                  value={customBackground}
-                                  onChange={(e) => setCustomBackground(e.target.value)}
-                                  className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-[10px] font-mono text-white outline-none focus:border-zinc-700"
-                                  placeholder="https://example.com/background.jpg"
-                                />
-                              </div>
                             </div>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center py-6 text-center">
-                              <Crown size={24} className="text-amber-500/50 mb-2" />
-                              <span className="text-[10px] font-mono text-amber-500 font-bold uppercase">
-                                {lang === 'ru' ? 'Доступно по VIP подписке' : 'Available with VIP subscription'}
-                              </span>
-                              <span className="text-[9px] text-zinc-500 mt-1 max-w-[200px]">
-                                {lang === 'ru' ? 'Поддержите проект в разделе "Донат", чтобы загружать свои фоны.' : 'Support the project in the "Donation" section to upload custom backgrounds.'}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* БЕЗОПАСНОСТЬ И УДАЛЕНИЕ АККАУНТА */}
-                    <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
-                      <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5 flex items-center gap-2">
-                        <ShieldCheck size={12} className="text-[#cd412b]" />
-                        {lang === 'ru' ? 'БЕЗОПАСНОСТЬ ПРОФИЛЯ' : 'PROFILE SECURITY'}
-                      </span>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1">
-                        {/* Изменение пароля */}
-                        <div className="space-y-3.5">
-                          <span className="text-[9px] text-[#cd412b] font-mono uppercase font-black block tracking-wider">
-                            {lang === 'ru' ? '1. ИЗМЕНЕНИЕ ПАРОЛЯ' : '1. UPDATE ACCESS CODE (PASSWORD)'}
-                          </span>
-                          <div className="space-y-3">
-                            <div className="space-y-1">
-                              <label className="text-[8px] text-zinc-500 font-mono uppercase block">
-                                {lang === 'ru' ? 'Новый пароль' : 'New Password'}
-                              </label>
-                              <input 
-                                type="password" 
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-zinc-700"
-                                placeholder="••••••••"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-[8px] text-zinc-500 font-mono uppercase block">
-                                {lang === 'ru' ? 'Подтвердите новый пароль' : 'Confirm New Password'}
-                              </label>
-                              <input 
-                                type="password" 
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-zinc-700"
-                                placeholder="••••••••"
-                              />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={handleUpdatePassword}
-                              disabled={isUpdatingPassword}
-                              className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white border border-zinc-700/50 hover:border-zinc-500 text-[10px] font-bold font-mono uppercase tracking-wider cursor-pointer transition-all disabled:opacity-50"
-                            >
-                              {isUpdatingPassword ? (lang === 'ru' ? 'ОБНОВЛЕНИЕ...' : 'UPDATING...') : (lang === 'ru' ? 'ИЗМЕНИТЬ ПАРОЛЬ' : 'CHANGE PASSWORD')}
-                            </button>
                           </div>
-                        </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
-                        {/* Заявка на удаление */}
-                        <div className="space-y-3.5 flex flex-col justify-between">
-                          <div>
-                            <span className="text-[9px] text-red-500 font-mono uppercase font-black block tracking-wider mb-2">
-                              {lang === 'ru' ? '2. УДАЛЕНИЕ ПРОФИЛЯ' : '2. PROTOCOL: SELF-DESTRUCTION'}
-                            </span>
-                            <p className="text-[10px] text-zinc-400 font-mono leading-relaxed">
-                              {lang === 'ru' 
-                                ? 'Вы можете подать заявку на удаление своего профиля на рассмотрение администрации в Control Center.' 
-                                : 'You can submit a request for your profile deletion to be reviewed by administration in Control Center.'}
-                            </p>
-                          </div>
-                          
-                          <div className="pt-2">
-                            {fullProfile?.deletionRequested ? (
-                              <div className="space-y-3">
-                                <div className="p-2.5 bg-red-950/20 border border-red-900/50 flex items-center gap-2 rounded-sm">
-                                  <span className="w-2 h-2 bg-red-500 rounded-full animate-ping shrink-0" />
-                                  <div className="min-w-0">
-                                    <span className="block text-[8.5px] font-mono text-red-400 uppercase font-bold leading-tight">
-                                      {lang === 'ru' ? 'ЗАЯВКА НА УДАЛЕНИЕ АКТИВНА' : 'DELETION REQUEST ACTIVE'}
-                                    </span>
-                                    {fullProfile.deletionRequestedAt && (
-                                      <span className="block text-[6.5px] font-mono text-zinc-500">
-                                        {new Date(fullProfile.deletionRequestedAt).toLocaleString()}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={handleCancelDeletion}
-                                  disabled={isCancellingDeletion}
-                                  className="w-full py-2 bg-red-600/10 hover:bg-red-600 border border-red-500/30 hover:border-red-500 text-red-500 hover:text-white text-[10px] font-bold font-mono uppercase tracking-wider cursor-pointer transition-all disabled:opacity-50"
-                                >
-                                  {isCancellingDeletion ? (lang === 'ru' ? 'ОТМЕНА...' : 'CANCELLING...') : (lang === 'ru' ? 'ОТМЕНИТЬ ЗАЯВКУ НА УДАЛЕНИЕ' : 'CANCEL DELETION REQUEST')}
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={handleRequestDeletion}
-                                disabled={isRequestingDeletion}
-                                className="w-full py-2 bg-red-600/10 hover:bg-red-600 border border-red-600/20 text-red-500 hover:text-white text-[10px] font-bold font-mono uppercase tracking-wider cursor-pointer transition-all disabled:opacity-50"
-                              >
-                                {isRequestingDeletion ? (lang === 'ru' ? 'ОТПРАВКА...' : 'SUBMITTING...') : (lang === 'ru' ? 'ЗАПРОСИТЬ УДАЛЕНИЕ ПРОФИЛЯ' : 'REQUEST PROFILE DELETION')}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Save profile block */}
-                    <button
-                      type="submit"
-                      disabled={isSavingProfile}
-                      className="w-full py-3 bg-[#cd412b] hover:bg-[#b03825] text-white font-black text-xs uppercase tracking-widest font-mono cursor-pointer transition-all flex items-center justify-center gap-2 border border-[#cd412b]/65 hover:border-white shadow-lg"
-                    >
-                      <Save size={14} />
-                      <span>{isSavingProfile ? (lang === 'ru' ? 'ОБНОВЛЕНИЕ БИОСИСТЕМЫ...' : 'TRANSMITTING CODES...') : (lang === 'ru' ? 'ЗАФИКСИРОВАТЬ ПАРАМЕТРЫ ПРОФИЛЯ' : 'COMMIT BIO-SYSTEM PARAMETERS')}</span>
-                    </button>
                   </form>
 
                   {/* Right Column: Live Card Preview (Span 5) */}

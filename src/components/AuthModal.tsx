@@ -15,6 +15,7 @@ import {
 } from '../firebase';
 import { CUSTOM_AVATARS } from '../customAvatars';
 import { CustomUser } from '../types';
+import TermsModal from './TermsModal';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -32,11 +33,24 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
   const [selectedAvatar, setSelectedAvatar] = useState('whiteout');
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [authLoading, setAuthLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   if (!isOpen) return null;
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (authMode === 'register' && !acceptedTerms) {
+      onToast(
+        lang === 'ru' 
+          ? 'Вы должны принять пользовательское соглашение!' 
+          : 'You must accept the user agreement!', 
+        'warning'
+      );
+      return;
+    }
+
     const cleanUsername = usernameInput.trim().toLowerCase();
     const cleanPassword = passwordInput.trim();
     const cleanDisplayName = displayNameInput.trim() || usernameInput.trim();
@@ -361,6 +375,31 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
               </div>
             )}
 
+            {/* Terms of Service Checkbox (Registration Only) */}
+            {authMode === 'register' && (
+              <div className="flex items-start gap-2.5 p-3 bg-[#0c0d10] border border-[#2a2f3b] group hover:border-[#cd412b]/30 transition-all cursor-pointer" onClick={() => setAcceptedTerms(!acceptedTerms)}>
+                <div className="pt-0.5">
+                  <div className={`w-4 h-4 border flex items-center justify-center transition-all ${acceptedTerms ? 'bg-[#cd412b] border-[#cd412b]' : 'border-gray-700 bg-black group-hover:border-gray-500'}`}>
+                    {acceptedTerms && <Sparkles size={10} className="text-white" />}
+                  </div>
+                </div>
+                <div className="flex-1 text-[10px] font-mono leading-tight">
+                  <span className="text-gray-500">{lang === 'ru' ? 'Я принимаю ' : 'I accept '}</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowTerms(true);
+                    }}
+                    className="text-[#cd412b] hover:underline font-bold"
+                  >
+                    {lang === 'ru' ? 'пользовательское соглашение' : 'user agreement'}
+                  </button>
+                  <span className="text-gray-500"> {lang === 'ru' ? 'и правила выживания.' : 'and survival rules.'}</span>
+                </div>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={authLoading}
@@ -375,6 +414,16 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
           </form>
         </div>
       </motion.div>
+
+      <AnimatePresence>
+        {showTerms && (
+          <TermsModal 
+            isOpen={showTerms}
+            onClose={() => setShowTerms(false)}
+            lang={lang}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -76,6 +76,7 @@ import AdminTab from './components/AdminTab';
 import AuthModal from './components/AuthModal';
 import CabinetModal from './components/CabinetModal';
 import PlayerTrackerTab from './components/PlayerTrackerTab';
+import TermsModal from './components/TermsModal';
 import { PlayerRadar } from './components/Radar/PlayerRadar';
 // @ts-ignore
 import globalWarfareLogo from './assets/images/global_warfare_logo_1782807450573.jpg';
@@ -261,6 +262,7 @@ export default function App() {
   const [cabinetModalOpen, setCabinetModalOpen] = useState(false);
   const [announcement, setAnnouncement] = useState<{ text: string; active: boolean; type: 'info' | 'hazard' | 'important' } | null>(null);
   const [showJungleFeverSpoiler, setShowJungleFeverSpoiler] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const [twitchSettings, setTwitchSettings] = useState<{
     channelName: string;
@@ -1076,6 +1078,17 @@ export default function App() {
                 <span>VERSION:</span>
                 <span className="text-gray-400">v2.4</span>
               </div>
+
+              {/* User Agreement Link integrated into sidebar */}
+              <button
+                onClick={() => setShowTermsModal(true)}
+                className="w-full mt-2 p-2 bg-[#cd412b]/5 border border-dashed border-[#cd412b]/30 hover:border-[#cd412b] hover:bg-[#cd412b]/10 group cursor-pointer transition-all flex items-center justify-center gap-2"
+              >
+                <ShieldCheck size={10} className="text-[#cd412b]/60 group-hover:text-[#cd412b] transition-colors" />
+                <span className="text-[9px] font-black text-zinc-400 group-hover:text-white transition-colors uppercase tracking-[0.15em]">
+                  {lang === 'ru' ? 'ЛИЦЕНЗИОННОЕ СОГЛАШЕНИЕ' : 'USER AGREEMENT'}
+                </span>
+              </button>
             </div>
           </aside>
 
@@ -2392,6 +2405,16 @@ export default function App() {
           ))}
         </AnimatePresence>
       </div>
+
+      <AnimatePresence>
+        {showTermsModal && (
+          <TermsModal
+            isOpen={showTermsModal}
+            onClose={() => setShowTermsModal(false)}
+            lang={lang}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
