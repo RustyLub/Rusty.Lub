@@ -96,5 +96,42 @@ export interface CustomUser {
     streams: boolean;
   };
   customBackground?: string;
+  deletionRequested?: boolean;
+  deletionRequestedAt?: string;
+}
+
+export interface RadarPlayer {
+  id: string;
+  userId: string;
+  steamId: string;
+  battlemetricsId: string;
+  currentName: string;
+  avatar: string;
+  addedAt: any;
+  isActive: boolean;
+  lastCheck: any;
+  currentStatus: 'online' | 'offline' | 'unknown';
+  currentServer: {
+    id: string;
+    name: string;
+    ip: string;
+    players: number;
+    maxPlayers: number;
+  } | null;
+  totalPlayTime: number;
+  totalSessions: number;
+}
+
+export interface NameHistoryEntry {
+  playerName: string;
+  detectedAt: any;
+}
+
+export interface SessionEntry {
+  serverName: string;
+  sessionStart: any;
+  sessionEnd: any | null;
+  durationSeconds: number | null;
+  isActive: boolean;
 }
 

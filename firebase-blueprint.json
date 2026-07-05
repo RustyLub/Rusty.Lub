@@ -100,9 +100,89 @@
         "verifiedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["txId", "userId", "amount", "plan", "status", "createdAt"]
+    },
+    "User": {
+      "title": "User",
+      "description": "User account data and subscription status",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "vipUntil": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "TrackedPlayer": {
+      "title": "TrackedPlayer",
+      "description": "A player being tracked by the radar",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "steamId": { "type": "string" },
+        "battlemetricsId": { "type": "string" },
+        "currentName": { "type": "string" },
+        "avatar": { "type": "string" },
+        "addedAt": { "type": "string", "format": "date-time" },
+        "isActive": { "type": "boolean" },
+        "lastCheck": { "type": "string", "format": "date-time" },
+        "currentStatus": { "type": "string", "enum": ["online", "offline", "unknown"] },
+        "currentServer": { "type": "object" },
+        "totalPlayTime": { "type": "number" },
+        "totalSessions": { "type": "number" }
+      },
+      "required": ["userId", "steamId", "battlemetricsId", "addedAt"]
+    },
+    "NameHistory": {
+      "title": "NameHistory",
+      "description": "History of player names",
+      "type": "object",
+      "properties": {
+        "trackedPlayerId": { "type": "string" },
+        "userId": { "type": "string" },
+        "steamId": { "type": "string" },
+        "playerName": { "type": "string" },
+        "detectedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["trackedPlayerId", "playerName", "detectedAt"]
+    },
+    "PlayerSession": {
+      "title": "PlayerSession",
+      "description": "A gaming session on a server",
+      "type": "object",
+      "properties": {
+        "trackedPlayerId": { "type": "string" },
+        "userId": { "type": "string" },
+        "steamId": { "type": "string" },
+        "serverId": { "type": "string" },
+        "serverName": { "type": "string" },
+        "sessionStart": { "type": "string", "format": "date-time" },
+        "sessionEnd": { "type": "string", "format": "date-time" },
+        "durationSeconds": { "type": "number" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["trackedPlayerId", "serverId", "sessionStart"]
     }
   },
   "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and VIP status"
+    },
+    "/tracked_players/{playerId}": {
+      "schema": "TrackedPlayer",
+      "description": "Players tracked by VIP users"
+    },
+    "/name_history/{historyId}": {
+      "schema": "NameHistory",
+      "description": "Player name change history"
+    },
+    "/sessions/{sessionId}": {
+      "schema": "PlayerSession",
+      "description": "Server session tracking"
+    },
     "/payments/{txId}": {
       "schema": "Payment",
       "description": "USDT TRC20 Payments and subscriptions tracker"

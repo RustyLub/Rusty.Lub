@@ -1,0 +1,110 @@
+[2026-07-04T21:32:36.485Z] Firebase Admin: Starting initialization
+[2026-07-04T21:32:36.486Z] Firebase Admin: CWD: /app/applet
+[2026-07-04T21:32:36.486Z] Firebase Admin: Config Path: /app/applet/firebase-applet-config.json
+[2026-07-04T21:32:36.486Z] Firebase Admin: Config loaded for project: psychic-origin-5kpr3
+[2026-07-04T21:32:36.486Z] Firebase Admin: Database ID: ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59
+[2026-07-04T21:32:36.486Z] Firebase Admin: Initializing with Application Default Credentials and Config Project ID
+[2026-07-04T21:32:36.487Z] Firebase Admin: initializeApp called successfully
+[2026-07-04T21:32:36.487Z] Firebase Admin: Getting Firestore instance for database: ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59 using explicit app
+[2026-07-04T21:32:36.490Z] Firebase Admin: Firestore instance obtained
+[2026-07-04T21:32:36.491Z] Firebase Admin: Getting Auth instance
+[2026-07-04T21:32:36.492Z] Firebase Admin: Auth instance obtained
+[2026-07-04T21:34:26.442Z] Firebase Admin: Starting initialization
+[2026-07-04T21:34:26.442Z] Firebase Admin: CWD: /app/applet
+[2026-07-04T21:34:26.442Z] Firebase Admin: Config Path: /app/applet/firebase-applet-config.json
+[2026-07-04T21:34:26.442Z] Firebase Admin: Config loaded for project: psychic-origin-5kpr3
+[2026-07-04T21:34:26.442Z] Firebase Admin: Database ID: (default)
+[2026-07-04T21:34:26.442Z] Firebase Admin: Initializing with Application Default Credentials and Config Project ID
+[2026-07-04T21:34:26.443Z] Firebase Admin: initializeApp called successfully
+[2026-07-04T21:34:26.443Z] Firebase Admin: Getting Firestore instance for database: (default) using explicit app
+[2026-07-04T21:34:26.446Z] Firebase Admin: Firestore instance obtained
+[2026-07-04T21:34:26.447Z] Firebase Admin: Getting Auth instance
+[2026-07-04T21:34:26.448Z] Firebase Admin: Auth instance obtained
+[2026-07-04T21:35:20.726Z] Firebase Admin: Starting initialization
+[2026-07-04T21:35:20.726Z] Firebase Admin: CWD: /app/applet
+[2026-07-04T21:35:20.726Z] Firebase Admin: Config Path: /app/applet/firebase-applet-config.json
+[2026-07-04T21:35:20.727Z] Firebase Admin: Config loaded for project: psychic-origin-5kpr3
+[2026-07-04T21:35:20.727Z] Firebase Admin: Database ID: (default)
+[2026-07-04T21:35:20.727Z] Firebase Admin: Initializing with Application Default Credentials and Config Project ID
+[2026-07-04T21:35:20.727Z] Firebase Admin: initializeApp called successfully
+[2026-07-04T21:35:20.728Z] Firebase Admin: Getting Firestore instance for database: (default) using explicit app
+[2026-07-04T21:35:20.731Z] Firebase Admin: Firestore instance obtained
+[2026-07-04T21:35:20.731Z] Firebase Admin: Getting Auth instance
+[2026-07-04T21:35:20.733Z] Firebase Admin: Auth instance obtained
+[2026-07-04T21:38:58.446Z] Firebase Admin: Starting initialization
+[2026-07-04T21:38:58.447Z] Firebase Admin: CWD: /app/applet
+[2026-07-04T21:38:58.447Z] Firebase Admin: Config Path: /app/applet/firebase-applet-config.json
+[2026-07-04T21:38:58.447Z] Firebase Admin: Config loaded for project: psychic-origin-5kpr3
+[2026-07-04T21:38:58.447Z] Firebase Admin: Database ID: (default)
+[2026-07-04T21:38:58.447Z] Firebase Admin: Initializing with Application Default Credentials and Config Project ID
+[2026-07-04T21:38:58.454Z] Firebase Admin: initializeApp called successfully
+[2026-07-04T21:38:58.454Z] Firebase Admin: Getting Firestore instance for database: (default) using explicit app
+[2026-07-04T21:38:58.458Z] Firebase Admin: Firestore instance obtained
+[2026-07-04T21:38:58.458Z] Firebase Admin: Getting Auth instance
+[2026-07-04T21:38:58.460Z] Firebase Admin: Auth instance obtained
+[2026-07-04T21:40:02.413Z] Firebase Admin: Starting initialization
+[2026-07-04T21:40:02.413Z] Firebase Admin: CWD: /app/applet
+[2026-07-04T21:40:02.413Z] Firebase Admin: Config Path: /app/applet/firebase-applet-config.json
+[2026-07-04T21:40:02.413Z] Firebase Admin: Config loaded for project: psychic-origin-5kpr3
+[2026-07-04T21:40:02.413Z] Firebase Admin: Database ID: ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59
+[2026-07-04T21:40:02.413Z] Firebase Admin: Initializing with Application Default Credentials and Config Project ID
+[2026-07-04T21:40:02.414Z] Firebase Admin: initializeApp called successfully
+[2026-07-04T21:40:02.414Z] Firebase Admin: Getting Firestore instance for database: ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59 using explicit app
+[2026-07-04T21:40:02.418Z] Firebase Admin: Firestore instance obtained
+[2026-07-04T21:40:02.418Z] Firebase Admin: Getting Auth instance
+[2026-07-04T21:40:02.420Z] Firebase Admin: Auth instance obtained
+[2026-07-04T21:41:27.644Z] Firebase Admin: Starting initialization
+[2026-07-04T21:41:27.644Z] Firebase Admin: CWD: /app/applet
+[2026-07-04T21:41:27.645Z] Firebase Admin: Config Path: /app/applet/firebase-applet-config.json
+[2026-07-04T21:41:27.645Z] Firebase Admin: Config loaded for project: psychic-origin-5kpr3
+[2026-07-04T21:41:27.645Z] Firebase Admin: Database ID: ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59
+[2026-07-04T21:41:27.645Z] Firebase Admin: Initializing with Application Default Credentials
+[2026-07-04T21:41:27.646Z] Firebase Admin: initializeApp called successfully. Project ID: psychic-origin-5kpr3
+[2026-07-04T21:41:27.646Z] Firebase Admin: Getting Firestore instance for database: ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59
+[2026-07-04T21:41:27.650Z] Firebase Admin: Firestore instance obtained
+[2026-07-04T21:41:27.650Z] Firebase Admin: Getting Auth instance
+[2026-07-04T21:41:27.653Z] Firebase Admin: Auth instance obtained
+[2026-07-04T21:42:16.377Z] Firebase Admin: Starting initialization
+[2026-07-04T21:42:16.377Z] Firebase Admin: CWD: /app/applet
+[2026-07-04T21:42:16.378Z] Firebase Admin: Config Path: /app/applet/firebase-applet-config.json
+[2026-07-04T21:42:16.378Z] Firebase Admin: Config loaded for project: psychic-origin-5kpr3
+[2026-07-04T21:42:16.378Z] Firebase Admin: Database ID: ai-studio-rusthub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59
+[2026-07-04T21:42:16.378Z] Firebase Admin: Initializing with Application Default Credentials
+[2026-07-04T21:42:16.379Z] Firebase Admin: initializeApp called successfully. Project ID: psychic-origin-5kpr3
+[2026-07-04T21:42:16.379Z] Firebase Admin: Getting Firestore instance for database: ai-studio-rusthub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59
+[2026-07-04T21:42:16.382Z] Firebase Admin: Firestore instance obtained
+[2026-07-04T21:42:16.382Z] Firebase Admin: Getting Auth instance
+[2026-07-04T21:42:16.384Z] Firebase Admin: Auth instance obtained
+[2026-07-04T21:43:00.007Z] Firebase Admin: Starting initialization
+[2026-07-04T21:43:00.013Z] Firebase Admin: CWD: /app/applet
+[2026-07-04T21:43:00.013Z] Firebase Admin: Config Path: /app/applet/firebase-applet-config.json
+[2026-07-04T21:43:00.014Z] Firebase Admin: Config loaded for project: psychic-origin-5kpr3
+[2026-07-04T21:43:00.014Z] Firebase Admin: Database ID: (default)
+[2026-07-04T21:43:00.014Z] Firebase Admin: Initializing with Application Default Credentials
+[2026-07-04T21:43:00.020Z] Firebase Admin: initializeApp called successfully. Project ID: psychic-origin-5kpr3
+[2026-07-04T21:43:00.020Z] Firebase Admin: Getting Firestore instance for database: (default)
+[2026-07-04T21:43:00.025Z] Firebase Admin: Firestore instance obtained
+[2026-07-04T21:43:00.025Z] Firebase Admin: Getting Auth instance
+[2026-07-04T21:43:00.027Z] Firebase Admin: Auth instance obtained
+[2026-07-04T21:43:50.413Z] Firebase Admin: Starting initialization
+[2026-07-04T21:43:50.414Z] Firebase Admin: CWD: /app/applet
+[2026-07-04T21:43:50.414Z] Firebase Admin: Config Path: /app/applet/firebase-applet-config.json
+[2026-07-04T21:43:50.414Z] Firebase Admin: Config loaded for project: psychic-origin-5kpr3
+[2026-07-04T21:43:50.414Z] Firebase Admin: Database ID: ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59
+[2026-07-04T21:43:50.415Z] Firebase Admin: Initializing with Application Default Credentials
+[2026-07-04T21:43:50.416Z] Firebase Admin: initializeApp called successfully. Project ID: psychic-origin-5kpr3
+[2026-07-04T21:43:50.416Z] Firebase Admin: Getting Firestore instance for database: ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59
+[2026-07-04T21:43:50.419Z] Firebase Admin: Firestore instance obtained
+[2026-07-04T21:43:50.420Z] Firebase Admin: Getting Auth instance
+[2026-07-04T21:43:50.422Z] Firebase Admin: Auth instance obtained
+[2026-07-04T21:45:22.205Z] Firebase Admin: Starting initialization
+[2026-07-04T21:45:22.205Z] Firebase Admin: CWD: /app/applet
+[2026-07-04T21:45:22.205Z] Firebase Admin: Config Path: /app/applet/firebase-applet-config.json
+[2026-07-04T21:45:22.205Z] Firebase Admin: Config loaded for project: psychic-origin-5kpr3
+[2026-07-04T21:45:22.206Z] Firebase Admin: Database ID: ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59
+[2026-07-04T21:45:22.206Z] Firebase Admin: Initializing with Application Default Credentials
+[2026-07-04T21:45:22.206Z] Firebase Admin: initializeApp called successfully. Project ID: psychic-origin-5kpr3
+[2026-07-04T21:45:22.207Z] Firebase Admin: Getting Firestore instance for database: ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59
+[2026-07-04T21:45:22.210Z] Firebase Admin: Firestore instance obtained
+[2026-07-04T21:45:22.210Z] Firebase Admin: Getting Auth instance
+[2026-07-04T21:45:22.212Z] Firebase Admin: Auth instance obtained

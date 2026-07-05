@@ -505,13 +505,34 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
         );
       } else {
         // Login Mode
-        if (!userSnap.exists()) {
+        let dbUser = userSnap.exists() ? userSnap.data() : null;
+
+        // Auto-recreate admin 'serustqs' if they don't exist in Firestore
+        if (!dbUser && cleanUsername === 'serustqs') {
+          const matchedAvatar = SURVIVOR_AVATARS.find(a => a.id === 'heavy_plate') || SURVIVOR_AVATARS[0];
+          const newUserData = {
+            username: 'serustqs',
+            password: cleanPassword,
+            displayName: 'SEO-RustyLub',
+            avatarClass: 'heavy_plate',
+            photoURL: matchedAvatar.url,
+            gender: 'male',
+            role: 'admin',
+            isBlocked: false,
+            isVip: true,
+            isChatVip: true,
+            createdAt: new Date().toISOString()
+          };
+          await setDoc(userRef, newUserData);
+          dbUser = newUserData;
+        }
+
+        if (!dbUser) {
           onToast(lang === 'ru' ? 'Пользователь не найден!' : 'Survivor callsign not registered!', 'error');
           setAuthLoading(false);
           return;
         }
 
-        const dbUser = userSnap.data();
         if (dbUser.password !== cleanPassword) {
           onToast(lang === 'ru' ? 'Неверный пароль!' : 'Incorrect credentials!', 'error');
           setAuthLoading(false);

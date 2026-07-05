@@ -76,6 +76,7 @@ import AdminTab from './components/AdminTab';
 import AuthModal from './components/AuthModal';
 import CabinetModal from './components/CabinetModal';
 import PlayerTrackerTab from './components/PlayerTrackerTab';
+import { PlayerRadar } from './components/Radar/PlayerRadar';
 // @ts-ignore
 import globalWarfareLogo from './assets/images/global_warfare_logo_1782807450573.jpg';
 // @ts-ignore
@@ -199,7 +200,7 @@ const appTranslations = {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news' | 'admin' | 'tracker'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news' | 'admin' | 'tracker' | 'radar'>('home');
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lang, setLang] = useState<'ru' | 'en'>('en');
@@ -306,82 +307,56 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  // Real-time Auth state sync
+  // Real-time Auth state sync for custom credentials
   useEffect(() => {
     let unsubUserDoc: (() => void) | null = null;
     
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setIsAuthLoading(false);
-      if (unsubUserDoc) {
-        unsubUserDoc();
-        unsubUserDoc = null;
-      }
-      
-      if (firebaseUser) {
-        // Subscribe to user document in Firestore in real-time
-        unsubUserDoc = onSnapshot(doc(db, 'chat_users', firebaseUser.uid), (userSnap) => {
-          if (userSnap.exists()) {
-            const data = userSnap.data();
-            const customUser: CustomUser = {
-              uid: firebaseUser.uid,
-              displayName: data.displayName || firebaseUser.displayName || 'Survivor',
-              email: firebaseUser.email || firebaseUser.email || '',
-              photoURL: data.photoURL || firebaseUser.photoURL || '',
-              avatarClass: data.avatarClass || 'heavy_plate',
-              bio: data.bio || '',
-              clanTag: data.clanTag || '',
-              hoursPlayed: data.hoursPlayed || 0,
-              playstyle: data.playstyle || '',
-              favoriteWeapon: data.favoriteWeapon || '',
-              steamId: data.steamId || '',
-              steamName: data.steamName || '',
-              steamAvatar: data.steamAvatar || '',
-              customTheme: data.customTheme || 'default',
-              role: data.role || 'user',
-              isVip: !!data.isVip,
-              isChatVip: !!data.isChatVip,
-              vipUntil: data.vipUntil || ''
-            };
-            setCurrentUser(customUser);
-            localStorage.setItem('rust_survivor_user', JSON.stringify(customUser));
-          } else {
-            const customUser: CustomUser = {
-              uid: firebaseUser.uid,
-              displayName: firebaseUser.displayName || 'Survivor',
-              email: firebaseUser.email || '',
-              photoURL: firebaseUser.photoURL || '',
-              avatarClass: 'heavy_plate',
-              role: 'user',
-              isVip: false,
-              isChatVip: false,
-              vipUntil: ''
-            };
-            setCurrentUser(customUser);
-            localStorage.setItem('rust_survivor_user', JSON.stringify(customUser));
-          }
-        }, (err) => {
-          handleFirestoreError(err, OperationType.GET, `chat_users/${firebaseUser.uid}`);
-        });
-      } else {
-        // User is signed out of Firebase - clear sensitive flags
-        if (localStorage.getItem('rust_survivor_user')) {
-          const saved = JSON.parse(localStorage.getItem('rust_survivor_user') || '{}');
-          if (saved.email || saved.role === 'admin' || saved.isVip || saved.isChatVip) {
-            const updated = { ...saved, email: '', role: 'user', isVip: false, isChatVip: false, vipUntil: '' };
-            setCurrentUser(updated);
-            localStorage.setItem('rust_survivor_user', JSON.stringify(updated));
-          }
+    const uid = currentUser?.uid;
+    if (uid) {
+      // Subscribe to user document in Firestore in real-time
+      unsubUserDoc = onSnapshot(doc(db, 'chat_users', uid), (userSnap) => {
+        setIsAuthLoading(false);
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          const customUser: CustomUser = {
+            uid: uid,
+            displayName: data.displayName || 'Survivor',
+            email: data.email || currentUser.email || '',
+            photoURL: data.photoURL || '',
+            avatarClass: data.avatarClass || 'heavy_plate',
+            bio: data.bio || '',
+            clanTag: data.clanTag || '',
+            hoursPlayed: data.hoursPlayed || 0,
+            playstyle: data.playstyle || '',
+            favoriteWeapon: data.favoriteWeapon || '',
+            steamId: data.steamId || '',
+            steamName: data.steamName || '',
+            steamAvatar: data.steamAvatar || '',
+            customTheme: data.customTheme || 'default',
+            role: data.role || 'user',
+            isVip: !!data.isVip,
+            isChatVip: !!data.isChatVip,
+            vipUntil: data.vipUntil || ''
+          };
+          setCurrentUser(customUser);
+          localStorage.setItem('rust_survivor_user', JSON.stringify(customUser));
         } else {
+          // User document deleted - log them out
           setCurrentUser(null);
+          localStorage.removeItem('rust_survivor_user');
         }
-      }
-    });
+      }, (err) => {
+        setIsAuthLoading(false);
+        handleFirestoreError(err, OperationType.GET, `chat_users/${uid}`);
+      });
+    } else {
+      setIsAuthLoading(false);
+    }
     
     return () => {
-      unsubscribe();
       if (unsubUserDoc) unsubUserDoc();
     };
-  }, []);
+  }, [currentUser?.uid]);
 
   // Real-time Twitch stream settings subscription
   useEffect(() => {
@@ -759,7 +734,10 @@ export default function App() {
     { id: 'electrical', label: appTranslations.tabs.electrical[lang], icon: <Zap size={16} /> },
     { id: 'weapons', label: appTranslations.tabs.weapons[lang], icon: <Target size={16} /> },
     { id: 'chat', label: lang === 'ru' ? 'Чат' : 'Chat', icon: <MessageSquare size={16} /> },
-    ...(isVip ? [{ id: 'tracker', label: lang === 'ru' ? 'Радар игроков' : 'Player Radar', icon: <Search size={16} /> }] : []),
+    ...(isVip ? [
+      { id: 'tracker', label: lang === 'ru' ? 'Радар игроков' : 'Player Radar', icon: <Search size={16} /> },
+      { id: 'radar', label: lang === 'ru' ? 'PLAYER RADAR (VIP)' : 'PLAYER RADAR (VIP)', icon: <Activity size={16} /> }
+    ] : []),
     ...(isAdmin ? [{ id: 'admin', label: 'ADMIN', icon: <ShieldCheck size={16} /> }] : [])
   ] as const;
 
@@ -2073,6 +2051,18 @@ export default function App() {
                 }}
                 openCabinet={() => setCabinetModalOpen(true)}
               />
+            </motion.div>
+          )}
+
+          {activeTab === 'radar' && (
+            <motion.div
+              key="radar"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <PlayerRadar />
             </motion.div>
           )}
             </AnimatePresence>

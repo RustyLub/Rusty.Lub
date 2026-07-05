@@ -22,6 +22,8 @@ interface RegisteredUser {
   isVip?: boolean;
   isChatVip?: boolean;
   vipUntil?: string;
+  deletionRequested?: boolean;
+  deletionRequestedAt?: string;
 }
 
 export default function AdminTab({ currentUser, lang }: AdminTabProps) {
@@ -73,7 +75,12 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
 
   const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([]);
   const [userSearch, setUserSearch] = useState('');
+  const [userTypeFilter, setUserTypeFilter] = useState<'all' | 'admins' | 'vips' | 'banned' | 'deletions'>('all');
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+
+  const isSuperAdmin = useMemo(() => {
+    return currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com';
+  }, [currentUser]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -241,11 +248,20 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
 
   const [vipManagerUserId, setVipManagerUserId] = useState<string | null>(null);
 
-  const filteredUsers = registeredUsers.filter(u => 
-    u.displayName.toLowerCase().includes(userSearch.toLowerCase()) || 
-    (u.username && u.username.toLowerCase().includes(userSearch.toLowerCase())) ||
-    u.id.toLowerCase().includes(userSearch.toLowerCase())
-  );
+  const filteredUsers = registeredUsers.filter(u => {
+    const matchesSearch = u.displayName.toLowerCase().includes(userSearch.toLowerCase()) || 
+      (u.username && u.username.toLowerCase().includes(userSearch.toLowerCase())) ||
+      u.id.toLowerCase().includes(userSearch.toLowerCase());
+    
+    if (!matchesSearch) return false;
+    
+    if (userTypeFilter === 'admins') return u.role === 'admin';
+    if (userTypeFilter === 'vips') return u.isVip;
+    if (userTypeFilter === 'banned') return u.isBlocked;
+    if (userTypeFilter === 'deletions') return !!u.deletionRequested;
+    
+    return true;
+  });
 
   const handleToggleVip = (uid: string) => {
     setVipManagerUserId(prev => prev === uid ? null : uid);
@@ -293,12 +309,27 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
     }
   };
   const handleDeleteUser = async (uid: string) => {
+    if (!isSuperAdmin) {
+      alert(lang === 'ru' ? 'Ошибка: Только Владелец проекта может удалять профили.' : 'Error: Only the Project Owner can delete profiles.');
+      return;
+    }
     if (confirm(lang === 'ru' ? 'Удалить?' : 'Delete?')) {
         try {
             await deleteDoc(doc(db, 'chat_users', uid));
         } catch (err) {
             handleFirestoreError(err, OperationType.DELETE, `chat_users/${uid}`);
         }
+    }
+  };
+
+  const handleDismissDeletionRequest = async (uid: string) => {
+    try {
+      await updateDoc(doc(db, 'chat_users', uid), {
+        deletionRequested: false,
+        deletionRequestedAt: null
+      });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `chat_users/${uid}`);
     }
   };
 
@@ -337,6 +368,10 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
 
   const handleSaveTwitchSettings = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSuperAdmin) {
+      alert(lang === 'ru' ? 'Ошибка: У вас нет прав для изменения настроек Twitch.' : 'Error: You do not have permissions to modify Twitch settings.');
+      return;
+    }
     setSavingTwitch(true);
     try {
       await setDoc(doc(db, 'site_settings', 'twitch'), {
@@ -530,111 +565,273 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
 
         {/* User Management */}
         <div className="lg:col-span-2 bg-[#14171e] border border-[#2a2f3b] p-6 rounded-sm shadow-xl space-y-4">
-            <div className="flex items-center justify-between">
-                <h3 className="text-md font-bold text-gray-200 flex items-center gap-2">
-                    <Users size={18} className="text-blue-500" />
-                    {lang === 'ru' ? 'Пользователи' : 'User Management'}
-                </h3>
-                <div className="text-[10px] font-mono text-gray-500 bg-black/40 px-2 py-1 rounded">
-                    {lang === 'ru' ? 'Всего' : 'Total'}: {registeredUsers.length}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2a2f3b]/60 pb-4">
+                <div className="space-y-1">
+                    <h3 className="text-md font-bold text-gray-200 flex items-center gap-2">
+                        <Users size={18} className="text-blue-500" />
+                        {lang === 'ru' ? 'Управление пользователями' : 'User Management'}
+                    </h3>
+                    <p className="text-[11px] text-zinc-500">
+                        {lang === 'ru' ? 'Поиск, назначение прав и управление подписками' : 'Search, assign roles, and manage active VIP subscriptions'}
+                    </p>
+                </div>
+                <div className="text-[10px] font-mono text-gray-400 bg-black/40 border border-[#2a2f3b] px-3 py-1.5 rounded self-start sm:self-center">
+                    {lang === 'ru' ? 'Всего зарегистрировано' : 'Total Registered'}: <span className="text-blue-400 font-bold">{registeredUsers.length}</span>
                 </div>
             </div>
-            <div className="relative">
-                <Search size={14} className="absolute left-3 top-3 text-gray-500" />
-                <input
-                    type="text"
-                    value={userSearch}
-                    onChange={(e) => setUserSearch(e.target.value)}
-                    placeholder={lang === 'ru' ? 'Поиск...' : 'Search...'}
-                    className="w-full bg-black/40 border border-zinc-800 p-2.5 pl-9 text-xs font-mono text-white rounded-sm"
-                />
-            </div>
-            <div className="border border-[#2a2f3b] bg-black/20 divide-y divide-[#2a2f3b] overflow-y-auto max-h-[400px] rounded-sm">
-            {filteredUsers.map((rUser) => (
-                <div key={rUser.id} className="p-3 hover:bg-white/5 transition space-y-2">
-                <div className="flex items-center justify-between gap-3 text-[10px]">
-                <div className="flex items-center gap-3">
-                    <img referrerPolicy="no-referrer" src={getAvatarUrl(rUser.photoURL, rUser.avatarClass)} className="w-8 h-8 rounded-full border border-zinc-800" />
-                    <div>
-                        <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-gray-200">{rUser.displayName}</span>
-                            {rUser.isChatVip && (
-                                <span className="px-1 py-0.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 text-[8px] font-bold rounded uppercase">CHAT VIP</span>
-                            )}
-                            {rUser.isVip && (
-                                <span className="px-1 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[8px] font-bold rounded uppercase">VIP SUB</span>
-                            )}
-                        </div>
-                        <div className="text-zinc-500 font-mono">
-                            {rUser.username || rUser.id}
-                            {rUser.isVip && rUser.vipUntil && (
-                                <span className="text-amber-500/80 font-bold ml-1.5">
-                                    ({lang === 'ru' ? 'подписка до' : 'subscription until'}: {new Date(rUser.vipUntil).toLocaleDateString()})
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                </div>
-                <div className="flex gap-2">
-                    {/* Chat VIP simple toggle */}
-                    <button 
-                        onClick={() => handleToggleChatVip(rUser.id, !!rUser.isChatVip)} 
-                        className={`p-1.5 border rounded-sm transition-all cursor-pointer ${rUser.isChatVip ? 'border-blue-500 text-blue-500 bg-blue-500/10' : 'border-zinc-700 text-zinc-500'}`} 
-                        title={lang === 'ru' ? 'VIP Чат' : 'Chat VIP'}
-                    >
-                        <Star size={12} />
-                    </button>
-                    {/* VIP Subscription issue button */}
-                    <button 
-                        onClick={() => handleToggleVip(rUser.id)} 
-                        className={`p-1.5 border rounded-sm transition-all cursor-pointer ${vipManagerUserId === rUser.id ? 'border-amber-400 bg-amber-400/20 text-amber-300' : (rUser.isVip ? 'border-amber-500 text-amber-500 bg-amber-500/10' : 'border-zinc-700 text-zinc-500')}`} 
-                        title={lang === 'ru' ? 'Выдача VIP Подписки' : 'Issue VIP Subscription'}
-                    >
-                        <Crown size={12} />
-                    </button>
-                    <button onClick={() => handleToggleBlock(rUser.id, !!rUser.isBlocked)} className={`p-1.5 border rounded-sm ${rUser.isBlocked ? 'border-red-500 text-red-500 bg-red-500/10' : 'border-zinc-700 text-zinc-500'}`} title="Block"><Ban size={12} /></button>
-                    <button onClick={() => handleToggleRole(rUser.id, rUser.role)} className={`p-1.5 border rounded-sm ${rUser.role === 'admin' ? 'border-purple-500 text-purple-500 bg-purple-500/10' : 'border-zinc-700 text-zinc-500'}`} title="Role">{rUser.role === 'admin' ? 'A' : 'U'}</button>
-                    <button onClick={() => setInspectUserId(rUser.id)} className="p-1.5 border border-zinc-700 text-zinc-500 hover:text-emerald-500 hover:border-emerald-500 rounded-sm" title={lang === 'ru' ? 'Визитка' : 'Card'}><IdCard size={12} /></button>
-                    <button onClick={() => handleDeleteUser(rUser.id)} className="p-1.5 border border-zinc-700 text-zinc-500 hover:text-red-500 hover:border-red-500 rounded-sm" title="Delete"><Trash2 size={12} /></button>
-                </div>
+
+            {/* Practical Search and Filter Bar */}
+            <div className="flex flex-col gap-3">
+                <div className="relative w-full">
+                    <Search size={16} className="absolute left-3.5 top-3 text-zinc-500" />
+                    <input
+                        type="text"
+                        value={userSearch}
+                        onChange={e => setUserSearch(e.target.value)}
+                        placeholder={lang === 'ru' ? 'Поиск по имени, ID или @username...' : 'Search by name, ID, or @username...'}
+                        className="w-full bg-black/30 border border-[#2a2f3b] rounded-sm py-2.5 pl-11 pr-4 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-blue-500/50 transition-colors"
+                    />
                 </div>
 
-                {/* Inline VIP duration management panel */}
-                {vipManagerUserId === rUser.id && (
-                    <div className="bg-black/40 border border-amber-500/20 p-2 rounded-sm flex flex-col gap-1.5">
-                        <div className="text-[9px] font-mono uppercase tracking-wider text-amber-500 font-bold">
-                            {lang === 'ru' ? '⚙️ Управление подпиской VIP' : '⚙️ Manage VIP Subscription'}
+                {/* Segmented Filter Buttons */}
+                <div className="flex flex-wrap gap-1 bg-black/20 p-1 rounded-sm border border-zinc-900">
+                    {(['all', 'vips', 'admins', 'banned', 'deletions'] as const).map((filter) => {
+                        const labelMap = {
+                            all: lang === 'ru' ? 'Все' : 'All',
+                            vips: lang === 'ru' ? 'VIP-Подписчики' : 'VIP Subs',
+                            admins: lang === 'ru' ? 'Администраторы' : 'Admins',
+                            banned: lang === 'ru' ? 'Забаненные' : 'Banned',
+                            deletions: lang === 'ru' ? 'Заявки на удаление' : 'Deletions'
+                        };
+                        const countMap = {
+                            all: registeredUsers.length,
+                            vips: registeredUsers.filter(u => u.isVip).length,
+                            admins: registeredUsers.filter(u => u.role === 'admin').length,
+                            banned: registeredUsers.filter(u => u.isBlocked).length,
+                            deletions: registeredUsers.filter(u => u.deletionRequested).length
+                        };
+                        const isActive = userTypeFilter === filter;
+                        return (
+                            <button
+                                key={filter}
+                                onClick={() => setUserTypeFilter(filter)}
+                                className={`flex-1 min-w-[80px] py-1.5 px-3 text-[10px] font-mono font-bold uppercase transition rounded-sm flex items-center justify-center gap-1.5 cursor-pointer ${
+                                    isActive 
+                                        ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
+                                        : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5 border border-transparent'
+                                }`}
+                            >
+                                <span>{labelMap[filter]}</span>
+                                <span className={`px-1 rounded-full text-[8px] ${isActive ? 'bg-blue-500/20 text-blue-400' : 'bg-zinc-800 text-zinc-500'}`}>
+                                    {countMap[filter]}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Users Scroll Container */}
+            <div className="border border-[#2a2f3b] bg-black/10 divide-y divide-[#2a2f3b]/60 overflow-y-auto max-h-[500px] rounded-sm custom-scrollbar">
+                {filteredUsers.length > 0 ? filteredUsers.map((rUser) => (
+                    <div key={rUser.id} className="p-4 hover:bg-white/[0.02] transition space-y-3">
+                        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                            {/* User Profile Info */}
+                            <div className="flex items-start sm:items-center gap-3 min-w-0">
+                                <div className="relative shrink-0">
+                                    <img 
+                                        referrerPolicy="no-referrer" 
+                                        src={getAvatarUrl(rUser.photoURL, rUser.avatarClass)} 
+                                        className="w-11 h-11 rounded-full border border-zinc-700/80 bg-zinc-950 object-cover" 
+                                    />
+                                    {rUser.isBlocked && (
+                                        <span className="absolute -bottom-1 -right-1 bg-red-600 text-white rounded-full p-1 border border-[#14171e] shadow-lg">
+                                            <Ban size={10} />
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="min-w-0 space-y-1">
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                        <span className="font-bold text-zinc-200 text-sm truncate max-w-[180px]">
+                                            {rUser.displayName}
+                                        </span>
+                                        {rUser.role === 'admin' ? (
+                                            <span className="px-1.5 py-0.5 bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[8px] font-bold rounded font-mono uppercase tracking-wider">ADMIN</span>
+                                        ) : (
+                                            <span className="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 text-zinc-400 text-[8px] font-bold rounded font-mono uppercase tracking-wider">USER</span>
+                                        )}
+                                        {rUser.isBlocked && (
+                                            <span className="px-1.5 py-0.5 bg-red-500/10 border border-red-500/30 text-red-500 text-[8px] font-bold rounded font-mono uppercase tracking-wider">{lang === 'ru' ? 'БАН' : 'BANNED'}</span>
+                                        )}
+                                    </div>
+                                    <div className="text-[10px] text-zinc-500 font-mono flex flex-wrap items-center gap-x-3 gap-y-1">
+                                        <span>ID: <span className="text-zinc-400 select-all">{rUser.id}</span></span>
+                                        {rUser.username && <span className="text-blue-400/80">@{rUser.username}</span>}
+                                    </div>
+                                    
+                                    {/* Badges indicators */}
+                                    <div className="flex flex-wrap gap-1">
+                                        {rUser.isChatVip && (
+                                            <span className="px-1.5 py-0.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 text-[8px] font-bold rounded uppercase tracking-wider">CHAT VIP</span>
+                                        )}
+                                        {rUser.isVip && (
+                                            <span className="px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[8px] font-bold rounded uppercase tracking-wider">
+                                                VIP SUB {rUser.vipUntil && `(${lang === 'ru' ? 'до' : 'until'}: ${new Date(rUser.vipUntil).toLocaleDateString()})`}
+                                            </span>
+                                        )}
+                                        {rUser.deletionRequested && (
+                                            <span className="px-1.5 py-0.5 bg-red-500/20 border border-red-500/50 text-red-400 text-[8px] font-black rounded uppercase tracking-wider flex items-center gap-1 animate-pulse">
+                                                <AlertTriangle size={8} />
+                                                {lang === 'ru' ? 'ЗАПРОС НА УДАЛЕНИЕ' : 'DELETION REQUEST'}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* User Actions Grid */}
+                            <div className="flex flex-wrap items-center gap-1.5 xl:justify-end">
+                                {/* Chat VIP */}
+                                <button 
+                                    onClick={() => handleToggleChatVip(rUser.id, !!rUser.isChatVip)} 
+                                    className={`px-2.5 py-1.5 border text-[9px] font-mono font-bold rounded-sm transition-all cursor-pointer flex items-center gap-1.5 ${rUser.isChatVip ? 'border-blue-500 text-blue-400 bg-blue-500/10' : 'border-zinc-800 text-zinc-500 bg-black/20 hover:border-zinc-700 hover:text-zinc-300'}`} 
+                                    title={lang === 'ru' ? 'Выдать/Снять VIP Чат' : 'Toggle Chat VIP'}
+                                >
+                                    <Star size={11} />
+                                    <span>{lang === 'ru' ? 'Чат VIP' : 'Chat VIP'}</span>
+                                </button>
+
+                                {/* VIP Subscription */}
+                                <button 
+                                    onClick={() => handleToggleVip(rUser.id)} 
+                                    className={`px-2.5 py-1.5 border text-[9px] font-mono font-bold rounded-sm transition-all cursor-pointer flex items-center gap-1.5 ${vipManagerUserId === rUser.id ? 'border-amber-400 bg-amber-400/20 text-amber-300' : (rUser.isVip ? 'border-amber-500 text-amber-400 bg-amber-500/10' : 'border-zinc-800 text-zinc-500 bg-black/20 hover:border-zinc-700 hover:text-zinc-300')}`} 
+                                    title={lang === 'ru' ? 'Управление VIP Подпиской' : 'Manage VIP Subscription'}
+                                >
+                                    <Crown size={11} />
+                                    <span>{lang === 'ru' ? 'VIP Подписка' : 'VIP Sub'}</span>
+                                </button>
+
+                                {/* Block */}
+                                <button 
+                                    onClick={() => handleToggleBlock(rUser.id, !!rUser.isBlocked)} 
+                                    className={`px-2.5 py-1.5 border text-[9px] font-mono font-bold rounded-sm transition-all cursor-pointer flex items-center gap-1.5 ${rUser.isBlocked ? 'border-red-500 text-red-500 bg-red-500/10' : 'border-zinc-800 text-zinc-500 bg-black/20 hover:border-zinc-700 hover:text-red-400'}`} 
+                                    title={rUser.isBlocked ? (lang === 'ru' ? 'Разблокировать' : 'Unblock') : (lang === 'ru' ? 'Заблокировать' : 'Block')}
+                                >
+                                    <Ban size={11} />
+                                    <span>{rUser.isBlocked ? (lang === 'ru' ? 'Разбанить' : 'Unban') : (lang === 'ru' ? 'Бан' : 'Ban')}</span>
+                                </button>
+
+                                {/* Toggle Role */}
+                                <button 
+                                    onClick={() => handleToggleRole(rUser.id, rUser.role)} 
+                                    className={`px-2.5 py-1.5 border text-[9px] font-mono font-bold rounded-sm transition-all cursor-pointer flex items-center gap-1.5 ${rUser.role === 'admin' ? 'border-purple-500 text-purple-400 bg-purple-500/10 font-black' : 'border-zinc-800 text-zinc-500 bg-black/20 hover:border-zinc-700 hover:text-zinc-300'}`} 
+                                    title={lang === 'ru' ? 'Сменить Роль' : 'Toggle Role'}
+                                >
+                                    <ShieldAlert size={11} />
+                                    <span>{rUser.role === 'admin' ? (lang === 'ru' ? 'Админ' : 'Admin') : (lang === 'ru' ? 'Юзер' : 'User')}</span>
+                                </button>
+
+                                {/* Card Inspector */}
+                                <button 
+                                    onClick={() => setInspectUserId(rUser.id)} 
+                                    className="px-2.5 py-1.5 border border-zinc-800 text-zinc-500 bg-black/20 hover:text-emerald-500 hover:border-emerald-500/40 rounded-sm text-[9px] font-mono font-bold transition flex items-center gap-1.5 cursor-pointer" 
+                                    title={lang === 'ru' ? 'Посмотреть Визитку' : 'Inspect Profile Card'}
+                                >
+                                    <IdCard size={11} />
+                                    <span>{lang === 'ru' ? 'Визитка' : 'Card'}</span>
+                                </button>
+
+                                {/* Delete User Profile (Restricted to Owner/SuperAdmin but visible and has alert if non-owner) */}
+                                <button 
+                                    onClick={() => isSuperAdmin ? handleDeleteUser(rUser.id) : alert(lang === 'ru' ? 'Доступ ограничен: Удалять профили может только Владелец проекта.' : 'Access Denied: Only the Project Owner can delete profiles.')} 
+                                    className={`px-2.5 py-1.5 border text-[9px] font-mono font-bold rounded-sm transition flex items-center gap-1.5 cursor-pointer ${
+                                        !isSuperAdmin 
+                                            ? 'border-zinc-800/45 text-zinc-600 bg-zinc-950/10 hover:text-amber-500 hover:border-amber-500/40' 
+                                            : 'border-zinc-800 text-zinc-500 bg-black/20 hover:text-red-500 hover:border-red-500/50'
+                                    }`} 
+                                    title={lang === 'ru' ? 'Удалить профиль' : 'Delete Profile'}
+                                >
+                                    <Trash2 size={11} />
+                                    <span>{lang === 'ru' ? 'Удалить' : 'Delete'}</span>
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex flex-wrap gap-1.5">
-                            <button 
-                                onClick={() => handleSetVipDuration(rUser.id, 45)}
-                                className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[8px] font-bold uppercase transition cursor-pointer"
-                            >
-                                {lang === 'ru' ? '45 дней подписки' : '45 Days VIP'}
-                            </button>
-                            <button 
-                                onClick={() => handleSetVipDuration(rUser.id, 9999)}
-                                    className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[8px] font-bold uppercase transition cursor-pointer"
-                            >
-                                {lang === 'ru' ? 'Навсегда' : 'Infinite'}
-                            </button>
-                            <button 
-                                onClick={() => handleSetVipDuration(rUser.id, 0)}
-                                    className="px-2 py-0.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-[8px] font-bold uppercase transition cursor-pointer"
-                            >
-                                {lang === 'ru' ? 'Снять VIP' : 'Remove VIP'}
-                            </button>
-                            <button 
-                                onClick={() => setVipManagerUserId(null)}
-                                className="px-2 py-0.5 bg-zinc-800 hover:bg-zinc-700 text-gray-300 text-[8px] font-bold uppercase transition ml-auto cursor-pointer"
-                            >
-                                {lang === 'ru' ? 'Отмена' : 'Cancel'}
-                            </button>
-                        </div>
+
+                        {/* Inline VIP duration management panel */}
+                        {vipManagerUserId === rUser.id && (
+                            <div className="bg-black/45 border border-amber-500/20 p-3.5 rounded-sm space-y-2.5 animate-in slide-in-from-top-1 duration-200">
+                                <div className="text-[9px] font-mono uppercase tracking-wider text-amber-500 font-bold flex items-center gap-1.5">
+                                    <Crown size={12} />
+                                    <span>{lang === 'ru' ? 'Управление подпиской VIP' : 'Manage VIP Subscription'}</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    <button 
+                                        onClick={() => handleSetVipDuration(rUser.id, 45)}
+                                        className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[9px] font-mono font-bold uppercase transition cursor-pointer"
+                                    >
+                                        {lang === 'ru' ? '45 дней подписки' : '45 Days VIP'}
+                                    </button>
+                                    <button 
+                                        onClick={() => handleSetVipDuration(rUser.id, 9999)}
+                                        className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[9px] font-mono font-bold uppercase transition cursor-pointer"
+                                    >
+                                        {lang === 'ru' ? 'Навсегда (Forever)' : 'Lifetime'}
+                                    </button>
+                                    <button 
+                                        onClick={() => handleSetVipDuration(rUser.id, 0)}
+                                        className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-[9px] font-mono font-bold uppercase transition cursor-pointer"
+                                    >
+                                        {lang === 'ru' ? 'Снять VIP подписку' : 'Remove VIP'}
+                                    </button>
+                                    <button 
+                                        onClick={() => setVipManagerUserId(null)}
+                                        className="px-3 py-1.5 bg-zinc-850 hover:bg-zinc-800 text-gray-400 text-[9px] font-mono font-bold uppercase transition ml-auto cursor-pointer"
+                                    >
+                                        {lang === 'ru' ? 'Отмена' : 'Cancel'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Deletion Request Action Panel */}
+                        {rUser.deletionRequested && (
+                            <div className="bg-red-950/10 border border-red-500/20 p-3.5 rounded-sm space-y-2.5 animate-in slide-in-from-top-1 duration-200 mt-2">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div className="space-y-0.5">
+                                        <span className="text-[10px] font-mono text-red-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                            <AlertTriangle size={12} className="text-red-500" />
+                                            {lang === 'ru' ? 'АКТИВНЫЙ ЗАПРОС НА УДАЛЕНИЕ АККАУНТА' : 'ACTIVE PROFILE DELETION REQUEST'}
+                                        </span>
+                                        {rUser.deletionRequestedAt && (
+                                            <span className="block text-[8px] font-mono text-zinc-500">
+                                                {lang === 'ru' ? 'Инициировано' : 'Requested at'}: {new Date(rUser.deletionRequestedAt).toLocaleString()}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        <button
+                                            onClick={() => handleDismissDeletionRequest(rUser.id)}
+                                            className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-750 border border-zinc-700 hover:border-zinc-500 text-zinc-200 hover:text-white text-[9px] font-mono font-bold uppercase transition rounded-sm cursor-pointer"
+                                        >
+                                            {lang === 'ru' ? 'ОТКЛОНИТЬ' : 'DISMISS REQUEST'}
+                                        </button>
+                                        <button
+                                            onClick={() => isSuperAdmin ? handleDeleteUser(rUser.id) : alert(lang === 'ru' ? 'Доступ ограничен: Удалять профили может только Владелец проекта.' : 'Access Denied: Only the Project Owner can delete profiles.')}
+                                            className="px-3 py-1.5 bg-red-600/10 hover:bg-red-600 border border-red-500/30 hover:border-red-500 text-red-500 hover:text-white text-[9px] font-mono font-bold uppercase transition rounded-sm cursor-pointer"
+                                        >
+                                            {lang === 'ru' ? 'ПОДТВЕРДИТЬ УДАЛЕНИЕ' : 'APPROVE DELETION'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )) : (
+                    <div className="p-12 text-center text-zinc-600 font-mono text-xs uppercase space-y-2">
+                        <Users size={32} className="mx-auto text-zinc-800" />
+                        <div>{lang === 'ru' ? 'Пользователи не найдены' : 'No survivors found'}</div>
                     </div>
                 )}
-                </div>
-            ))}
             </div>
         </div>
 
@@ -949,21 +1146,28 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
 
       {/* Twitch Settings */}
       <form onSubmit={handleSaveTwitchSettings} className="bg-[#14171e] border border-[#2a2f3b] p-6 rounded-sm shadow-xl space-y-4">
-        <h3 className="text-md font-bold text-gray-200 flex items-center gap-2">
-            <Tv size={18} className="text-purple-500" />
-            {lang === 'ru' ? 'Настройки Twitch' : 'Twitch Settings'}
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="text" value={twitchChannel} onChange={e => setTwitchChannel(e.target.value)} placeholder="Channel Name" className="bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm" />
-            <input type="text" value={twitchStreamTitle} onChange={e => setTwitchStreamTitle(e.target.value)} placeholder="Stream Title" className="bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm" />
-            <input type="text" value={twitchClientId} onChange={e => setTwitchClientId(e.target.value)} placeholder="Client ID" className="bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm" />
-            <input type="text" value={twitchClientSecret} onChange={e => setTwitchClientSecret(e.target.value)} placeholder="Client Secret" className="bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm" />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="text-md font-bold text-gray-200 flex items-center gap-2">
+                <Tv size={18} className="text-purple-500" />
+                {lang === 'ru' ? 'Настройки Twitch' : 'Twitch Settings'}
+            </h3>
+            {!isSuperAdmin && (
+                <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[9px] font-mono font-bold rounded uppercase">
+                    {lang === 'ru' ? 'Только для чтения' : 'Read-only access'}
+                </span>
+            )}
         </div>
-        <label className="flex items-center gap-2 text-xs text-white bg-black/40 border border-zinc-800 px-3 py-2 rounded-sm w-fit">
-            <input type="checkbox" checked={twitchManualLive} onChange={e => setTwitchManualLive(e.target.checked)} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="text" disabled={!isSuperAdmin} value={twitchChannel} onChange={e => setTwitchChannel(e.target.value)} placeholder="Channel Name" className="bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm disabled:opacity-55 disabled:cursor-not-allowed" />
+            <input type="text" disabled={!isSuperAdmin} value={twitchStreamTitle} onChange={e => setTwitchStreamTitle(e.target.value)} placeholder="Stream Title" className="bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm disabled:opacity-55 disabled:cursor-not-allowed" />
+            <input type="text" disabled={!isSuperAdmin} value={twitchClientId} onChange={e => setTwitchClientId(e.target.value)} placeholder="Client ID" className="bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm disabled:opacity-55 disabled:cursor-not-allowed" />
+            <input type="text" disabled={!isSuperAdmin} value={twitchClientSecret} onChange={e => setTwitchClientSecret(e.target.value)} placeholder="Client Secret" className="bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm disabled:opacity-55 disabled:cursor-not-allowed" />
+        </div>
+        <label className={`flex items-center gap-2 text-xs text-white bg-black/40 border border-zinc-800 px-3 py-2 rounded-sm w-fit ${!isSuperAdmin ? 'opacity-55 cursor-not-allowed' : 'cursor-pointer'}`}>
+            <input type="checkbox" disabled={!isSuperAdmin} checked={twitchManualLive} onChange={e => setTwitchManualLive(e.target.checked)} />
             Manual Live
         </label>
-        <button type="submit" disabled={savingTwitch} className="px-4 py-2 bg-purple-600/80 text-white text-xs font-bold uppercase tracking-widest font-mono cursor-pointer hover:bg-purple-700 transition">
+        <button type="submit" disabled={savingTwitch || !isSuperAdmin} className={`px-4 py-2 text-white text-xs font-bold uppercase tracking-widest font-mono rounded-sm transition ${!isSuperAdmin ? 'bg-zinc-800 border border-zinc-700 text-zinc-500 cursor-not-allowed opacity-50' : 'bg-purple-600/80 hover:bg-purple-700 cursor-pointer'}`}>
             {lang === 'ru' ? 'Сохранить настройки Twitch' : 'Save Twitch Settings'}
         </button>
       </form>

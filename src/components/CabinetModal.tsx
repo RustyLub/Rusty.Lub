@@ -138,6 +138,13 @@ export default function CabinetModal({
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [jungleFeverSpoiler, setJungleFeverSpoiler] = useState(false);
 
+  // Security and Password fields
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [isRequestingDeletion, setIsRequestingDeletion] = useState(false);
+  const [isCancellingDeletion, setIsCancellingDeletion] = useState(false);
+
   // Friend search and add direct states
   const [friendSearchId, setFriendSearchId] = useState('');
 
@@ -180,7 +187,9 @@ export default function CabinetModal({
           isVip: !!data.isVip,
           vipUntil: data.vipUntil || '',
           role: data.role || 'user',
-          customBackground: data.customBackground || ''
+          customBackground: data.customBackground || '',
+          deletionRequested: !!data.deletionRequested,
+          deletionRequestedAt: data.deletionRequestedAt || ''
         };
         setFullProfile(profile);
 
@@ -308,6 +317,72 @@ export default function CabinetModal({
       onToast(lang === 'ru' ? 'Ошибка сохранения радиопрофиля.' : 'Failed to save radio profile settings.', 'error');
     } finally {
       setIsSavingProfile(false);
+    }
+  };
+
+  // Handle password change request (Security section)
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPassword) {
+      onToast(lang === 'ru' ? 'Введите новый пароль!' : 'Please enter a new password!', 'warning');
+      return;
+    }
+    if (newPassword.length < 4) {
+      onToast(lang === 'ru' ? 'Пароль должен быть не менее 4 символов!' : 'Password must be at least 4 characters!', 'warning');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      onToast(lang === 'ru' ? 'Пароли не совпадают!' : 'Passwords do not match!', 'warning');
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      await updateDoc(doc(db, 'chat_users', user.uid), {
+        password: newPassword
+      });
+      onToast(lang === 'ru' ? 'Пароль успешно обновлен!' : 'Password updated successfully!', 'success');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `chat_users/${user.uid}`);
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
+  // Handle request for profile deletion (sent to Control Center)
+  const handleRequestDeletion = async () => {
+    if (!confirm(lang === 'ru' ? 'Вы уверены, что хотите отправить запрос на удаление профиля? Это действие нельзя отменить автоматически.' : 'Are you sure you want to submit a profile deletion request? This action cannot be undone automatically.')) {
+      return;
+    }
+    setIsRequestingDeletion(true);
+    try {
+      await updateDoc(doc(db, 'chat_users', user.uid), {
+        deletionRequested: true,
+        deletionRequestedAt: new Date().toISOString()
+      });
+      onToast(lang === 'ru' ? 'Заявка на удаление профиля отправлена в Control Center!' : 'Profile deletion request submitted to Control Center!', 'success');
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `chat_users/${user.uid}`);
+    } finally {
+      setIsRequestingDeletion(false);
+    }
+  };
+
+  // Handle canceling/deleting one's own profile deletion request
+  const handleCancelDeletion = async () => {
+    setIsCancellingDeletion(true);
+    try {
+      await updateDoc(doc(db, 'chat_users', user.uid), {
+        deletionRequested: false,
+        deletionRequestedAt: null
+      });
+      onToast(lang === 'ru' ? 'Заявка на удаление профиля успешно отменена!' : 'Profile deletion request successfully cancelled!', 'success');
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `chat_users/${user.uid}`);
+    } finally {
+      setIsCancellingDeletion(false);
     }
   };
 
@@ -1063,6 +1138,108 @@ export default function CabinetModal({
                               </span>
                             </div>
                           )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* БЕЗОПАСНОСТЬ И УДАЛЕНИЕ АККАУНТА */}
+                    <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
+                      <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5 flex items-center gap-2">
+                        <ShieldCheck size={12} className="text-[#cd412b]" />
+                        {lang === 'ru' ? 'БЕЗОПАСНОСТЬ ПРОФИЛЯ' : 'PROFILE SECURITY'}
+                      </span>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1">
+                        {/* Изменение пароля */}
+                        <div className="space-y-3.5">
+                          <span className="text-[9px] text-[#cd412b] font-mono uppercase font-black block tracking-wider">
+                            {lang === 'ru' ? '1. ИЗМЕНЕНИЕ ПАРОЛЯ' : '1. UPDATE ACCESS CODE (PASSWORD)'}
+                          </span>
+                          <div className="space-y-3">
+                            <div className="space-y-1">
+                              <label className="text-[8px] text-zinc-500 font-mono uppercase block">
+                                {lang === 'ru' ? 'Новый пароль' : 'New Password'}
+                              </label>
+                              <input 
+                                type="password" 
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-zinc-700"
+                                placeholder="••••••••"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[8px] text-zinc-500 font-mono uppercase block">
+                                {lang === 'ru' ? 'Подтвердите новый пароль' : 'Confirm New Password'}
+                              </label>
+                              <input 
+                                type="password" 
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className="w-full bg-[#14171e] border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-zinc-700"
+                                placeholder="••••••••"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleUpdatePassword}
+                              disabled={isUpdatingPassword}
+                              className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white border border-zinc-700/50 hover:border-zinc-500 text-[10px] font-bold font-mono uppercase tracking-wider cursor-pointer transition-all disabled:opacity-50"
+                            >
+                              {isUpdatingPassword ? (lang === 'ru' ? 'ОБНОВЛЕНИЕ...' : 'UPDATING...') : (lang === 'ru' ? 'ИЗМЕНИТЬ ПАРОЛЬ' : 'CHANGE PASSWORD')}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Заявка на удаление */}
+                        <div className="space-y-3.5 flex flex-col justify-between">
+                          <div>
+                            <span className="text-[9px] text-red-500 font-mono uppercase font-black block tracking-wider mb-2">
+                              {lang === 'ru' ? '2. УДАЛЕНИЕ ПРОФИЛЯ' : '2. PROTOCOL: SELF-DESTRUCTION'}
+                            </span>
+                            <p className="text-[10px] text-zinc-400 font-mono leading-relaxed">
+                              {lang === 'ru' 
+                                ? 'Вы можете подать заявку на удаление своего профиля на рассмотрение администрации в Control Center.' 
+                                : 'You can submit a request for your profile deletion to be reviewed by administration in Control Center.'}
+                            </p>
+                          </div>
+                          
+                          <div className="pt-2">
+                            {fullProfile?.deletionRequested ? (
+                              <div className="space-y-3">
+                                <div className="p-2.5 bg-red-950/20 border border-red-900/50 flex items-center gap-2 rounded-sm">
+                                  <span className="w-2 h-2 bg-red-500 rounded-full animate-ping shrink-0" />
+                                  <div className="min-w-0">
+                                    <span className="block text-[8.5px] font-mono text-red-400 uppercase font-bold leading-tight">
+                                      {lang === 'ru' ? 'ЗАЯВКА НА УДАЛЕНИЕ АКТИВНА' : 'DELETION REQUEST ACTIVE'}
+                                    </span>
+                                    {fullProfile.deletionRequestedAt && (
+                                      <span className="block text-[6.5px] font-mono text-zinc-500">
+                                        {new Date(fullProfile.deletionRequestedAt).toLocaleString()}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={handleCancelDeletion}
+                                  disabled={isCancellingDeletion}
+                                  className="w-full py-2 bg-red-600/10 hover:bg-red-600 border border-red-500/30 hover:border-red-500 text-red-500 hover:text-white text-[10px] font-bold font-mono uppercase tracking-wider cursor-pointer transition-all disabled:opacity-50"
+                                >
+                                  {isCancellingDeletion ? (lang === 'ru' ? 'ОТМЕНА...' : 'CANCELLING...') : (lang === 'ru' ? 'ОТМЕНИТЬ ЗАЯВКУ НА УДАЛЕНИЕ' : 'CANCEL DELETION REQUEST')}
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={handleRequestDeletion}
+                                disabled={isRequestingDeletion}
+                                className="w-full py-2 bg-red-600/10 hover:bg-red-600 border border-red-600/20 text-red-500 hover:text-white text-[10px] font-bold font-mono uppercase tracking-wider cursor-pointer transition-all disabled:opacity-50"
+                              >
+                                {isRequestingDeletion ? (lang === 'ru' ? 'ОТПРАВКА...' : 'SUBMITTING...') : (lang === 'ru' ? 'ЗАПРОСИТЬ УДАЛЕНИЕ ПРОФИЛЯ' : 'REQUEST PROFILE DELETION')}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>

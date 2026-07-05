@@ -1,6 +1,6 @@
 {
   "name": "Rusty.Lub",
-  "description": "The ultimate Rust reference guide: critical error fixes, tactical keybinds, interactive raid calculator, and performance FPS optimization.",
+  "description": "The ultimate Rust reference guide: critical error fixes, tactical keybinds, interactive raid calculator, performance FPS optimization, and Advanced Player Radar for VIP subscribers.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

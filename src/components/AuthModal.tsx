@@ -102,7 +102,27 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
       } else {
         // LOGIN MODE
         const userRef = doc(db, 'chat_users', cleanUsername);
-        const userSnap = await getDoc(userRef);
+        let userSnap = await getDoc(userRef);
+
+        // Auto-recreate admin 'serustqs' if they don't exist in Firestore
+        if (!userSnap.exists() && cleanUsername === 'serustqs') {
+          const matchedAvatar = CUSTOM_AVATARS.find(a => a.id === 'heavy_plate') || CUSTOM_AVATARS[0];
+          const newUserData = {
+            username: 'serustqs',
+            password: cleanPassword,
+            displayName: 'SEO-RustyLub',
+            avatarClass: 'heavy_plate',
+            photoURL: matchedAvatar.url,
+            gender: 'male',
+            role: 'admin',
+            isBlocked: false,
+            isVip: true,
+            isChatVip: true,
+            createdAt: new Date().toISOString()
+          };
+          await setDoc(userRef, newUserData);
+          userSnap = await getDoc(userRef);
+        }
 
         if (userSnap.exists()) {
           const data = userSnap.data();

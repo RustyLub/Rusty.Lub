@@ -1,14 +1,129 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
+import { Server as SocketServer } from "socket.io";
+import http from "http";
+import axios from "axios";
+import { 
+  db as clientDb, 
+  getDoc as clientGetDoc, 
+  setDoc as clientSetDoc,
+  doc as clientDoc,
+  collection as clientCollection,
+  query as clientQuery,
+  where as clientWhere,
+  getDocs as clientGetDocs,
+  addDoc as clientAddDoc,
+  deleteDoc as clientDeleteDoc,
+  serverTimestamp as clientServerTimestamp,
+  orderBy as clientOrderBy,
+  limit as clientLimit
+} from "./src/lib/firebase-client-on-server";
+import { adminAuth } from "./src/lib/firebase-admin";
+import { RadarService } from "./src/services/radarService";
 
 dotenv.config();
 
 async function startServer() {
   const app = express();
+  const server = http.createServer(app);
+  const io = new SocketServer(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+    }
+  });
   const PORT = 3000;
+
+  // Инициализация Radar Service
+  const radarService = new RadarService(io);
+  radarService.start();
+
+  // Middleware для проверки Firebase Token и VIP статуса
+  const verifyVIP = async (req: any, res: any, next: any) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const idToken = authHeader.split('Bearer ')[1];
+    if (!idToken || idToken === 'undefined' || idToken === 'null') {
+      console.log('VerifyVIP: Invalid or missing token string:', idToken);
+      return res.status(401).json({ success: false, message: 'Invalid or missing token' });
+    }
+
+    console.log(`VerifyVIP: Received token. Length: ${idToken.length}, Prefix: ${idToken.substring(0, 10)}...`);
+    const authLogPath = path.join(process.cwd(), 'auth-log.txt');
+    const logAuth = (msg: string) => {
+      const line = `[${new Date().toISOString()}] ${msg}\n`;
+      try { fs.appendFileSync(authLogPath, line); } catch (e) {}
+    };
+    logAuth(`Attempting to verify token. Length: ${idToken.length}, Prefix: ${idToken.substring(0, 10)}...`);
+
+    try {
+      // 1. Try custom chat_users verification first, because it's the primary system
+      const chatUserRef = clientDoc(clientDb, 'chat_users', idToken);
+      const chatUserDoc = await clientGetDoc(chatUserRef);
+      if (chatUserDoc.exists()) {
+        const userData = chatUserDoc.data();
+        const isAdmin = userData?.role === 'admin' || idToken === 'serustqs' || userData?.email === 'misterzet556@gmail.com';
+        const isVip = userData?.isVip === true;
+        const vipUntil = userData?.vipUntil;
+        const now = new Date();
+        const hasVip = isAdmin || isVip || (vipUntil && new Date(vipUntil) > now);
+
+        if (hasVip) {
+          req.user = { uid: idToken, ...userData };
+          logAuth(`Custom VIP verification succeeded for user ${idToken}`);
+          return next();
+        }
+      }
+
+      // 2. Fallback to standard Firebase Auth ID Token verification
+      try {
+        const decodedToken = await adminAuth.verifyIdToken(idToken);
+        const uid = decodedToken.uid;
+        
+        // Проверка VIP статуса в Firestore через клиентский SDK
+        const userDocRef = clientDoc(clientDb, 'users', uid);
+        const userDoc = await clientGetDoc(userDocRef);
+        
+        if (!userDoc.exists()) {
+          // Если пользователя нет в коллекции users, создаем его (базовая регистрация)
+          await clientSetDoc(userDocRef, {
+            uid,
+            email: decodedToken.email || '',
+            displayName: decodedToken.name || 'Survivor',
+            photoURL: decodedToken.picture || '',
+            createdAt: clientServerTimestamp()
+          });
+          return res.status(403).json({ success: false, message: 'VIP subscription required' });
+        }
+
+        const userData = userDoc.data();
+        const vipUntil = userData?.vipUntil?.toDate?.() || userData?.vipUntil;
+        const now = new Date();
+
+        if (!vipUntil || new Date(vipUntil) < now) {
+          return res.status(403).json({ success: false, message: 'VIP subscription required' });
+        }
+
+        req.user = { ...decodedToken, ...userData };
+        logAuth(`Firebase ID token verification succeeded for user ${uid}`);
+        return next();
+      } catch (err: any) {
+        logAuth(`Firebase ID token verification failed: ${err.message}`);
+      }
+
+      return res.status(403).json({ success: false, message: 'VIP subscription required' });
+    } catch (error: any) {
+      console.error(`VerifyVIP Auth Error:`, error.message);
+      return res.status(401).json({ success: false, message: 'Invalid token', error: error.message });
+    }
+  };
 
   app.use(express.json());
 
@@ -614,6 +729,171 @@ async function startServer() {
     }
   });
 
+  // --- Radar API ---
+
+  app.post("/api/radar/search", async (req, res) => {
+    const { query } = req.body;
+    if (!query) return res.status(400).json({ success: false, message: "Query is required" });
+
+    try {
+      let steamId = query;
+      // Базовая обработка ссылки на Steam
+      if (query.includes('steamcommunity.com')) {
+        const match = query.match(/profiles\/(\d+)/) || query.match(/id\/([^\/]+)/);
+        if (match) steamId = match[1];
+      }
+
+      // Поиск игрока в BattleMetrics
+      const response = await axios.get(`https://api.battlemetrics.com/players?filter[search]=${steamId}`, {
+        headers: { 'Authorization': `Bearer ${process.env.BM_TOKEN}` }
+      });
+
+      const players = response.data.data;
+      if (!players || players.length === 0) {
+        return res.status(404).json({ success: false, message: "Player not found" });
+      }
+
+      const player = players[0];
+      res.json({
+        success: true,
+        player: {
+          id: player.id,
+          name: player.attributes.name,
+          avatar: player.attributes.avatarUrl || 'https://via.placeholder.com/150',
+          steamId: player.attributes.id // SteamID обычно доступен в атрибутах
+        }
+      });
+    } catch (error) {
+      console.error('BM Search Error:', error);
+      res.status(500).json({ success: false, message: "Error searching player" });
+    }
+  });
+
+  app.post("/api/radar/track", verifyVIP, async (req: any, res) => {
+    const { steamId, battlemetricsId, name, avatar } = req.body;
+    const userId = req.user.uid;
+
+    try {
+      const q = clientQuery(
+        clientCollection(clientDb, 'tracked_players'),
+        clientWhere('userId', '==', userId),
+        clientWhere('steamId', '==', steamId)
+      );
+      const existing = await clientGetDocs(q);
+
+      if (!existing.empty) {
+        return res.status(400).json({ success: false, message: "Player already tracked" });
+      }
+
+      await clientAddDoc(clientCollection(clientDb, 'tracked_players'), {
+        userId,
+        steamId,
+        battlemetricsId,
+        currentName: name,
+        avatar: avatar || '',
+        addedAt: clientServerTimestamp(),
+        isActive: true,
+        lastCheck: clientServerTimestamp(),
+        currentStatus: 'offline',
+        currentServer: null,
+        totalPlayTime: 0,
+        totalSessions: 0
+      });
+
+      res.json({ success: true, message: "Player added to radar" });
+    } catch (error) {
+      console.error('Track Error:', error);
+      res.status(500).json({ success: false, message: "Error tracking player" });
+    }
+  });
+
+  app.get("/api/radar/tracked", verifyVIP, async (req: any, res) => {
+    const userId = req.user.uid;
+
+    try {
+      const q = clientQuery(
+        clientCollection(clientDb, 'tracked_players'),
+        clientWhere('userId', '==', userId)
+      );
+      const snapshot = await clientGetDocs(q);
+
+      const players = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      res.json({ success: true, players });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Error fetching players" });
+    }
+  });
+
+  app.get("/api/radar/player/:id/names", verifyVIP, async (req, res) => {
+    const { id } = req.params;
+    try {
+      const q = clientQuery(
+        clientCollection(clientDb, 'name_history'),
+        clientWhere('trackedPlayerId', '==', id),
+        clientOrderBy('detectedAt', 'desc'),
+        clientLimit(50)
+      );
+      const snapshot = await clientGetDocs(q);
+
+      const names = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        detectedAt: (doc.data() as any).detectedAt?.toDate?.() || (doc.data() as any).detectedAt
+      }));
+      res.json({ success: true, names });
+    } catch (error) {
+      console.error('Name History Error:', error);
+      res.status(500).json({ success: false, message: "Error fetching name history" });
+    }
+  });
+
+  app.get("/api/radar/player/:id/sessions", verifyVIP, async (req, res) => {
+    const { id } = req.params;
+    try {
+      const q = clientQuery(
+        clientCollection(clientDb, 'sessions'),
+        clientWhere('trackedPlayerId', '==', id),
+        clientOrderBy('sessionStart', 'desc'),
+        clientLimit(50)
+      );
+      const snapshot = await clientGetDocs(q);
+
+      const sessions = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        sessionStart: (doc.data() as any).sessionStart?.toDate?.() || (doc.data() as any).sessionStart,
+        sessionEnd: (doc.data() as any).sessionEnd?.toDate?.() || (doc.data() as any).sessionEnd
+      }));
+      res.json({ success: true, sessions });
+    } catch (error) {
+      console.error('Sessions Error:', error);
+      res.status(500).json({ success: false, message: "Error fetching sessions" });
+    }
+  });
+
+  app.delete("/api/radar/track/:id", verifyVIP, async (req: any, res) => {
+    const { id } = req.params;
+    const userId = req.user.uid;
+
+    try {
+      const playerDocRef = clientDoc(clientDb, 'tracked_players', id);
+      const playerDoc = await clientGetDoc(playerDocRef);
+      
+      if (!playerDoc.exists() || playerDoc.data()?.userId !== userId) {
+        return res.status(403).json({ success: false, message: "Forbidden" });
+      }
+
+      await clientDeleteDoc(playerDocRef);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Error deleting player" });
+    }
+  });
+
   // Vite middleware for development or static serving for production
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
@@ -629,7 +909,7 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  server.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }

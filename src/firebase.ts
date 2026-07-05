@@ -33,13 +33,14 @@ import {
   arrayRemove
 } from 'firebase/firestore';
 
-const firebaseConfig = {
+const firebaseConfig: any = {
   apiKey: "AIzaSyCKBAhIPVmCFhg8hom5G91VEbY3kaxNhGQ",
   authDomain: "psychic-origin-5kpr3.firebaseapp.com",
   projectId: "psychic-origin-5kpr3",
   storageBucket: "psychic-origin-5kpr3.firebasestorage.app",
   messagingSenderId: "739344973051",
-  appId: "1:739344973051:web:329ad00b8b4f1e1385c45e"
+  appId: "1:739344973051:web:329ad00b8b4f1e1385c45e",
+  firestoreDatabaseId: "ai-studio-rusthub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59"
 };
 
 // Initialize Firebase
@@ -47,7 +48,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 // Use the custom database ID provided in the configuration
-const db = getFirestore(app, "ai-studio-rusthub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59");
+const firestoreDbId = firebaseConfig.firestoreDatabaseId === "(default)" ? undefined : firebaseConfig.firestoreDatabaseId;
+const db = getFirestore(app, firestoreDbId);
 
 const githubProvider = new GithubAuthProvider();
 
