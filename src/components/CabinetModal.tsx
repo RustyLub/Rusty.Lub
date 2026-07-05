@@ -38,6 +38,7 @@ import {
 import { 
   doc, 
   db, 
+  auth,
   setDoc, 
   onSnapshot, 
   collection, 
@@ -162,7 +163,11 @@ export default function CabinetModal({
 
   const [fullProfile, setFullProfile] = useState<CustomUser | null>(null);
 
-  const isAdmin = user && (user.uid === 'serustqs' || user.email === 'misterzet556@gmail.com' || (fullProfile && fullProfile.badges?.includes('founder')));
+  const isAdmin = user && (
+    user.uid === 'serustqs' || 
+    user.email === 'misterzet556@gmail.com' || 
+    (fullProfile && (fullProfile.badges?.includes('founder') || fullProfile.role === 'admin'))
+  );
 
   // Subscribe to logged-in user's own profile doc live
   useEffect(() => {
@@ -531,10 +536,12 @@ export default function CabinetModal({
 
     try {
       // Step 1: Query the Express server verification endpoint
+      const token = await auth.currentUser?.getIdToken();
       const response = await fetch('/api/payment/verify-usdt', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           txId: trimmedTxId,

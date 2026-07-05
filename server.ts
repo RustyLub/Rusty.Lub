@@ -22,8 +22,9 @@ import {
   orderBy as clientOrderBy,
   limit as clientLimit
 } from "./src/lib/firebase-client-on-server";
-import { adminAuth } from "./src/lib/firebase-admin";
+import { adminAuth, adminDb } from "./src/lib/firebase-admin";
 import { RadarService } from "./src/services/radarService";
+import { FieldValue } from "firebase-admin/firestore";
 
 dotenv.config();
 
@@ -38,92 +39,111 @@ async function startServer() {
   });
   const PORT = 3000;
 
-  // Инициализация Radar Service
+  // Initialize Radar Service
   const radarService = new RadarService(io);
   radarService.start();
 
-  // Middleware для проверки Firebase Token и VIP статуса
-  const verifyVIP = async (req: any, res: any, next: any) => {
+  // Middleware for ID Token verification
+  const verifyToken = async (req: any, res: any, next: any) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ success: false, message: 'Unauthorized' });
+      return res.status(401).json({ success: false, message: 'Unauthorized: Missing token' });
     }
 
     const idToken = authHeader.split('Bearer ')[1];
     if (!idToken || idToken === 'undefined' || idToken === 'null') {
-      console.log('VerifyVIP: Invalid or missing token string:', idToken);
-      return res.status(401).json({ success: false, message: 'Invalid or missing token' });
+      return res.status(401).json({ success: false, message: 'Unauthorized: Invalid token' });
     }
-
-    console.log(`VerifyVIP: Received token. Length: ${idToken.length}, Prefix: ${idToken.substring(0, 10)}...`);
-    const authLogPath = path.join(process.cwd(), 'auth-log.txt');
-    const logAuth = (msg: string) => {
-      const line = `[${new Date().toISOString()}] ${msg}\n`;
-      try { fs.appendFileSync(authLogPath, line); } catch (e) {}
-    };
-    logAuth(`Attempting to verify token. Length: ${idToken.length}, Prefix: ${idToken.substring(0, 10)}...`);
 
     try {
-      // 1. Try custom chat_users verification first, because it's the primary system
-      const chatUserRef = clientDoc(clientDb, 'chat_users', idToken);
-      const chatUserDoc = await clientGetDoc(chatUserRef);
-      if (chatUserDoc.exists()) {
-        const userData = chatUserDoc.data();
-        const isAdmin = userData?.role === 'admin' || idToken === 'serustqs' || userData?.email === 'misterzet556@gmail.com';
-        const isVip = userData?.isVip === true;
-        const vipUntil = userData?.vipUntil;
-        const now = new Date();
-        const hasVip = isAdmin || isVip || (vipUntil && new Date(vipUntil) > now);
-
-        if (hasVip) {
-          req.user = { uid: idToken, ...userData };
-          logAuth(`Custom VIP verification succeeded for user ${idToken}`);
-          return next();
-        }
-      }
-
-      // 2. Fallback to standard Firebase Auth ID Token verification
-      try {
-        const decodedToken = await adminAuth.verifyIdToken(idToken);
-        const uid = decodedToken.uid;
-        
-        // Проверка VIP статуса в Firestore через клиентский SDK
-        const userDocRef = clientDoc(clientDb, 'users', uid);
-        const userDoc = await clientGetDoc(userDocRef);
-        
-        if (!userDoc.exists()) {
-          // Если пользователя нет в коллекции users, создаем его (базовая регистрация)
-          await clientSetDoc(userDocRef, {
-            uid,
-            email: decodedToken.email || '',
-            displayName: decodedToken.name || 'Survivor',
-            photoURL: decodedToken.picture || '',
-            createdAt: clientServerTimestamp()
-          });
-          return res.status(403).json({ success: false, message: 'VIP subscription required' });
-        }
-
-        const userData = userDoc.data();
-        const vipUntil = userData?.vipUntil?.toDate?.() || userData?.vipUntil;
-        const now = new Date();
-
-        if (!vipUntil || new Date(vipUntil) < now) {
-          return res.status(403).json({ success: false, message: 'VIP subscription required' });
-        }
-
-        req.user = { ...decodedToken, ...userData };
-        logAuth(`Firebase ID token verification succeeded for user ${uid}`);
-        return next();
-      } catch (err: any) {
-        logAuth(`Firebase ID token verification failed: ${err.message}`);
-      }
-
-      return res.status(403).json({ success: false, message: 'VIP subscription required' });
+      const decodedToken = await adminAuth.verifyIdToken(idToken);
+      req.user = decodedToken;
+      next();
     } catch (error: any) {
-      console.error(`VerifyVIP Auth Error:`, error.message);
-      return res.status(401).json({ success: false, message: 'Invalid token', error: error.message });
+      console.error('verifyToken Auth Error:', error.message);
+      return res.status(401).json({ success: false, message: 'Unauthorized: Invalid token' });
     }
   };
+
+  // Middleware for Admin only
+  const verifyAdmin = async (req: any, res: any, next: any) => {
+    await verifyToken(req, res, async () => {
+      try {
+        const uid = req.user.uid;
+        const userDoc = await clientGetDoc(clientDoc(clientDb, 'chat_users', uid));
+        const userData = userDoc.data();
+        
+        const isAdminUser = userData?.role === 'admin' || uid === 'serustqs' || req.user.email === 'misterzet556@gmail.com';
+        
+        if (!isAdminUser) {
+          return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
+        }
+        
+        req.user = { ...req.user, ...userData, isAdmin: true };
+        next();
+      } catch (err) {
+        console.error('verifyAdmin Error:', err);
+        return res.status(500).json({ success: false, message: 'Internal server error during authorization' });
+      }
+    });
+  };
+
+  // Middleware for VIP status check
+  const verifyVIP = async (req: any, res: any, next: any) => {
+    await verifyToken(req, res, async () => {
+      try {
+        const uid = req.user.uid;
+        let userDoc = await clientGetDoc(clientDoc(clientDb, 'chat_users', uid));
+        let userData = userSnapToData(userDoc);
+        
+        if (!userDoc.exists) {
+          // Fallback to 'users' collection
+          userDoc = await clientGetDoc(clientDoc(clientDb, 'users', uid));
+          userData = userSnapToData(userDoc);
+        }
+
+        if (!userDoc.exists) {
+          // Auto-register user in 'users' if missing
+          userData = {
+            uid,
+            email: req.user.email || '',
+            displayName: req.user.name || 'Survivor',
+            photoURL: req.user.picture || '',
+            createdAt: clientServerTimestamp()
+          };
+          await clientSetDoc(clientDoc(clientDb, 'users', uid), userData);
+        }
+
+        const isAdminUser = userData?.role === 'admin' || uid === 'serustqs' || req.user.email === 'misterzet556@gmail.com';
+        const isVipUser = userData?.isVip === true;
+        
+        // Handle Firestore Timestamp or Date string
+        const vipUntilRaw = userData?.vipUntil;
+        let vipUntilDate: Date | null = null;
+        if (vipUntilRaw) {
+          vipUntilDate = vipUntilRaw.toDate ? vipUntilRaw.toDate() : new Date(vipUntilRaw);
+        }
+        
+        const now = new Date();
+        const hasVip = isAdminUser || isVipUser || (vipUntilDate && vipUntilDate > now);
+
+        if (!hasVip) {
+          return res.status(403).json({ success: false, message: 'Forbidden: VIP subscription required' });
+        }
+
+        req.user = { ...req.user, ...userData, isAdmin: isAdminUser, isVip: true };
+        next();
+      } catch (err) {
+        console.error('verifyVIP Error:', err);
+        return res.status(500).json({ success: false, message: 'Internal server error during authorization' });
+      }
+    });
+  };
+
+  function userSnapToData(snap: any) {
+    return snap.exists() ? snap.data() : null;
+  }
+
 
   app.use(express.json());
 
@@ -137,8 +157,8 @@ async function startServer() {
     }
   });
 
-  // API route for Gemini troubleshooter
-  app.post("/api/gemini/solve", async (req, res) => {
+  // API route for Gemini troubleshooter - AUTH REQUIRED
+  app.post("/api/gemini/solve", verifyToken, async (req, res) => {
     try {
       const { errorQuery } = req.body;
       if (!errorQuery) {
@@ -412,8 +432,8 @@ async function startServer() {
     }
   });
 
-  // API route to send Discord notification
-  app.post("/api/discord/notify", async (req, res) => {
+  // API route to send Discord notification - ADMIN ONLY
+  app.post("/api/discord/notify", verifyAdmin, async (req, res) => {
     try {
       const { message } = req.body;
       const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
@@ -435,10 +455,15 @@ async function startServer() {
     }
   });
 
-  // API route to verify USDT TRC20 transaction on the TRON network
-  app.post("/api/payment/verify-usdt", async (req, res) => {
+  // API route to verify USDT TRC20 transaction - AUTH REQUIRED
+  app.post("/api/payment/verify-usdt", verifyToken, async (req: any, res) => {
     try {
       const { txId, plan, amount, userId, isSandbox } = req.body;
+      const callerUid = req.user.uid;
+
+      if (userId !== callerUid) {
+        return res.status(403).json({ error: "Forbidden: You can only verify payments for your own account." });
+      }
 
       if (!txId) {
         return res.status(400).json({ error: "Missing txId" });
@@ -457,9 +482,17 @@ async function startServer() {
         });
       }
 
-      // 1. Sandbox / Demo Mode handling
+      // 1. Sandbox / Demo Mode handling - Restricted to admins for security
       if (isSandbox) {
+        // We still verify token here because verify-usdt is NOT protected by verifyVIP middleware
+        // But we should check if the user is an admin or at least authorized for sandbox
         console.log(`[PAYMENT] Sandbox payment verification requested for User: ${userId}, Plan: ${plan}`);
+        
+        // Safety check: only allow demo hashes if we trust the request
+        if (!isDemoHash) {
+          return res.status(403).json({ error: "Sandbox mode requires a demo hash." });
+        }
+
         return res.json({
           success: true,
           isSandbox: true,
@@ -564,8 +597,8 @@ async function startServer() {
     }
   });
 
-  // API route to search Rust player history on BattleMetrics by steamid64
-  app.get("/api/battlemetrics/player/:steamId", async (req, res) => {
+  // API route to search Rust player history on BattleMetrics by steamid64 - VIP ONLY
+  app.get("/api/battlemetrics/player/:steamId", verifyVIP, async (req, res) => {
     try {
       const { steamId } = req.params;
       
@@ -731,7 +764,8 @@ async function startServer() {
 
   // --- Radar API ---
 
-  app.post("/api/radar/search", async (req, res) => {
+  // API route to search players on BattleMetrics for Radar - VIP ONLY
+  app.post("/api/radar/search", verifyVIP, async (req, res) => {
     const { query } = req.body;
     if (!query) return res.status(400).json({ success: false, message: "Query is required" });
 

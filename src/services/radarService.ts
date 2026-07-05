@@ -1,16 +1,19 @@
 import { 
   db as clientDb, 
-  collection as clientCollection, 
-  getDocs as clientGetDocs, 
-  getDoc as clientGetDoc,
-  query as clientQuery, 
-  where as clientWhere,
-  addDoc as clientAddDoc,
-  updateDoc as clientUpdateDoc,
+  getDoc as clientGetDoc, 
+  setDoc as clientSetDoc,
   doc as clientDoc,
+  collection as clientCollection,
+  query as clientQuery,
+  where as clientWhere,
+  getDocs as clientGetDocs,
+  addDoc as clientAddDoc,
+  deleteDoc as clientDeleteDoc,
   serverTimestamp as clientServerTimestamp,
+  orderBy as clientOrderBy,
+  limit as clientLimit,
   increment as clientIncrement
-} from '../lib/firebase-client-on-server';
+} from "../lib/firebase-client-on-server";
 import { Server as SocketServer } from 'socket.io';
 import axios from 'axios';
 import cron from 'node-cron';
@@ -56,9 +59,9 @@ export class RadarService {
   }
 
   public start() {
-    console.log('Radar Service started');
+    console.log('Radar Service started (Admin SDK mode)');
     this.updateTrackedPlayers();
-    cron.schedule('* * * * *', () => {
+    cron.schedule('*/5 * * * *', () => { // Check every 5 minutes
       this.updateTrackedPlayers();
     });
   }
@@ -73,8 +76,7 @@ export class RadarService {
 
     try {
       logRadar('RadarService: Checking for active tracked players...');
-      const q = clientQuery(clientCollection(clientDb, 'tracked_players'), clientWhere('isActive', '==', true));
-      const playersSnapshot = await clientGetDocs(q);
+      const playersSnapshot = await clientGetDocs(clientQuery(clientCollection(clientDb, 'tracked_players'), clientWhere('isActive', '==', true)));
 
       if (playersSnapshot.empty) {
         logRadar('RadarService: No active tracked players found.');
@@ -84,7 +86,7 @@ export class RadarService {
       logRadar(`RadarService: Updating ${playersSnapshot.docs.length} tracked players`);
 
       for (const docSnapshot of playersSnapshot.docs) {
-        const player = docSnapshot.data() as any;
+        const player = docSnapshot.data();
         const playerId = docSnapshot.id;
         const playerDocRef = clientDoc(clientDb, 'tracked_players', playerId);
 
@@ -110,7 +112,7 @@ export class RadarService {
               detectedAt: clientServerTimestamp()
             });
 
-            await clientUpdateDoc(playerDocRef, { currentName });
+            await clientSetDoc(playerDocRef, { currentName }, { merge: true });
             
             this.io?.emit('new_name', {
               steamId: player.steamId,
@@ -139,7 +141,7 @@ export class RadarService {
                 isActive: true
               });
               
-              await clientUpdateDoc(playerDocRef, {
+              await clientSetDoc(playerDocRef, {
                 currentStatus: 'online',
                 currentServer: serverInfo ? {
                   id: serverInfo.id,
@@ -149,40 +151,35 @@ export class RadarService {
                   maxPlayers: serverInfo.attributes.maxPlayers
                 } : null,
                 lastCheck: clientServerTimestamp()
-              });
+              }, { merge: true });
             } else {
               // Закрываем активную сессию
-              const qSessions = clientQuery(
-                clientCollection(clientDb, 'sessions'),
-                clientWhere('trackedPlayerId', '==', playerId),
-                clientWhere('isActive', '==', true)
-              );
-              const activeSessions = await clientGetDocs(qSessions);
+              const activeSessions = await clientGetDocs(clientQuery(clientCollection(clientDb, 'sessions'), clientWhere('trackedPlayerId', '==', playerId), clientWhere('isActive', '==', true)));
 
               for (const sessionDoc of activeSessions.docs) {
-                const sessionData = sessionDoc.data() as any;
+                const sessionData = sessionDoc.data();
                 const start = sessionData.sessionStart.toDate();
                 const end = new Date();
                 const durationSeconds = Math.floor((end.getTime() - start.getTime()) / 1000);
 
-                await clientUpdateDoc(clientDoc(clientDb, 'sessions', sessionDoc.id), {
+                await clientSetDoc(sessionDoc.ref, {
                   sessionEnd: clientServerTimestamp(),
                   durationSeconds,
                   isActive: false
-                });
+                }, { merge: true });
 
                 // Обновляем общую статистику игрока
-                await clientUpdateDoc(playerDocRef, {
+                await clientSetDoc(playerDocRef, {
                   totalPlayTime: clientIncrement(Math.floor(durationSeconds / 60)),
                   totalSessions: clientIncrement(1)
-                });
+                }, { merge: true });
               }
 
-              await clientUpdateDoc(playerDocRef, {
+              await clientSetDoc(playerDocRef, {
                 currentStatus: 'offline',
                 currentServer: null,
                 lastCheck: clientServerTimestamp()
-              });
+              }, { merge: true });
             }
 
             this.io?.emit('player_status_update', {
@@ -193,9 +190,9 @@ export class RadarService {
             });
           } else {
             // Если статус не изменился, просто обновляем lastCheck
-            await clientUpdateDoc(playerDocRef, {
+            await clientSetDoc(playerDocRef, {
               lastCheck: clientServerTimestamp()
-            });
+            }, { merge: true });
           }
 
         } catch (err) {
@@ -204,7 +201,7 @@ export class RadarService {
       }
     } catch (error: any) {
       const radarLogPath = path.join(process.cwd(), 'radar-log.txt');
-      const msg = `[${new Date().toISOString()}] Radar Service update error: ${error.message}${error.code ? ' Code: ' + error.code : ''}${error.stack ? '\n' + error.stack.split('\n')[1] : ''}\n`;
+      const msg = `[${new Date().toISOString()}] Radar Service update error: ${error.message}\n`;
       try { fs.appendFileSync(radarLogPath, msg); } catch (e) {}
       console.error('Radar Service update error:', error);
     }

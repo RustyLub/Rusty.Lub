@@ -23,7 +23,10 @@ export const PlayerSearch: React.FC<PlayerSearchProps> = ({ onPlayerAdded }) => 
       setError(null);
       setFoundPlayer(null);
       
-      const response = await axios.post('/api/radar/search', { query });
+      const token = await auth.currentUser?.getIdToken();
+      const response = await axios.post('/api/radar/search', { query }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       if (response.data.success) {
         setFoundPlayer(response.data.player);
       }
@@ -34,25 +37,12 @@ export const PlayerSearch: React.FC<PlayerSearchProps> = ({ onPlayerAdded }) => 
     }
   };
 
-  const getCustomToken = () => {
-    try {
-      const saved = localStorage.getItem('rust_survivor_user');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return parsed.uid || '';
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    return '';
-  };
-
   const handleTrack = async () => {
     if (!foundPlayer) return;
 
     try {
       setTracking(true);
-      const token = getCustomToken();
+      const token = await auth.currentUser?.getIdToken();
       if (!token) {
         setError('Вы должны войти в аккаунт для этого!');
         setTracking(false);

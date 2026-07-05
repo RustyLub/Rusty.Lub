@@ -248,10 +248,17 @@ export default function App() {
     if (isAdmin) return true;
     if (!currentUser) return false;
     if (currentUser.isVip) return true;
-    if (currentUser.vipUntil) {
+    
+    const vipUntil = currentUser.vipUntil;
+    if (vipUntil) {
       try {
-        return new Date(currentUser.vipUntil).getTime() > Date.now();
-      } catch {
+        // Handle string or object (Timestamp-like)
+        const date = (typeof vipUntil === 'object' && (vipUntil as any).toDate) 
+          ? (vipUntil as any).toDate() 
+          : new Date(vipUntil);
+        return date.getTime() > Date.now();
+      } catch (e) {
+        console.error('VIP date check failed:', e);
         return false;
       }
     }
@@ -261,7 +268,7 @@ export default function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [cabinetModalOpen, setCabinetModalOpen] = useState(false);
   const [announcement, setAnnouncement] = useState<{ text: string; active: boolean; type: 'info' | 'hazard' | 'important' } | null>(null);
-  const [showJungleFeverSpoiler, setShowJungleFeverSpoiler] = useState(false);
+  const [showJungleFeverSpoiler, setShowJungleFeverSpoiler] = useState(true);
   const [showTermsModal, setShowTermsModal] = useState(false);
 
   const [twitchSettings, setTwitchSettings] = useState<{
@@ -338,7 +345,7 @@ export default function App() {
             role: data.role || 'user',
             isVip: !!data.isVip,
             isChatVip: !!data.isChatVip,
-            vipUntil: data.vipUntil || '',
+            vipUntil: data.vipUntil ? (data.vipUntil.toDate ? data.vipUntil.toDate().toISOString() : data.vipUntil) : '',
             isScam: !!data.isScam,
             scamReason: data.scamReason || '',
             scamUntil: data.scamUntil || ''
@@ -1107,7 +1114,15 @@ export default function App() {
               transition={{ duration: 0.2 }}
               className="space-y-8"
             >
-              <AdminTab currentUser={currentUser} lang={lang} />
+              <AdminTab 
+            currentUser={currentUser} 
+            lang={lang} 
+            onToast={(msg, type) => {
+              const id = Math.random().toString(36).substring(2, 9);
+              setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : (type === 'info' ? 'info' as any : 'success') }]);
+              setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+            }}
+          />
             </motion.div>
           )}
           {activeTab === 'home' && (

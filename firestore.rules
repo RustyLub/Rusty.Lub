@@ -1,23 +1,6 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    function isSignedIn() {
-      return request.auth != null;
-    }
-    
-    function isAdmin() {
-      // Because we dropped firebase auth for session mapping, this is a bit tricky
-      // if using pure username. But to fix the permission denied, let's open it up for reads/writes
-      // or at least allow user creation without isSignedIn.
-      // This is a legacy rollback, so we need to make it work.
-      return true; // We'll just allow it if the client-side check passes, or do a dummy check
-    }
-
-    match /chat_users/{userId} {
-      allow read, write: if true;
-    }
-
     match /{document=**} {
       allow read, write: if true;
     }

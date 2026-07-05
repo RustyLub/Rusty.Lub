@@ -9,6 +9,7 @@ import UserProfileModal from './UserProfileModal';
 interface AdminTabProps {
   currentUser: CustomUser | null;
   lang: 'ru' | 'en';
+  onToast: (msg: string, type: 'success' | 'error' | 'info') => void;
 }
 
 interface RegisteredUser {
@@ -29,7 +30,7 @@ interface RegisteredUser {
   scamUntil?: string;
 }
 
-export default function AdminTab({ currentUser, lang }: AdminTabProps) {
+export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) {
   const [announcementText, setAnnouncementText] = useState('');
   const [announcementActive, setAnnouncementActive] = useState(false);
   const [announcementType, setAnnouncementType] = useState<'info' | 'hazard' | 'important'>('info');
@@ -96,7 +97,7 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
     const file = e.target.files?.[0];
     if (file) {
         if (file.size > 1024 * 1024) { // 1MB limit for Firestore doc size safety
-            alert(lang === 'ru' ? 'Файл слишком большой! Максимум 1МБ.' : 'File too large! Max 1MB.');
+            onToast(lang === 'ru' ? 'Файл слишком большой! Максимум 1МБ.' : 'File too large! Max 1MB.', 'error');
             return;
         }
         const reader = new FileReader();
@@ -312,15 +313,32 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
   };
 
   const handleToggleBlock = async (uid: string, currentBlocked: boolean) => {
-    const reason = !currentBlocked ? prompt(lang === 'ru' ? 'Причина блокировки:' : 'Reason for block:') : '';
-    if (!currentBlocked && reason === null) return;
+    if (uid === currentUser?.uid) {
+      onToast(lang === 'ru' ? 'Нельзя забанить самого себя!' : 'Cannot ban yourself!', 'error');
+      return;
+    }
+    if (uid === 'serustqs') {
+      onToast(lang === 'ru' ? 'Нельзя забанить создателя!' : 'Cannot ban founder!', 'error');
+      return;
+    }
+
+    let reason = '';
+    if (!currentBlocked) {
+      const input = prompt(lang === 'ru' ? 'Причина блокировки:' : 'Reason for block:');
+      if (input === null) return; // Cancelled
+      reason = input.trim() || (lang === 'ru' ? 'Нарушение правил' : 'Rules violation');
+    }
 
     try {
-      await updateDoc(doc(db, 'chat_users', uid), { 
+      await setDoc(doc(db, 'chat_users', uid), { 
         isBlocked: !currentBlocked,
-        blockedReason: reason || ''
-      });
-      alert(lang === 'ru' ? `Пользователь ${currentBlocked ? 'разблокирован' : 'заблокирован'}` : `User ${currentBlocked ? 'unblocked' : 'blocked'}`);
+        blockedReason: reason
+      }, { merge: true });
+      
+      onToast(
+        lang === 'ru' ? `Пользователь ${currentBlocked ? 'разблокирован' : 'заблокирован'}` : `User ${currentBlocked ? 'unblocked' : 'blocked'}`,
+        'success'
+      );
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, `chat_users/${uid}`);
     }
@@ -329,22 +347,24 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
   const handleToggleScam = async (uid: string, currentScam: boolean) => {
     if (uid === currentUser?.uid) return;
 
-    let reason = !currentScam ? prompt(lang === 'ru' ? 'Причина тега SCAM (на 3 дня):' : 'Reason for SCAM tag (for 3 days):') : '';
+    let reason = '';
+    if (!currentScam) {
+      const input = prompt(lang === 'ru' ? 'Причина тега SCAM (на 3 дня):' : 'Reason for SCAM tag (for 3 days):');
+      if (input === null) return; // Cancelled
+      reason = input.trim() || (lang === 'ru' ? 'Нарушение правил' : 'Rules violation');
+    }
     
-    // Fallback if prompt is blocked or cancelled but we still want to issue it? 
-    // Actually if it's cancelled, we should probably respect that.
-    // But if it's an empty string, that's fine.
-    if (!currentScam && reason === null) return;
-    if (!currentScam && !reason) reason = lang === 'ru' ? 'Нарушение правил' : 'Rules violation';
-
     try {
         const scamUntil = !currentScam ? new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() : null;
         await updateDoc(doc(db, 'chat_users', uid), {
             isScam: !currentScam,
-            scamReason: reason || '',
+            scamReason: reason,
             scamUntil: scamUntil
         });
-        alert(lang === 'ru' ? `Тег SCAM ${currentScam ? 'снят' : 'выдан'}` : `SCAM tag ${currentScam ? 'removed' : 'issued'}`);
+        onToast(
+          lang === 'ru' ? `Тег SCAM ${currentScam ? 'снят' : 'выдан'}` : `SCAM tag ${currentScam ? 'removed' : 'issued'}`,
+          'success'
+        );
     } catch (err) {
         handleFirestoreError(err, OperationType.UPDATE, `chat_users/${uid}`);
     }
@@ -358,7 +378,7 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
   };
   const handleDeleteUser = async (uid: string) => {
     if (!isSuperAdmin) {
-      alert(lang === 'ru' ? 'Ошибка: Только Владелец проекта может удалять профили.' : 'Error: Only the Project Owner can delete profiles.');
+      onToast(lang === 'ru' ? 'Ошибка: Только Владелец проекта может удалять профили.' : 'Error: Only the Project Owner can delete profiles.', 'error');
       return;
     }
     if (confirm(lang === 'ru' ? 'Удалить?' : 'Delete?')) {
@@ -403,7 +423,7 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
         });
 
         await batch.commit();
-        alert(lang === 'ru' ? 'VIP статус активирован!' : 'VIP status activated!');
+        onToast(lang === 'ru' ? 'VIP статус активирован!' : 'VIP status activated!', 'success');
     } catch (err) {
         handleFirestoreError(err, OperationType.UPDATE, `vip_applications/${app.id}`);
     } finally {
@@ -439,7 +459,7 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
         }
 
         await batch.commit();
-        alert(lang === 'ru' ? 'Заявка отклонена.' : 'Application rejected.');
+        onToast(lang === 'ru' ? 'Заявка отклонена.' : 'Application rejected.', 'info');
     } catch (err) {
         handleFirestoreError(err, OperationType.UPDATE, `vip_applications/${app.id}`);
     } finally {
@@ -458,17 +478,21 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
         updatedAt: serverTimestamp()
       }, { merge: true });
       
+      const token = await auth.currentUser?.getIdToken();
       await fetch('/api/discord/notify', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ 
           message: `📢 Global Announcement: ${announcementText}` 
         })
       });
-      alert('Announcement updated!');
+      onToast('Announcement updated!', 'success');
     } catch (e) {
       console.error(e);
-      alert('Failed to update announcement');
+      onToast('Failed to update announcement', 'error');
     }
     setLoading(false);
   };
@@ -496,17 +520,21 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
         clientSecret: twitchClientSecret.trim(),
         updatedAt: serverTimestamp()
       }, { merge: true });
-      alert('Twitch settings updated!');
+      onToast('Twitch settings updated!', 'success');
     } catch (e) {
       console.error(e);
-      alert('Failed to update Twitch settings');
+      onToast('Failed to update Twitch settings', 'error');
     }
     setSavingTwitch(false);
   };
 
   const handleDeleteNews = async (id: string) => {
+    if (!isSuperAdmin) {
+        onToast(lang === 'ru' ? 'Ошибка: У вас нет прав для удаления новостей.' : 'Error: You do not have permissions to delete news.', 'error');
+        return;
+    }
     if (isCurrentUserScamActive) {
-        alert(lang === 'ru' ? 'Ошибка: Пользователи с тегом SCAM не могут удалять новости.' : 'Error: Users with SCAM tag cannot delete news.');
+        onToast(lang === 'ru' ? 'Ошибка: Пользователи с тегом SCAM не могут удалять новости.' : 'Error: Users with SCAM tag cannot delete news.', 'error');
         return;
     }
     if (!confirm(lang === 'ru' ? 'Удалить эту новость?' : 'Delete this news?')) return;
@@ -518,8 +546,12 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
   }
 
   const handleEditNews = (news: NewsItem) => {
+    if (!isSuperAdmin) {
+        onToast(lang === 'ru' ? 'Ошибка: У вас нет прав для редактирования новостей.' : 'Error: You do not have permissions to edit news.', 'error');
+        return;
+    }
     if (isCurrentUserScamActive) {
-        alert(lang === 'ru' ? 'Ошибка: Пользователи с тегом SCAM не могут редактировать новости.' : 'Error: Users with SCAM tag cannot edit news.');
+        onToast(lang === 'ru' ? 'Ошибка: Пользователи с тегом SCAM не могут редактировать новости.' : 'Error: Users with SCAM tag cannot edit news.', 'error');
         return;
     }
     setEditingNewsId(news.id);
@@ -542,8 +574,12 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
 
   const handleSaveNews = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSuperAdmin) {
+        onToast(lang === 'ru' ? 'Ошибка: У вас нет прав для сохранения новостей.' : 'Error: You do not have permissions to save news.', 'error');
+        return;
+    }
     if (isCurrentUserScamActive) {
-        alert(lang === 'ru' ? 'Ошибка: Пользователи с тегом SCAM не могут публиковать или изменять новости.' : 'Error: Users with SCAM tag cannot publish or modify news.');
+        onToast(lang === 'ru' ? 'Ошибка: Пользователи с тегом SCAM не могут публиковать или изменять новости.' : 'Error: Users with SCAM tag cannot publish or modify news.', 'error');
         return;
     }
     try {
@@ -1089,6 +1125,7 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
         <div className="lg:col-span-3 space-y-6">
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                 {/* News Form */}
+                {isSuperAdmin && (
                 <div className="xl:col-span-2 bg-[#14171e] border border-[#2a2f3b] p-6 rounded-sm shadow-xl space-y-6">
                     <div className="flex items-center justify-between">
                         <h3 className="text-md font-bold text-gray-200 flex items-center gap-2">
@@ -1339,6 +1376,7 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
                         </button>
                     </form>
                 </div>
+                )}
 
                 {/* News List */}
                 <div className="bg-[#14171e] border border-[#2a2f3b] p-6 rounded-sm shadow-xl flex flex-col">
@@ -1367,6 +1405,7 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
                                         </span>
                                     </div>
                                 </div>
+                                {isSuperAdmin && (
                                 <div className="flex gap-1.5 opacity-40 group-hover:opacity-100 transition-opacity">
                                     <button 
                                         onClick={() => handleEditNews(news)} 
@@ -1383,6 +1422,7 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
                                         <Trash2 size={12} />
                                     </button>
                                 </div>
+                                )}
                             </div>
                         </div>
                     )) : (

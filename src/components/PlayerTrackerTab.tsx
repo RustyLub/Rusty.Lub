@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Search, ShieldAlert, Clock, User, Server, AlertTriangle, ExternalLink, HelpCircle, Star } from 'lucide-react';
 import { CustomUser } from '../types';
+import { auth } from '../firebase';
 
 interface PlayerTrackerTabProps {
   currentUser: CustomUser | null;
@@ -71,7 +72,12 @@ export default function PlayerTrackerTab({ currentUser, lang, onToast, openCabin
     setResult(null);
 
     try {
-      const response = await fetch(`/api/battlemetrics/player/${trimmedId}`);
+      const token = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/battlemetrics/player/${trimmedId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) {
         const errJson = await response.json();
         throw new Error(errJson.error || 'Failed to fetch player stats');

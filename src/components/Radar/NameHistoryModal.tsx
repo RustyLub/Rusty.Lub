@@ -21,23 +21,10 @@ export const NameHistoryModal: React.FC<NameHistoryModalProps> = ({ isOpen, onCl
     }
   }, [isOpen, playerId]);
 
-  const getCustomToken = () => {
-    try {
-      const saved = localStorage.getItem('rust_survivor_user');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return parsed.uid || '';
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    return '';
-  };
-
   const fetchHistory = async () => {
     try {
       setLoading(true);
-      const token = getCustomToken();
+      const token = await auth.currentUser?.getIdToken();
       if (!token) {
         setLoading(false);
         return;

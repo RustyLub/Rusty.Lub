@@ -173,7 +173,7 @@ export default function NewsTab({ lang }: NewsTabProps) {
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2a2f3b] pb-4">
                 <div className="flex items-center gap-3">
                   <span className="px-2 py-0.5 bg-gradient-to-r from-blue-500/10 to-red-500/10 border border-purple-500/30 text-[9px] font-black uppercase tracking-widest text-purple-400 font-mono">
-                    {activeItem.badge[lang]}
+                    {activeItem.badge ? activeItem.badge[lang] : (lang === 'ru' ? 'НОВОСТЬ' : 'NEWS')}
                   </span>
                   <span className="flex items-center gap-1.5 text-[10px] font-mono text-gray-500 font-bold">
                     <Calendar size={12} />
@@ -202,7 +202,7 @@ export default function NewsTab({ lang }: NewsTabProps) {
                 </h3>
                 <div className="relative text-sm text-gray-300 leading-relaxed font-sans font-medium bg-[#0c0d10] p-4 pl-5 border-y border-r border-[#2a2f3b]">
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-red-500" />
-                  {activeItem.summary[lang]}
+                  {activeItem.summary ? activeItem.summary[lang] : ''}
                 </div>
               </div>
 
@@ -274,7 +274,7 @@ export default function NewsTab({ lang }: NewsTabProps) {
             </h3>
 
             <div className="space-y-4">
-              {filteredNews.filter(n => n.id !== activeItem.id).map((item) => (
+              {filteredNews.filter(n => activeItem && n.id !== activeItem.id).map((item) => (
                 <div 
                   key={item.id}
                   onClick={() => setActiveNewsId(item.id)}
@@ -285,7 +285,7 @@ export default function NewsTab({ lang }: NewsTabProps) {
 
                   <div className="flex items-center gap-2 mb-2">
                     <span className="px-1.5 py-0.5 bg-gradient-to-r from-blue-500/10 to-red-500/10 text-purple-400 border border-purple-500/20 text-[8px] font-bold font-mono uppercase tracking-wider">
-                      {item.badge[lang]}
+                      {item.badge ? item.badge[lang] : (lang === 'ru' ? 'НОВОСТЬ' : 'NEWS')}
                     </span>
                     <span className="text-[9px] font-mono text-gray-500 font-medium">
                       {new Date(item.date).toLocaleDateString()}
@@ -297,7 +297,7 @@ export default function NewsTab({ lang }: NewsTabProps) {
                   </h4>
 
                   <p className="text-[10.5px] text-gray-400 mt-1.5 leading-relaxed line-clamp-2">
-                    {item.summary[lang]}
+                    {item.summary ? item.summary[lang] : ''}
                   </p>
 
                   <div className="mt-3 flex items-center gap-1 text-[9px] text-purple-400 font-bold font-mono tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity">

@@ -5,6 +5,7 @@ import { Search, AlertTriangle, Cpu, Wifi, ShieldAlert, CheckCircle2, ChevronDow
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import { errorCategoryMap, errorsTranslationMap } from '../translations';
+import { auth } from '../firebase';
 
 interface ErrorsTabProps {
   onCopy: (text: string) => void;
@@ -72,9 +73,13 @@ export default function ErrorsTab({ onCopy, lang }: ErrorsTabProps) {
     }
 
     try {
+      const token = await auth.currentUser?.getIdToken();
       const res = await fetch('/api/gemini/solve', {
          method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
+         headers: { 
+           'Content-Type': 'application/json',
+           'Authorization': `Bearer ${token}`
+         },
          body: JSON.stringify({ errorQuery: query, lang })
       });
       const data = await res.json();

@@ -41,26 +41,13 @@ export const PlayerRadar: React.FC = () => {
     };
   }, []);
 
-  const getCustomToken = () => {
-    try {
-      const saved = localStorage.getItem('rust_survivor_user');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return parsed.uid || '';
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    return '';
-  };
-
   const fetchTrackedPlayers = async () => {
-    const token = getCustomToken();
-    if (!token) {
-      setLoading(false);
-      return;
-    }
     try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       const response = await axios.get('/api/radar/tracked', {
         headers: { Authorization: `Bearer ${token}` }
@@ -76,9 +63,9 @@ export const PlayerRadar: React.FC = () => {
   };
 
   const handleRemove = async (id: string) => {
-    const token = getCustomToken();
-    if (!token) return;
     try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
       await axios.delete(`/api/radar/track/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });

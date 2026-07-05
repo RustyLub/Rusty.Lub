@@ -345,7 +345,11 @@ export default function UserProfileModal({
     targetUser.email === 'misterzet556@gmail.com'
   );
 
-  const isScamActive = !!targetUser?.isScam && (!targetUser.scamUntil || new Date(targetUser.scamUntil) > new Date());
+  const isScamActive = !!targetUser?.isScam && (
+    !targetUser.scamUntil || 
+    targetUser.scamUntil === "" || 
+    new Date(targetUser.scamUntil) > new Date()
+  );
 
   // Helper function to return border style conditionally
   const vipBorder = (normalClass: string, vipClass: string = 'border-amber-500/60') => {

@@ -679,9 +679,28 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
       return;
     }
 
+    if (targetUid === user?.uid) {
+      onToast(lang === 'ru' ? 'Нельзя забанить самого себя!' : 'Cannot ban yourself!', 'error');
+      return;
+    }
+
     setAdminActionLoading(true);
     try {
-      await setDoc(doc(db, 'chat_users', targetUid), { isBlocked: !currentlyBlocked }, { merge: true });
+      let reason = '';
+      if (!currentlyBlocked) {
+        const input = prompt(lang === 'ru' ? 'Причина блокировки:' : 'Reason for block:');
+        if (input === null) {
+          setAdminActionLoading(false);
+          return;
+        }
+        reason = input.trim() || (lang === 'ru' ? 'Нарушение правил' : 'Rules violation');
+      }
+
+      await setDoc(doc(db, 'chat_users', targetUid), { 
+        isBlocked: !currentlyBlocked,
+        blockedReason: reason
+      }, { merge: true });
+
       onToast(
         currentlyBlocked ? t.userUnblockedMsg[lang] : t.userBlockedMsg[lang],
         'success'
@@ -892,7 +911,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   }, [user]);
 
   // Check if user is Admin
-  const isAdmin = user && (user.uid === 'serustqs' || user.email === 'misterzet556@gmail.com');
+  const isAdmin = user && (user.uid === 'serustqs' || user.email === 'misterzet556@gmail.com' || user.role === 'admin');
 
   // Check if current user is VIP Subscriber or Admin
   const isCurrentVipSub = user && (
@@ -1388,7 +1407,11 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                   const isMsgVipSub = msg.uid === 'serustqs' || !!msgUser.isVip || msgUser.role === 'admin';
                   const isMsgFounder = msg.uid === 'serustqs';
                   const isHighlighted = !!msg.isHighlighted || (activeChannel === 'rust-vip');
-                  const isMsgScamActive = !!msgUser.isScam && (!msgUser.scamUntil || new Date(msgUser.scamUntil) > new Date());
+                  const isMsgScamActive = !!msgUser.isScam && (
+                    !msgUser.scamUntil || 
+                    msgUser.scamUntil === "" || 
+                    new Date(msgUser.scamUntil) > new Date()
+                  );
 
                   return (
                     <div 
@@ -1525,11 +1548,15 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
 
                               {msg.uid !== 'serustqs' && (
                                 <button
-                                  onClick={() => handleToggleBlockUser(msg.uid, false)}
-                                  className="p-1 hover:bg-amber-500/10 text-zinc-400 hover:text-amber-400 transition-colors cursor-pointer rounded"
-                                  title={lang === 'ru' ? 'Забанить автора' : 'Ban Author'}
+                                  onClick={() => handleToggleBlockUser(msg.uid, !!usersMap[msg.uid]?.isBlocked)}
+                                  className={`p-1 transition-colors cursor-pointer rounded ${
+                                    usersMap[msg.uid]?.isBlocked 
+                                      ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
+                                      : 'hover:bg-amber-500/10 text-zinc-400 hover:text-amber-400'
+                                  }`}
+                                  title={usersMap[msg.uid]?.isBlocked ? (lang === 'ru' ? 'Разбанить автора' : 'Unban Author') : (lang === 'ru' ? 'Забанить автора' : 'Ban Author')}
                                 >
-                                  <UserX size={13} />
+                                  {usersMap[msg.uid]?.isBlocked ? <UserCheck size={13} /> : <UserX size={13} />}
                                 </button>
                               )}
                             </>
@@ -1709,7 +1736,11 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                     .map((u) => {
                       const userAvatar = SURVIVOR_AVATARS.find(a => a.id === u.avatarClass) || SURVIVOR_AVATARS[0];
                       const isChatVip = !!u.isChatVip;
-                      const isScamActive = !!u.isScam && (!u.scamUntil || new Date(u.scamUntil) > new Date());
+                      const isScamActive = !!u.isScam && (
+                        !u.scamUntil || 
+                        u.scamUntil === "" || 
+                        new Date(u.scamUntil) > new Date()
+                      );
 
                       return (
                         <div 

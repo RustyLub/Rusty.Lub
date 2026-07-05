@@ -27,7 +27,12 @@
           "description": "The timestamp when the message was created"
         }
       },
-      "required": ["text", "uid", "displayName", "createdAt"]
+      "required": [
+        "text",
+        "uid",
+        "displayName",
+        "createdAt"
+      ]
     },
     "Presence": {
       "title": "Presence",
@@ -44,7 +49,9 @@
           "description": "The display name of the online user"
         }
       },
-      "required": ["lastActive"]
+      "required": [
+        "lastActive"
+      ]
     },
     "SiteSettings": {
       "title": "SiteSettings",
@@ -62,15 +69,38 @@
       "description": "A news post in the news feed",
       "type": "object",
       "properties": {
-        "category": { "type": "string", "enum": ["updates", "blogs", "events"] },
-        "title": { "type": "object" },
-        "date": { "type": "string" },
-        "author": { "type": "string" },
-        "badge": { "type": "object" },
-        "isFeatured": { "type": "boolean" },
-        "coverImage": { "type": "string" },
-        "summary": { "type": "object" },
-        "content": { "type": "object" }
+        "category": {
+          "type": "string",
+          "enum": [
+            "updates",
+            "blogs",
+            "events"
+          ]
+        },
+        "title": {
+          "type": "object"
+        },
+        "date": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "badge": {
+          "type": "object"
+        },
+        "isFeatured": {
+          "type": "boolean"
+        },
+        "coverImage": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "object"
+        },
+        "content": {
+          "type": "object"
+        }
       }
     },
     "ChatUser": {
@@ -78,12 +108,24 @@
       "description": "Profile data for chat participants",
       "type": "object",
       "properties": {
-        "displayName": { "type": "string" },
-        "photoURL": { "type": "string" },
-        "avatarClass": { "type": "string" },
-        "role": { "type": "string" },
-        "isBlocked": { "type": "boolean" },
-        "isVip": { "type": "boolean" }
+        "displayName": {
+          "type": "string"
+        },
+        "photoURL": {
+          "type": "string"
+        },
+        "avatarClass": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "isBlocked": {
+          "type": "boolean"
+        },
+        "isVip": {
+          "type": "boolean"
+        }
       }
     },
     "Payment": {
@@ -91,139 +133,303 @@
       "description": "USDT TRC20 Payment verification details",
       "type": "object",
       "properties": {
-        "txId": { "type": "string" },
-        "userId": { "type": "string" },
-        "amount": { "type": "number" },
-        "plan": { "type": "string" },
-        "status": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "verifiedAt": { "type": "string", "format": "date-time" }
+        "txId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number"
+        },
+        "plan": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "verifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
       },
-      "required": ["txId", "userId", "amount", "plan", "status", "createdAt"]
+      "required": [
+        "txId",
+        "userId",
+        "amount",
+        "plan",
+        "status",
+        "createdAt"
+      ]
     },
     "User": {
       "title": "User",
       "description": "User account data and subscription status",
       "type": "object",
       "properties": {
-        "uid": { "type": "string" },
-        "email": { "type": "string" },
-        "displayName": { "type": "string" },
-        "photoURL": { "type": "string" },
-        "vipUntil": { "type": "string", "format": "date-time" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "uid": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "photoURL": {
+          "type": "string"
+        },
+        "vipUntil": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
       },
-      "required": ["uid", "email", "createdAt"]
+      "required": [
+        "uid",
+        "email",
+        "createdAt"
+      ]
     },
     "TrackedPlayer": {
       "title": "TrackedPlayer",
       "description": "A player being tracked by the radar",
       "type": "object",
       "properties": {
-        "userId": { "type": "string" },
-        "steamId": { "type": "string" },
-        "battlemetricsId": { "type": "string" },
-        "currentName": { "type": "string" },
-        "avatar": { "type": "string" },
-        "addedAt": { "type": "string", "format": "date-time" },
-        "isActive": { "type": "boolean" },
-        "lastCheck": { "type": "string", "format": "date-time" },
-        "currentStatus": { "type": "string", "enum": ["online", "offline", "unknown"] },
-        "currentServer": { "type": "object" },
-        "totalPlayTime": { "type": "number" },
-        "totalSessions": { "type": "number" }
+        "userId": {
+          "type": "string"
+        },
+        "steamId": {
+          "type": "string"
+        },
+        "battlemetricsId": {
+          "type": "string"
+        },
+        "currentName": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "addedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "isActive": {
+          "type": "boolean"
+        },
+        "lastCheck": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "currentStatus": {
+          "type": "string",
+          "enum": [
+            "online",
+            "offline",
+            "unknown"
+          ]
+        },
+        "currentServer": {
+          "type": "object"
+        },
+        "totalPlayTime": {
+          "type": "number"
+        },
+        "totalSessions": {
+          "type": "number"
+        }
       },
-      "required": ["userId", "steamId", "battlemetricsId", "addedAt"]
+      "required": [
+        "userId",
+        "steamId",
+        "battlemetricsId",
+        "addedAt"
+      ]
     },
     "NameHistory": {
       "title": "NameHistory",
       "description": "History of player names",
       "type": "object",
       "properties": {
-        "trackedPlayerId": { "type": "string" },
-        "userId": { "type": "string" },
-        "steamId": { "type": "string" },
-        "playerName": { "type": "string" },
-        "detectedAt": { "type": "string", "format": "date-time" }
+        "trackedPlayerId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "steamId": {
+          "type": "string"
+        },
+        "playerName": {
+          "type": "string"
+        },
+        "detectedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
       },
-      "required": ["trackedPlayerId", "playerName", "detectedAt"]
+      "required": [
+        "trackedPlayerId",
+        "playerName",
+        "detectedAt"
+      ]
     },
     "PlayerSession": {
       "title": "PlayerSession",
       "description": "A gaming session on a server",
       "type": "object",
       "properties": {
-        "trackedPlayerId": { "type": "string" },
-        "userId": { "type": "string" },
-        "steamId": { "type": "string" },
-        "serverId": { "type": "string" },
-        "serverName": { "type": "string" },
-        "sessionStart": { "type": "string", "format": "date-time" },
-        "sessionEnd": { "type": "string", "format": "date-time" },
-        "durationSeconds": { "type": "number" },
-        "isActive": { "type": "boolean" }
+        "trackedPlayerId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "steamId": {
+          "type": "string"
+        },
+        "serverId": {
+          "type": "string"
+        },
+        "serverName": {
+          "type": "string"
+        },
+        "sessionStart": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sessionEnd": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "durationSeconds": {
+          "type": "number"
+        },
+        "isActive": {
+          "type": "boolean"
+        }
       },
-      "required": ["trackedPlayerId", "serverId", "sessionStart"]
+      "required": [
+        "trackedPlayerId",
+        "serverId",
+        "sessionStart"
+      ]
     }
   },
   "firestore": {
     "/users/{userId}": {
       "schema": "User",
-      "description": "User profiles and VIP status"
+      "description": "User profiles and VIP status",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     },
     "/tracked_players/{playerId}": {
       "schema": "TrackedPlayer",
-      "description": "Players tracked by VIP users"
+      "description": "Players tracked by VIP users",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     },
     "/name_history/{historyId}": {
       "schema": "NameHistory",
-      "description": "Player name change history"
+      "description": "Player name change history",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     },
     "/sessions/{sessionId}": {
       "schema": "PlayerSession",
-      "description": "Server session tracking"
+      "description": "Server session tracking",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     },
     "/payments/{txId}": {
       "schema": "Payment",
-      "description": "USDT TRC20 Payments and subscriptions tracker"
+      "description": "USDT TRC20 Payments and subscriptions tracker",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     },
     "/messages/{messageId}": {
-      "schema": "Message",
-      "description": "Global chat messages collection"
+      "description": "Chat messages",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     },
     "/presence/{userId}": {
-      "schema": "Presence",
-      "description": "Real-time presence collection"
+      "description": "User presence tracking",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     },
     "/site_settings/{docId}": {
       "schema": "SiteSettings",
-      "description": "Global site settings"
+      "description": "Global site settings",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     },
     "/news/{newsId}": {
       "schema": "NewsItem",
-      "description": "Game news and updates"
+      "description": "Game news and updates",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     },
     "/chat_users/{userId}": {
       "schema": "ChatUser",
-      "description": "User profiles and permissions"
-    },
-    "/messages/{messageId}": {
-      "description": "Chat messages"
-    },
-    "/presence/{userId}": {
-      "description": "User presence tracking"
+      "description": "User profiles and permissions",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     },
     "/site_settings/announcement": {
-      "description": "Global announcement"
+      "description": "Global announcement",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     },
     "/site_settings/twitch": {
-      "description": "Twitch integration settings"
+      "description": "Twitch integration settings",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     },
     "/site_settings/jungle_fever_spoiler": {
-      "description": "Spoiler visibility toggle"
+      "description": "Spoiler visibility toggle",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     },
     "/site_settings/maintenance_mode": {
-      "description": "Global maintenance mode toggle"
+      "description": "Global maintenance mode toggle",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     }
   }
 }
