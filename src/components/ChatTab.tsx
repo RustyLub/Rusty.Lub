@@ -11,6 +11,7 @@ import {
   serverTimestamp,
   doc,
   setDoc,
+  updateDoc,
   getDoc,
   getDocs,
   deleteDoc,
@@ -52,7 +53,8 @@ import {
   HelpCircle,
   ChevronDown,
   Compass,
-  PhoneOff
+  PhoneOff,
+  Ban
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CustomUser } from '../types';
@@ -87,6 +89,8 @@ interface RegisteredUser {
   isBlocked: boolean;
   isVip?: boolean;
   isChatVip?: boolean;
+  isScam?: boolean;
+  scamUntil?: string;
   clanTag?: string;
   voiceChannel?: string | null;
 }
@@ -204,7 +208,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   // Admin controls & list
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([]);
-  const [usersMap, setUsersMap] = useState<Record<string, { isBlocked: boolean; isVip?: boolean; isChatVip?: boolean; role: string; displayName: string; photoURL: string; avatarClass: string; clanTag?: string; voiceChannel?: string | null }>>({});
+  const [usersMap, setUsersMap] = useState<Record<string, { isBlocked: boolean; isVip?: boolean; isChatVip?: boolean; isScam?: boolean; scamUntil?: string; role: string; displayName: string; photoURL: string; avatarClass: string; clanTag?: string; voiceChannel?: string | null }>>({});
   const [searchUserQuery, setSearchUserQuery] = useState('');
   const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -329,7 +333,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   // Real-time subscribe to registered users to dynamically retrieve VIP status, blocks, and roles
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'chat_users'), (snapshot) => {
-      const uMap: Record<string, { isBlocked: boolean; isVip?: boolean; isChatVip?: boolean; role: string; displayName: string; photoURL: string; avatarClass: string; clanTag?: string; voiceChannel?: string | null }> = {};
+      const uMap: Record<string, { isBlocked: boolean; isVip?: boolean; isChatVip?: boolean; isScam?: boolean; scamUntil?: string; role: string; displayName: string; photoURL: string; avatarClass: string; clanTag?: string; voiceChannel?: string | null }> = {};
       const usersList: RegisteredUser[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
@@ -337,6 +341,8 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
           isBlocked: !!data.isBlocked,
           isVip: !!data.isVip,
           isChatVip: !!data.isChatVip,
+          isScam: !!data.isScam,
+          scamUntil: data.scamUntil || '',
           role: data.role || 'user',
           displayName: data.displayName || doc.id,
           photoURL: data.photoURL || '',
@@ -353,12 +359,14 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
           isBlocked: !!data.isBlocked,
           isVip: !!data.isVip,
           isChatVip: !!data.isChatVip,
+          isScam: !!data.isScam,
+          scamUntil: data.scamUntil || '',
           clanTag: data.clanTag || '',
           voiceChannel: data.voiceChannel || null
-        });
+        } as any);
       });
       setUsersMap(uMap);
-      setRegisteredUsers(usersList);
+      setRegisteredUsers(usersList as any);
     }, (err) => {
       console.warn("Could not load real-time users map:", err);
     });
@@ -729,6 +737,36 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
     } catch (err) {
       console.error("Toggle EAC error:", err);
       onToast('Error toggling EAC tag', 'error');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  };
+
+  // Toggle SCAM tag for user
+  const handleToggleScamUser = async (targetUid: string, currentlyScam: boolean) => {
+    if (targetUid === user?.uid) return;
+    
+    setAdminActionLoading(true);
+    try {
+      let reason = !currentlyScam ? prompt(lang === 'ru' ? 'Причина тега SCAM (на 3 дня):' : 'Reason for SCAM tag (for 3 days):') : '';
+      if (!currentlyScam && reason === null) return;
+      if (!currentlyScam && !reason) reason = lang === 'ru' ? 'Нарушение правил' : 'Rules violation';
+      
+      const scamUntil = !currentlyScam ? new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() : null;
+      await updateDoc(doc(db, 'chat_users', targetUid), {
+        isScam: !currentlyScam,
+        scamReason: reason || '',
+        scamUntil: scamUntil
+      });
+      onToast(
+        currentlyScam 
+          ? (lang === 'ru' ? 'Тег SCAM успешно снят!' : 'SCAM tag successfully removed!')
+          : (lang === 'ru' ? 'Пользователю успешно выдан тег SCAM на 3 дня!' : 'SCAM tag successfully issued to user for 3 days!'),
+        'success'
+      );
+    } catch (err) {
+      console.error("Toggle SCAM error:", err);
+      onToast('Error toggling SCAM tag', 'error');
     } finally {
       setAdminActionLoading(false);
     }
@@ -1345,19 +1383,22 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                 {filteredMessages.map((msg) => {
                   const isOwnMessage = msg.uid === user.uid;
                   const avatarConfig = SURVIVOR_AVATARS.find(a => a.id === msg.avatarClass) || SURVIVOR_AVATARS[0];
-                  const msgUser = usersMap[msg.uid] || { role: 'user', isVip: false, isChatVip: false };
+                  const msgUser = usersMap[msg.uid] || { role: 'user', isVip: false, isChatVip: false, isScam: false, scamUntil: '' };
                   const isMsgChatVip = !!msgUser.isChatVip;
                   const isMsgVipSub = msg.uid === 'serustqs' || !!msgUser.isVip || msgUser.role === 'admin';
                   const isMsgFounder = msg.uid === 'serustqs';
                   const isHighlighted = !!msg.isHighlighted || (activeChannel === 'rust-vip');
+                  const isMsgScamActive = !!msgUser.isScam && (!msgUser.scamUntil || new Date(msgUser.scamUntil) > new Date());
 
                   return (
                     <div 
                       key={msg.id} 
                       className={`flex items-start gap-4 px-4 py-2.5 transition-all duration-150 relative group select-text border-l-2 ${
-                        isHighlighted 
-                          ? 'bg-gradient-to-r from-amber-500/10 via-blue-500/5 to-transparent border-amber-500 shadow-[inset_1px_0_10px_rgba(245,158,11,0.03)]' 
-                          : 'hover:bg-[#2e3035]/60 border-transparent'
+                        isMsgScamActive
+                          ? 'bg-red-900/10 border-red-600 shadow-[inset_1px_0_10px_rgba(220,38,38,0.05)]'
+                          : isHighlighted 
+                            ? 'bg-gradient-to-r from-amber-500/10 via-blue-500/5 to-transparent border-amber-500 shadow-[inset_1px_0_10px_rgba(245,158,11,0.03)]' 
+                            : 'hover:bg-[#2e3035]/60 border-transparent'
                       }`}
                     >
                       {/* Avatar */}
@@ -1407,20 +1448,26 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                               </span>
                             )}
                             <span className={
-                              isMsgFounder 
-                                ? 'text-[#f87171]' 
-                                : isMsgVipSub 
-                                  ? 'bg-gradient-to-r from-amber-400 via-yellow-200 to-blue-400 bg-clip-text text-transparent font-black tracking-wide drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]' 
-                                  : isMsgChatVip 
-                                    ? 'text-[#60a5fa]' 
-                                    : 'text-zinc-200'
+                              isMsgScamActive
+                                ? 'text-red-500 line-through decoration-red-700 decoration-2'
+                                : isMsgFounder 
+                                  ? 'text-[#f87171]' 
+                                  : isMsgVipSub 
+                                    ? 'bg-gradient-to-r from-amber-400 via-yellow-200 to-blue-400 bg-clip-text text-transparent font-black tracking-wide drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]' 
+                                    : isMsgChatVip 
+                                      ? 'text-[#60a5fa]' 
+                                      : 'text-zinc-200'
                             }>
                               {usersMap[msg.uid]?.displayName || msg.displayName}
                             </span>
                           </span>
                           
                           {/* Role tag badge - Discord style */}
-                          {isMsgFounder ? (
+                          {isMsgScamActive ? (
+                            <span className="px-1.5 py-0.2 bg-red-600/20 border border-red-500/40 text-red-500 text-[8px] font-black tracking-wide uppercase rounded-md flex items-center gap-0.5 animate-pulse">
+                              <Ban size={10} /> SCAM / МОШЕННИК
+                            </span>
+                          ) : isMsgFounder ? (
                             <span className="px-1.5 py-0.2 bg-[#f87171]/10 border border-[#f87171]/20 text-[#f87171] text-[8px] font-black tracking-wide uppercase rounded-md flex items-center gap-0.5">
                               👑 {t.adminTag[lang]}
                             </span>
@@ -1662,29 +1709,31 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                     .map((u) => {
                       const userAvatar = SURVIVOR_AVATARS.find(a => a.id === u.avatarClass) || SURVIVOR_AVATARS[0];
                       const isChatVip = !!u.isChatVip;
+                      const isScamActive = !!u.isScam && (!u.scamUntil || new Date(u.scamUntil) > new Date());
+
                       return (
                         <div 
                           key={u.username} 
                           onClick={() => setInspectUserId(u.username)}
-                          className="flex items-center justify-between p-1.5 hover:bg-zinc-700/30 rounded-lg group transition-colors cursor-pointer"
+                          className={`flex items-center justify-between p-1.5 hover:bg-zinc-700/30 rounded-lg group transition-colors cursor-pointer ${isScamActive ? 'bg-red-900/10' : ''}`}
                         >
                           <div className="flex items-center gap-2 truncate">
                             <div className="relative">
                               <img referrerPolicy="no-referrer" 
                                 src={getAvatarUrl(u.photoURL, u.avatarClass)} 
                                 alt={u.displayName} 
-                                className="w-7 h-7 rounded-full object-cover bg-zinc-950 border border-zinc-800"
+                                className={`w-7 h-7 rounded-full object-cover bg-zinc-950 border ${isScamActive ? 'border-red-600 animate-pulse' : 'border-zinc-800'}`}
                               />
-                              <span className={`absolute bottom-0 right-0 w-2 h-2 ${u.isBlocked ? 'bg-red-500' : 'bg-emerald-500'} border border-[#2b2d31] rounded-full`} />
+                              <span className={`absolute bottom-0 right-0 w-2 h-2 ${u.isBlocked ? 'bg-red-500' : isScamActive ? 'bg-red-600' : 'bg-emerald-500'} border border-[#2b2d31] rounded-full`} />
                             </div>
                             <div className="text-left min-w-0">
                               <span className={`text-xs font-bold block truncate ${
-                                isChatVip ? 'text-blue-400' : 'text-zinc-300'
+                                isScamActive ? 'text-red-500 line-through' : isChatVip ? 'text-blue-400' : 'text-zinc-300'
                               }`}>
                                 {u.displayName}
                               </span>
-                              <span className="text-[8px] text-zinc-500 block truncate font-mono leading-none">
-                                {isChatVip ? '⭐ VIP SURVIVOR' : userAvatar.name[lang]}
+                              <span className={`text-[8px] block truncate font-mono leading-none ${isScamActive ? 'text-red-400 font-bold' : 'text-zinc-500'}`}>
+                                {isScamActive ? '🚫 SCAMMER' : isChatVip ? '⭐ VIP SURVIVOR' : userAvatar.name[lang]}
                               </span>
                             </div>
                           </div>
@@ -1692,6 +1741,18 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                           {/* Quick Moderator actions right inside Member List item on hover */}
                           {isAdmin && (
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleToggleScamUser(u.username, !!u.isScam); }}
+                                disabled={adminActionLoading}
+                                className={`p-1 border rounded text-[8px] font-black uppercase transition-colors cursor-pointer ${
+                                  u.isScam 
+                                    ? 'bg-amber-600/30 border-amber-500/50 text-amber-400' 
+                                    : 'bg-zinc-800 border-zinc-700 text-gray-400 hover:text-red-400'
+                                }`}
+                                title={u.isScam ? (lang === 'ru' ? 'Снять SCAM' : 'Remove SCAM') : (lang === 'ru' ? 'Выдать SCAM' : 'Issue SCAM')}
+                              >
+                                SCAM
+                              </button>
                               <button
                                 onClick={(e) => { e.stopPropagation(); handleToggleEacTag(u.username, u.clanTag === 'EAC'); }}
                                 disabled={adminActionLoading}

@@ -88,6 +88,10 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
     return currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com';
   }, [currentUser]);
 
+  const isCurrentUserScamActive = useMemo(() => {
+    return !!currentUser?.isScam && (!currentUser.scamUntil || new Date(currentUser.scamUntil) > new Date());
+  }, [currentUser]);
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -225,7 +229,7 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
     const statsInterval = setInterval(fetchStats, 60000); // Every minute
 
     const unsubVipApps = onSnapshot(collection(db, 'vip_applications'), (snapshot) => {
-        const apps = snapshot.docs.map(doc => ({ ...doc.data() } as VipApplication));
+        const apps = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as VipApplication));
         apps.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         setVipApps(apps);
     });
@@ -325,8 +329,13 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
   const handleToggleScam = async (uid: string, currentScam: boolean) => {
     if (uid === currentUser?.uid) return;
 
-    const reason = !currentScam ? prompt(lang === 'ru' ? 'Причина тега SCAM (на 3 дня):' : 'Reason for SCAM tag (for 3 days):') : '';
+    let reason = !currentScam ? prompt(lang === 'ru' ? 'Причина тега SCAM (на 3 дня):' : 'Reason for SCAM tag (for 3 days):') : '';
+    
+    // Fallback if prompt is blocked or cancelled but we still want to issue it? 
+    // Actually if it's cancelled, we should probably respect that.
+    // But if it's an empty string, that's fine.
     if (!currentScam && reason === null) return;
+    if (!currentScam && !reason) reason = lang === 'ru' ? 'Нарушение правил' : 'Rules violation';
 
     try {
         const scamUntil = !currentScam ? new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() : null;
@@ -403,8 +412,9 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
   };
 
   const handleRejectVip = async (app: VipApplication, isScam: boolean = false) => {
-    const reason = prompt(lang === 'ru' ? 'Причина отклонения:' : 'Reason for rejection:');
+    let reason = prompt(lang === 'ru' ? 'Причина отклонения:' : 'Reason for rejection:');
     if (reason === null) return;
+    if (!reason) reason = lang === 'ru' ? 'Некорректные данные' : 'Invalid data';
 
     setProcessingAppId(app.id);
     try {
@@ -495,6 +505,10 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
   };
 
   const handleDeleteNews = async (id: string) => {
+    if (isCurrentUserScamActive) {
+        alert(lang === 'ru' ? 'Ошибка: Пользователи с тегом SCAM не могут удалять новости.' : 'Error: Users with SCAM tag cannot delete news.');
+        return;
+    }
     if (!confirm(lang === 'ru' ? 'Удалить эту новость?' : 'Delete this news?')) return;
     try {
         await deleteDoc(doc(db, 'news', id));
@@ -504,6 +518,10 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
   }
 
   const handleEditNews = (news: NewsItem) => {
+    if (isCurrentUserScamActive) {
+        alert(lang === 'ru' ? 'Ошибка: Пользователи с тегом SCAM не могут редактировать новости.' : 'Error: Users with SCAM tag cannot edit news.');
+        return;
+    }
     setEditingNewsId(news.id);
     setNewsForm({ ...news });
   }
@@ -524,6 +542,10 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
 
   const handleSaveNews = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isCurrentUserScamActive) {
+        alert(lang === 'ru' ? 'Ошибка: Пользователи с тегом SCAM не могут публиковать или изменять новости.' : 'Error: Users with SCAM tag cannot publish or modify news.');
+        return;
+    }
     try {
         const data = {
             ...newsForm,
@@ -840,7 +862,9 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
 
             {/* Users Scroll Container */}
             <div className="border border-[#2a2f3b] bg-black/10 divide-y divide-[#2a2f3b]/60 overflow-y-auto max-h-[500px] rounded-sm custom-scrollbar">
-                {filteredUsers.length > 0 ? filteredUsers.map((rUser) => (
+                {filteredUsers.length > 0 ? filteredUsers.map((rUser) => {
+                    const isScamActive = !!rUser.isScam && (!rUser.scamUntil || new Date(rUser.scamUntil) > new Date());
+                    return (
                     <div key={rUser.id} className="p-4 hover:bg-white/[0.02] transition space-y-3">
                         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                             {/* User Profile Info */}
@@ -870,7 +894,7 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
                                         {rUser.isBlocked && (
                                             <span className="px-1.5 py-0.5 bg-red-500/10 border border-red-500/30 text-red-500 text-[8px] font-bold rounded font-mono uppercase tracking-wider">{lang === 'ru' ? 'БАН' : 'BANNED'}</span>
                                         )}
-                                        {rUser.isScam && (
+                                        {isScamActive && (
                                             <span className="px-1.5 py-0.5 bg-red-900/20 border border-red-600/30 text-red-500 text-[8px] font-bold rounded font-mono uppercase tracking-wider">{lang === 'ru' ? 'SCAM' : 'SCAM'}</span>
                                         )}
                                     </div>
@@ -887,6 +911,12 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
                                         {rUser.isVip && (
                                             <span className="px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[8px] font-bold rounded uppercase tracking-wider">
                                                 VIP SUB {rUser.vipUntil && `(${lang === 'ru' ? 'до' : 'until'}: ${new Date(rUser.vipUntil).toLocaleDateString()})`}
+                                            </span>
+                                        )}
+                                        {isScamActive && (
+                                            <span className="px-1.5 py-0.5 bg-red-600/20 border border-red-500/50 text-red-500 text-[8px] font-black rounded uppercase tracking-wider flex items-center gap-1 animate-pulse">
+                                                <Ban size={8} />
+                                                SCAM / МОШЕННИК
                                             </span>
                                         )}
                                         {rUser.deletionRequested && (
@@ -934,10 +964,10 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
                                 {/* SCAM */}
                                 <button 
                                     onClick={() => handleToggleScam(rUser.id, !!rUser.isScam)} 
-                                    className={`px-2.5 py-1.5 border text-[9px] font-mono font-bold rounded-sm transition-all cursor-pointer flex items-center gap-1.5 ${rUser.isScam ? 'border-amber-500 text-amber-500 bg-amber-500/10' : 'border-red-900/40 text-zinc-500 bg-black/20 hover:border-red-500/40 hover:text-red-400'}`} 
+                                    className={`px-2.5 py-1.5 border text-[9px] font-mono font-bold rounded-sm transition-all cursor-pointer flex items-center gap-1.5 ${rUser.isScam ? 'border-red-500 text-red-500 bg-red-500/10 shadow-[0_0_10px_rgba(239,68,68,0.2)]' : 'border-zinc-800 text-zinc-500 bg-black/20 hover:border-red-500/40 hover:text-red-400'}`} 
                                     title={rUser.isScam ? (lang === 'ru' ? 'Снять SCAM' : 'Remove SCAM') : (lang === 'ru' ? 'Выдать SCAM' : 'Issue SCAM')}
                                 >
-                                    <AlertTriangle size={11} />
+                                    <AlertTriangle size={11} className={rUser.isScam ? 'animate-pulse' : ''} />
                                     <span>SCAM</span>
                                 </button>
 
@@ -1046,7 +1076,7 @@ export default function AdminTab({ currentUser, lang }: AdminTabProps) {
                             </div>
                         )}
                     </div>
-                )) : (
+                ); }) : (
                     <div className="p-12 text-center text-zinc-600 font-mono text-xs uppercase space-y-2">
                         <Users size={32} className="mx-auto text-zinc-800" />
                         <div>{lang === 'ru' ? 'Пользователи не найдены' : 'No survivors found'}</div>

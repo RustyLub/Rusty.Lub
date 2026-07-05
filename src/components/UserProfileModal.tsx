@@ -184,6 +184,9 @@ export default function UserProfileModal({
           isVip: !!data.isVip,
           isChatVip: !!data.isChatVip,
           vipUntil: data.vipUntil || '',
+          isScam: !!data.isScam,
+          scamReason: data.scamReason || '',
+          scamUntil: data.scamUntil || '',
           customBackground: data.customBackground || ''
         });
       } else {

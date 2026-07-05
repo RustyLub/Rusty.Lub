@@ -338,7 +338,10 @@ export default function App() {
             role: data.role || 'user',
             isVip: !!data.isVip,
             isChatVip: !!data.isChatVip,
-            vipUntil: data.vipUntil || ''
+            vipUntil: data.vipUntil || '',
+            isScam: !!data.isScam,
+            scamReason: data.scamReason || '',
+            scamUntil: data.scamUntil || ''
           };
           setCurrentUser(customUser);
           localStorage.setItem('rust_survivor_user', JSON.stringify(customUser));
