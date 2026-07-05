@@ -778,6 +778,11 @@ async function startServer() {
       }
 
       // Поиск игрока в BattleMetrics
+      if (!process.env.BM_TOKEN) {
+        console.error('BM_TOKEN is not configured');
+        return res.status(500).json({ success: false, message: "BattleMetrics API token is not configured" });
+      }
+
       const response = await axios.get(`https://api.battlemetrics.com/players?filter[search]=${steamId}`, {
         headers: { 'Authorization': `Bearer ${process.env.BM_TOKEN}` }
       });
