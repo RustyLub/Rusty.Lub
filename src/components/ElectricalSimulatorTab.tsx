@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import fandomIcons from './fandom_icons.json';
 import { 
   Zap, 
   Sun, 
@@ -540,7 +541,40 @@ export default function ElectricalSimulatorTab({ lang }: ElectricalSimulatorTabP
     }
   };
 
-  // Real-time Solver & Propagator
+  // Helper for component icons
+  const ComponentIcon = ({ type, size = 16 }: { type: string; size?: number }) => {
+    const iconUrl = (fandomIcons as Record<string, string>)[type];
+    const getRustlabsId = (type: string) => {
+      switch (type) {
+        case 'solar_panel': return 'solar.panel';
+        case 'wind_turbine': return 'wind.turbine';
+        case 'large_battery': return 'large.battery';
+        case 'electrical_branch': return 'electrical.branch';
+        case 'switch': return 'electrical.switch';
+        case 'splitter': return 'electrical.splitter';
+        case 'blocker': return 'electrical.blocker';
+        case 'auto_turret': return 'autoturret';
+        case 'sam_site': return 'sam.site';
+        case 'ceiling_light': return 'ceiling.light';
+        default: return type;
+      }
+    };
+    
+    return (
+      <img 
+        src={iconUrl || `https://rustlabs.com/img/items180/${getRustlabsId(type)}.png`} 
+        alt={type} 
+        style={{ width: size, height: size }} 
+        className="object-contain" 
+        loading="lazy"
+        onError={(e) => { 
+          const target = e.target as HTMLImageElement;
+          target.style.display = 'none';
+        }}
+      />
+    );
+  };
+
   useEffect(() => {
     // 1. Reset all calculated power parameters
     const resetComps = components.map(c => ({ ...c, powerIn: 0, powerOut: 0 }));
@@ -991,7 +1025,7 @@ export default function ElectricalSimulatorTab({ lang }: ElectricalSimulatorTabP
                         {/* Content detail body */}
                         <div className="space-y-3 z-10">
                           <div className="flex items-center gap-2">
-                            <Zap size={14} className={isPoweredOn ? compMeta.activeColor : 'text-gray-600'} />
+                            <ComponentIcon type={c.type} size={14} />
                             <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono">
                               {lang === 'ru' ? c.nameRU : c.nameEN}
                             </h4>

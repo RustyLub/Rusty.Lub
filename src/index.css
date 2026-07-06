@@ -277,7 +277,7 @@
 .light-theme .text-gray-400,
 .light-theme .text-gray-500,
 .light-theme .text-gray-600,
-.light-theme .text-[#cd412b],
+.light-theme .text-\[\#cd412b\],
 .light-theme .text-emerald-400,
 .light-theme .text-emerald-500,
 .light-theme .text-red-400,
@@ -677,8 +677,8 @@
   color: #ffffff !important;
 }
 
-.light-theme .cabinet-modal-container button[type="button"].border-\[\#cd412b\] .text-[#cd412b],
-.light-theme .cabinet-modal-container button[type="button"].border-\[\#cd412b\] span.text-[#cd412b] {
+.light-theme .cabinet-modal-container button[type="button"].border-\[\#cd412b\] .text-\[\#cd412b\],
+.light-theme .cabinet-modal-container button[type="button"].border-\[\#cd412b\] span.text-\[\#cd412b\] {
   color: #cd412b !important;
 }
 

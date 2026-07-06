@@ -43,7 +43,9 @@ import {
   Download,
   Zap,
   Mail,
-  Target
+  Target,
+  Calculator,
+  Sprout
 } from 'lucide-react';
 import { ToastType, CustomUser } from './types';
 
@@ -68,20 +70,25 @@ import ErrorsTab from './components/ErrorsTab';
 import BindsTab from './components/BindsTab';
 import FpsTab from './components/FpsTab';
 import RaidCalculatorTab from './components/RaidCalculatorTab';
+import DecayCalculator from './components/DecayCalculator';
 import ElectricalSimulatorTab from './components/ElectricalSimulatorTab';
 import WeaponGuidesTab from './components/WeaponGuidesTab';
+import RustBreeder from './components/RustBreeder';
+import RecyclerTab from './components/RecyclerTab';
 import ChatTab from './components/ChatTab';
 import NewsTab from './components/NewsTab';
 import AdminTab from './components/AdminTab';
 import AuthModal from './components/AuthModal';
 import CabinetModal from './components/CabinetModal';
-import PlayerTrackerTab from './components/PlayerTrackerTab';
 import TermsModal from './components/TermsModal';
 import { PlayerRadar } from './components/Radar/PlayerRadar';
+import DiscordWidget from './components/DiscordWidget';
 // @ts-ignore
 import globalWarfareLogo from './assets/images/global_warfare_logo_1782807450573.jpg';
 // @ts-ignore
 import rustWallpaperOne from './assets/images/rust_wallpaper_one_1782810116151.jpg';
+// @ts-ignore
+import oilRigBg from './assets/images/oil_rig_wallpaper_1783378845895.jpg';
 // @ts-ignore
 import rustWallpaperTwo from './assets/images/rust_wallpaper_two_1782810130672.jpg';
 import { getAvatarUrl } from './customAvatars';
@@ -111,16 +118,19 @@ const appTranslations = {
     binds: { ru: 'Бинды', en: 'Binds' },
     fps: { ru: 'Оптимизация FPS', en: 'FPS Boost' },
     raid: { ru: 'Рейд Калькулятор', en: 'Raid Calculator' },
+    decay: { ru: 'Калькулятор Гниения', en: 'Decay Calculator' },
     electrical: { ru: 'Симулятор Электрики', en: 'Electrical Simulator' },
     weapons: { ru: 'Оружие / Мета', en: 'Weapon Guides' },
+    breeder: { ru: 'Селекция растений', en: 'Rust Breeder' },
+    recycler: { ru: 'ИНСТРУМЕНТ Recycling Tool', en: 'Recycling Tool' },
     news: { ru: 'Новости', en: 'News' }
   },
   discordBtn: { ru: 'Наш Discord', en: 'Our Discord' },
   discordMobileBtn: { ru: 'Наш Discord сервер', en: 'Our Discord Server' },
-  bannerSubtitle: { ru: 'УЛЬТИМАТИВНЫЙ СПРАВОЧНИК 2026', en: 'ULTIMATE SURVIVAL KIT 2026' },
-  bannerTitle: { ru: 'Rusty.Lub', en: 'Rusty.Lub' },
+  bannerSubtitle: { ru: 'ULTIMATE SURVIVAL KIT 2026', en: 'ULTIMATE SURVIVAL KIT 2026' },
+  bannerTitle: { ru: 'RUSTY.LUB', en: 'RUSTY.LUB' },
   bannerDesc: {
-    ru: 'Добро пожаловать на профессиональный портал помощи игрокам Rust. Здесь собраны подробные алгоритмы устранения критических ошибок, ультимативные макро-бинды, интерактивный калькулятор рейда с Сачелями и Бобовыми гранатами, а также тонкие настройки для повышения FPS.',
+    ru: 'Welcome to the professional Rust players support portal. Here you will find detailed algorithms for resolving critical errors, ultimate macro-binds, an interactive raid calculator, and deep tweaks to boost your FPS.',
     en: 'Welcome to the professional Rust players support portal. Here you will find detailed algorithms for resolving critical errors, ultimate macro-binds, an interactive raid calculator, and deep tweaks to boost your FPS.'
   },
   bannerBtnErrors: { ru: '💻 РЕШЕНИЯ ОШИБОК', en: '💻 ERROR SOLUTIONS' },
@@ -201,7 +211,7 @@ const appTranslations = {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news' | 'admin' | 'tracker' | 'radar'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler'>('home');
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lang, setLang] = useState<'ru' | 'en'>('en');
@@ -544,7 +554,7 @@ export default function App() {
     }, 550);
   };
 
-  const handleTabChange = (tabId: 'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'electrical' | 'weapons' | 'chat' | 'news' | 'admin' | 'tracker') => {
+  const handleTabChange = (tabId: 'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin') => {
     setActiveTab(tabId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -743,11 +753,13 @@ export default function App() {
     { id: 'binds', label: appTranslations.tabs.binds[lang], icon: <Keyboard size={16} /> },
     { id: 'fps', label: appTranslations.tabs.fps[lang], icon: <Settings size={16} /> },
     { id: 'raid', label: appTranslations.tabs.raid[lang], icon: <Flame size={16} /> },
+    { id: 'decay', label: appTranslations.tabs.decay[lang], icon: <Calculator size={16} /> },
     { id: 'electrical', label: appTranslations.tabs.electrical[lang], icon: <Zap size={16} /> },
     { id: 'weapons', label: appTranslations.tabs.weapons[lang], icon: <Target size={16} /> },
+    { id: 'breeder', label: appTranslations.tabs.breeder[lang], icon: <Sprout size={16} /> },
+    { id: 'recycler', label: appTranslations.tabs.recycler[lang], icon: <Layers size={16} /> },
     { id: 'chat', label: lang === 'ru' ? 'Чат' : 'Chat', icon: <MessageSquare size={16} /> },
     ...(isVip ? [
-      { id: 'tracker', label: lang === 'ru' ? 'Радар игроков' : 'Player Radar', icon: <Search size={16} /> },
       { id: 'radar', label: lang === 'ru' ? 'PLAYER RADAR (VIP)' : 'PLAYER RADAR (VIP)', icon: <Activity size={16} /> }
     ] : []),
     ...(isAdmin ? [{ id: 'admin', label: 'ADMIN', icon: <ShieldCheck size={16} /> }] : [])
@@ -1135,7 +1147,12 @@ export default function App() {
               className="space-y-8"
             >
               {/* Grand Banner */}
-              <div className="relative overflow-hidden rounded-none bg-gradient-to-b from-[#14171e] via-[#0d0f14] to-[#14171e] border-2 border-[#2a2f3b] p-8 sm:p-12 text-center space-y-6 shadow-2xl rust-metal-pattern">
+              <div 
+                className="relative overflow-hidden rounded-none border-2 border-[#2a2f3b] p-8 sm:p-12 text-center space-y-6 shadow-2xl bg-cover bg-center"
+                style={{ backgroundImage: `url(${oilRigBg})` }}
+              >
+                <div className="absolute inset-0 bg-black/60 pointer-events-none" />
+                
                 {/* Tactical Corner Brackets */}
                 <div className="rust-bracket-tl" />
                 <div className="rust-bracket-tr" />
@@ -1152,21 +1169,21 @@ export default function App() {
                 {/* Visual Glow behind title */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#cd412b]/15 rounded-full blur-[100px] pointer-events-none" />
 
-                <div className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#cd412b]/15 border border-[#cd412b]/35 text-[10px] font-bold tracking-wider text-[#cd412b] uppercase font-mono rounded-none">
+                <div className="relative z-10 inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#cd412b]/15 border border-[#cd412b]/35 text-[10px] font-bold tracking-wider text-[#cd412b] uppercase font-mono rounded-none">
                   <Sparkles size={11} className="animate-pulse text-[#cd412b]" />
                   <span>{appTranslations.bannerSubtitle[lang]}</span>
                 </div>
 
-                <h1 className="text-5xl sm:text-7xl font-bold tracking-widest leading-none text-white font-teko uppercase">
+                <h1 className="relative z-10 text-5xl sm:text-7xl font-bold tracking-widest leading-none text-white font-teko uppercase">
                   RUSTY.LU<span className="text-[#cd412b]">B</span>
                 </h1>
 
-                <p className="text-xs sm:text-sm text-gray-400 max-w-2xl mx-auto leading-relaxed font-sans font-medium">
+                <p className="relative z-10 text-xs sm:text-sm text-gray-200 max-w-2xl mx-auto leading-relaxed font-sans font-medium">
                   {appTranslations.bannerDesc[lang]}
                 </p>
 
                 {/* Suggestions & Feedback Terminal Banner */}
-                <div id="suggestions-feedback-banner" className="relative overflow-hidden bg-[#1b1e26]/90 border border-[#2a2f3b] p-3 sm:p-4 max-w-xl mx-auto rounded-none text-left space-y-1 sm:space-y-1.5 shadow-md">
+                <div id="suggestions-feedback-banner" className="relative z-10 overflow-hidden bg-[#1b1e26]/90 border border-[#2a2f3b] p-3 sm:p-4 max-w-xl mx-auto rounded-none text-left space-y-1 sm:space-y-1.5 shadow-md">
                   <div className="absolute top-0 right-0 w-2 h-full bg-[#cd412b] opacity-40" />
                   <div className="flex items-start gap-3">
                     <div className="bg-[#cd412b]/10 text-[#cd412b] p-1.5 border border-[#cd412b]/20 mt-0.5">
@@ -1174,11 +1191,11 @@ export default function App() {
                     </div>
                     <div className="space-y-0.5">
                       <h4 className="text-[10px] font-black tracking-widest text-[#cd412b] uppercase font-mono leading-none">
-                        {lang === 'ru' ? '📬 ПРЕДЛОЖЕНИЯ И ДОРАБОТКИ ДЛЯ САЙТА' : '📬 SUGGESTIONS & WEBSITE PROPOSALS'}
+                        {lang === 'ru' ? '📬 SUGGESTIONS & WEBSITE PROPOSALS' : '📬 SUGGESTIONS & WEBSITE PROPOSALS'}
                       </h4>
                       <p className="text-[10.5px] text-gray-400 leading-normal font-sans font-medium">
                         {lang === 'ru' 
-                          ? 'Если чего-то не хватает или нашли ошибку в базе данных, напишите нам на почту для обращений: ' 
+                          ? 'If anything is missing or you found an error in our database, please write to us at our official contact mail: ' 
                           : 'If anything is missing or you found an error in our database, please write to us at our official contact mail: '}
                         <a 
                           href="mailto:rusty.lub_offers@bk.ru" 
@@ -1191,7 +1208,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div id="banner-tactical-buttons" className="flex flex-wrap items-center justify-center gap-3">
+                <div id="banner-tactical-buttons" className="relative z-10 flex flex-wrap items-center justify-center gap-3">
                   <button
                     onClick={() => handleTabChange('errors')}
                     className="px-5 py-2.5 bg-[#1b1e26] hover:bg-white/5 border border-[#2a2f3b] hover:border-gray-500 rounded-none text-xs font-bold uppercase tracking-wider transition-all cursor-pointer text-white"
@@ -1619,43 +1636,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Discord Widget / CTA */}
-                  <div className="bg-gradient-to-br from-[#14171e] to-[#0c0d10] p-6 flex flex-col justify-between border border-[#2a2f3b] rounded-none shadow-xl relative overflow-hidden flex-1 mt-0">
-                    <div className="rust-bracket-tl" />
-                    <div className="rust-bracket-tr" />
-                    <div className="rust-bracket-bl" />
-                    <div className="rust-bracket-br" />
-
-                    <div className="absolute top-0 right-0 w-2 h-full rust-hazard opacity-40" />
-                    
-                    <div className="space-y-4">
-                      <div className="w-12 h-12 rounded-none bg-[#cd412b]/10 text-[#cd412b] flex items-center justify-center border border-[#cd412b]/20 shadow-inner relative">
-                        <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-[#cd412b]/60" />
-                        <div className="absolute top-0.5 right-0.5 w-1 h-1 bg-[#cd412b]/60" />
-                        <MessageSquare size={22} />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-white tracking-wider font-teko uppercase text-lg">
-                          {appTranslations.discordWidgetTitle[lang]}
-                        </h3>
-                        <p className="text-xs text-gray-400 mt-1.5 leading-relaxed font-sans font-medium">
-                          {appTranslations.discordWidgetDesc[lang]}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="pt-6 relative z-10">
-                      <a
-                        href="https://discord.gg/R2TyKZ9xvZ"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="w-full flex items-center justify-center gap-2.5 py-3 rounded-none text-xs font-bold uppercase tracking-wider text-white bg-[#5865F2] hover:bg-[#4752c4] transition-all shadow-md"
-                      >
-                        <span>{appTranslations.openDiscord[lang]}</span>
-                        <ExternalLink size={13} />
-                      </a>
-                    </div>
-                  </div>
+                  <DiscordWidget lang={lang} />
                 </div>
               </div>
 
@@ -2008,6 +1989,18 @@ export default function App() {
             </motion.div>
           )}
 
+          {activeTab === 'decay' && (
+            <motion.div
+              key="decay"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <DecayCalculator lang={lang} />
+            </motion.div>
+          )}
+
           {activeTab === 'electrical' && (
             <motion.div
               key="electrical"
@@ -2029,6 +2022,70 @@ export default function App() {
               transition={{ duration: 0.2 }}
             >
               <WeaponGuidesTab lang={lang} />
+            </motion.div>
+          )}
+
+          {activeTab === 'recycler' && (
+            <motion.div
+              key="recycler"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <RecyclerTab lang={lang} />
+            </motion.div>
+          )}
+
+          {activeTab === 'breeder' && (
+            <motion.div
+              key="breeder"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              {isAdmin ? (
+                <RustBreeder lang={lang} />
+              ) : (
+                <div className="bg-[#14171e]/95 border-2 border-[#cd412b]/30 p-8 sm:p-12 text-center max-w-2xl mx-auto my-12 relative overflow-hidden rust-metal-pattern shadow-2xl text-left">
+                  {/* Tactical Corner Brackets */}
+                  <div className="rust-bracket-tl" />
+                  <div className="rust-bracket-tr" />
+                  <div className="rust-bracket-bl" />
+                  <div className="rust-bracket-br" />
+
+                  {/* Top Hazard Warning Stripe */}
+                  <div className="absolute top-0 left-0 right-0 h-1 rust-hazard" />
+                  
+                  <div className="space-y-6 text-center">
+                    <div className="w-16 h-16 mx-auto rounded-none bg-[#cd412b]/10 text-[#cd412b] flex items-center justify-center border border-[#cd412b]/20 shadow-inner relative animate-pulse">
+                      <div className="absolute top-0.5 left-0.5 w-1.5 h-1.5 bg-[#cd412b]/60" />
+                      <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-[#cd412b]/60" />
+                      <span className="text-3xl font-bold">🛠️</span>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h2 className="text-2xl sm:text-3xl font-black text-white tracking-widest font-teko uppercase">
+                        {lang === 'ru' ? 'В разработке' : 'UNDER DEVELOPMENT'}
+                      </h2>
+                      <div className="h-[2px] w-16 bg-[#cd412b] mx-auto" />
+                    </div>
+
+                    <p className="text-sm sm:text-base text-gray-300 font-sans font-medium leading-relaxed max-w-lg mx-auto">
+                      {lang === 'ru'
+                        ? 'В скором времени работа данного функционала будет доступна'
+                        : 'Soon the operation of this functionality will be available'}
+                    </p>
+
+                    <div className="pt-2">
+                      <span className="inline-block text-[10px] font-mono text-gray-500 uppercase tracking-widest bg-black/40 px-3 py-1 border border-[#2a2f3b]">
+                        SYS_STATUS: OFFLINE_MAINTENANCE
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -2058,29 +2115,6 @@ export default function App() {
                     setToasts(prev => prev.filter(t => t.id !== id));
                   }, 3000);
                 }} 
-              />
-            </motion.div>
-          )}
-
-          {activeTab === 'tracker' && (
-            <motion.div
-              key="tracker"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.2 }}
-            >
-              <PlayerTrackerTab
-                currentUser={currentUser}
-                lang={lang}
-                onToast={(msg, type) => {
-                  const id = Math.random().toString(36).substring(2, 9);
-                  setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : (type === 'info' ? 'info' : 'success') }]);
-                  setTimeout(() => {
-                    setToasts(prev => prev.filter(t => t.id !== id));
-                  }, 4000);
-                }}
-                openCabinet={() => setCabinetModalOpen(true)}
               />
             </motion.div>
           )}

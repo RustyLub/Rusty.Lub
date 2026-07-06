@@ -366,12 +366,12 @@ export default function UserProfileModal({
         whileHover={isTargetVipSub ? { y: -2, scale: 1.002 } : {}}
       >
         {targetUser?.customBackground && (
-          <img referrerPolicy="no-referrer" src={targetUser.customBackground} alt="Background" className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-60 mix-blend-screen" />
+          <img referrerPolicy="no-referrer" src={targetUser.customBackground} alt="Background" className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-100" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0c0d10]/80 to-[#14171e]/65 pointer-events-none" style={{ zIndex: 0 }} />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0c0d10]/40 to-[#14171e]/90 pointer-events-none" style={{ zIndex: 0 }} />
 
         {/* Sleek Tactical Header Bar */}
-        <div className={`bg-[#0b0c0f]/60 backdrop-blur-sm border-b px-4 py-2 flex items-center justify-between text-[9px] font-mono tracking-widest select-none relative z-10 ${vipBorder('border-[#2a2f3b] text-zinc-400', 'border-amber-500/60 text-amber-400')}`}>
+        <div className={`bg-black/20 backdrop-blur-sm border-b px-4 py-2 flex items-center justify-between text-[9px] font-mono tracking-widest select-none relative z-10 ${vipBorder('border-[#2a2f3b] text-zinc-400', 'border-amber-500/60 text-amber-400')}`}>
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isTargetVipSub ? 'bg-amber-400' : 'bg-red-500'}`}></span>
@@ -399,7 +399,7 @@ export default function UserProfileModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-10 right-4 text-zinc-400 hover:text-white transition-colors cursor-pointer z-20 bg-black/40 p-1.5 border border-[#2a2f3b]/60 hover:border-zinc-500"
+          className="absolute top-10 right-4 text-zinc-400 hover:text-white transition-colors cursor-pointer z-20 bg-black/20 p-1.5 border border-[#2a2f3b]/60 hover:border-zinc-500"
         >
           <X size={16} />
         </button>
@@ -470,7 +470,7 @@ export default function UserProfileModal({
                 </button>
 
                 {/* Tactical Status Bars (Simulated Survival HUD) */}
-                <div className={`w-full bg-black/30 backdrop-blur-sm border p-3 space-y-2 select-none text-left ${vipBorder('border-[#2a2f3b]/70', 'border-amber-500/40')}`}>
+                <div className={`w-full bg-black/10 backdrop-blur-sm border p-3 space-y-2 select-none text-left ${vipBorder('border-[#2a2f3b]/70', 'border-amber-500/40')}`}>
                   <span className="text-[7.5px] font-mono text-zinc-500 uppercase tracking-widest block border-b border-zinc-900 pb-1">
                     {lang === 'ru' ? 'ПОКАЗАТЕЛИ ЖИЗНЕДЕЯТЕЛЬНОСТИ' : 'VITAL TELEMETRY STATUS'}
                   </span>
@@ -609,7 +609,7 @@ export default function UserProfileModal({
                   </div>
 
                   {/* Character Suit Spec Description */}
-                  <div className={`bg-[#0b0c0f]/40 backdrop-blur-sm border p-3 text-left ${vipBorder('border-[#2a2f3b]', 'border-amber-500/40')}`}>
+                  <div className={`bg-black/20 backdrop-blur-sm border p-3 text-left ${vipBorder('border-[#2a2f3b]', 'border-amber-500/40')}`}>
                     <span className="text-[7.5px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">
                       {lang === 'ru' ? 'СПЕЦИФИКАЦИЯ ЭКИПИРОВАННОГО КОСТЮМА' : 'EQUIPPED SKIN SPECIFICATION'}
                     </span>
@@ -652,19 +652,19 @@ export default function UserProfileModal({
 
             {/* Survivor Stats Cards - Clean grid */}
             <div className="grid grid-cols-3 gap-2">
-              <div className={`bg-black/40 border p-3 text-center ${vipBorder('border-[#2a2f3b]/40', 'border-amber-500/40')}`}>
+              <div className={`bg-black/20 border p-3 text-center ${vipBorder('border-[#2a2f3b]/40', 'border-amber-500/40')}`}>
                 <span className="text-[7.5px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ЧАСЫ В ИГРЕ' : 'RUST STATISTICS'}</span>
                 <span className="text-sm font-black font-mono text-zinc-100 mt-1 block">
                   {targetUser.hoursPlayed?.toLocaleString() || 0} H
                 </span>
               </div>
-              <div className={`bg-black/40 border p-3 text-center ${vipBorder('border-[#2a2f3b]/40', 'border-amber-500/40')}`}>
+              <div className={`bg-black/20 border p-3 text-center ${vipBorder('border-[#2a2f3b]/40', 'border-amber-500/40')}`}>
                 <span className="text-[7.5px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ОРУЖИЕ ВЫБОРА' : 'EQUIPPED WEAPON'}</span>
                 <span className={`text-xs font-bold font-mono mt-1 block truncate ${isTargetVipSub ? 'text-amber-400' : 'text-[#cd412b]'}`}>
                   {targetUser.favoriteWeapon || 'AK-47'}
                 </span>
               </div>
-              <div className={`bg-black/40 border p-3 text-center ${vipBorder('border-[#2a2f3b]/40', 'border-amber-500/40')}`}>
+              <div className={`bg-black/20 border p-3 text-center ${vipBorder('border-[#2a2f3b]/40', 'border-amber-500/40')}`}>
                 <span className="text-[7.5px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ТАКТИКА БОЯ' : 'PLAYSTYLE TACTICS'}</span>
                 <span className="text-xs font-bold font-mono text-zinc-200 mt-1 block truncate">
                   {targetUser.playstyle || 'Solo'}
@@ -673,7 +673,7 @@ export default function UserProfileModal({
             </div>
 
             {/* Steam Link Integration Section */}
-            <div className={`bg-[#171a21]/95 border p-3.5 rounded-none flex flex-col gap-3 text-left ${vipBorder('border-[#3b4b57]/40', 'border-amber-500/40')}`}>
+            <div className={`bg-[#171a21]/50 border p-3.5 rounded-none flex flex-col gap-3 text-left ${vipBorder('border-[#3b4b57]/40', 'border-amber-500/40')}`}>
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className={`w-8 h-8 rounded bg-[#101216] flex items-center justify-center border shrink-0 ${vipBorder('border-[#4c5c68]/30', 'border-amber-500/30')}`}>
@@ -843,7 +843,7 @@ export default function UserProfileModal({
                   className={`flex items-center justify-between p-2 text-[10px] font-mono border ${
                     targetUser.notifications?.news 
                       ? 'bg-emerald-900/20 border-emerald-500/30' 
-                      : vipBorder('bg-black/40 border-zinc-800', 'bg-black/40 border-amber-500/30')
+                      : vipBorder('bg-black/20 border-zinc-800', 'bg-black/20 border-amber-500/30')
                   }`}
                 >
                   <span>{lang === 'ru' ? 'Новости' : 'News'}</span>
@@ -862,7 +862,7 @@ export default function UserProfileModal({
                   className={`flex items-center justify-between p-2 text-[10px] font-mono border ${
                     targetUser.notifications?.streams 
                       ? 'bg-emerald-900/20 border-emerald-500/30' 
-                      : vipBorder('bg-black/40 border-zinc-800', 'bg-black/40 border-amber-500/30')
+                      : vipBorder('bg-black/20 border-zinc-800', 'bg-black/20 border-amber-500/30')
                   }`}
                 >
                   <span>{lang === 'ru' ? 'Стримы' : 'Streams'}</span>

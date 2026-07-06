@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Search, Crosshair, HelpCircle, ChevronRight, CornerDownRight, Shield, Award, Sparkles, Gauge, Compass, Sliders, ListFilter } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import fandomIcons from './fandom_icons.json';
+import { ItemImageOrFallback } from './IconUtils';
 
 // --- GAME ACCURATE WEAPON SVG ILLUSTRATIONS ---
 
@@ -308,31 +310,6 @@ const BoltActionSVG = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
-const getWeaponSVGIcon = (id: string, size = 20) => {
-  switch (id) {
-    case 'ak47':
-      return <AK47SVG size={size} />;
-    case 'lr300':
-      return <LR300SVG size={size} />;
-    case 'mp5':
-      return <MP5SVG size={size} />;
-    case 'thompson':
-      return <ThompsonSVG size={size} />;
-    case 'custom':
-      return <CustomSMGSVG size={size} />;
-    case 'sar':
-      return <SARSVG size={size} />;
-    case 'hmlmg':
-      return <HMLMGSVG size={size} />;
-    case 'm249':
-      return <M249SVG size={size} />;
-    case 'bolt':
-      return <BoltActionSVG size={size} />;
-    default:
-      return <AK47SVG size={size} />;
-  }
-};
-
 interface Attachment {
   name: { ru: string; en: string };
   desc: { ru: string; en: string };
@@ -613,6 +590,25 @@ export default function WeaponGuidesTab({ lang }: { lang: 'ru' | 'en' }) {
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'rifles' | 'smgs' | 'special'>('all');
   const [selectedWeapon, setSelectedWeapon] = useState<WeaponGuide | null>(null);
 
+  const weaponSvgMap: Record<string, React.FC<{ size?: number }>> = {
+    'ak47': AK47SVG,
+    'lr300': LR300SVG,
+    'mp5': MP5SVG,
+    'thompson': ThompsonSVG,
+    'custom': CustomSMGSVG,
+    'sar': SARSVG,
+    'hmlmg': HMLMGSVG,
+    'm249': M249SVG,
+    'bolt': BoltActionSVG,
+  };
+
+  const WeaponIcon = ({ id, size = 24 }: { id: string; size?: number }) => {
+    const Svg = weaponSvgMap[id] || AK47SVG;
+    return (
+      <ItemImageOrFallback id={id} lang={lang} fallback={Svg} size={size} />
+    );
+  };
+
   const filteredWeapons = weaponsDatabase.filter((w) => {
     const matchesCategory = categoryFilter === 'all' || w.category === categoryFilter;
     const matchesSearch =
@@ -718,7 +714,7 @@ export default function WeaponGuidesTab({ lang }: { lang: 'ru' | 'en' }) {
                     <div className="w-12 h-12 flex items-center justify-center bg-[#1b1e26] border border-[#2a2f3b] relative select-none">
                       <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-gray-600" />
                       <div className="absolute top-0.5 right-0.5 w-1 h-1 bg-gray-600" />
-                      {getWeaponSVGIcon(weapon.id, 40)}
+                      {WeaponIcon({ id: weapon.id, size: 40 })}
                     </div>
                     <div className="space-y-0.5">
                       <h3 className="text-sm font-black text-white group-hover:text-[#cd412b] transition-colors uppercase font-mono tracking-wide leading-none">
@@ -771,7 +767,7 @@ export default function WeaponGuidesTab({ lang }: { lang: 'ru' | 'en' }) {
               <div className="flex justify-between items-start border-b border-[#2a2f3b] pb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-16 h-16 flex items-center justify-center bg-[#1b1e26] border border-[#2a2f3b] select-none p-1">
-                    {getWeaponSVGIcon(selectedWeapon.id, 56)}
+                    <WeaponIcon id={selectedWeapon.id} size={56} />
                   </div>
                   <div>
                     <span className="text-[10px] font-mono text-[#cd412b] font-bold uppercase tracking-widest block">

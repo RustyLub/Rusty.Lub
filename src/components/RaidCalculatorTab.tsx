@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { raidWeapons, raidTargets } from '../data';
 import { RaidWeapon, RaidTarget } from '../types';
+import fandomIcons from './fandom_icons.json';
+import { ItemImageOrFallback } from './IconUtils';
 import { 
   Shield, 
   Hammer, 
@@ -519,68 +521,49 @@ interface RaidCalculatorTabProps {
 }
 
 // Gorgeous custom icon mappers with tailored theme classes and subtle dropshadow glows
-const getWeaponIcon = (id: string, size = 20) => {
-  switch (id) {
-    case 'c4':
-      return <C4WeaponSVG size={size} />;
-    case 'rocket':
-      return <RocketWeaponSVG size={size} />;
-    case 'satchel':
-      return <SatchelWeaponSVG size={size} />;
-    case 'explosive_ammo':
-      return <ExplosiveAmmoWeaponSVG size={size} />;
-    case 'beancan':
-      return <BeancanWeaponSVG size={size} />;
-    default:
-      return <C4WeaponSVG size={size} />;
-  }
+const weaponSvgMap: Record<string, React.FC<{ size?: number }>> = {
+  'c4': C4WeaponSVG,
+  'rocket': RocketWeaponSVG,
+  'satchel': SatchelWeaponSVG,
+  'explosive_ammo': ExplosiveAmmoWeaponSVG,
+  'beancan': BeancanWeaponSVG,
 };
 
-const getTargetIcon = (id: string, size = 24) => {
-  switch (id) {
-    // Walls
-    case 'wood_wall':
-      return <WoodWallSVG size={size} />;
-    case 'stone_wall':
-      return <StoneWallSVG size={size} />;
-    case 'sheet_wall':
-      return <SheetWallSVG size={size} />;
-    case 'armored_wall':
-      return <ArmoredWallSVG size={size} />;
-    case 'high_stone_wall':
-      return <HighStoneWallSVG size={size} />;
-    case 'high_wood_wall':
-      return <HighWoodWallSVG size={size} />;
-    
-    // Doors
-    case 'wood_door':
-      return <WoodDoorSVG size={size} />;
-    case 'sheet_door':
-      return <SheetDoorSVG size={size} />;
-    case 'garage_door':
-      return <GarageDoorSVG size={size} />;
-    case 'armored_door':
-      return <ArmoredDoorSVG size={size} />;
-    
-    // Deployables
-    case 'tc':
-      return <TCSvg size={size} />;
-    case 'auto_turret':
-      return <AutoTurretSVG size={size} />;
-    case 'guntrap':
-      return <GuntrapSVG size={size} />;
-    case 'flametrap':
-      return <FlametrapSVG size={size} />;
-    
-    default:
-      return <WoodWallSVG size={size} />;
-  }
+const targetSvgMap: Record<string, React.FC<{ size?: number }>> = {
+  'wood_wall': WoodWallSVG,
+  'stone_wall': StoneWallSVG,
+  'sheet_wall': SheetWallSVG,
+  'armored_wall': ArmoredWallSVG,
+  'high_stone_wall': HighStoneWallSVG,
+  'high_wood_wall': HighWoodWallSVG,
+  'wood_door': WoodDoorSVG,
+  'sheet_door': SheetDoorSVG,
+  'garage_door': GarageDoorSVG,
+  'armored_door': ArmoredDoorSVG,
+  'tc': TCSvg,
+  'auto_turret': AutoTurretSVG,
+  'guntrap': GuntrapSVG,
+  'flametrap': FlametrapSVG,
 };
 
 export default function RaidCalculatorTab({ lang }: RaidCalculatorTabProps) {
   const [selectedWeaponId, setSelectedWeaponId] = useState<RaidWeapon['id']>('c4');
   const [activeCategory, setActiveCategory] = useState<'walls' | 'doors' | 'deployables'>('walls');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+
+  const WeaponIcon = ({ id, size = 20 }: { id: string; size?: number }) => {
+    const Svg = weaponSvgMap[id] || C4WeaponSVG;
+    return (
+      <ItemImageOrFallback id={id} lang={lang} fallback={Svg} size={size} />
+    );
+  };
+
+  const TargetIcon = ({ id, size = 24 }: { id: string; size?: number }) => {
+    const Svg = targetSvgMap[id] || WoodWallSVG;
+    return (
+      <ItemImageOrFallback id={id} lang={lang} fallback={Svg} size={size} />
+    );
+  };
 
   const selectedWeapon = raidWeapons.find((w) => w.id === selectedWeaponId)!;
 
@@ -672,7 +655,7 @@ export default function RaidCalculatorTab({ lang }: RaidCalculatorTabProps) {
                   isSelected ? 'bg-[#0c0d10] border-[#0c0d10]/30' : 'bg-[#14171e] border-[#2a2f3b]'
                 }`}>
                   <div className="absolute top-0.5 left-0.5 w-0.5 h-0.5 bg-gray-500/50" />
-                  {getWeaponIcon(weapon.id, 20)}
+                  <WeaponIcon id={weapon.id} size={20} />
                 </span>
                 <div className="flex-1 min-w-0">
                   <h4 className="text-sm font-bold font-mono tracking-tight truncate uppercase">
@@ -838,7 +821,7 @@ export default function RaidCalculatorTab({ lang }: RaidCalculatorTabProps) {
                           {lang === 'ru' ? 'Расход взрывчатки' : 'Explosives Cost'}
                         </span>
                         <div className="flex items-center justify-center gap-1.5 mt-1 text-xs font-black">
-                          {getWeaponIcon(selectedWeaponId, 14)}
+                          <WeaponIcon id={selectedWeaponId} size={14} />
                           <span className="text-[#cd412b]">{singleTargetWeaponNeed}</span>
                           <span className="text-gray-500 text-[10px]">x</span>
                           <span className="text-gray-300">{qty || 1}</span>
@@ -912,7 +895,7 @@ export default function RaidCalculatorTab({ lang }: RaidCalculatorTabProps) {
                     <div className="text-center space-y-2 mb-3 z-10">
                       <div className="bg-[#0c0d10] w-12 h-12 rounded-none mx-auto flex items-center justify-center border border-[#2a2f3b] shadow-inner relative">
                         <div className="absolute top-0.5 left-0.5 w-0.5 h-0.5 bg-gray-500/50" />
-                        {getTargetIcon(target.id, 24)}
+                        <TargetIcon id={target.id} size={24} />
                       </div>
                       <div>
                         <h4 className="text-xs font-bold text-gray-200 font-sans tracking-tight line-clamp-2 min-h-[32px] flex items-center justify-center uppercase font-mono">
@@ -975,7 +958,7 @@ export default function RaidCalculatorTab({ lang }: RaidCalculatorTabProps) {
                       key={target.id}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-[#1b1e26] border border-[#2a2f3b] text-xs text-gray-300 font-mono uppercase"
                     >
-                      <span className="flex items-center justify-center">{getTargetIcon(target.id, 14)}</span>
+                      <span className="flex items-center justify-center"><TargetIcon id={target.id} size={14} /></span>
                       <span>{targetName}</span>
                       <strong className="text-[#cd412b] font-bold">×{qty}</strong>
                       <span className="text-[10px] text-gray-500 font-mono font-bold lowercase">
@@ -1009,7 +992,7 @@ export default function RaidCalculatorTab({ lang }: RaidCalculatorTabProps) {
                   <div className="text-sm font-bold text-white flex items-center gap-2 font-sans font-medium uppercase">
                     <span>{lang === 'en' ? 'Required for raid:' : 'Потребуется для взрыва:'}</span>
                     <span className="inline-flex items-center gap-1.5 bg-[#cd412b]/10 text-[#cd412b] px-3 py-1 rounded-none border border-[#cd412b]/20 font-mono">
-                      <span className="flex items-center justify-center">{getWeaponIcon(selectedWeapon.id, 14)}</span>
+                      <span className="flex items-center justify-center"><WeaponIcon id={selectedWeapon.id} size={14} /></span>
                       <span>{weaponTranslationMap[selectedWeapon.id]?.[lang] || selectedWeapon.name}</span>
                     </span>
                   </div>

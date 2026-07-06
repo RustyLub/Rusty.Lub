@@ -22,6 +22,7 @@ import {
   Gamepad2,
   Award,
   Plus,
+  Calculator,
   UserCheck,
   UserMinus,
   Link,
@@ -1343,30 +1344,7 @@ export default function CabinetModal({
                           transition={{ duration: 0.15 }}
                           className="space-y-4"
                         >
-                          {!(fullProfile?.isVip || fullProfile?.role === 'admin') ? (
-                            <div className="bg-[#0c0d10] border border-[#2a2f3b] p-12 flex flex-col items-center justify-center gap-4 text-center">
-                              <div className="w-16 h-16 bg-red-500/10 border border-red-500/30 rounded-full flex items-center justify-center text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.1)]">
-                                <ShieldAlert size={32} />
-                              </div>
-                              <div className="space-y-2">
-                                <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] font-mono">
-                                  {lang === 'ru' ? 'ДОСТУП ОГРАНИЧЕН' : 'ACCESS DENIED'}
-                                </h3>
-                                <p className="text-[10px] text-zinc-500 font-mono uppercase leading-relaxed max-w-sm">
-                                  {lang === 'ru' 
-                                    ? 'РАСШИРЕННЫЕ ПРОТОКОЛЫ БЕЗОПАСНОСТИ ДОСТУПНЫ ТОЛЬКО ДЛЯ VIP-ПОДРАЗДЕЛЕНИЙ' 
-                                    : 'ADVANCED SECURITY PROTOCOLS ARE RESTRICTED TO VIP OPERATIVES ONLY'}
-                                </p>
-                              </div>
-                              <button
-                                onClick={() => setActiveTab('vip')}
-                                className="px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black text-[10px] font-black font-mono uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)]"
-                              >
-                                {lang === 'ru' ? 'КУПИТЬ VIP ПОДПИСКУ' : 'UPGRADE TO VIP'}
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
+                          <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
                             <span className="text-[10px] font-mono text-[#cd412b] font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5 flex items-center gap-1.5">
                               <ShieldCheck size={12} className="text-[#cd412b]" />
                               {lang === 'ru' ? 'БЕЗОПАСНОСТЬ ПРОФИЛЯ' : 'PROFILE SECURITY PROTOCOLS'}
@@ -1466,12 +1444,10 @@ export default function CabinetModal({
                               </div>
                             </div>
                           </div>
-                        )}
-                      </motion.div>
-                    )}
+                        </motion.div>
+                      )}
                     </AnimatePresence>
-
-                  </form>
+                    </form>
 
                   {/* Right Column: Live Card Preview (Span 5) */}
                   <div className="xl:col-span-5 space-y-3.5 order-1 xl:order-2 xl:sticky xl:top-0 bg-black/40 p-4 border border-[#2a2f3b]/50">
