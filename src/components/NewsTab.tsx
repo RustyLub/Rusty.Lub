@@ -224,7 +224,7 @@ export default function NewsTab({ lang }: NewsTabProps) {
                     </p>
 
                     <ul className="space-y-2 pt-2">
-                      {sec.highlights.map((h, hIdx) => (
+                      {sec.highlights?.map((h, hIdx) => (
                         <li key={hIdx} className="flex items-start gap-2.5 text-[11px] text-gray-300 font-sans font-medium">
                           <CheckCircle2 size={13} className="text-purple-400 shrink-0 mt-0.5" />
                           <span>

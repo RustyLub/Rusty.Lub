@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { doc, updateDoc, collection, onSnapshot, deleteDoc, serverTimestamp, getDoc, setDoc, addDoc, getCountFromServer, writeBatch, query, limit, getDocs, where } from 'firebase/firestore';
-import { ShieldCheck, Send, Search, Crown, Star, Ban, Trash2, Users, Settings, Megaphone, EyeOff, Tv, PlusCircle, Activity, MessageSquare, AlertTriangle, ShieldAlert, IdCard, List, BarChart3, Wallet, Clock, Check, X } from 'lucide-react';
+import { ShieldCheck, Send, Search, Crown, Star, Ban, Trash2, Users, Settings, Megaphone, EyeOff, Tv, PlusCircle, Activity, MessageSquare, AlertTriangle, ShieldAlert, IdCard, List, BarChart3, Wallet, Clock, Check, X, Mail } from 'lucide-react';
 import { CustomUser, NewsItem, VipApplication } from '../types';
 import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 import UserProfileModal from './UserProfileModal';
@@ -10,6 +10,16 @@ interface AdminTabProps {
   currentUser: CustomUser | null;
   lang: 'ru' | 'en';
   onToast: (msg: string, type: 'success' | 'error' | 'info') => void;
+}
+
+interface FeedbackMessage {
+  id: string;
+  name: string;
+  email: string;
+  type: string;
+  message: string;
+  userId: string;
+  createdAt?: any;
 }
 
 interface RegisteredUser {
@@ -43,6 +53,9 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
     messages: 0,
     news: 0
   });
+
+  const [feedbacks, setFeedbacks] = useState<FeedbackMessage[]>([]);
+  const [feedbackTypeFilter, setFeedbackTypeFilter] = useState<'all' | 'general' | 'bug' | 'partnership' | 'clan'>('all');
   
   const [editingNewsId, setEditingNewsId] = useState<string | null>(null);
   const [newsForm, setNewsForm] = useState<Partial<NewsItem>>({
@@ -234,13 +247,33 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
         apps.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         setVipApps(apps);
     });
+
+    const unsubFeedbacks = onSnapshot(collection(db, 'feedbacks'), (snapshot) => {
+        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FeedbackMessage));
+        items.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        setFeedbacks(items);
+    }, (err) => {
+        console.error("Feedbacks subscription error:", err);
+    });
     
     return () => {
         unsub();
         unsubVipApps();
+        unsubFeedbacks();
         clearInterval(statsInterval);
     };
   }, []);
+
+  const handleDeleteFeedback = async (id: string) => {
+    if (!confirm(lang === 'ru' ? 'Вы действительно хотите удалить это сообщение?' : 'Are you sure you want to delete this message?')) return;
+    try {
+      await deleteDoc(doc(db, 'feedbacks', id));
+      onToast(lang === 'ru' ? 'Сообщение удалено' : 'Feedback message deleted', 'success');
+    } catch (err) {
+      console.error("Delete feedback error:", err);
+      onToast(lang === 'ru' ? 'Ошибка при удалении' : 'Error deleting feedback', 'error');
+    }
+  };
 
   const handleClearChat = async () => {
     if (!confirm(lang === 'ru' ? 'Вы уверены, что хотите очистить ВЕСЬ чат? Это действие необратимо.' : 'Are you sure you want to clear the WHOLE chat? This action is irreversible.')) return;
@@ -1116,6 +1149,131 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
                     <div className="p-12 text-center text-zinc-600 font-mono text-xs uppercase space-y-2">
                         <Users size={32} className="mx-auto text-zinc-800" />
                         <div>{lang === 'ru' ? 'Пользователи не найдены' : 'No survivors found'}</div>
+                    </div>
+                )}
+            </div>
+        </div>
+ 
+        {/* Feedback Messages Management Section */}
+        <div className="lg:col-span-3 bg-[#14171e] border border-red-500/10 p-6 rounded-sm shadow-xl space-y-6 relative overflow-hidden">
+            <div className="absolute right-0 top-0 opacity-5">
+                <Mail size={120} />
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#2a2f3b]/60 pb-4 relative z-10 gap-4">
+                <div className="space-y-1">
+                    <h3 className="text-md font-black text-[#cd412b] flex items-center gap-2 uppercase tracking-widest">
+                        <Mail size={20} />
+                        {lang === 'ru' ? 'Сообщения обратной связи' : 'Feedback & Contact Messages'}
+                    </h3>
+                    <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider">
+                        {lang === 'ru' ? 'Получено из формы защищенной передачи данных' : 'Received from TRANSMIT MESSAGE SECURELY dispatch channel'}
+                    </p>
+                </div>
+                <div className="bg-red-500/10 border border-red-500/30 px-3 py-1 text-[10px] font-mono text-red-400 font-bold uppercase tracking-widest self-start sm:self-center">
+                    {feedbacks.length} {lang === 'ru' ? 'СООБЩЕНИЙ' : 'DISPATCHES'}
+                </div>
+            </div>
+
+            {/* Category Filter for Feedback */}
+            <div className="flex flex-wrap gap-1 bg-black/20 p-1 rounded-sm border border-zinc-900 relative z-10">
+                {(['all', 'general', 'bug', 'partnership', 'clan'] as const).map((filter) => {
+                    const labelMap = {
+                        all: lang === 'ru' ? 'Все' : 'All',
+                        general: lang === 'ru' ? 'Предложения' : 'Suggestions',
+                        bug: lang === 'ru' ? 'Баги' : 'Bugs',
+                        partnership: lang === 'ru' ? 'Сотрудничество' : 'Business',
+                        clan: lang === 'ru' ? 'Клан EAC' : 'Clan EAC'
+                    };
+                    const count = filter === 'all' 
+                        ? feedbacks.length 
+                        : feedbacks.filter(f => f.type === filter).length;
+                    const isActive = feedbackTypeFilter === filter;
+                    return (
+                        <button
+                            key={filter}
+                            onClick={() => setFeedbackTypeFilter(filter)}
+                            className={`flex-1 min-w-[100px] py-1.5 px-3 text-[10px] font-mono font-bold uppercase transition rounded-sm flex items-center justify-center gap-1.5 cursor-pointer ${
+                                isActive 
+                                    ? 'bg-red-600/20 text-[#cd412b] border border-red-500/30 font-black' 
+                                    : 'text-zinc-500 hover:text-zinc-350 hover:bg-white/5 border border-transparent'
+                            }`}
+                        >
+                            <span>{labelMap[filter]}</span>
+                            <span className={`px-1.5 py-0.5 rounded-full text-[8px] ${isActive ? 'bg-red-500/20 text-[#cd412b]' : 'bg-zinc-850 text-zinc-500'}`}>
+                                {count}
+                            </span>
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Messages Scroll Panel */}
+            <div className="border border-[#2a2f3b] bg-black/10 divide-y divide-[#2a2f3b]/60 overflow-y-auto max-h-[500px] rounded-sm custom-scrollbar relative z-10">
+                {feedbacks.filter(f => feedbackTypeFilter === 'all' || f.type === feedbackTypeFilter).length > 0 ? (
+                    feedbacks
+                        .filter(f => feedbackTypeFilter === 'all' || f.type === feedbackTypeFilter)
+                        .map((msg) => {
+                            const badgeColors: Record<string, string> = {
+                                general: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
+                                bug: 'bg-red-500/10 border-red-500/30 text-red-400',
+                                partnership: 'bg-amber-500/10 border-amber-500/30 text-amber-500',
+                                clan: 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                            };
+                            const typeLabels: Record<string, string> = {
+                                general: lang === 'ru' ? 'ПРЕДЛОЖЕНИЕ' : 'SUGGESTION',
+                                bug: lang === 'ru' ? 'БАГ-РЕПОРТ' : 'BUG REPORT',
+                                partnership: lang === 'ru' ? 'СОТРУДНИЧЕСТВО' : 'PARTNERSHIP',
+                                clan: lang === 'ru' ? 'ЗАЯВКА В EAC' : 'EAC CLAN'
+                            };
+                            return (
+                                <div key={msg.id} className="p-5 hover:bg-white/[0.01] transition space-y-4 font-mono">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#2a2f3b]/30 pb-3">
+                                        <div className="space-y-1">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className="font-bold text-zinc-200 text-sm">{msg.name}</span>
+                                                <span className={`px-2 py-0.5 border text-[8px] font-bold rounded uppercase tracking-wider ${badgeColors[msg.type] || 'bg-zinc-800 text-zinc-400 border-zinc-700'}`}>
+                                                    {typeLabels[msg.type] || msg.type.toUpperCase()}
+                                                </span>
+                                            </div>
+                                            <div className="text-[10px] text-zinc-500 flex flex-wrap items-center gap-x-4 gap-y-1">
+                                                <span>Email: <a href={`mailto:${msg.email}`} className="text-red-400/80 hover:underline">{msg.email}</a></span>
+                                                <span>UID: <span className="text-zinc-400 cursor-pointer hover:text-white" onClick={() => msg.userId !== 'anonymous' && setInspectUserId(msg.userId)}>{msg.userId}</span></span>
+                                            </div>
+                                        </div>
+                                        <div className="text-right flex flex-col items-end gap-1 shrink-0">
+                                            <span className="text-[9px] text-zinc-500">
+                                                {msg.createdAt?.seconds ? new Date(msg.createdAt.seconds * 1000).toLocaleString() : '...'}
+                                            </span>
+                                            <div className="flex gap-1.5 mt-1">
+                                                <a
+                                                    href={`mailto:${msg.email}?subject=RustHub Response&body=Hello ${msg.name},\n\n`}
+                                                    className="px-2 py-1 bg-zinc-800 border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-700 text-[9px] text-zinc-300 font-bold uppercase transition rounded-sm flex items-center gap-1"
+                                                >
+                                                    <Send size={10} />
+                                                    <span>{lang === 'ru' ? 'Ответить' : 'Reply'}</span>
+                                                </a>
+                                                <button
+                                                    onClick={() => handleDeleteFeedback(msg.id)}
+                                                    className="px-2 py-1 bg-red-600/10 border border-red-500/20 hover:border-red-500 hover:bg-red-600 hover:text-white text-[9px] text-red-500 font-bold uppercase transition rounded-sm flex items-center gap-1 cursor-pointer"
+                                                >
+                                                    <Trash2 size={10} />
+                                                    <span>{lang === 'ru' ? 'Удалить' : 'Delete'}</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-black/35 border border-[#2a2f3b]/50 p-4 rounded-sm">
+                                        <p className="text-xs text-zinc-350 whitespace-pre-wrap leading-relaxed select-text select-all">
+                                            {msg.message}
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        })
+                ) : (
+                    <div className="p-16 text-center text-zinc-650 font-mono text-xs uppercase space-y-2">
+                        <Mail size={32} className="mx-auto text-zinc-800" />
+                        <div>{lang === 'ru' ? 'Сообщения обратной связи отсутствуют' : 'No feedback dispatches logged'}</div>
                     </div>
                 )}
             </div>

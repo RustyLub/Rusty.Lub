@@ -713,3 +713,25 @@
 [2026-07-06T23:17:31.617Z] Firebase Admin: Firestore instance obtained
 [2026-07-06T23:17:31.618Z] Firebase Admin: Getting Auth instance
 [2026-07-06T23:17:31.619Z] Firebase Admin: Auth instance obtained
+[2026-07-07T06:01:50.867Z] Firebase Admin: Starting initialization
+[2026-07-07T06:01:50.867Z] Firebase Admin: CWD: /app/applet
+[2026-07-07T06:01:50.867Z] Firebase Admin: Config Path: /app/applet/firebase-applet-config.json
+[2026-07-07T06:01:50.867Z] Firebase Admin: Config loaded for project: psychic-origin-5kpr3
+[2026-07-07T06:01:50.867Z] Firebase Admin: Database ID: ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59
+[2026-07-07T06:01:50.867Z] Firebase Admin: Initializing with Application Default Credentials
+[2026-07-07T06:01:50.868Z] Firebase Admin: initializeApp called successfully. Project ID: psychic-origin-5kpr3
+[2026-07-07T06:01:50.868Z] Firebase Admin: Getting Firestore instance for database: ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59
+[2026-07-07T06:01:50.872Z] Firebase Admin: Firestore instance obtained
+[2026-07-07T06:01:50.872Z] Firebase Admin: Getting Auth instance
+[2026-07-07T06:01:50.874Z] Firebase Admin: Auth instance obtained
+[2026-07-07T06:04:05.728Z] Firebase Admin: Starting initialization
+[2026-07-07T06:04:05.728Z] Firebase Admin: CWD: /app/applet
+[2026-07-07T06:04:05.728Z] Firebase Admin: Config Path: /app/applet/firebase-applet-config.json
+[2026-07-07T06:04:05.728Z] Firebase Admin: Config loaded for project: psychic-origin-5kpr3
+[2026-07-07T06:04:05.728Z] Firebase Admin: Database ID: ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59
+[2026-07-07T06:04:05.729Z] Firebase Admin: Initializing with Application Default Credentials
+[2026-07-07T06:04:05.729Z] Firebase Admin: initializeApp called successfully. Project ID: psychic-origin-5kpr3
+[2026-07-07T06:04:05.729Z] Firebase Admin: Getting Firestore instance for database: ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59
+[2026-07-07T06:04:05.734Z] Firebase Admin: Firestore instance obtained
+[2026-07-07T06:04:05.734Z] Firebase Admin: Getting Auth instance
+[2026-07-07T06:04:05.736Z] Firebase Admin: Auth instance obtained

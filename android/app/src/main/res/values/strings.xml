@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">RustyLub</string>
+    <string name="title_activity_main">RustyLub</string>
+    <string name="package_name">com.rustylub.app</string>
+    <string name="custom_url_scheme">com.rustylub.app</string>
+</resources>

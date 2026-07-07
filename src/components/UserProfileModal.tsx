@@ -104,14 +104,14 @@ export const BADGES: BadgeInfo[] = [
 ];
 
 export const PROFILE_THEMES = [
-  { id: 'slate', name: { ru: 'Угольный Сланец', en: 'Charcoal Slate' }, class: 'bg-gradient-to-br from-[#0c0d10] to-[#14171e]' },
-  { id: 'vip_gold', name: { ru: 'Золотая Элита (VIP)', en: 'Gold Elite (VIP)' }, class: 'bg-gradient-to-br from-[#1a1505] to-[#2b2408] border-amber-500/50 shadow-[inset_0_0_20px_rgba(245,158,11,0.1)]' },
-  { id: 'vip_nebula', name: { ru: 'Космическая Туманность (VIP)', en: 'Cosmic Nebula (VIP)' }, class: 'bg-gradient-to-br from-[#0a051a] to-[#1a082b] border-purple-500/50 shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]' },
-  { id: 'radiation', name: { ru: 'Зона Радиации', en: 'Radiation Zone' }, class: 'bg-gradient-to-br from-[#1a1505] to-[#261e08] border-yellow-500/30' },
-  { id: 'outpost', name: { ru: 'Аванпост', en: 'Outpost' }, class: 'bg-gradient-to-br from-[#051a10] to-[#082618] border-emerald-500/30' },
-  { id: 'bandit', name: { ru: 'Лагерь Бандитов', en: 'Bandit Camp' }, class: 'bg-gradient-to-br from-[#1a0f05] to-[#261508] border-amber-500/30' },
-  { id: 'wasteland', name: { ru: 'Красная Пустошь', en: 'Red Wasteland' }, class: 'bg-gradient-to-br from-[#1c0505] to-[#2a0808] border-red-500/30' },
-  { id: 'arctic', name: { ru: 'Полярная Станция', en: 'Arctic Outpost' }, class: 'bg-gradient-to-br from-[#05181a] to-[#082326] border-cyan-500/30' }
+  { id: 'slate', name: { ru: 'Угольный Сланец', en: 'Charcoal Slate' }, class: 'bg-gradient-to-br from-[#0c0d10]/40 to-[#14171e]/45' },
+  { id: 'vip_gold', name: { ru: 'Золотая Элита (VIP)', en: 'Gold Elite (VIP)' }, class: 'bg-gradient-to-br from-[#1a1505]/40 to-[#2b2408]/45 border-amber-500/50 shadow-[inset_0_0_20px_rgba(245,158,11,0.15)]' },
+  { id: 'vip_nebula', name: { ru: 'Космическая Туманность (VIP)', en: 'Cosmic Nebula (VIP)' }, class: 'bg-gradient-to-br from-[#0a051a]/40 to-[#1a082b]/45 border-purple-500/50 shadow-[inset_0_0_20px_rgba(168,85,247,0.15)]' },
+  { id: 'radiation', name: { ru: 'Зона Радиации', en: 'Radiation Zone' }, class: 'bg-gradient-to-br from-[#1a1505]/40 to-[#261e08]/45 border-yellow-500/30' },
+  { id: 'outpost', name: { ru: 'Аванпост', en: 'Outpost' }, class: 'bg-gradient-to-br from-[#051a10]/40 to-[#082618]/45 border-emerald-500/30' },
+  { id: 'bandit', name: { ru: 'Лагерь Бандитов', en: 'Bandit Camp' }, class: 'bg-gradient-to-br from-[#1a0f05]/40 to-[#261508]/45 border-amber-500/30' },
+  { id: 'wasteland', name: { ru: 'Красная Пустошь', en: 'Red Wasteland' }, class: 'bg-gradient-to-br from-[#1c0505]/40 to-[#2a0808]/45 border-red-500/30' },
+  { id: 'arctic', name: { ru: 'Полярная Станция', en: 'Arctic Outpost' }, class: 'bg-gradient-to-br from-[#05181a]/40 to-[#082326]/45 border-cyan-500/30' }
 ];
 
 interface UserProfileModalProps {
@@ -357,21 +357,21 @@ export default function UserProfileModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className={`w-full max-w-2xl border-2 rounded-none overflow-hidden shadow-2xl relative flex flex-col p-0 rust-metal-pattern keep-dark ${vipBorder('border-[#2a2f3b]', 'border-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.25)]')} ${selectedTheme.class} transition-shadow duration-500 ${isTargetVipSub ? 'hover:shadow-[0_0_40px_rgba(245,158,11,0.4)] hover:border-amber-400' : ''}`}
+        className={`w-full max-w-2xl border-2 backdrop-blur-md rounded-none overflow-hidden shadow-2xl relative flex flex-col p-0 rust-metal-pattern keep-dark ${vipBorder('border-[#2a2f3b]', 'border-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.25)]')} ${selectedTheme.class} transition-shadow duration-500 ${isTargetVipSub ? 'hover:shadow-[0_0_40px_rgba(245,158,11,0.4)] hover:border-amber-400' : ''}`}
         whileHover={isTargetVipSub ? { y: -2, scale: 1.002 } : {}}
       >
         {targetUser?.customBackground && (
-          <img referrerPolicy="no-referrer" src={targetUser.customBackground} alt="Background" className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-100" />
+          <img referrerPolicy="no-referrer" src={targetUser.customBackground} alt="Background" className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-[0.70]" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0c0d10]/40 to-[#14171e]/90 pointer-events-none" style={{ zIndex: 0 }} />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/70 pointer-events-none" style={{ zIndex: 0 }} />
 
         {/* Sleek Tactical Header Bar */}
-        <div className={`bg-black/20 backdrop-blur-sm border-b px-4 py-2 flex items-center justify-between text-[9px] font-mono tracking-widest select-none relative z-10 ${vipBorder('border-[#2a2f3b] text-zinc-400', 'border-amber-500/60 text-amber-400')}`}>
+        <div className={`bg-black/0 backdrop-blur-sm border-b px-4 py-2 flex items-center justify-between text-[9px] font-mono tracking-widest select-none relative z-10 ${vipBorder('border-[#2a2f3b] text-zinc-400', 'border-amber-500/60 text-amber-400')}`}>
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isTargetVipSub ? 'bg-amber-400' : 'bg-red-500'}`}></span>
@@ -399,7 +399,7 @@ export default function UserProfileModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-10 right-4 text-zinc-400 hover:text-white transition-colors cursor-pointer z-20 bg-black/20 p-1.5 border border-[#2a2f3b]/60 hover:border-zinc-500"
+          className="absolute top-10 right-4 text-zinc-400 hover:text-white transition-colors cursor-pointer z-20 bg-black/0 p-1.5 border border-[#2a2f3b]/60 hover:border-zinc-500"
         >
           <X size={16} />
         </button>
@@ -609,7 +609,7 @@ export default function UserProfileModal({
                   </div>
 
                   {/* Character Suit Spec Description */}
-                  <div className={`bg-black/20 backdrop-blur-sm border p-3 text-left ${vipBorder('border-[#2a2f3b]', 'border-amber-500/40')}`}>
+                  <div className={`bg-black/0 backdrop-blur-sm border p-3 text-left ${vipBorder('border-[#2a2f3b]', 'border-amber-500/40')}`}>
                     <span className="text-[7.5px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">
                       {lang === 'ru' ? 'СПЕЦИФИКАЦИЯ ЭКИПИРОВАННОГО КОСТЮМА' : 'EQUIPPED SKIN SPECIFICATION'}
                     </span>
@@ -626,7 +626,7 @@ export default function UserProfileModal({
                 </div>
 
                 {/* Personal Telex Log (Bio text area) */}
-                <div className={`bg-black/20 backdrop-blur-sm border p-3.5 text-left relative overflow-hidden ${vipBorder('border-[#2a2f3b]/50', 'border-amber-500/30')}`}>
+                <div className={`bg-black/0 backdrop-blur-sm border p-3.5 text-left relative overflow-hidden ${vipBorder('border-[#2a2f3b]/50', 'border-amber-500/30')}`}>
                   <div className="absolute top-0 right-0 p-1 text-[7px] font-mono text-zinc-600 uppercase">SYS_LOG_V2</div>
                   <span className={`text-[8px] font-mono block uppercase tracking-wider mb-1.5 border-b border-zinc-900 pb-1 ${vipBorder('text-[#cd412b]', 'text-amber-400')}`}>
                     {lang === 'ru' ? 'РАДИОФОННЫЙ ЖУРНАЛ' : 'DECRYPTED TRANSMISSION LOG'}
@@ -652,19 +652,19 @@ export default function UserProfileModal({
 
             {/* Survivor Stats Cards - Clean grid */}
             <div className="grid grid-cols-3 gap-2">
-              <div className={`bg-black/20 border p-3 text-center ${vipBorder('border-[#2a2f3b]/40', 'border-amber-500/40')}`}>
+              <div className={`bg-black/0 border p-3 text-center ${vipBorder('border-[#2a2f3b]/40', 'border-amber-500/40')}`}>
                 <span className="text-[7.5px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ЧАСЫ В ИГРЕ' : 'RUST STATISTICS'}</span>
                 <span className="text-sm font-black font-mono text-zinc-100 mt-1 block">
                   {targetUser.hoursPlayed?.toLocaleString() || 0} H
                 </span>
               </div>
-              <div className={`bg-black/20 border p-3 text-center ${vipBorder('border-[#2a2f3b]/40', 'border-amber-500/40')}`}>
+              <div className={`bg-black/0 border p-3 text-center ${vipBorder('border-[#2a2f3b]/40', 'border-amber-500/40')}`}>
                 <span className="text-[7.5px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ОРУЖИЕ ВЫБОРА' : 'EQUIPPED WEAPON'}</span>
                 <span className={`text-xs font-bold font-mono mt-1 block truncate ${isTargetVipSub ? 'text-amber-400' : 'text-[#cd412b]'}`}>
                   {targetUser.favoriteWeapon || 'AK-47'}
                 </span>
               </div>
-              <div className={`bg-black/20 border p-3 text-center ${vipBorder('border-[#2a2f3b]/40', 'border-amber-500/40')}`}>
+              <div className={`bg-black/0 border p-3 text-center ${vipBorder('border-[#2a2f3b]/40', 'border-amber-500/40')}`}>
                 <span className="text-[7.5px] text-zinc-500 font-mono block uppercase">{lang === 'ru' ? 'ТАКТИКА БОЯ' : 'PLAYSTYLE TACTICS'}</span>
                 <span className="text-xs font-bold font-mono text-zinc-200 mt-1 block truncate">
                   {targetUser.playstyle || 'Solo'}
@@ -843,7 +843,7 @@ export default function UserProfileModal({
                   className={`flex items-center justify-between p-2 text-[10px] font-mono border ${
                     targetUser.notifications?.news 
                       ? 'bg-emerald-900/20 border-emerald-500/30' 
-                      : vipBorder('bg-black/20 border-zinc-800', 'bg-black/20 border-amber-500/30')
+                      : vipBorder('bg-black/0 border-zinc-800', 'bg-black/0 border-amber-500/30')
                   }`}
                 >
                   <span>{lang === 'ru' ? 'Новости' : 'News'}</span>
@@ -862,7 +862,7 @@ export default function UserProfileModal({
                   className={`flex items-center justify-between p-2 text-[10px] font-mono border ${
                     targetUser.notifications?.streams 
                       ? 'bg-emerald-900/20 border-emerald-500/30' 
-                      : vipBorder('bg-black/20 border-zinc-800', 'bg-black/20 border-amber-500/30')
+                      : vipBorder('bg-black/0 border-zinc-800', 'bg-black/0 border-amber-500/30')
                   }`}
                 >
                   <span>{lang === 'ru' ? 'Стримы' : 'Streams'}</span>
@@ -871,12 +871,60 @@ export default function UserProfileModal({
               </div>
             </div>
 
+            {/* Feedback & Contacts Section */}
+            <div className={`space-y-2 pt-4 border-t ${vipBorder('border-[#2a2f3b]', 'border-amber-500/30')}`}>
+              <span className="text-[9px] font-mono text-zinc-500 block uppercase tracking-wider">
+                {lang === 'ru' ? 'ОБРАТНАЯ СВЯЗЬ / КОНТАКТЫ' : 'FEEDBACK / CONTACTS'}
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {/* Email Contact */}
+                <div className={`flex items-center justify-between p-2.5 text-[10px] font-mono border bg-black/10 ${vipBorder('border-[#2a2f3b]/50', 'border-amber-500/30')}`}>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-sm">📧</span>
+                    <div className="min-w-0">
+                      <span className="block text-[7px] text-zinc-500 uppercase leading-none">{lang === 'ru' ? 'ПОЧТА' : 'EMAIL'}</span>
+                      <span className="block text-[9.5px] text-zinc-300 font-mono mt-1 select-all truncate">rusty.lub_offers@bk.ru</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText('rusty.lub_offers@bk.ru');
+                      onToast(lang === 'ru' ? 'Почта скопирована в буфер!' : 'Email copied to clipboard!', 'success');
+                    }}
+                    className={`shrink-0 p-1 border border-zinc-800 hover:border-zinc-500 text-zinc-400 hover:text-white transition-colors cursor-pointer text-[7.5px] uppercase font-mono tracking-widest px-2`}
+                  >
+                    {lang === 'ru' ? 'КОПИРОВАТЬ' : 'COPY'}
+                  </button>
+                </div>
+
+                {/* Discord Contact */}
+                <div className={`flex items-center justify-between p-2.5 text-[10px] font-mono border bg-black/10 ${vipBorder('border-[#2a2f3b]/50', 'border-amber-500/30')}`}>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-sm">💬</span>
+                    <div className="min-w-0">
+                      <span className="block text-[7px] text-zinc-500 uppercase leading-none">DISCORD</span>
+                      <span className="block text-[9.5px] text-zinc-300 font-mono mt-1 select-all truncate">eaccheater</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText('eaccheater');
+                      onToast(lang === 'ru' ? 'Никнейм Discord скопирован в буфер!' : 'Discord username copied to clipboard!', 'success');
+                    }}
+                    className={`shrink-0 p-1 border border-zinc-800 hover:border-zinc-500 text-zinc-400 hover:text-white transition-colors cursor-pointer text-[7.5px] uppercase font-mono tracking-widest px-2`}
+                  >
+                    {lang === 'ru' ? 'КОПИРОВАТЬ' : 'COPY'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Friends List inside Inspector */}
             <div className="space-y-1.5">
               <span className="text-[9px] font-mono text-zinc-500 block uppercase tracking-wider">
                 {lang === 'ru' ? 'ДРУЗЬЯ ВЫЖИВШЕГО' : 'SURVIVOR CONTACTS'}
               </span>
-              <div className={`flex flex-wrap gap-1 bg-black/20 p-2 border ${vipBorder('border-zinc-800/40', 'border-amber-500/30')}`}>
+              <div className={`flex flex-wrap gap-1 bg-black/0 p-2 border ${vipBorder('border-zinc-800/40', 'border-amber-500/30')}`}>
                 {targetUser.friends && targetUser.friends.length > 0 ? (
                   targetUser.friends.map((fUid) => (
                     <span key={fUid} className={`text-[9px] font-mono bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-300 px-2 py-0.5 rounded-sm border uppercase ${vipBorder('border-zinc-700/35', 'border-amber-500/30')}`}>

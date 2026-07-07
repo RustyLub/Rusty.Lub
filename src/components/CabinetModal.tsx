@@ -34,7 +34,8 @@ import {
   ExternalLink,
   RefreshCw,
   Lock,
-  ShieldAlert
+  ShieldAlert,
+  Mail
 } from 'lucide-react';
 import { 
   doc, 
@@ -55,6 +56,7 @@ import {
 import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 import { CustomUser } from '../types';
 import UserProfileModal, { BADGES, PROFILE_THEMES } from './UserProfileModal';
+import FeedbackTab from './FeedbackTab';
 
 interface CabinetModalProps {
   isOpen: boolean;
@@ -92,7 +94,7 @@ export default function CabinetModal({
   onAvatarChange, 
   onToast 
 }: CabinetModalProps) {
-  const [activeTab, setActiveTab] = useState<'profile' | 'friends' | 'admin_users' | 'admin_site' | 'vip'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'friends' | 'admin_users' | 'admin_site' | 'vip' | 'feedback'>('profile');
   
   // USDT TRC20 Payment states
   const [usdtTxId, setUsdtTxId] = useState('');
@@ -854,6 +856,18 @@ export default function CabinetModal({
                 )}
               </button>
 
+              <button
+                onClick={() => setActiveTab('feedback')}
+                className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
+                  activeTab === 'feedback'
+                    ? 'bg-[#cd412b]/10 border-[#cd412b]/40 text-[#cd412b] font-black'
+                    : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Mail size={13} />
+                <span>{lang === 'ru' ? 'Обратная связь' : 'Feedback & Contacts'}</span>
+              </button>
+
               {isAdmin && (
                 <>
                   <div className="pt-2 text-[8px] font-mono font-black text-gray-500 uppercase tracking-widest pl-3">
@@ -1122,6 +1136,56 @@ export default function CabinetModal({
                             <Save size={14} />
                             <span>{isSavingProfile ? (lang === 'ru' ? 'ОБНОВЛЕНИЕ БИОСИСТЕМЫ...' : 'TRANSMITTING CODES...') : (lang === 'ru' ? 'СОХРАНИТЬ ПАРАМЕТРЫ ПРОФИЛЯ' : 'SAVE PROFILE PARAMETERS')}</span>
                           </button>
+
+                          {/* Feedback & Contacts Section */}
+                          <div className="space-y-2 pt-4 border-t border-[#2a2f3b]/60">
+                            <span className="text-[9px] font-mono text-zinc-500 block uppercase tracking-wider">
+                              {lang === 'ru' ? 'ОБРАТНАЯ СВЯЗЬ / КОНТАКТЫ' : 'FEEDBACK / CONTACTS'}
+                            </span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {/* Email Contact */}
+                              <div className="flex items-center justify-between p-2.5 text-[10px] font-mono border border-zinc-800 bg-black/10">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className="text-sm">📧</span>
+                                  <div className="min-w-0">
+                                    <span className="block text-[7px] text-zinc-500 uppercase leading-none">{lang === 'ru' ? 'ПОЧТА' : 'EMAIL'}</span>
+                                    <span className="block text-[9.5px] text-zinc-300 font-mono mt-1 select-all truncate">rusty.lub_offers@bk.ru</span>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText('rusty.lub_offers@bk.ru');
+                                    onToast(lang === 'ru' ? 'Почта скопирована в буфер!' : 'Email copied to clipboard!', 'success');
+                                  }}
+                                  className="shrink-0 p-1 border border-zinc-800 hover:border-zinc-500 text-zinc-400 hover:text-white transition-colors cursor-pointer text-[7.5px] uppercase font-mono tracking-widest px-2"
+                                >
+                                  {lang === 'ru' ? 'КОПИРОВАТЬ' : 'COPY'}
+                                </button>
+                              </div>
+
+                              {/* Discord Contact */}
+                              <div className="flex items-center justify-between p-2.5 text-[10px] font-mono border border-zinc-800 bg-black/10">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className="text-sm">💬</span>
+                                  <div className="min-w-0">
+                                    <span className="block text-[7px] text-zinc-500 uppercase leading-none">DISCORD</span>
+                                    <span className="block text-[9.5px] text-zinc-300 font-mono mt-1 select-all truncate">eaccheater</span>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText('eaccheater');
+                                    onToast(lang === 'ru' ? 'Никнейм Discord скопирован в буфер!' : 'Discord username copied to clipboard!', 'success');
+                                  }}
+                                  className="shrink-0 p-1 border border-zinc-800 hover:border-zinc-500 text-zinc-400 hover:text-white transition-colors cursor-pointer text-[7.5px] uppercase font-mono tracking-widest px-2"
+                                >
+                                  {lang === 'ru' ? 'КОПИРОВАТЬ' : 'COPY'}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </motion.div>
                       )}
 
@@ -2131,6 +2195,23 @@ export default function CabinetModal({
                     </div>
                   </div>
                 </div>
+              </motion.div>
+            )}
+
+            {/* FEEDBACK TAB */}
+            {activeTab === 'feedback' && (
+              <motion.div
+                key="feedback"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="space-y-6"
+              >
+                <FeedbackTab
+                  lang={lang}
+                  user={user}
+                  onToast={onToast}
+                />
               </motion.div>
             )}
 
