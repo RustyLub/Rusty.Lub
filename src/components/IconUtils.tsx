@@ -1,7 +1,24 @@
 import { useState } from 'react';
 import fandomIcons from './fandom_icons.json';
 
+const LOCAL_ITEMS = new Set([
+  'ak47', 'lr300', 'mp5', 'thompson', 'custom', 'sar', 'hmlmg', 'm249', 'bolt',
+  'pump_shotgun', 'm92', 'python', 'sap', 'revolver', 'm16a2', 'crossbow',
+  'm39', 'l96', 'double_barrel', 'waterpipe', 'spas12',
+  'c4', 'rocket', 'satchel', 'explosive_ammo', 'beancan',
+  'high_stone_wall', 'high_wood_wall', 'wood_door', 'sheet_door', 'garage_door', 
+  'armored_door', 'armored_hatch', 'tc', 'auto_turret', 'guntrap', 'flametrap',
+  'wood_wall', 'stone_wall', 'sheet_wall', 'armored_wall',
+  'scrap', 'metal_fragments', 'high_quality_metal', 'cloth', 'leather', 'rope', 
+  'wood', 'gears', 'metal_pipe', 'sewing_kit', 'sheet_metal', 'road_signs', 
+  'tech_trash', 'metal_blade', 'tarp', 'propane_tank', 'metal_spring', 
+  'smg_body', 'semi_body', 'rifle_body', 'fuse', 'large_battery'
+]);
+
 export const getRustLabsIconUrl = (id: string): string => {
+  if (LOCAL_ITEMS.has(id)) {
+    return new URL(`../assets/images/${id}.webp`, import.meta.url).href;
+  }
   return (fandomIcons as Record<string, string>)[id] || `https://wiki.rustclash.com/img/items180/${id}.png`;
 };
 

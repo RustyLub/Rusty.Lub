@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { doc, updateDoc, collection, onSnapshot, deleteDoc, serverTimestamp, getDoc, setDoc, addDoc, getCountFromServer, writeBatch, query, limit, getDocs, where } from 'firebase/firestore';
 import { ShieldCheck, Send, Search, Crown, Star, Ban, Trash2, Users, Settings, Megaphone, EyeOff, Tv, PlusCircle, Activity, MessageSquare, AlertTriangle, ShieldAlert, IdCard, List, BarChart3, Wallet, Clock, Check, X, Mail } from 'lucide-react';
-import { CustomUser, NewsItem, VipApplication } from '../types';
+import { CustomUser, NewsItem, VipApplication, APP_VERSION } from '../types';
 import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 import UserProfileModal from './UserProfileModal';
 
@@ -298,21 +298,24 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
   };
 
   const [vipManagerUserId, setVipManagerUserId] = useState<string | null>(null);
+  const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'vip' | 'feedback' | 'news' | 'survivors'>('dashboard');
 
-  const filteredUsers = registeredUsers.filter(u => {
-    const matchesSearch = u.displayName.toLowerCase().includes(userSearch.toLowerCase()) || 
-      (u.username && u.username.toLowerCase().includes(userSearch.toLowerCase())) ||
-      u.id.toLowerCase().includes(userSearch.toLowerCase());
-    
-    if (!matchesSearch) return false;
-    
-    if (userTypeFilter === 'admins') return u.role === 'admin';
-    if (userTypeFilter === 'vips') return u.isVip;
-    if (userTypeFilter === 'banned') return u.isBlocked;
-    if (userTypeFilter === 'deletions') return !!u.deletionRequested;
-    
-    return true;
-  });
+  const filteredUsers = useMemo(() => {
+    return registeredUsers.filter(u => {
+      const matchesSearch = u.displayName.toLowerCase().includes(userSearch.toLowerCase()) || 
+        (u.username && u.username.toLowerCase().includes(userSearch.toLowerCase())) ||
+        u.id.toLowerCase().includes(userSearch.toLowerCase());
+      
+      if (!matchesSearch) return false;
+      
+      if (userTypeFilter === 'admins') return u.role === 'admin';
+      if (userTypeFilter === 'vips') return u.isVip;
+      if (userTypeFilter === 'banned') return u.isBlocked;
+      if (userTypeFilter === 'deletions') return !!u.deletionRequested;
+      
+      return true;
+    });
+  }, [registeredUsers, userSearch, userTypeFilter]);
 
   const handleToggleVip = (uid: string) => {
     setVipManagerUserId(prev => prev === uid ? null : uid);
@@ -647,222 +650,304 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
           </h2>
           <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
             <Activity size={12} className="text-emerald-500 animate-pulse" />
-            RustHub System Infrastructure · v2.4.0
+            RustHub System Infrastructure · {APP_VERSION}
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <button 
-            onClick={handleClearChat}
-            disabled={loading}
-            className="px-6 py-2.5 bg-red-600/10 border border-red-500/30 text-red-500 font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-red-600/20 transition-all flex items-center gap-2 rounded-sm disabled:opacity-50"
-          >
-            <Trash2 size={14} />
-            {lang === 'ru' ? 'ОЧИСТИТЬ ЧАТ' : 'CLEAR CHAT'}
-          </button>
-        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-[#14171e] border border-[#2a2f3b] p-8 rounded-sm shadow-2xl flex items-center gap-8 group hover:border-blue-500/30 transition-all relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Users size={80} />
-            </div>
-            <div className="p-5 bg-blue-500/10 rounded-sm text-blue-500 group-hover:scale-110 transition-transform duration-500">
-                <Users size={32} />
-            </div>
-            <div>
-                <div className="text-4xl font-black text-white font-mono tracking-tighter mb-1">{stats.users.toLocaleString()}</div>
-                <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">{lang === 'ru' ? 'Выживших зарегистрировано' : 'Total Survivors'}</div>
-            </div>
-        </div>
-        <div className="bg-[#14171e] border border-[#2a2f3b] p-8 rounded-sm shadow-2xl flex items-center gap-8 group hover:border-emerald-500/30 transition-all relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                <MessageSquare size={80} />
-            </div>
-            <div className="p-5 bg-emerald-500/10 rounded-sm text-emerald-500 group-hover:scale-110 transition-transform duration-500">
-                <MessageSquare size={32} />
-            </div>
-            <div>
-                <div className="text-4xl font-black text-white font-mono tracking-tighter mb-1">{stats.messages.toLocaleString()}</div>
-                <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">{lang === 'ru' ? 'Перехвачено сообщений' : 'Communications Logged'}</div>
-            </div>
-        </div>
-        <div className="bg-[#14171e] border border-[#2a2f3b] p-8 rounded-sm shadow-2xl flex items-center gap-8 group hover:border-purple-500/30 transition-all relative overflow-hidden sm:col-span-2 lg:col-span-1">
-            <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Megaphone size={80} />
-            </div>
-            <div className="p-5 bg-purple-500/10 rounded-sm text-purple-500 group-hover:scale-110 transition-transform duration-500">
-                <Megaphone size={32} />
-            </div>
-            <div>
-                <div className="text-4xl font-black text-white font-mono tracking-tighter mb-1">{stats.news.toLocaleString()}</div>
-                <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">{lang === 'ru' ? 'Новостных сводок' : 'Intelligence Briefings'}</div>
-            </div>
-        </div>
+      {/* Tactical Sub-navigation Menu */}
+      <div className="flex flex-wrap gap-1 bg-[#14171e]/60 p-1.5 rounded-sm border border-[#2a2f3b] overflow-x-auto custom-scrollbar relative z-10">
+        {[
+          { id: 'dashboard', label_ru: 'Панель', label_en: 'Dashboard', icon: BarChart3 },
+          { id: 'vip', label_ru: 'VIP Заявки', label_en: 'VIP Apps', icon: Crown, badge: vipApps.filter(a => a.status === 'pending').length },
+          { id: 'feedback', label_ru: 'Обратная связь', label_en: 'Feedback', icon: Mail, badge: feedbacks.length },
+          { id: 'news', label_ru: 'Новости', label_en: 'News Hub', icon: Megaphone },
+          { id: 'survivors', label_ru: 'Выжившие', label_en: 'Survivors', icon: Users, badge: registeredUsers.length }
+        ].map(tab => {
+          const Icon = tab.icon;
+          const isActive = activeSubTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSubTab(tab.id as any)}
+              className={`flex items-center gap-2 px-4 py-2.5 text-xs font-mono font-bold uppercase tracking-wider rounded-sm transition-all cursor-pointer whitespace-nowrap ${
+                isActive
+                  ? 'bg-[#cd412b]/15 text-[#cd412b] border border-[#cd412b]/30 font-extrabold shadow-[inset_0_0_15px_rgba(205,65,43,0.08)]'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.02] border border-transparent'
+              }`}
+            >
+              <Icon size={14} className={isActive ? 'text-[#cd412b]' : 'text-zinc-500'} />
+              <span>{lang === 'ru' ? tab.label_ru : tab.label_en}</span>
+              {tab.badge !== undefined && tab.badge > 0 && (
+                <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-sans font-black ${
+                  isActive 
+                    ? 'bg-[#cd412b]/20 text-[#cd412b]' 
+                    : tab.id === 'vip' ? 'bg-amber-500/15 text-amber-500' :
+                      tab.id === 'feedback' ? 'bg-red-500/15 text-red-500' :
+                      'bg-zinc-800 text-zinc-500'
+                }`}>
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Global Settings */}
-        <div className="space-y-6">
-            {/* Announcement Controller */}
-            <form onSubmit={handleSaveSiteSettings} className="bg-[#14171e] border border-[#2a2f3b] p-6 rounded-sm shadow-xl space-y-4">
-                <h3 className="text-md font-bold text-gray-200 flex items-center gap-2">
-                    <Megaphone size={18} className="text-[#cd412b]" />
-                    {lang === 'ru' ? 'Оповещение' : 'Announcement'}
-                </h3>
-                <textarea
-                value={announcementText}
-                onChange={(e) => setAnnouncementText(e.target.value)}
-                className="w-full bg-black/40 border border-zinc-800 p-3 text-sm font-mono text-white rounded-sm"
-                placeholder={lang === 'ru' ? 'Текст объявления...' : 'Announcement text...'}
-                rows={3}
-                />
-                <div className="flex flex-wrap gap-2">
-                {(['info', 'hazard', 'important'] as const).map(type => (
-                    <button
-                    key={type}
-                    type="button"
-                    onClick={() => setAnnouncementType(type)}
-                    className={`px-3 py-1 text-[10px] font-mono border ${announcementType === type ? 'bg-[#cd412b] border-[#cd412b]' : 'bg-black/40 border-zinc-800'}`}
-                    >
-                    {type.toUpperCase()}
-                    </button>
-                ))}
-                <label className="flex items-center gap-2 text-xs text-white bg-black/40 border border-zinc-800 px-3 py-1">
-                    <input type="checkbox" checked={announcementActive} onChange={e => setAnnouncementActive(e.target.checked)} />
-                    Active
-                </label>
+      {activeSubTab === 'dashboard' && (
+        <div className="space-y-8 animate-in fade-in duration-300">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-[#14171e] border border-[#2a2f3b] p-8 rounded-sm shadow-2xl flex items-center gap-8 group hover:border-blue-500/30 transition-all relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <Users size={80} />
                 </div>
-                <button type="submit" disabled={loading} className="w-full px-4 py-2 bg-[#cd412b] text-white text-xs font-bold uppercase tracking-widest font-mono cursor-pointer hover:bg-red-700 transition">
-                    {lang === 'ru' ? 'Сохранить настройки сайта' : 'Save Site Settings'}
-                </button>
-            </form>
-
-            {/* Spoiler Controller */}
-            <div className="bg-[#14171e] border border-[#2a2f3b] p-6 rounded-sm shadow-xl flex items-center justify-between">
-                <div className='flex items-center gap-3'>
-                    <EyeOff size={20} className="text-emerald-500" />
-                    <h3 className="text-md font-bold text-gray-200">{lang === 'ru' ? 'Спойлер "Jungle Fever"' : 'Jungle Fever Spoiler'}</h3>
+                <div className="p-5 bg-blue-500/10 rounded-sm text-blue-500 group-hover:scale-110 transition-transform duration-500">
+                    <Users size={32} />
                 </div>
-                <button
-                    onClick={handleToggleSpoiler}
-                    className={`px-4 py-1.5 text-[10px] font-mono font-bold uppercase border cursor-pointer transition-colors ${
-                        jungleFeverSpoiler 
-                            ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400' 
-                            : 'bg-red-500/10 border-red-500/40 text-red-400'
-                    }`}
-                >
-                    {jungleFeverSpoiler ? (lang === 'ru' ? 'Включен' : 'Enabled') : (lang === 'ru' ? 'Отключен' : 'Disabled')}
-                </button>
+                <div>
+                    <div className="text-4xl font-black text-white font-mono tracking-tighter mb-1">{stats.users.toLocaleString()}</div>
+                    <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">{lang === 'ru' ? 'Выживших зарегистрировано' : 'Total Survivors'}</div>
+                </div>
             </div>
-        </div>
+            <div className="bg-[#14171e] border border-[#2a2f3b] p-8 rounded-sm shadow-2xl flex items-center gap-8 group hover:border-emerald-500/30 transition-all relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <MessageSquare size={80} />
+                </div>
+                <div className="p-5 bg-emerald-500/10 rounded-sm text-emerald-500 group-hover:scale-110 transition-transform duration-500">
+                    <MessageSquare size={32} />
+                </div>
+                <div>
+                    <div className="text-4xl font-black text-white font-mono tracking-tighter mb-1">{stats.messages.toLocaleString()}</div>
+                    <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">{lang === 'ru' ? 'Перехвачено сообщений' : 'Communications Logged'}</div>
+                </div>
+            </div>
+            <div className="bg-[#14171e] border border-[#2a2f3b] p-8 rounded-sm shadow-2xl flex items-center gap-8 group hover:border-purple-500/30 transition-all relative overflow-hidden sm:col-span-2 lg:col-span-1">
+                <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <Megaphone size={80} />
+                </div>
+                <div className="p-5 bg-purple-500/10 rounded-sm text-purple-500 group-hover:scale-110 transition-transform duration-500">
+                    <Megaphone size={32} />
+                </div>
+                <div>
+                    <div className="text-4xl font-black text-white font-mono tracking-tighter mb-1">{stats.news.toLocaleString()}</div>
+                    <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">{lang === 'ru' ? 'Новостных сводок' : 'Intelligence Briefings'}</div>
+                </div>
+            </div>
+          </div>
 
-        {/* VIP Applications Management */}
-        <div className="lg:col-span-3 bg-[#14171e] border border-amber-500/20 p-6 rounded-sm shadow-xl space-y-6 relative overflow-hidden">
-            <div className="absolute right-0 top-0 opacity-5">
-                <Crown size={120} />
-            </div>
-            <div className="flex items-center justify-between border-b border-[#2a2f3b]/60 pb-4 relative z-10">
-                <div className="space-y-1">
-                    <h3 className="text-md font-black text-amber-500 flex items-center gap-2 uppercase tracking-widest">
-                        <Crown size={20} />
-                        {lang === 'ru' ? 'Заявки на VIP подписку' : 'VIP Subscription Applications'}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Global Settings */}
+            <div className="space-y-6 lg:col-span-1">
+                {/* Announcement Controller */}
+                <form onSubmit={handleSaveSiteSettings} className="bg-[#14171e] border border-[#2a2f3b] p-6 rounded-sm shadow-xl space-y-4">
+                    <h3 className="text-md font-bold text-gray-200 flex items-center gap-2">
+                        <Megaphone size={18} className="text-[#cd412b]" />
+                        {lang === 'ru' ? 'Оповещение' : 'Announcement'}
                     </h3>
-                    <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider">
-                        {lang === 'ru' ? 'Рассмотрение заявок через DonationAlerts и USDT' : 'Reviewing DonationAlerts and USDT manual claims'}
-                    </p>
-                </div>
-                <div className="bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-[10px] font-mono text-amber-400 font-bold uppercase tracking-widest">
-                    {vipApps.filter(a => a.status === 'pending').length} {lang === 'ru' ? 'В ОЖИДАНИИ' : 'PENDING'}
+                    <textarea
+                    value={announcementText}
+                    onChange={(e) => setAnnouncementText(e.target.value)}
+                    className="w-full bg-black/40 border border-zinc-800 p-3 text-sm font-mono text-white rounded-sm focus:border-red-500/50 outline-none transition"
+                    placeholder={lang === 'ru' ? 'Текст объявления...' : 'Announcement text...'}
+                    rows={3}
+                    />
+                    <div className="flex flex-wrap gap-2">
+                    {(['info', 'hazard', 'important'] as const).map(type => (
+                        <button
+                        key={type}
+                        type="button"
+                        onClick={() => setAnnouncementType(type)}
+                        className={`px-3 py-1 text-[10px] font-mono border transition ${announcementType === type ? 'bg-[#cd412b] border-[#cd412b] text-white font-bold' : 'bg-black/40 border-zinc-800 text-zinc-400 hover:text-white'}`}
+                        >
+                        {type.toUpperCase()}
+                        </button>
+                    ))}
+                    <label className="flex items-center gap-2 text-xs text-white bg-black/40 border border-zinc-800 px-3 py-1 rounded-sm cursor-pointer hover:bg-black/60 transition">
+                        <input type="checkbox" checked={announcementActive} onChange={e => setAnnouncementActive(e.target.checked)} />
+                        Active
+                    </label>
+                    </div>
+                    <button type="submit" disabled={loading} className="w-full px-4 py-2 bg-[#cd412b] text-white text-xs font-bold uppercase tracking-widest font-mono cursor-pointer hover:bg-red-700 transition">
+                        {lang === 'ru' ? 'Сохранить настройки сайта' : 'Save Site Settings'}
+                    </button>
+                </form>
+
+                {/* Spoiler Controller */}
+                <div className="bg-[#14171e] border border-[#2a2f3b] p-6 rounded-sm shadow-xl flex items-center justify-between">
+                    <div className='flex items-center gap-3'>
+                        <EyeOff size={20} className="text-emerald-500" />
+                        <h3 className="text-md font-bold text-gray-200">{lang === 'ru' ? 'Спойлер "Jungle Fever"' : 'Jungle Fever Spoiler'}</h3>
+                    </div>
+                    <button
+                        onClick={handleToggleSpoiler}
+                        className={`px-4 py-1.5 text-[10px] font-mono font-bold uppercase border cursor-pointer transition-colors ${
+                            jungleFeverSpoiler 
+                                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400' 
+                                : 'bg-red-500/10 border-red-500/40 text-red-400'
+                        }`}
+                    >
+                        {jungleFeverSpoiler ? (lang === 'ru' ? 'Включен' : 'Enabled') : (lang === 'ru' ? 'Отключен' : 'Disabled')}
+                    </button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[400px] overflow-y-auto custom-scrollbar relative z-10">
-                {vipApps.length > 0 ? vipApps.map((app) => (
-                    <div key={app.id} className={`p-4 border rounded-sm space-y-3 transition-all ${
-                        app.status === 'pending' ? 'bg-amber-500/5 border-amber-500/30 shadow-[inset_0_0_20px_rgba(245,158,11,0.05)]' :
-                        app.status === 'approved' ? 'bg-emerald-500/5 border-emerald-500/20 opacity-60' :
-                        'bg-red-500/5 border-red-500/20 opacity-60'
-                    }`}>
-                        <div className="flex justify-between items-start gap-2">
-                            <div className="min-w-0">
-                                <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">{app.id}</div>
-                                <div className="font-bold text-white truncate cursor-pointer hover:text-amber-400 transition-colors" onClick={() => setInspectUserId(app.userId)}>
-                                    {app.userDisplayName}
-                                </div>
-                            </div>
-                            <span className={`px-1.5 py-0.5 rounded-sm text-[8px] font-mono font-black uppercase tracking-widest ${
-                                app.status === 'pending' ? 'bg-amber-500 text-black animate-pulse' :
-                                app.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400' :
-                                'bg-red-500/20 text-red-400'
-                            }`}>
-                                {app.status}
-                            </span>
-                        </div>
-
-                        <div className="bg-black/30 p-2 border border-zinc-800/40 rounded-sm space-y-1">
-                            <div className="flex justify-between text-[9px] font-mono">
-                                <span className="text-zinc-500 uppercase">{lang === 'ru' ? 'Метод:' : 'Method:'}</span>
-                                <span className="text-zinc-300 font-bold uppercase">{app.paymentMethod}</span>
-                            </div>
-                            <div className="flex justify-between text-[9px] font-mono">
-                                <span className="text-zinc-500 uppercase">{lang === 'ru' ? 'Донатер:' : 'Donator:'}</span>
-                                <span className="text-amber-500 font-black truncate max-w-[120px]">{app.donatorNickname}</span>
-                            </div>
-                            <div className="flex justify-between text-[9px] font-mono">
-                                <span className="text-zinc-500 uppercase">{lang === 'ru' ? 'Дата:' : 'Date:'}</span>
-                                <span className="text-zinc-400">{app.createdAt?.seconds ? new Date(app.createdAt.seconds * 1000).toLocaleString() : '...'}</span>
-                            </div>
-                        </div>
-
-                        {app.status === 'pending' && (
-                            <div className="flex flex-col gap-1.5 pt-1">
-                                <button
-                                    onClick={() => handleApproveVip(app)}
-                                    disabled={!!processingAppId}
-                                    className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5"
-                                >
-                                    <Check size={12} />
-                                    {lang === 'ru' ? 'ОДОБРИТЬ VIP' : 'APPROVE VIP'}
-                                </button>
-                                <div className="grid grid-cols-2 gap-1.5">
-                                    <button
-                                        onClick={() => handleRejectVip(app, false)}
-                                        disabled={!!processingAppId}
-                                        className="py-1.5 border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5"
-                                    >
-                                        <X size={12} />
-                                        {lang === 'ru' ? 'ОТКЛОНИТЬ' : 'REJECT'}
-                                    </button>
-                                    <button
-                                        onClick={() => handleRejectVip(app, true)}
-                                        disabled={!!processingAppId}
-                                        className="py-1.5 bg-red-600/10 border border-red-500/30 text-red-500 hover:bg-red-600 hover:text-white text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5"
-                                    >
-                                        <Ban size={12} />
-                                        {lang === 'ru' ? 'SCAM' : 'SCAM'}
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                        
-                        {app.rejectionReason && (
-                            <div className="text-[8px] font-mono text-red-400 bg-red-500/5 p-1.5 border border-red-500/10 rounded-sm">
-                                REASON: {app.rejectionReason}
-                            </div>
-                        )}
+            {/* Twitch Settings */}
+            <div className="lg:col-span-2">
+              <form onSubmit={handleSaveTwitchSettings} className="bg-[#14171e] border border-[#2a2f3b] p-6 rounded-sm shadow-xl space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <h3 className="text-md font-bold text-gray-200 flex items-center gap-2">
+                        <Tv size={18} className="text-[#9146ff]" />
+                        {lang === 'ru' ? 'Настройки Twitch' : 'Twitch Settings'}
+                    </h3>
+                    {!isSuperAdmin && (
+                        <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[9px] font-mono font-bold rounded uppercase">
+                            {lang === 'ru' ? 'Только для чтения' : 'Read-only access'}
+                        </span>
+                    )}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-widest">{lang === 'ru' ? 'Имя канала' : 'Channel Name'}</label>
+                      <input type="text" disabled={!isSuperAdmin} value={twitchChannel} onChange={e => setTwitchChannel(e.target.value)} placeholder="Channel Name" className="w-full bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm disabled:opacity-55 disabled:cursor-not-allowed focus:border-[#9146ff]/50 outline-none transition" />
                     </div>
-                )) : (
-                    <div className="lg:col-span-3 py-12 text-center text-zinc-600 font-mono text-xs uppercase tracking-widest">
-                        {lang === 'ru' ? 'Нет активных заявок' : 'No active applications'}
+                    <div className="space-y-1">
+                      <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-widest">{lang === 'ru' ? 'Название стрима' : 'Stream Title'}</label>
+                      <input type="text" disabled={!isSuperAdmin} value={twitchStreamTitle} onChange={e => setTwitchStreamTitle(e.target.value)} placeholder="Stream Title" className="w-full bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm disabled:opacity-55 disabled:cursor-not-allowed focus:border-[#9146ff]/50 outline-none transition" />
                     </div>
-                )}
+                    <div className="space-y-1">
+                      <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-widest">Client ID</label>
+                      <input type="text" disabled={!isSuperAdmin} value={twitchClientId} onChange={e => setTwitchClientId(e.target.value)} placeholder="Client ID" className="w-full bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm disabled:opacity-55 disabled:cursor-not-allowed focus:border-[#9146ff]/50 outline-none transition" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-widest">Client Secret</label>
+                      <input type="text" disabled={!isSuperAdmin} value={twitchClientSecret} onChange={e => setTwitchClientSecret(e.target.value)} placeholder="Client Secret" className="w-full bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm disabled:opacity-55 disabled:cursor-not-allowed focus:border-[#9146ff]/50 outline-none transition" />
+                    </div>
+                </div>
+                <label className={`flex items-center gap-2 text-xs text-white bg-black/40 border border-zinc-800 px-3 py-2 rounded-sm w-fit ${!isSuperAdmin ? 'opacity-55 cursor-not-allowed' : 'cursor-pointer'}`}>
+                    <input type="checkbox" disabled={!isSuperAdmin} checked={twitchManualLive} onChange={e => setTwitchManualLive(e.target.checked)} />
+                    Manual Live
+                </label>
+                <button type="submit" disabled={savingTwitch || !isSuperAdmin} className={`px-4 py-2 text-white text-xs font-bold uppercase tracking-widest font-mono rounded-sm transition ${!isSuperAdmin ? 'bg-zinc-800 border border-zinc-700 text-zinc-500 cursor-not-allowed opacity-50' : 'bg-purple-600/80 hover:bg-purple-700 cursor-pointer'}`}>
+                    {lang === 'ru' ? 'Сохранить настройки Twitch' : 'Save Twitch Settings'}
+                </button>
+              </form>
             </div>
+          </div>
         </div>
+      )}
 
-        {/* User Management */}
-        <div className="lg:col-span-2 bg-[#14171e] border border-[#2a2f3b] p-6 rounded-sm shadow-xl space-y-4">
+      {activeSubTab === 'vip' && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {/* VIP Applications Management */}
+          <div className="bg-[#14171e] border border-amber-500/20 p-6 rounded-sm shadow-xl space-y-6 relative overflow-hidden">
+              <div className="absolute right-0 top-0 opacity-5">
+                  <Crown size={120} />
+              </div>
+              <div className="flex items-center justify-between border-b border-[#2a2f3b]/60 pb-4 relative z-10">
+                  <div className="space-y-1">
+                      <h3 className="text-md font-black text-amber-500 flex items-center gap-2 uppercase tracking-widest">
+                          <Crown size={20} />
+                          {lang === 'ru' ? 'Заявки на VIP подписку' : 'VIP Subscription Applications'}
+                      </h3>
+                      <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider">
+                          {lang === 'ru' ? 'Рассмотрение заявок через DonationAlerts и USDT' : 'Reviewing DonationAlerts and USDT manual claims'}
+                      </p>
+                  </div>
+                  <div className="bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-[10px] font-mono text-amber-400 font-bold uppercase tracking-widest">
+                      {vipApps.filter(a => a.status === 'pending').length} {lang === 'ru' ? 'В ОЖИДАНИИ' : 'PENDING'}
+                  </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[400px] overflow-y-auto custom-scrollbar relative z-10">
+                  {vipApps.length > 0 ? vipApps.map((app) => (
+                      <div key={app.id} className={`p-4 border rounded-sm space-y-3 transition-all ${
+                          app.status === 'pending' ? 'bg-amber-500/5 border-amber-500/30 shadow-[inset_0_0_20px_rgba(245,158,11,0.05)]' :
+                          app.status === 'approved' ? 'bg-emerald-500/5 border-emerald-500/20 opacity-60' :
+                          'bg-red-500/5 border-red-500/20 opacity-60'
+                      }`}>
+                          <div className="flex justify-between items-start gap-2">
+                              <div className="min-w-0">
+                                  <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">{app.id}</div>
+                                  <div className="font-bold text-white truncate cursor-pointer hover:text-amber-400 transition-colors" onClick={() => setInspectUserId(app.userId)}>
+                                      {app.userDisplayName}
+                                  </div>
+                              </div>
+                              <span className={`px-1.5 py-0.5 rounded-sm text-[8px] font-mono font-black uppercase tracking-widest ${
+                                  app.status === 'pending' ? 'bg-amber-500 text-black animate-pulse' :
+                                  app.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400' :
+                                  'bg-red-500/20 text-red-400'
+                              }`}>
+                                  {app.status}
+                              </span>
+                          </div>
+
+                          <div className="bg-black/30 p-2 border border-zinc-800/40 rounded-sm space-y-1">
+                              <div className="flex justify-between text-[9px] font-mono">
+                                  <span className="text-zinc-500 uppercase">{lang === 'ru' ? 'Метод:' : 'Method:'}</span>
+                                  <span className="text-zinc-300 font-bold uppercase">{app.paymentMethod}</span>
+                              </div>
+                              <div className="flex justify-between text-[9px] font-mono">
+                                  <span className="text-zinc-500 uppercase">{lang === 'ru' ? 'Донатер:' : 'Donator:'}</span>
+                                  <span className="text-amber-500 font-black truncate max-w-[120px]">{app.donatorNickname}</span>
+                              </div>
+                              <div className="flex justify-between text-[9px] font-mono">
+                                  <span className="text-zinc-500 uppercase">{lang === 'ru' ? 'Дата:' : 'Date:'}</span>
+                                  <span className="text-zinc-400">{app.createdAt?.seconds ? new Date(app.createdAt.seconds * 1000).toLocaleString() : '...'}</span>
+                              </div>
+                          </div>
+
+                          {app.status === 'pending' && (
+                              <div className="flex flex-col gap-1.5 pt-1">
+                                  <button
+                                      onClick={() => handleApproveVip(app)}
+                                      disabled={!!processingAppId}
+                                      className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5"
+                                  >
+                                      <Check size={12} />
+                                      {lang === 'ru' ? 'ОДОБРИТЬ VIP' : 'APPROVE VIP'}
+                                  </button>
+                                  <div className="grid grid-cols-2 gap-1.5">
+                                      <button
+                                          onClick={() => handleRejectVip(app, false)}
+                                          disabled={!!processingAppId}
+                                          className="py-1.5 border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5"
+                                      >
+                                          <X size={12} />
+                                          {lang === 'ru' ? 'ОТКЛОНИТЬ' : 'REJECT'}
+                                      </button>
+                                      <button
+                                          onClick={() => handleRejectVip(app, true)}
+                                          disabled={!!processingAppId}
+                                          className="py-1.5 bg-red-600/10 border border-red-500/30 text-red-500 hover:bg-red-600 hover:text-white text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5"
+                                      >
+                                          <Ban size={12} />
+                                          {lang === 'ru' ? 'SCAM' : 'SCAM'}
+                                      </button>
+                                  </div>
+                              </div>
+                          )}
+                          
+                          {app.rejectionReason && (
+                              <div className="text-[8px] font-mono text-red-400 bg-red-500/5 p-1.5 border border-red-500/10 rounded-sm">
+                                  REASON: {app.rejectionReason}
+                              </div>
+                          )}
+                      </div>
+                  )) : (
+                      <div className="lg:col-span-3 py-12 text-center text-zinc-600 font-mono text-xs uppercase tracking-widest">
+                          {lang === 'ru' ? 'Нет active-заявок' : 'No active applications'}
+                      </div>
+                  )}
+              </div>
+          </div>
+        </div>
+      )}
+
+      {activeSubTab === 'survivors' && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {/* User Management */}
+          <div className="bg-[#14171e] border border-[#2a2f3b] p-6 rounded-sm shadow-xl space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2a2f3b]/60 pb-4">
                 <div className="space-y-1">
                     <h3 className="text-md font-bold text-gray-200 flex items-center gap-2">
@@ -1152,10 +1237,14 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
                     </div>
                 )}
             </div>
+          </div>
         </div>
+      )}
  
-        {/* Feedback Messages Management Section */}
-        <div className="lg:col-span-3 bg-[#14171e] border border-red-500/10 p-6 rounded-sm shadow-xl space-y-6 relative overflow-hidden">
+      {activeSubTab === 'feedback' && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {/* Feedback Messages Management Section */}
+          <div className="bg-[#14171e] border border-red-500/10 p-6 rounded-sm shadow-xl space-y-6 relative overflow-hidden">
             <div className="absolute right-0 top-0 opacity-5">
                 <Mail size={120} />
             </div>
@@ -1277,10 +1366,14 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
                     </div>
                 )}
             </div>
+          </div>
         </div>
+      )}
 
-        {/* News Management */}
-        <div className="lg:col-span-3 space-y-6">
+      {activeSubTab === 'news' && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {/* News Management */}
+          <div className="space-y-6">
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                 {/* News Form */}
                 {isSuperAdmin && (
@@ -1589,36 +1682,9 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
                     </div>
                 </div>
             </div>
+          </div>
         </div>
-      </div>
-
-      {/* Twitch Settings */}
-      <form onSubmit={handleSaveTwitchSettings} className="bg-[#14171e] border border-[#2a2f3b] p-6 rounded-sm shadow-xl space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-md font-bold text-gray-200 flex items-center gap-2">
-                <Tv size={18} className="text-purple-500" />
-                {lang === 'ru' ? 'Настройки Twitch' : 'Twitch Settings'}
-            </h3>
-            {!isSuperAdmin && (
-                <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[9px] font-mono font-bold rounded uppercase">
-                    {lang === 'ru' ? 'Только для чтения' : 'Read-only access'}
-                </span>
-            )}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="text" disabled={!isSuperAdmin} value={twitchChannel} onChange={e => setTwitchChannel(e.target.value)} placeholder="Channel Name" className="bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm disabled:opacity-55 disabled:cursor-not-allowed" />
-            <input type="text" disabled={!isSuperAdmin} value={twitchStreamTitle} onChange={e => setTwitchStreamTitle(e.target.value)} placeholder="Stream Title" className="bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm disabled:opacity-55 disabled:cursor-not-allowed" />
-            <input type="text" disabled={!isSuperAdmin} value={twitchClientId} onChange={e => setTwitchClientId(e.target.value)} placeholder="Client ID" className="bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm disabled:opacity-55 disabled:cursor-not-allowed" />
-            <input type="text" disabled={!isSuperAdmin} value={twitchClientSecret} onChange={e => setTwitchClientSecret(e.target.value)} placeholder="Client Secret" className="bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white rounded-sm disabled:opacity-55 disabled:cursor-not-allowed" />
-        </div>
-        <label className={`flex items-center gap-2 text-xs text-white bg-black/40 border border-zinc-800 px-3 py-2 rounded-sm w-fit ${!isSuperAdmin ? 'opacity-55 cursor-not-allowed' : 'cursor-pointer'}`}>
-            <input type="checkbox" disabled={!isSuperAdmin} checked={twitchManualLive} onChange={e => setTwitchManualLive(e.target.checked)} />
-            Manual Live
-        </label>
-        <button type="submit" disabled={savingTwitch || !isSuperAdmin} className={`px-4 py-2 text-white text-xs font-bold uppercase tracking-widest font-mono rounded-sm transition ${!isSuperAdmin ? 'bg-zinc-800 border border-zinc-700 text-zinc-500 cursor-not-allowed opacity-50' : 'bg-purple-600/80 hover:bg-purple-700 cursor-pointer'}`}>
-            {lang === 'ru' ? 'Сохранить настройки Twitch' : 'Save Twitch Settings'}
-        </button>
-      </form>
+      )}
 
       {/* User Profile Inspector Modal */}
       {inspectUserId && (

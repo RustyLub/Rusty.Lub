@@ -46,6 +46,18 @@ export interface RaidWeapon {
   icon: string;
 }
 
+export interface WeaponStat {
+  id: string;
+  name: string;
+  damage: number;
+  fireRate: number; // RPM
+  magSize: number;
+  range: number; // Meters
+  accuracy: number; // 0-100
+  category: 'rifles' | 'smgs' | 'shotguns' | 'pistols' | 'snipers' | 'special';
+  icon?: string; // Filename in assets/images/ without extension
+}
+
 export interface RaidTarget {
   id: string;
   name: string;
@@ -151,4 +163,7 @@ export interface SessionEntry {
   durationSeconds: number | null;
   isActive: boolean;
 }
+
+export const APP_VERSION = 'v2.6';
+
 

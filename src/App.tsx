@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Home,
@@ -47,7 +47,7 @@ import {
   Calculator,
   Sprout
 } from 'lucide-react';
-import { ToastType, CustomUser } from './types';
+import { ToastType, CustomUser, APP_VERSION } from './types';
 
 // Firebase & Auth Presence dependencies
 import { 
@@ -114,16 +114,16 @@ const wallpaperTitles = [
 const appTranslations = {
   tabs: {
     home: { ru: 'Главная', en: 'Home' },
-    errors: { ru: 'Ошибки', en: 'Errors' },
+    news: { ru: 'Новости', en: 'News' },
+    errors: { ru: 'Ошибки', en: 'Fixes' },
     binds: { ru: 'Бинды', en: 'Binds' },
-    fps: { ru: 'Оптимизация FPS', en: 'FPS Boost' },
-    raid: { ru: 'Рейд Калькулятор', en: 'Raid Calculator' },
-    decay: { ru: 'Калькулятор Гниения', en: 'Decay Calculator' },
-    electrical: { ru: 'Симулятор Электрики', en: 'Electrical Simulator' },
-    weapons: { ru: 'Оружие / Мета', en: 'Weapon Guides' },
-    breeder: { ru: 'Селекция растений', en: 'Rust Breeder' },
-    recycler: { ru: 'ИНСТРУМЕНТ Recycling Tool', en: 'Recycling Tool' },
-    news: { ru: 'Новости', en: 'News' }
+    fps: { ru: 'Оптимизация FPS', en: 'FPS' },
+    raid: { ru: 'Рейд', en: 'Raid' },
+    decay: { ru: 'Гниение', en: 'Decay' },
+    electrical: { ru: 'Электрика', en: 'Electricity' },
+    weapons: { ru: 'Оружие', en: 'Weapons' },
+    breeder: { ru: 'Ферма', en: 'Farming' },
+    recycler: { ru: 'Переработка', en: 'Recycling' }
   },
   discordBtn: { ru: 'Наш Discord', en: 'Our Discord' },
   discordMobileBtn: { ru: 'Наш Discord сервер', en: 'Our Discord Server' },
@@ -411,20 +411,36 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  const currentUserRef = useRef(currentUser);
+  useEffect(() => {
+    currentUserRef.current = currentUser;
+  }, [currentUser]);
+
+  const twitchSettingsRef = useRef(twitchSettings);
+  useEffect(() => {
+    twitchSettingsRef.current = twitchSettings;
+  }, [twitchSettings]);
+
   // Periodically check actual Twitch Helix API status if credentials exist
   useEffect(() => {
-    if (!twitchSettings) return;
-    const { channelName, clientId, clientSecret, isManualLive } = twitchSettings;
+    const currentSettings = twitchSettingsRef.current;
+    if (!currentSettings) return;
+    const { channelName, clientId, clientSecret, isManualLive } = currentSettings;
     if (!channelName) return;
 
     const checkActualTwitchLiveStatus = async () => {
-      if (isManualLive) return;
+      const activeSettings = twitchSettingsRef.current;
+      if (!activeSettings || activeSettings.isManualLive) return;
 
       try {
         const response = await fetch('/api/twitch/status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ channelName, clientId, clientSecret })
+          body: JSON.stringify({ 
+            channelName: activeSettings.channelName, 
+            clientId: activeSettings.clientId, 
+            clientSecret: activeSettings.clientSecret 
+          })
         });
 
         if (response.ok) {
@@ -436,10 +452,10 @@ export default function App() {
 
           // To prevent double triggering or infinite update loops, only write if there is a difference
           if (
-            twitchSettings.isLiveFromApi !== isLive ||
-            twitchSettings.viewerCount !== viewers ||
-            twitchSettings.apiTitle !== currentTitle ||
-            twitchSettings.gameName !== currentGame
+            activeSettings.isLiveFromApi !== isLive ||
+            activeSettings.viewerCount !== viewers ||
+            activeSettings.apiTitle !== currentTitle ||
+            activeSettings.gameName !== currentGame
           ) {
             await setDoc(doc(db, 'site_settings', 'twitch'), {
               isLiveFromApi: isLive,
@@ -460,17 +476,19 @@ export default function App() {
       const interval = setInterval(checkActualTwitchLiveStatus, 120000);
       return () => clearInterval(interval);
     }
-  }, [twitchSettings]);
+  }, [twitchSettings?.channelName, twitchSettings?.clientId, twitchSettings?.clientSecret, twitchSettings?.isManualLive]);
 
   // Periodic presence update for active logged-in user
   useEffect(() => {
     if (!currentUser) return;
+    const uid = currentUser.uid;
+    const displayName = currentUser.displayName;
 
     const updatePresence = async () => {
       try {
-        await setDoc(doc(db, 'presence', currentUser.uid), {
+        await setDoc(doc(db, 'presence', uid), {
           lastActive: serverTimestamp(),
-          displayName: currentUser.displayName || 'Survivor'
+          displayName: displayName || 'Survivor'
         });
       } catch (err) {
         console.warn('Error updating presence status:', err);
@@ -481,7 +499,7 @@ export default function App() {
     const interval = setInterval(updatePresence, 30000); // every 30s
 
     return () => clearInterval(interval);
-  }, [currentUser]);
+  }, [currentUser?.uid, currentUser?.displayName]);
 
   // Real-time online count sync
   useEffect(() => {
@@ -503,13 +521,13 @@ export default function App() {
         }
       });
       // Fallback: at least 1 if the current user is active, or a natural base line of users online
-      setOnlineCount(Math.max(activeCount, currentUser ? 1 : 0));
+      setOnlineCount(Math.max(activeCount, currentUserRef.current ? 1 : 0));
     }, (error) => {
       handleFirestoreError(error, OperationType.LIST, 'presence');
     });
 
     return () => unsubscribe();
-  }, [currentUser]);
+  }, []);
 
 
 
@@ -816,7 +834,7 @@ export default function App() {
                   RUSTY<span className="text-[#cd412b]">.LUB</span>
                 </span>
                 <span className="block text-[7.5px] font-black text-black tracking-widest font-mono uppercase leading-none mt-0.5">
-                  SURVIVAL KIT v2.4
+                  SURVIVAL KIT {APP_VERSION}
                 </span>
                 {/* Online Users Indicator integrated directly below logo */}
                 <div className="flex items-center gap-1 text-[7.5px] font-mono text-[#10b981] font-bold select-none leading-none mt-1">
@@ -1051,7 +1069,7 @@ export default function App() {
                   <button
                     key={tab.id}
                     onClick={() => handleTabChange(tab.id as any)}
-                    className={`w-full flex items-center gap-3 px-3 py-3 text-[10px] font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer rounded-none relative overflow-hidden font-mono group ${
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer rounded-none relative overflow-hidden font-mono group ${
                       isActive
                         ? 'bg-gradient-to-r from-blue-600/10 to-[#ff4d30]/10 text-white border border-[#cd412b]/40 shadow-sm font-black'
                         : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
@@ -1098,7 +1116,7 @@ export default function App() {
               </div>
               <div className="flex justify-between">
                 <span>VERSION:</span>
-                <span className="text-gray-400">v2.4</span>
+                <span className="text-gray-400">{APP_VERSION}</span>
               </div>
 
               {/* User Agreement Link integrated into sidebar */}
@@ -1148,7 +1166,8 @@ export default function App() {
             >
               {/* Grand Banner */}
               <div 
-                className="relative overflow-hidden rounded-none border-2 border-[#2a2f3b] p-8 sm:p-12 text-center space-y-6 shadow-2xl bg-cover bg-center"
+                id="grand-home-banner"
+                className="relative overflow-hidden rounded-none border-2 border-[#2a2f3b] p-8 sm:p-12 text-center space-y-6 shadow-2xl bg-cover bg-center keep-dark"
                 style={{ backgroundImage: `url(${oilRigBg})` }}
               >
                 <div className="absolute inset-0 bg-black/60 pointer-events-none" />
@@ -1715,7 +1734,7 @@ export default function App() {
               </div>
 
               {/* US, EU & SEA Rustoria Server Monitor Section */}
-              <div id="rustoria-monitor-section" className="bg-[#14171e]/90 border border-[#2a2f3b] rounded-none p-6 sm:p-8 space-y-6 shadow-xl relative overflow-hidden rust-metal-pattern">
+              <div id="rustoria-monitor-section" className="bg-[#14171e]/90 border border-[#2a2f3b] rounded-none p-4 sm:p-5 space-y-4 shadow-xl relative overflow-hidden rust-metal-pattern">
                 {/* Tactical Corner Brackets */}
                 <div className="rust-bracket-tl" />
                 <div className="rust-bracket-tr" />
@@ -1726,30 +1745,30 @@ export default function App() {
                 <div className="absolute top-0 left-0 right-0 h-1 rust-hazard" />
                 <div className="absolute bottom-2 left-3 text-[7px] font-mono text-gray-600 select-none hidden sm:block uppercase">NET_SYS: ONLINE</div>
 
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2a2f3b] pb-5">
-                  <div className="space-y-1.5">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#2a2f3b] pb-3.5">
+                  <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="relative flex h-2.5 w-2.5">
+                      <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#cd412b] opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#cd412b]"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#cd412b]"></span>
                       </span>
-                      <h3 className="text-lg font-bold tracking-wider text-white font-teko uppercase leading-none">
+                      <h3 className="text-base font-bold tracking-wider text-white font-teko uppercase leading-none">
                         {appTranslations.rustoriaMonitor.title[lang]}
                       </h3>
                     </div>
-                    <p className="text-xs text-gray-400 font-sans leading-relaxed max-w-2xl font-medium">
+                    <p className="text-[11px] text-gray-400 font-sans leading-relaxed max-w-2xl font-medium">
                       {appTranslations.rustoriaMonitor.desc[lang]}
                     </p>
                   </div>
                   
-                  <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="flex flex-wrap items-center gap-2">
                     {/* Region Filter Selector */}
-                    <div className="flex bg-[#0c0d10] p-1 border border-[#2a2f3b] text-[10px] font-mono uppercase">
+                    <div className="flex bg-[#0c0d10] p-0.5 border border-[#2a2f3b] text-[9px] font-mono uppercase">
                       {(['ALL', 'US', 'EU', 'SEA'] as const).map((reg) => (
                         <button
                           key={reg}
                           onClick={() => setRegionFilter(reg)}
-                          className={`px-2.5 py-1 font-bold cursor-pointer transition-all ${
+                          className={`px-2 py-0.5 font-bold cursor-pointer transition-all ${
                             regionFilter === reg
                               ? 'bg-[#cd412b] text-white font-black'
                               : 'text-gray-500 hover:text-white'
@@ -1765,31 +1784,31 @@ export default function App() {
                         fetchRustoriaServers();
                       }}
                       disabled={loadingServers}
-                      className="flex items-center justify-center gap-2 px-4 py-2 rounded-sm text-xs font-bold text-gray-300 bg-[#1b1e26] border border-[#2a2f3b] hover:border-[#cd412b]/40 hover:text-white transition-all cursor-pointer disabled:opacity-50 flex-shrink-0 font-mono uppercase"
+                      className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-sm text-[10px] font-bold text-gray-300 bg-[#1b1e26] border border-[#2a2f3b] hover:border-[#cd412b]/40 hover:text-white transition-all cursor-pointer disabled:opacity-50 flex-shrink-0 font-mono uppercase"
                     >
-                      <RefreshCw size={12} className={loadingServers ? "animate-spin text-[#cd412b]" : ""} />
+                      <RefreshCw size={11} className={loadingServers ? "animate-spin text-[#cd412b]" : ""} />
                       <span>{loadingServers ? appTranslations.rustoriaMonitor.loading[lang] : appTranslations.rustoriaMonitor.refresh[lang]}</span>
                     </button>
                   </div>
                 </div>
 
                 {/* Secondary Controls Bar for Search & Filters */}
-                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-[#1b1e26]/80 p-3 border border-[#2a2f3b] rounded-sm">
+                <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between bg-[#1b1e26]/80 p-2 border border-[#2a2f3b] rounded-sm">
                   {/* Search box */}
                   <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500" size={13} />
                     <input
                       type="text"
                       id="server-search-input"
                       value={serverSearch}
                       onChange={(e) => setServerSearch(e.target.value)}
                       placeholder={lang === 'en' ? "Search by server name, map, or IP..." : "Поиск по названию, карте или IP..."}
-                      className="w-full bg-[#0c0d10] border border-[#2a2f3b] focus:border-[#cd412b]/70 text-[#e1e1e6] placeholder-gray-500 pl-9 pr-16 py-2 rounded-sm outline-none transition-all text-xs font-mono"
+                      className="w-full bg-[#0c0d10] border border-[#2a2f3b] focus:border-[#cd412b]/70 text-[#e1e1e6] placeholder-gray-500 pl-8 pr-14 py-1.5 rounded-sm outline-none transition-all text-[11px] font-mono"
                     />
                     {serverSearch && (
                       <button
                         onClick={() => setServerSearch('')}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold px-1.5 py-0.5 rounded-sm bg-[#cd412b]/25 hover:bg-[#cd412b]/40 text-white border border-[#cd412b]/30 transition-colors uppercase font-mono"
+                        className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] font-bold px-1.5 py-0.5 rounded-sm bg-[#cd412b]/25 hover:bg-[#cd412b]/40 text-white border border-[#cd412b]/30 transition-colors uppercase font-mono"
                       >
                         {lang === 'en' ? 'Clear' : 'Сброс'}
                       </button>
@@ -1797,9 +1816,9 @@ export default function App() {
                   </div>
 
                   {/* Active servers counter */}
-                  <div className="text-[10px] font-mono text-gray-400 flex items-center gap-1.5 self-center">
+                  <div className="text-[9px] font-mono text-gray-400 flex items-center gap-1 self-center">
                     <span>{lang === 'en' ? 'Showing' : 'Показано'}:</span>
-                    <span className="text-[#cd412b] font-black bg-[#0c0d10] px-2 py-0.5 border border-[#2a2f3b] rounded-sm">
+                    <span className="text-[#cd412b] font-black bg-[#0c0d10] px-1.5 py-0.5 border border-[#2a2f3b] rounded-sm">
                       {rustoriaServers.filter((server) => {
                         const matchesRegion = regionFilter === 'ALL' || 
                           server.name.toLowerCase().includes(`-${regionFilter.toLowerCase()}`) || 
@@ -1817,14 +1836,14 @@ export default function App() {
                 </div>
 
                 {/* Server Table / Cards List */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {rustoriaServers.length === 0 && loadingServers ? (
-                    <div className="py-12 text-center space-y-3">
-                      <RefreshCw size={24} className="animate-spin text-[#cd412b] mx-auto" />
-                      <p className="text-xs text-gray-500 font-mono">{appTranslations.rustoriaMonitor.loading[lang]}</p>
+                    <div className="py-8 text-center space-y-2">
+                      <RefreshCw size={20} className="animate-spin text-[#cd412b] mx-auto" />
+                      <p className="text-[11px] text-gray-500 font-mono">{appTranslations.rustoriaMonitor.loading[lang]}</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 gap-2">
                       <AnimatePresence>
                       {rustoriaServers
                         .filter((server) => {
@@ -1849,18 +1868,18 @@ export default function App() {
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
-                              className="flex flex-col lg:flex-row lg:items-center justify-between p-4 rounded-sm bg-[#1b1e26] border-l-4 border-l-[#cd412b] border-y border-r border-[#2a2f3b] hover:border-r-gray-500 hover:border-y-gray-500 transition-all gap-4 group relative overflow-hidden"
+                              className="flex flex-col lg:flex-row lg:items-center justify-between p-2.5 sm:px-4 rounded-sm bg-[#1b1e26] border-l-4 border-l-[#cd412b] border-y border-r border-[#2a2f3b] hover:border-r-gray-500 hover:border-y-gray-500 transition-all gap-3 group relative overflow-hidden"
                             >
                               {/* Server info / Status */}
-                              <div className="flex items-start gap-3 lg:w-1/3 z-10">
+                              <div className="flex items-start gap-2.5 lg:w-1/3 z-10">
                                 <div className="mt-1 flex-shrink-0">
-                                  <span className={`inline-block w-2.5 h-2.5 rounded-full ${server.status === 'online' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-rose-500'}`} />
+                                  <span className={`inline-block w-2 h-2 rounded-full ${server.status === 'online' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-rose-500'}`} />
                                 </div>
                                 <div className="space-y-0.5">
-                                  <h4 className="text-xs sm:text-sm font-bold text-white font-sans tracking-tight group-hover:text-[#cd412b] transition-colors leading-tight uppercase font-mono">
+                                  <h4 className="text-[11px] sm:text-xs font-bold text-white font-sans tracking-tight group-hover:text-[#cd412b] transition-colors leading-tight uppercase font-mono">
                                     {server.name}
                                   </h4>
-                                  <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] text-gray-500 font-mono">
+                                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[9px] text-gray-500 font-mono">
                                     <span>{server.map}</span>
                                     <span>•</span>
                                     <span className="text-[#cd412b] font-bold">{server.fps} FPS</span>
@@ -1869,12 +1888,12 @@ export default function App() {
                               </div>
 
                               {/* Players progress bar and count */}
-                              <div className="lg:w-1/4 space-y-1.5 z-10">
-                                <div className="flex items-center justify-between text-[10px] font-mono">
+                              <div className="lg:w-1/4 space-y-1 z-10">
+                                <div className="flex items-center justify-between text-[9px] font-mono">
                                   <span className="text-gray-400 font-bold uppercase">{appTranslations.rustoriaMonitor.players[lang]}</span>
                                   <span className="text-white font-black">{server.players} / {server.maxPlayers}</span>
                                 </div>
-                                <div className="w-full h-2 bg-[#0c0d10] border border-[#2a2f3b] rounded-none overflow-hidden">
+                                <div className="w-full h-1.5 bg-[#0c0d10] border border-[#2a2f3b] rounded-none overflow-hidden">
                                   <div 
                                     className="h-full bg-[#cd412b] transition-all duration-500" 
                                     style={{ width: `${progressPercent}%` }}
@@ -1883,17 +1902,17 @@ export default function App() {
                               </div>
 
                               {/* Queue and Wipe date info */}
-                              <div className="flex items-center justify-between lg:justify-start gap-6 lg:w-1/5 text-xs z-10">
+                              <div className="flex items-center justify-between lg:justify-start gap-4 lg:w-1/5 text-xs z-10">
                                 <div className="space-y-0.5">
                                   <span className="block text-[8px] text-gray-500 uppercase font-bold tracking-wider font-mono">{appTranslations.rustoriaMonitor.queue[lang]}</span>
-                                  <span className={`font-mono font-bold ${server.queue > 0 ? 'text-amber-400 text-sm' : 'text-gray-400'}`}>
+                                  <span className={`font-mono font-bold ${server.queue > 0 ? 'text-amber-400 text-xs' : 'text-gray-400 text-[11px]'}`}>
                                     {server.queue}
                                   </span>
                                 </div>
                                 
                                 <div className="space-y-0.5">
                                   <span className="block text-[8px] text-gray-500 uppercase font-bold tracking-wider font-mono">{appTranslations.rustoriaMonitor.wipe[lang]}</span>
-                                  <span className="font-mono text-gray-300 font-bold uppercase">
+                                  <span className="font-mono text-gray-300 font-bold uppercase text-[10px]">
                                     {server.lastWipe ? new Date(server.lastWipe).toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { month: 'short', day: 'numeric' }) : 'N/A'}
                                   </span>
                                 </div>
@@ -1908,13 +1927,13 @@ export default function App() {
                                     handleCopy(connectCmd);
                                     setTimeout(() => setCopiedServerId(null), 3000);
                                   }}
-                                  className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-sm text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer font-mono ${
+                                  className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-sm text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer font-mono ${
                                     isCopied 
                                       ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30' 
                                       : 'bg-[#0c0d10] text-gray-300 border border-[#2a2f3b] hover:border-[#cd412b]/40 hover:text-white'
                                   }`}
                                 >
-                                  {isCopied ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
+                                  {isCopied ? <Check size={10} className="text-emerald-400" /> : <Copy size={10} />}
                                   <span>{isCopied ? appTranslations.rustoriaMonitor.copied[lang] : appTranslations.rustoriaMonitor.connect[lang]}</span>
                                 </button>
                               </div>

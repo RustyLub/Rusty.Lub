@@ -1,4 +1,4 @@
-import { ErrorItem, BindItem, RaidWeapon, RaidTarget, AdminCommandItem } from './types';
+import { ErrorItem, BindItem, RaidWeapon, RaidTarget, AdminCommandItem, WeaponStat } from './types';
 
 export const errorDatabase: ErrorItem[] = [
   // --- CRITICAL ERRORS ---
@@ -1671,4 +1671,16 @@ export const adminCommandsDatabase: AdminCommandItem[] = [
     desc: 'Статистика игроков',
     explanation: 'Выводит подробную игровую статистику игроков (убийства, смерти, время нахождения на сервере).'
   }
+];
+
+export const weaponStatsDatabase: WeaponStat[] = [
+  { id: 'ak47', name: 'Assault Rifle', damage: 50, fireRate: 450, magSize: 30, range: 100, accuracy: 80, category: 'rifles', icon: 'ak47' },
+  { id: 'lr300', name: 'LR-300 Assault Rifle', damage: 45, fireRate: 450, magSize: 30, range: 100, accuracy: 85, category: 'rifles', icon: 'lr300' },
+  { id: 'mp5', name: 'MP5A4', damage: 35, fireRate: 600, magSize: 30, range: 50, accuracy: 70, category: 'smgs', icon: 'mp5' },
+  { id: 'thompson', name: 'Thompson', damage: 37, fireRate: 500, magSize: 20, range: 45, accuracy: 65, category: 'smgs', icon: 'thompson' },
+  { id: 'custom', name: 'Custom SMG', damage: 30, fireRate: 600, magSize: 24, range: 35, accuracy: 60, category: 'smgs', icon: 'custom' },
+  { id: 'sar', name: 'Semi-Automatic Rifle', damage: 40, fireRate: 400, magSize: 16, range: 80, accuracy: 75, category: 'rifles', icon: 'sar' },
+  { id: 'bolt', name: 'Bolt Action Rifle', damage: 80, fireRate: 30, magSize: 4, range: 150, accuracy: 95, category: 'snipers', icon: 'bolt' },
+  { id: 'm249', name: 'M249', damage: 55, fireRate: 500, magSize: 100, range: 120, accuracy: 85, category: 'rifles', icon: 'm249' },
+  { id: 'hmlmg', name: 'HMLMG', damage: 48, fireRate: 450, magSize: 60, range: 110, accuracy: 80, category: 'rifles', icon: 'hmlmg' }
 ];

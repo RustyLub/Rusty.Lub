@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { APP_VERSION } from '../types';
 import { 
   ShieldAlert, 
   Clock, 
@@ -212,7 +213,7 @@ export default function DecayCalculator({ lang }: { lang: 'ru' | 'en' }) {
         </div>
 
         <div className="flex items-center gap-2 text-xs text-zinc-500 font-mono uppercase">
-          <span className="bg-zinc-800/40 px-2 py-0.5 border border-zinc-800 text-[10px]">RUST v2.4</span>
+          <span className="bg-zinc-800/40 px-2 py-0.5 border border-zinc-800 text-[10px]">RUST {APP_VERSION}</span>
         </div>
       </div>
 

@@ -1,7 +1,9 @@
+import { APP_VERSION } from './types';
+
 export const uiTranslations: Record<string, Record<'ru' | 'en', string>> = {
   logoSub: {
-    ru: 'SUVIVAL KIT v2.4 • CLAN [EAC]',
-    en: 'SURVIVAL KIT v2.4 • CLAN [EAC]'
+    ru: `SUVIVAL KIT ${APP_VERSION} • CLAN [EAC]`,
+    en: `SURVIVAL KIT ${APP_VERSION} • CLAN [EAC]`
   },
   navHome: {
     ru: 'Главная',

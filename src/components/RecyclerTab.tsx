@@ -464,15 +464,6 @@ export const RECYCLER_ITEMS_LIST: RecyclerItem[] = [
     yields: { metal_fragments: 50, wood: 100 },
     svgComponent: () => <ItemPlaceholderSVG color="#7c2d12" icon="🪠" size={44} />
   },
-  {
-    id: 'crossbow',
-    name: { ru: 'Арбалет', en: 'Crossbow' },
-    category: 'weapons',
-    icon: '🏹',
-    color: '#b45309',
-    yields: { wood: 100, metal_fragments: 37, rope: 1 },
-    svgComponent: () => <ItemPlaceholderSVG color="#b45309" icon="🏹" size={44} />
-  },
 
   // ARMOR
   {

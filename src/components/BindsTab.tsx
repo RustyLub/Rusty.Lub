@@ -116,14 +116,14 @@ export default function BindsTab({ onCopy, lang }: BindsTabProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Mode Switcher */}
-      <div className="flex bg-[#0c0d10] p-1 rounded-none border border-[#2a2f3b] max-w-xs">
+      <div className="flex gap-1 border-b border-[#2a2f3b] mb-4">
         <button
           onClick={() => handleModeChange('player')}
-          className={`flex-1 py-2 text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+          className={`px-4 py-2 text-xs uppercase transition-all cursor-pointer ${
             bindsMode === 'player'
-              ? 'bg-[#cd412b] text-white font-black'
+              ? 'text-white border-b-2 border-[#cd412b]'
               : 'text-gray-400 hover:text-white'
           }`}
         >
@@ -131,9 +131,9 @@ export default function BindsTab({ onCopy, lang }: BindsTabProps) {
         </button>
         <button
           onClick={() => handleModeChange('admin')}
-          className={`flex-1 py-2 text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+          className={`px-4 py-2 text-xs uppercase transition-all cursor-pointer ${
             bindsMode === 'admin'
-              ? 'bg-[#cd412b] text-white font-black'
+              ? 'text-white border-b-2 border-[#cd412b]'
               : 'text-gray-400 hover:text-white'
           }`}
         >
@@ -142,67 +142,52 @@ export default function BindsTab({ onCopy, lang }: BindsTabProps) {
       </div>
 
       {/* Search and Filters Header */}
-      <div className="flex flex-col xl:flex-row gap-4 justify-between items-stretch xl:items-center bg-[#14171e]/90 p-5 rounded-none border border-[#2a2f3b] shadow-md relative overflow-hidden">
-        <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-gray-600" />
-        <div className="absolute top-0.5 right-0.5 w-1 h-1 bg-gray-600" />
-        
+      <div className="flex flex-col xl:flex-row gap-3 bg-[#14171e] p-4 border border-[#2a2f3b]">
         {/* Smart Search */}
-        <div className="relative flex-1 max-w-lg">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
           <input
             type="text"
             id="binds-search-input"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={
-              bindsMode === 'player'
-                ? (lang === 'en' ? "Search binds (e.g. syringe, loot, fov)..." : "Поиск по биндам (например: шприц, лут, fov)...")
-                : (lang === 'en' ? "Search commands (e.g. ban, spawn, weather)..." : "Поиск команд (например: бан, спавн, погода)...")
-            }
-            className="w-full bg-[#0c0d10] border border-[#2a2f3b] focus:border-[#cd412b]/70 focus:ring-1 focus:ring-[#cd412b]/30 text-[#e1e1e6] placeholder-gray-500 pl-11 pr-4 py-3 rounded-none outline-none transition-all text-sm font-sans font-medium"
+            placeholder={lang === 'en' ? "Search..." : "Поиск..."}
+            className="w-full bg-[#0c0d10] border border-[#2a2f3b] text-[#e1e1e6] placeholder-gray-600 pl-10 pr-3 py-2 rounded text-sm outline-none transition-all"
           />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-[10px] font-bold px-2 py-1 rounded-none bg-gray-800"
-            >
-              {lang === 'en' ? 'Reset' : 'Сброс'}
-            </button>
-          )}
         </div>
 
         {/* Categories Tab Pill */}
-        <div className="flex flex-wrap gap-1 bg-[#0c0d10] p-1.5 rounded-none border border-[#2a2f3b]">
+        <div className="flex flex-wrap gap-1">
           {(bindsMode === 'player'
             ? [
-                { id: 'all', label: lang === 'en' ? 'All Binds' : 'Все бинды' },
+                { id: 'all', label: lang === 'en' ? 'All' : 'Все' },
                 { id: 'PVP', label: 'PVP' },
                 { id: 'МЕДИЦИНА', label: lang === 'en' ? 'Medical' : 'Медицина' },
                 { id: 'ФАРМ', label: lang === 'en' ? 'Farming' : 'Фарм' },
                 { id: 'СТРОЙКА', label: lang === 'en' ? 'Building' : 'Стройка' },
                 { id: 'УПРАВЛЕНИЕ', label: lang === 'en' ? 'Controls' : 'Управление' },
-                { id: 'QOL', label: lang === 'en' ? 'QoL / Comfort' : 'QoL / Комфорт' },
+                { id: 'QOL', label: 'QoL' },
                 { id: 'МОДОВЫЕ', label: lang === 'en' ? 'Modded' : 'Модовые' }
               ]
             : [
-                { id: 'all', label: lang === 'en' ? 'All Commands' : 'Все команды' },
-                { id: 'ПРАВА', label: lang === 'en' ? 'Permissions' : '👑 Права' },
-                { id: 'МОДЕРАЦИЯ', label: lang === 'en' ? 'Moderation' : '🚨 Модерация' },
-                { id: 'РЕЖИМЫ', label: lang === 'en' ? 'Modes' : '🧙‍♂️ Режимы' },
-                { id: 'ТЕЛЕПОРТ', label: lang === 'en' ? 'Teleport' : '💫 Телепорт' },
-                { id: 'ВЫДАЧА', label: lang === 'en' ? 'Give Items' : '🎁 Выдача' },
-                { id: 'МИР', label: lang === 'en' ? 'World' : '🌦️ Мир' },
-                { id: 'СУЩНОСТИ', label: lang === 'en' ? 'Entities' : '⚙️ Сущности' },
-                { id: 'ИНФО', label: lang === 'en' ? 'Info' : '📢 Инфо' }
+                { id: 'all', label: lang === 'en' ? 'All' : 'Все' },
+                { id: 'ПРАВА', label: lang === 'en' ? 'Perms' : 'Права' },
+                { id: 'МОДЕРАЦИЯ', label: lang === 'en' ? 'Mod' : 'Модерация' },
+                { id: 'РЕЖИМЫ', label: lang === 'en' ? 'Modes' : 'Режимы' },
+                { id: 'ТЕЛЕПОРТ', label: lang === 'en' ? 'TP' : 'Телепорт' },
+                { id: 'ВЫДАЧА', label: lang === 'en' ? 'Give' : 'Выдача' },
+                { id: 'МИР', label: lang === 'en' ? 'World' : 'Мир' },
+                { id: 'СУЩНОСТИ', label: lang === 'en' ? 'Entities' : 'Сущности' },
+                { id: 'ИНФО', label: lang === 'en' ? 'Info' : 'Инфо' }
               ]
           ).map((cat) => (
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-none text-xs font-bold transition-all cursor-pointer font-mono uppercase ${
+              className={`px-3 py-1.5 text-xs uppercase transition-all ${
                 activeCategory === cat.id
-                  ? 'bg-[#cd412b] text-white font-black'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-[#cd412b] text-white'
+                  : 'text-gray-400 hover:text-white bg-[#1b1e26]'
               }`}
             >
               {cat.label}
@@ -212,133 +197,67 @@ export default function BindsTab({ onCopy, lang }: BindsTabProps) {
       </div>
 
       {/* Info Notice */}
-      <div className="bg-[#14171e]/90 border-l-4 border-l-[#cd412b] border-y border-r border-[#2a2f3b] text-white rounded-none p-4 flex items-start gap-3 relative overflow-hidden">
-        {/* Tactical Corner Brackets */}
-        <div className="rust-bracket-tr" />
-        <div className="rust-bracket-br" />
-        
+      <div className="bg-[#14171e] border border-[#2a2f3b] text-white p-4 flex gap-3">
         <Info size={18} className="text-[#cd412b] mt-0.5 flex-shrink-0" />
-        <div className="text-xs space-y-1 font-sans z-10">
-          <p className="font-bold text-[#cd412b] uppercase tracking-wider font-mono text-[11px]">
+        <div className="text-xs space-y-1">
+          <p className="font-bold text-[#cd412b] uppercase">
             {bindsMode === 'player'
-              ? (lang === 'en' ? 'How to install a bind?' : 'Как установить бинд?')
+              ? (lang === 'en' ? 'How to install?' : 'Как установить?')
               : (lang === 'en' ? 'How to use admin commands?' : 'Как использовать админ-команды?')
             }
           </p>
-          <p className="text-gray-300 font-medium">
+          <p className="text-gray-400">
             {bindsMode === 'player' ? (
-              lang === 'en' ? (
-                <>Click on any card to copy the command. Launch Rust, open the developer console by pressing <strong className="font-mono text-white bg-[#0c0d10] border border-[#2a2f3b] px-1 py-0.5 rounded-none">F1</strong>, paste the copied bind via <strong className="font-mono text-white bg-[#0c0d10] border border-[#2a2f3b] px-1 py-0.5 rounded-none">Ctrl + V</strong> and press <strong className="font-mono text-white bg-[#0c0d10] border border-[#2a2f3b] px-1 py-0.5 rounded-none">Enter</strong>.</>
-              ) : (
-                <>Кликните по любой карточке, чтобы скопировать команду. Зайдите в игру Rust, откройте консоль разработчика на клавишу <strong className="font-mono text-white bg-[#0c0d10] border border-[#2a2f3b] px-1 py-0.5 rounded-none">F1</strong>, вставьте скопированный бинд через <strong className="font-mono text-white bg-[#0c0d10] border border-[#2a2f3b] px-1 py-0.5 rounded-none">Ctrl + V</strong> и нажмите <strong className="font-mono text-white bg-[#0c0d10] border border-[#2a2f3b] px-1 py-0.5 rounded-none">Enter</strong>.</>
-              )
+              lang === 'en' ? 'Click to copy, open console (F1) in Rust, paste (Ctrl+V) and Enter.' : 'Кликните, чтобы скопировать. В игре откройте консоль (F1), вставьте (Ctrl+V) и нажмите Enter.'
             ) : (
-              lang === 'en' ? (
-                <>Click on any command to copy it. You must have admin or moderator permissions (auth level 1 or 2) on the server. Open the console via <strong className="font-mono text-white bg-[#0c0d10] border border-[#2a2f3b] px-1 py-0.5 rounded-none">F1</strong>, paste via <strong className="font-mono text-white bg-[#0c0d10] border border-[#2a2f3b] px-1 py-0.5 rounded-none">Ctrl + V</strong>, replace brackets like <code className="text-amber-400 font-bold font-mono">&lt;ID&gt;</code> with real values, and press <strong className="font-mono text-white bg-[#0c0d10] border border-[#2a2f3b] px-1 py-0.5 rounded-none">Enter</strong>.</>
-              ) : (
-                <>Кликните по команде, чтобы скопировать её. У вас должны быть права администратора или модератора на сервере. Откройте консоль на <strong className="font-mono text-white bg-[#0c0d10] border border-[#2a2f3b] px-1 py-0.5 rounded-none">F1</strong>, вставьте через <strong className="font-mono text-white bg-[#0c0d10] border border-[#2a2f3b] px-1 py-0.5 rounded-none">Ctrl + V</strong>, замените параметры в скобках <code className="text-amber-400 font-bold font-mono">&lt;ID&gt;</code> на реальные значения и нажмите <strong className="font-mono text-white bg-[#0c0d10] border border-[#2a2f3b] px-1 py-0.5 rounded-none">Enter</strong>.</>
-              )
+              lang === 'en' ? 'Click to copy. You need auth level 1/2. Paste in console (F1), replace <ID> with actual value, and Enter.' : 'Кликните, чтобы скопировать. Нужен auth level 1/2. Вставьте в консоль (F1), замените <ID> на нужное значение и нажмите Enter.'
             )}
           </p>
         </div>
       </div>
 
       {/* Binds Grid */}
-      <AnimatePresence mode="popLayout">
-        {filteredBinds.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredBinds.map((bind) => {
-              const trans = lang === 'en' && bindsTranslationMap[bind.cmd] ? {
-                ...bind,
-                desc: bindsTranslationMap[bind.cmd].desc,
-                explanation: bindsTranslationMap[bind.cmd].explanation
-              } : bind;
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {filteredBinds.map((bind) => {
+          const trans = lang === 'en' && bindsTranslationMap[bind.cmd] ? {
+            ...bind,
+            desc: bindsTranslationMap[bind.cmd].desc,
+            explanation: bindsTranslationMap[bind.cmd].explanation
+          } : bind;
 
-              // Check if it's an admin command and has an example
-              const adminItem = bind as unknown as AdminCommandItem;
+          const adminItem = bind as unknown as AdminCommandItem;
 
-              return (
-                <motion.div
-                  key={bind.cmd}
-                  layout="position"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                  onClick={() => onCopy(bind.cmd)}
-                  className="group relative bg-[#14171e]/90 hover:bg-[#1b1e26] border border-[#2a2f3b] hover:border-[#cd412b]/50 rounded-none p-5 cursor-pointer flex flex-col justify-between shadow-lg overflow-hidden animate-fade-in"
-                >
-                  {/* Tactical Corner Brackets */}
-                  <div className="rust-bracket-tl opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="rust-bracket-tr opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="rust-bracket-bl opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="rust-bracket-br opacity-0 group-hover:opacity-100 transition-opacity" />
+          return (
+            <div
+              key={bind.cmd}
+              onClick={() => onCopy(bind.cmd)}
+              className="bg-[#14171e] border-2 border-[#cd412b]/50 shadow-[0_0_10px_rgba(205,65,43,0.4),_0_0_10px_rgba(59,130,246,0.4)] p-4 cursor-pointer flex flex-col justify-between transition-all"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] text-gray-500 uppercase">{bindsCategoryMap[bind.category]?.[lang] || bind.category}</span>
+                  <Copy size={12} className="text-gray-500" />
+                </div>
 
-                  {/* Subtle hover hazard or line indicator */}
-                  <div className="absolute top-0 left-0 w-full h-0.5 bg-[#cd412b] scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <h4 className="text-sm font-bold text-white mb-1 uppercase">{trans.desc}</h4>
+                {trans.explanation && (
+                  <p className="text-xs text-gray-400 mb-3">{trans.explanation}</p>
+                )}
 
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-none text-[9px] font-bold border uppercase font-mono ${getCategoryClass(bind.category)}`}>
-                        {getCategoryIcon(bind.category)}
-                        {bindsCategoryMap[bind.category]?.[lang] || bind.category}
-                      </span>
-                      <Copy size={12} className="text-gray-500 group-hover:text-[#cd412b] opacity-60 group-hover:opacity-100 transition-all" />
-                    </div>
-
-                    <h4 className="text-sm font-bold text-gray-200 group-hover:text-[#cd412b] font-sans tracking-tight mb-2 uppercase">
-                      {trans.desc}
-                    </h4>
-
-                    {trans.explanation && (
-                      <p className="text-xs text-gray-400 leading-relaxed font-sans mb-3 font-medium">
-                        {trans.explanation}
-                      </p>
-                    )}
-
-                    {/* Example block if exists */}
-                    {adminItem.example && (
-                      <div className="mt-2 mb-4 bg-[#0c0d10]/60 p-2.5 border border-[#2a2f3b] rounded-none">
-                        <div className="text-[10px] font-mono font-bold text-amber-500/80 uppercase mb-1">
-                          {lang === 'en' ? 'Example:' : 'Пример:'}
-                        </div>
-                        <div className="text-xs font-mono text-gray-300 break-all select-all">
-                          {adminItem.example}
-                        </div>
-                      </div>
-                    )}
+                {adminItem.example && (
+                  <div className="mb-3 bg-[#0c0d10] p-2 border border-[#2a2f3b] text-[10px] font-mono text-amber-500">
+                    {lang === 'en' ? 'Example: ' : 'Пример: '}{adminItem.example}
                   </div>
+                )}
+              </div>
 
-                  {/* Command Block */}
-                  <div className="mt-auto bg-[#0c0d10] border border-[#2a2f3b] group-hover:border-[#cd412b]/30 p-3 rounded-none text-xs font-mono text-[#cd412b] break-all select-all flex items-center justify-between">
-                    <span className="truncate mr-2">{bind.cmd}</span>
-                    <span className="text-[9px] text-gray-500 group-hover:text-[#cd412b]/90 uppercase font-bold font-mono flex-shrink-0 ml-2">
-                      {lang === 'en' ? 'click to copy' : 'клик для копирования'}
-                    </span>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="py-12 text-center bg-[#14171e]/90 border border-[#2a2f3b] rounded-sm"
-          >
-            <div className="text-gray-600 text-4xl mb-3">⌨️</div>
-            <h3 className="text-gray-400 font-bold mb-1 font-mono uppercase tracking-wider">
-              {bindsMode === 'player'
-                ? (lang === 'en' ? 'Bind not found' : 'Такой бинд не найден')
-                : (lang === 'en' ? 'Command not found' : 'Такая команда не найдена')
-              }
-            </h3>
-            <p className="text-xs text-gray-600 font-mono">{lang === 'en' ? 'Try entering another keyword' : 'Попробуйте ввести другое ключевое слово'}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <div className="mt-2 bg-[#0c0d10] border border-[#2a2f3b] p-2 text-xs font-mono text-[#cd412b] truncate">
+                {bind.cmd}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

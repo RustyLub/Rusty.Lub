@@ -310,6 +310,12 @@ const BoltActionSVG = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
+const PumpShotgunSVG = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+    <rect x="10" y="45" width="80" height="10" fill="#374151" />
+  </svg>
+);
+
 interface Attachment {
   name: { ru: string; en: string };
   desc: { ru: string; en: string };
@@ -320,7 +326,7 @@ interface Attachment {
 interface WeaponGuide {
   id: string;
   name: { ru: string; en: string };
-  category: 'rifles' | 'smgs' | 'special';
+  category: 'rifles' | 'smgs' | 'shotguns' | 'pistols' | 'snipers' | 'special';
   categoryLabel: { ru: string; en: string };
   icon: string;
   difficulty: 'easy' | 'medium' | 'hard' | 'veteran';
@@ -333,6 +339,8 @@ interface WeaponGuide {
     fireRate: number; // RPM
     velocity: number; // m/s
     magazine: number;
+    range: number; // Meters
+    accuracy: number; // 0-100
   };
   recoilDesc: { ru: string; en: string };
   tip: { ru: string; en: string };
@@ -396,7 +404,7 @@ const weaponsDatabase: WeaponGuide[] = [
     difficultyColor: 'text-rose-500 border-rose-500/20 bg-rose-500/5',
     optimalMin: 20,
     optimalMax: 125,
-    stats: { damage: 50, fireRate: 450, velocity: 375, magazine: 30 },
+    stats: { damage: 50, fireRate: 450, velocity: 375, magazine: 30, range: 100, accuracy: 80 },
     recoilDesc: {
       ru: 'Первые 5 патронов летят вертикально вверх с легким уклоном вправо. После этого ствол резко уводит влево до 10-го патрона, затем идет плавное смещение вправо. Требует мышечной памяти.',
       en: 'The first 5 bullets travel vertically upwards with a slight right tilt. Then, the barrel pulls sharply left until the 10th bullet, followed by a smooth sway right. Requires active muscle memory.'
@@ -418,7 +426,7 @@ const weaponsDatabase: WeaponGuide[] = [
     difficultyColor: 'text-amber-500 border-amber-500/20 bg-amber-500/5',
     optimalMin: 30,
     optimalMax: 150,
-    stats: { damage: 40, fireRate: 500, velocity: 375, magazine: 30 },
+    stats: { damage: 40, fireRate: 500, velocity: 375, magazine: 30, range: 100, accuracy: 85 },
     recoilDesc: {
       ru: 'Очень простая, почти линейная отдача с минимальным горизонтальным уводом. Ствол плавно движется вверх и слегка вправо. Легко поддается контролю даже без опыта.',
       en: 'Highly predictable, near-linear vertical recoil with minor horizontal sway. The barrel glides upwards and slightly right. Very easy to control even for beginners.'
@@ -440,7 +448,7 @@ const weaponsDatabase: WeaponGuide[] = [
     difficultyColor: 'text-rose-400 border-rose-400/20 bg-rose-400/5',
     optimalMin: 10,
     optimalMax: 55,
-    stats: { damage: 35, fireRate: 600, velocity: 300, magazine: 30 },
+    stats: { damage: 35, fireRate: 600, velocity: 300, magazine: 30, range: 50, accuracy: 70 },
     recoilDesc: {
       ru: 'Высокий темп стрельбы создает агрессивную горизонтальную тряску. Первые 4 патрона идут вверх, затем начинается резкий зигзагообразный увод влево и вправо.',
       en: 'The blistering rate of fire triggers high-frequency horizontal wobble. The first 4 rounds climb straight up, followed by a tight zig-zag shift left and right.'
@@ -462,7 +470,7 @@ const weaponsDatabase: WeaponGuide[] = [
     difficultyColor: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
     optimalMin: 10,
     optimalMax: 65,
-    stats: { damage: 38, fireRate: 462, velocity: 300, magazine: 20 },
+    stats: { damage: 38, fireRate: 462, velocity: 300, magazine: 20, range: 45, accuracy: 65 },
     recoilDesc: {
       ru: 'Умеренная вертикальная отдача и очень слабый горизонтальный увод. Оружие предсказуемо поднимается вверх-вправо, что легко компенсируется легким движением вниз-влево.',
       en: 'Mild vertical drift paired with comfortable horizontal shake. The barrel smoothly rises up and right, easily offset by a steady pull down-left.'
@@ -484,7 +492,7 @@ const weaponsDatabase: WeaponGuide[] = [
     difficultyColor: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
     optimalMin: 5,
     optimalMax: 40,
-    stats: { damage: 32, fireRate: 600, velocity: 240, magazine: 24 },
+    stats: { damage: 32, fireRate: 600, velocity: 240, magazine: 24, range: 35, accuracy: 60 },
     recoilDesc: {
       ru: 'Высокая частота выстрелов быстро задирает ствол вверх, но горизонтальный увод почти отсутствует. Достаточно тянуть мышку строго вниз.',
       en: 'The rapid cycling rate quickly pushes the barrel straight up, but horizontal drift is nearly non-existent. Simply pull the mouse directly down.'
@@ -506,7 +514,7 @@ const weaponsDatabase: WeaponGuide[] = [
     difficultyColor: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
     optimalMin: 25,
     optimalMax: 100,
-    stats: { damage: 40, fireRate: 343, velocity: 375, magazine: 16 },
+    stats: { damage: 40, fireRate: 343, velocity: 375, magazine: 16, range: 80, accuracy: 75 },
     recoilDesc: {
       ru: 'Оружие стреляет одиночными. При быстром кликанье ствол совершает короткие скачки вверх, которые быстро затухают самостоятельно.',
       en: 'Fires semi-automatically. Rapid spam trigger pulls cause brief vertical jumps which settle quickly on their own.'
@@ -528,7 +536,7 @@ const weaponsDatabase: WeaponGuide[] = [
     difficultyColor: 'text-rose-500 border-rose-500/20 bg-rose-500/5',
     optimalMin: 40,
     optimalMax: 120,
-    stats: { damage: 45, fireRate: 500, velocity: 375, magazine: 60 },
+    stats: { damage: 45, fireRate: 500, velocity: 375, magazine: 60, range: 110, accuracy: 80 },
     recoilDesc: {
       ru: 'Обладает массивной вертикальной отдачей и хаотичным боковым биением из стороны в сторону. Контролировать полный магазин без модулей практически невозможно.',
       en: 'Features immense vertical climb coupled with randomized lateral shaking. Controlling a full spray without attachments is an extreme challenge.'
@@ -550,7 +558,7 @@ const weaponsDatabase: WeaponGuide[] = [
     difficultyColor: 'text-purple-500 border-purple-500/20 bg-purple-500/5',
     optimalMin: 50,
     optimalMax: 200,
-    stats: { damage: 65, fireRate: 500, velocity: 488, magazine: 100 },
+    stats: { damage: 65, fireRate: 500, velocity: 488, magazine: 100, range: 120, accuracy: 85 },
     recoilDesc: {
       ru: 'Самая тяжелая вертикальная отдача в игре, буквально уносящая ствол в небо за секунду, но полное отсутствие горизонтального разброса при стрельбе сидя.',
       en: 'Features the most aggressive vertical climb in the game, rapidly pulling the gun skyward, but exhibits zero horizontal sway when crouched.'
@@ -572,7 +580,7 @@ const weaponsDatabase: WeaponGuide[] = [
     difficultyColor: 'text-amber-400 border-amber-400/20 bg-amber-400/5',
     optimalMin: 100,
     optimalMax: 300,
-    stats: { damage: 80, fireRate: 40, velocity: 656, magazine: 4 },
+    stats: { damage: 80, fireRate: 40, velocity: 656, magazine: 4, range: 150, accuracy: 95 },
     recoilDesc: {
       ru: 'Автоматическая отдача отсутствует из-за продольно-скользящего затвора. Основная сложность — расчет баллистического падения пули на сверхдальних дистанциях.',
       en: 'Recoil control is non-applicable due to single bolt-action cycling. The core difficulty lies in compensating for bullet drop at extreme distances.'
@@ -582,6 +590,182 @@ const weaponsDatabase: WeaponGuide[] = [
       en: 'Always load High Velocity (HV) ammunition to flatten bullet trajectory and speed. A tactical laser is valuable for settling reticle shake on high magnification scopes.'
     },
     attachments: [attachmentsDb.scope8x, attachmentsDb.scope16x, attachmentsDb.laser]
+  },
+  {
+    id: 'revolver',
+    name: { ru: 'Револьвер', en: 'Revolver' },
+    category: 'pistols',
+    categoryLabel: { ru: 'Пистолеты', en: 'Pistols' },
+    icon: '🔫',
+    difficulty: 'medium',
+    difficultyLabel: { ru: 'Средняя', en: 'Medium' },
+    difficultyColor: 'text-amber-500 border-amber-500/20 bg-amber-500/5',
+    optimalMin: 5,
+    optimalMax: 50,
+    stats: { damage: 35, fireRate: 240, velocity: 200, magazine: 8, range: 50, accuracy: 60 },
+    recoilDesc: { ru: 'Сильный подброс.', en: 'Strong recoil.' },
+    tip: { ru: 'Неплохо в начале вайпа.', en: 'Decent early wipe.' },
+    attachments: []
+  },
+  {
+    id: 'sap',
+    name: { ru: 'Полуавтоматический пистолет (SAP)', en: 'Semi-Automatic Pistol (SAP)' },
+    category: 'pistols',
+    categoryLabel: { ru: 'Пистолеты', en: 'Pistols' },
+    icon: '🔫',
+    difficulty: 'easy',
+    difficultyLabel: { ru: 'Легкая', en: 'Easy' },
+    difficultyColor: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
+    optimalMin: 10,
+    optimalMax: 60,
+    stats: { damage: 35, fireRate: 450, velocity: 240, magazine: 10, range: 60, accuracy: 75 },
+    recoilDesc: { ru: 'Стандартная вертикальная отдача.', en: 'Standard vertical recoil.' },
+    tip: { ru: 'Хороший стартовый вариант.', en: 'Good starter weapon.' },
+    attachments: [attachmentsDb.laser]
+  },
+  {
+    id: 'pump_shotgun',
+    name: { ru: 'Помповый дробовик', en: 'Pump Shotgun' },
+    category: 'shotguns',
+    categoryLabel: { ru: 'Дробовики', en: 'Shotguns' },
+    icon: '💥',
+    difficulty: 'easy',
+    difficultyLabel: { ru: 'Легкая', en: 'Easy' },
+    difficultyColor: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
+    optimalMin: 5,
+    optimalMax: 30,
+    stats: { damage: 100, fireRate: 60, velocity: 225, magazine: 6, range: 30, accuracy: 50 },
+    recoilDesc: { ru: 'Средняя отдача.', en: 'Medium recoil.' },
+    tip: { ru: 'Отличен в упор.', en: 'Great at close range.' },
+    attachments: [attachmentsDb.laser]
+  },
+  {
+    id: 'm92',
+    name: { ru: 'Пистолет M92', en: 'M92 Beretta' },
+    category: 'pistols',
+    categoryLabel: { ru: 'Пистолеты', en: 'Pistols' },
+    icon: '🔫',
+    difficulty: 'easy',
+    difficultyLabel: { ru: 'Легкая', en: 'Easy' },
+    difficultyColor: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
+    optimalMin: 10,
+    optimalMax: 50,
+    stats: { damage: 35, fireRate: 400, velocity: 300, magazine: 15, range: 50, accuracy: 70 },
+    recoilDesc: { ru: 'Низкая отдача.', en: 'Low recoil.' },
+    tip: { ru: 'Хороший пистолет.', en: 'Good pistol.' },
+    attachments: [attachmentsDb.laser]
+  },
+  {
+    id: 'python',
+    name: { ru: 'Револьвер Питон', en: 'Python Revolver' },
+    category: 'pistols',
+    categoryLabel: { ru: 'Пистолеты', en: 'Pistols' },
+    icon: '🔫',
+    difficulty: 'hard',
+    difficultyLabel: { ru: 'Высокая', en: 'Hard' },
+    difficultyColor: 'text-rose-500 border-rose-500/20 bg-rose-500/5',
+    optimalMin: 20,
+    optimalMax: 70,
+    stats: { damage: 60, fireRate: 200, velocity: 300, magazine: 6, range: 70, accuracy: 80 },
+    recoilDesc: { ru: 'Сильная отдача.', en: 'Strong recoil.' },
+    tip: { ru: 'Убийственный урон.', en: 'Deadly damage.' },
+    attachments: [attachmentsDb.holosight]
+  },
+  {
+    id: 'm16a2',
+    name: { ru: 'M16A2', en: 'M16A2' },
+    category: 'rifles',
+    categoryLabel: { ru: 'Винтовки', en: 'Rifles' },
+    icon: '🔫',
+    difficulty: 'medium',
+    difficultyLabel: { ru: 'Средняя', en: 'Medium' },
+    difficultyColor: 'text-amber-500 border-amber-500/20 bg-amber-500/5',
+    optimalMin: 20,
+    optimalMax: 100,
+    stats: { damage: 45, fireRate: 450, velocity: 350, magazine: 30, range: 100, accuracy: 80 },
+    recoilDesc: { ru: 'Стандартная отдача.', en: 'Standard recoil.' },
+    tip: { ru: 'Хороша на средних.', en: 'Good for medium range.' },
+    attachments: [attachmentsDb.laser]
+  },
+  {
+    id: 'm39',
+    name: { ru: 'Винтовка M39', en: 'M39 Rifle' },
+    category: 'rifles',
+    categoryLabel: { ru: 'Винтовки', en: 'Rifles' },
+    icon: '🔫',
+    difficulty: 'medium',
+    difficultyLabel: { ru: 'Средняя', en: 'Medium' },
+    difficultyColor: 'text-amber-500 border-amber-500/20 bg-amber-500/5',
+    optimalMin: 50,
+    optimalMax: 150,
+    stats: { damage: 55, fireRate: 300, velocity: 400, magazine: 20, range: 150, accuracy: 90 },
+    recoilDesc: { ru: 'Низкая отдача.', en: 'Low recoil.' },
+    tip: { ru: 'Для точной стрельбы.', en: 'For precision.' },
+    attachments: [attachmentsDb.scope8x, attachmentsDb.laser]
+  },
+  {
+    id: 'l96',
+    name: { ru: 'Винтовка L96', en: 'L96 Rifle' },
+    category: 'snipers',
+    categoryLabel: { ru: 'Снайперки', en: 'Snipers' },
+    icon: '🎯',
+    difficulty: 'hard',
+    difficultyLabel: { ru: 'Высокая', en: 'Hard' },
+    difficultyColor: 'text-rose-500 border-rose-500/20 bg-rose-500/5',
+    optimalMin: 100,
+    optimalMax: 500,
+    stats: { damage: 90, fireRate: 30, velocity: 800, magazine: 5, range: 500, accuracy: 98 },
+    recoilDesc: { ru: 'Затворная.', en: 'Bolt action.' },
+    tip: { ru: 'Летальный исход.', en: 'Deadly.' },
+    attachments: [attachmentsDb.scope16x, attachmentsDb.laser]
+  },
+  {
+    id: 'double_barrel',
+    name: { ru: 'Двуствольный дробовик', en: 'Double Barrel Shotgun' },
+    category: 'shotguns',
+    categoryLabel: { ru: 'Дробовики', en: 'Shotguns' },
+    icon: '💥',
+    difficulty: 'easy',
+    difficultyLabel: { ru: 'Легкая', en: 'Easy' },
+    difficultyColor: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
+    optimalMin: 0,
+    optimalMax: 15,
+    stats: { damage: 120, fireRate: 100, velocity: 200, magazine: 2, range: 15, accuracy: 40 },
+    recoilDesc: { ru: 'Высокая.', en: 'High.' },
+    tip: { ru: 'Идеален для засад.', en: 'Great for ambushes.' },
+    attachments: [attachmentsDb.laser]
+  },
+  {
+    id: 'waterpipe',
+    name: { ru: 'Самодельный дробовик', en: 'Waterpipe Shotgun' },
+    category: 'shotguns',
+    categoryLabel: { ru: 'Дробовики', en: 'Shotguns' },
+    icon: '💥',
+    difficulty: 'easy',
+    difficultyLabel: { ru: 'Легкая', en: 'Easy' },
+    difficultyColor: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
+    optimalMin: 0,
+    optimalMax: 10,
+    stats: { damage: 100, fireRate: 20, velocity: 150, magazine: 1, range: 10, accuracy: 30 },
+    recoilDesc: { ru: 'Средняя.', en: 'Medium.' },
+    tip: { ru: 'Дешево и сердито.', en: 'Cheap and dirty.' },
+    attachments: []
+  },
+  {
+    id: 'spas12',
+    name: { ru: 'Дробовик Spas-12', en: 'Spas-12 Shotgun' },
+    category: 'shotguns',
+    categoryLabel: { ru: 'Дробовики', en: 'Shotguns' },
+    icon: '💥',
+    difficulty: 'medium',
+    difficultyLabel: { ru: 'Средняя', en: 'Medium' },
+    difficultyColor: 'text-amber-500 border-amber-500/20 bg-amber-500/5',
+    optimalMin: 0,
+    optimalMax: 25,
+    stats: { damage: 90, fireRate: 80, velocity: 250, magazine: 6, range: 25, accuracy: 55 },
+    recoilDesc: { ru: 'Средняя.', en: 'Medium.' },
+    tip: { ru: 'Автоматический дробовик.', en: 'Semi-auto shotgun.' },
+    attachments: [attachmentsDb.laser]
   }
 ];
 
@@ -600,6 +784,12 @@ export default function WeaponGuidesTab({ lang }: { lang: 'ru' | 'en' }) {
     'hmlmg': HMLMGSVG,
     'm249': M249SVG,
     'bolt': BoltActionSVG,
+    'm16a2': AK47SVG,
+    'm39': SARSVG,
+    'l96': BoltActionSVG,
+    'double_barrel': PumpShotgunSVG, // Assuming I need to add PumpShotgunSVG
+    'waterpipe': PumpShotgunSVG,
+    'spas12': PumpShotgunSVG,
   };
 
   const WeaponIcon = ({ id, size = 24 }: { id: string; size?: number }) => {
@@ -619,50 +809,39 @@ export default function WeaponGuidesTab({ lang }: { lang: 'ru' | 'en' }) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header and Controls */}
-      <div className="flex flex-col xl:flex-row gap-4 justify-between items-stretch xl:items-center bg-[#14171e]/90 p-5 rounded-none border border-[#2a2f3b] shadow-md relative overflow-hidden">
-        {/* Tactical Corner accents */}
-        <div className="rust-bracket-tl" />
-        <div className="rust-bracket-tr" />
-        <div className="rust-bracket-bl" />
-        <div className="rust-bracket-br" />
-
+      <div className="flex flex-col xl:flex-row gap-3 justify-between items-stretch xl:items-center bg-[#14171e] p-4 border border-[#cd412b]/50 shadow-[0_0_10px_rgba(205,65,43,0.3),_0_0_10px_rgba(59,130,246,0.3)]">
         {/* Search */}
         <div className="relative flex-1 max-w-lg">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={lang === 'ru' ? "Поиск оружия по названию, гайду..." : "Search weapons by name or spray guide..."}
-            className="w-full bg-[#0c0d10] border border-[#2a2f3b] focus:border-[#cd412b]/70 focus:ring-1 focus:ring-[#cd412b]/30 text-[#e1e1e6] placeholder-gray-500 pl-11 pr-4 py-3 rounded-none outline-none transition-all text-sm font-sans font-medium"
+            placeholder={lang === 'ru' ? "Поиск..." : "Search..."}
+            className="w-full bg-[#0c0d10] border border-[#2a2f3b] text-[#e1e1e6] placeholder-gray-600 pl-10 pr-3 py-2 rounded text-sm outline-none transition-all"
           />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-[10px] font-bold px-2 py-1 rounded-none bg-[#1b1e26] border border-[#2a2f3b]"
-            >
-              {lang === 'ru' ? 'Сброс' : 'Clear'}
-            </button>
-          )}
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex flex-wrap gap-1.5 bg-[#0c0d10] p-1.5 rounded-none border border-[#2a2f3b] relative z-10">
+        <div className="flex flex-wrap gap-1">
           {[
-            { id: 'all', label: lang === 'ru' ? 'Все Оружие' : 'All Weapons' },
-            { id: 'rifles', label: lang === 'ru' ? 'Винтовки / Автоматы' : 'Rifles' },
-            { id: 'smgs', label: lang === 'ru' ? 'Пистолеты-пулеметы' : 'SMGs' },
-            { id: 'special', label: lang === 'ru' ? 'Снайперские / Тяжелые' : 'Heavy / Sniper' }
+            { id: 'all', label: lang === 'ru' ? 'Все' : 'All' },
+            { id: 'rifles', label: lang === 'ru' ? 'Винтовки' : 'Rifles' },
+            { id: 'smgs', label: lang === 'ru' ? 'ПП' : 'SMGs' },
+            { id: 'shotguns', label: lang === 'ru' ? 'Дробовики' : 'Shotguns' },
+            { id: 'pistols', label: lang === 'ru' ? 'Пистолеты' : 'Pistols' },
+            { id: 'snipers', label: lang === 'ru' ? 'Снайперки' : 'Snipers' },
+            { id: 'special', label: lang === 'ru' ? 'Спец' : 'Special' }
           ].map((cat) => (
             <button
               key={cat.id}
               onClick={() => setCategoryFilter(cat.id as any)}
-              className={`px-3.5 py-1.5 text-[10.5px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+              className={`px-3 py-1.5 text-xs uppercase ${
                 categoryFilter === cat.id
                   ? 'bg-[#cd412b] text-white'
-                  : 'text-gray-500 hover:text-white bg-[#14171e]/40'
+                  : 'text-gray-400 hover:text-white bg-[#1b1e26]'
               }`}
             >
               {cat.label}
@@ -671,9 +850,9 @@ export default function WeaponGuidesTab({ lang }: { lang: 'ru' | 'en' }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* WEAPONS LIST */}
-        <div className={`${selectedWeapon ? 'lg:col-span-6' : 'lg:col-span-12'} grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300`}>
+        <div className={`${selectedWeapon ? 'lg:col-span-6' : 'lg:col-span-12'} grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3`}>
           <AnimatePresence mode="popLayout">
             {filteredWeapons.map((weapon, idx) => {
               const isSelected = selectedWeapon?.id === weapon.id;
@@ -681,68 +860,27 @@ export default function WeaponGuidesTab({ lang }: { lang: 'ru' | 'en' }) {
                 <motion.div
                   key={weapon.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2, delay: idx * 0.02 }}
-                  whileHover={{ scale: isSelected ? 1 : 1.02, y: isSelected ? 0 : -2 }}
                   onClick={() => setSelectedWeapon(weapon)}
-                  className={`p-5 rounded-none bg-[#14171e]/90 hover:bg-[#1b1e26] border cursor-pointer relative overflow-hidden flex flex-col justify-between h-48 transition-all group ${
-                    isSelected ? 'border-[#cd412b] ring-1 ring-[#cd412b]/30' : 'border-[#2a2f3b] hover:border-gray-500'
+                  className={`p-4 bg-[#14171e] border cursor-pointer flex flex-col justify-between h-36 transition-all ${
+                    isSelected ? 'border-[#cd412b]' : 'border-[#2a2f3b] hover:border-gray-600'
                   }`}
                 >
-                  {/* Decorative bracket corners on hover/select */}
-                  <div className={`rust-bracket-tl ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`} />
-                  <div className={`rust-bracket-tr ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`} />
-                  <div className={`rust-bracket-bl ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`} />
-                  <div className={`rust-bracket-br ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`} />
-
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#cd412b] scale-y-0 group-hover:scale-y-100 transition-transform origin-bottom" />
-
-                  {/* Top line with weapon badge and category */}
                   <div className="flex justify-between items-start">
-                    <span className="text-[9px] font-mono font-black text-gray-500 uppercase tracking-widest bg-black/40 px-2 py-0.5 border border-[#2a2f3b]">
-                      {weapon.categoryLabel[lang]}
-                    </span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 border uppercase font-mono ${weapon.difficultyColor}`}>
-                      {lang === 'ru' ? 'ОТДАЧА: ' : 'RECOIL: '}{weapon.difficultyLabel[lang]}
-                    </span>
+                    <span className="text-[10px] text-gray-500 uppercase">{weapon.categoryLabel[lang]}</span>
                   </div>
-
-                  {/* Mid Title & Icon */}
-                  <div className="flex items-center gap-4 py-3">
-                    <div className="w-12 h-12 flex items-center justify-center bg-[#1b1e26] border border-[#2a2f3b] relative select-none">
-                      <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-gray-600" />
-                      <div className="absolute top-0.5 right-0.5 w-1 h-1 bg-gray-600" />
-                      {WeaponIcon({ id: weapon.id, size: 40 })}
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 flex items-center justify-center bg-[#1b1e26] border border-[#cd412b]/30">
+                      {WeaponIcon({ id: weapon.id, size: 30 })}
                     </div>
-                    <div className="space-y-0.5">
-                      <h3 className="text-sm font-black text-white group-hover:text-[#cd412b] transition-colors uppercase font-mono tracking-wide leading-none">
-                        {weapon.name[lang]}
-                      </h3>
-                      <p className="text-[10.5px] text-gray-400 font-sans line-clamp-2 leading-snug">
-                        {weapon.recoilDesc[lang]}
-                      </p>
-                    </div>
+                    <h3 className="text-sm font-bold text-white uppercase">{weapon.name[lang]}</h3>
                   </div>
-
-                  {/* Footer metadata info */}
-                  <div className="flex justify-between items-center border-t border-[#2a2f3b]/60 pt-2 text-[10px] font-mono text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <Gauge size={10} className="text-[#cd412b]" />
-                      <span>{lang === 'ru' ? 'Дистанция:' : 'Range:'} <span className="text-gray-300 font-bold">{weapon.optimalMin}м - {weapon.optimalMax}м</span></span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span>{lang === 'ru' ? 'Урон:' : 'Dmg:'} <span className="text-emerald-400 font-bold">{weapon.stats.damage}</span></span>
-                      <span>•</span>
-                      <span>{lang === 'ru' ? 'Маг:' : 'Mag:'} <span className="text-gray-300 font-bold">{weapon.stats.magazine}</span></span>
-                    </div>
-                  </div>
+                  <div className="text-[10px] text-gray-500">{weapon.recoilDesc[lang]}</div>
                 </motion.div>
               );
             })}
           </AnimatePresence>
         </div>
+
 
         {/* DETAILED PANEL VIEW */}
         {selectedWeapon && (
@@ -752,7 +890,7 @@ export default function WeaponGuidesTab({ lang }: { lang: 'ru' | 'en' }) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              className="bg-[#14171e]/95 border-2 border-[#cd412b] p-6 rounded-none relative overflow-hidden shadow-2xl space-y-6"
+              className="bg-[#14171e]/95 border-2 border-[#cd412b] p-6 rounded-none relative overflow-hidden shadow-2xl shadow-[0_0_20px_rgba(205,65,43,0.5)] space-y-6"
             >
               {/* Corner tactical brackets */}
               <div className="rust-bracket-tl" />
@@ -787,12 +925,14 @@ export default function WeaponGuidesTab({ lang }: { lang: 'ru' | 'en' }) {
               </div>
 
               {/* Statistics Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {[
                   { label: lang === 'ru' ? 'Урон' : 'Damage', value: selectedWeapon.stats.damage, suffix: 'HP', icon: <Crosshair size={12} className="text-[#cd412b]" /> },
                   { label: lang === 'ru' ? 'Темп стрельбы' : 'Fire Rate', value: selectedWeapon.stats.fireRate, suffix: 'RPM', icon: <Gauge size={12} className="text-[#cd412b]" /> },
                   { label: lang === 'ru' ? 'Скорость пули' : 'Velocity', value: selectedWeapon.stats.velocity, suffix: 'm/s', icon: <Compass size={12} className="text-[#cd412b]" /> },
-                  { label: lang === 'ru' ? 'Магазин' : 'Magazine', value: selectedWeapon.stats.magazine, suffix: lang === 'ru' ? 'патр.' : 'rds', icon: <Sliders size={12} className="text-[#cd412b]" /> }
+                  { label: lang === 'ru' ? 'Магазин' : 'Magazine', value: selectedWeapon.stats.magazine, suffix: lang === 'ru' ? 'патр.' : 'rds', icon: <Sliders size={12} className="text-[#cd412b]" /> },
+                  { label: lang === 'ru' ? 'Дистанция' : 'Range', value: selectedWeapon.stats.range, suffix: 'm', icon: <Compass size={12} className="text-[#cd412b]" /> },
+                  { label: lang === 'ru' ? 'Точность' : 'Accuracy', value: selectedWeapon.stats.accuracy, suffix: '%', icon: <Crosshair size={12} className="text-[#cd412b]" /> }
                 ].map((stat, i) => (
                   <div key={i} className="bg-[#0c0d10] border border-[#2a2f3b] p-3 text-center relative">
                     <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-gray-600" />

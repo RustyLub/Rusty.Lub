@@ -92,94 +92,67 @@ export default function FpsTab({ onCopy, lang }: FpsTabProps) {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* Intro Header */}
-      <div className="bg-gradient-to-br from-[#14171e] to-[#0c0d10] p-6 rounded-none border border-[#2a2f3b] flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
-        {/* Tactical Corner Brackets */}
-        <div className="rust-bracket-tl" />
-        <div className="rust-bracket-tr" />
-        <div className="rust-bracket-bl" />
-        <div className="rust-bracket-br" />
-
-        {/* Top Hazard Diagonal Stripe */}
-        <div className="absolute top-0 left-0 right-0 h-1 rust-hazard" />
-
-        <div className="p-4 rounded-none bg-[#cd412b]/10 text-[#cd412b] border border-[#cd412b]/20 relative">
-          <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-[#cd412b]" />
-          <Settings size={32} className="animate-spin-slow" />
-        </div>
-        <div className="space-y-1 z-10">
-          <h2 className="text-xl font-bold text-white font-teko uppercase tracking-wider text-2xl">
+      <div className="bg-[#14171e] p-4 border border-[#2a2f3b] flex items-center gap-4">
+        <Settings size={24} className="text-[#cd412b]" />
+        <div className="space-y-1">
+          <h2 className="text-sm font-bold text-white uppercase tracking-wider">
             {fpsTranslationMap.title[lang]}
           </h2>
-          <p className="text-xs text-gray-400 leading-relaxed font-sans max-w-2xl font-medium">
+          <p className="text-xs text-gray-400">
             {fpsTranslationMap.desc[lang]}
           </p>
         </div>
       </div>
 
       {/* Launcher Parameters Generator */}
-      <div className="bg-[#14171e]/90 rounded-none border border-[#2a2f3b] p-6 space-y-6 relative overflow-hidden">
-        {/* Tactical Corner Brackets */}
-        <div className="rust-bracket-tl" />
-        <div className="rust-bracket-tr" />
-        <div className="rust-bracket-bl" />
-        <div className="rust-bracket-br" />
-
-        <div className="flex items-center gap-3 border-b border-[#2a2f3b] pb-4">
-          <Sliders className="text-[#cd412b]" size={18} />
-          <h3 className="text-sm font-bold text-white tracking-widest font-teko uppercase text-lg">
+      <div className="bg-[#14171e] border border-[#2a2f3b] p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Sliders className="text-[#cd412b]" size={16} />
+          <h3 className="text-xs font-bold text-white uppercase">
             {fpsTranslationMap.generatorTitle[lang]}
           </h3>
         </div>
 
-        <p className="text-xs text-gray-400 font-sans font-medium">
+        <p className="text-xs text-gray-400">
           {fpsTranslationMap.generatorDesc[lang]}
         </p>
 
         {/* RAM Selector Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {[8, 12, 16, 24, 32, 64].map((size) => (
-            <motion.button
+            <button
               key={size}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 400, damping: 15 }}
               onClick={() => setRamSize(size)}
-              className={`p-3.5 rounded-none border text-center transition-all cursor-pointer relative ${
+              className={`p-2 border text-center transition-all ${
                 ramSize === size
-                  ? 'bg-[#cd412b] border-[#e6553f] text-white font-black'
+                  ? 'bg-[#cd412b] border-[#cd412b] text-white'
                   : 'bg-[#1b1e26] border-[#2a2f3b] text-gray-400 hover:text-white hover:border-gray-500'
               }`}
             >
-              <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-gray-600/60" />
-              <div className="text-sm font-mono font-bold">{size} GB</div>
-              <div className={`text-[8px] uppercase mt-1 font-mono ${ramSize === size ? 'text-white/80' : 'text-gray-500'}`}>{fpsTranslationMap.ramLabel[lang]}</div>
-            </motion.button>
+              <div className="text-xs font-bold">{size} GB</div>
+              <div className="text-[9px] uppercase mt-1 text-inherit/60">{fpsTranslationMap.ramLabel[lang]}</div>
+            </button>
           ))}
         </div>
 
         {/* Generated Parameters Display */}
-        <div className="space-y-3">
-          <div className="text-xs font-bold text-gray-500 tracking-wider uppercase font-mono">
+        <div className="space-y-2">
+          <div className="text-[10px] font-bold text-gray-500 uppercase">
             {fpsTranslationMap.generatedLabel[lang]}
           </div>
-          <motion.div
-            whileHover={{ scale: 1.006 }}
-            whileTap={{ scale: 0.99 }}
-            transition={{ type: "spring", stiffness: 500, damping: 20 }}
+          <div
             onClick={() => onCopy(generatedParams)}
-            className="group relative bg-[#0c0d10] border border-[#2a2f3b] hover:border-[#cd412b]/50 p-4 rounded-none cursor-pointer flex items-center justify-between"
+            className="group relative bg-[#0c0d10] border border-[#2a2f3b] p-3 cursor-pointer flex items-center justify-between"
           >
-            <div className="font-mono text-xs text-[#cd412b] break-all leading-relaxed pr-8 select-all">
+            <div className="font-mono text-xs text-[#cd412b] truncate pr-4">
               {generatedParams}
             </div>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-gray-500 group-hover:text-[#cd412b] transition-opacity">
-              <Copy size={14} />
-            </div>
-          </motion.div>
-          <div className="text-[10px] text-gray-500 flex items-start gap-1.5 px-1 font-sans font-medium">
-            <Info size={12} className="flex-shrink-0 mt-0.5 text-[#cd412b]" />
+            <Copy size={14} className="text-gray-500" />
+          </div>
+          <div className="text-[10px] text-gray-500 flex items-center gap-2">
+            <Info size={12} className="text-[#cd412b]" />
             <span>
               <strong>{fpsTranslationMap.howToInsert[lang]}</strong> {fpsTranslationMap.howToInsertDesc[lang]}
             </span>
@@ -188,81 +161,56 @@ export default function FpsTab({ onCopy, lang }: FpsTabProps) {
       </div>
 
       {/* In-Game Console Commands */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3 border-b border-[#2a2f3b] pb-4">
-          <Cpu className="text-[#cd412b]" size={18} />
-          <h3 className="text-sm font-bold text-white tracking-widest font-teko uppercase text-lg">
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Cpu className="text-[#cd412b]" size={16} />
+          <h3 className="text-xs font-bold text-white uppercase">
             {fpsTranslationMap.consoleCommandsTitle[lang]}
           </h3>
         </div>
 
-        <p className="text-xs text-gray-400 font-sans font-medium">
-          {fpsTranslationMap.consoleCommandsDesc[lang]}
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {f1Commands.map((item) => (
-            <motion.div
+            <div
               key={item.cmd}
-              whileHover={{ scale: 1.015, y: -2 }}
-              whileTap={{ scale: 0.985 }}
-              transition={{ type: "spring", stiffness: 400, damping: 15 }}
               onClick={() => onCopy(item.cmd)}
-              className="group relative bg-[#14171e]/90 hover:bg-[#1b1e26] border border-[#2a2f3b] hover:border-[#cd412b]/50 p-4 rounded-none cursor-pointer flex flex-col justify-between shadow-md overflow-hidden"
+              className="bg-[#14171e] border border-[#2a2f3b] hover:border-[#cd412b]/50 p-3 cursor-pointer flex flex-col justify-between transition-all"
             >
-              {/* Tactical Corner Brackets */}
-              <div className="rust-bracket-tl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="rust-bracket-tr opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="rust-bracket-bl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="rust-bracket-br opacity-0 group-hover:opacity-100 transition-opacity" />
-
-              <div className="absolute top-0 right-0 w-2 h-full bg-[#cd412b] scale-y-0 group-hover:scale-y-100 transition-transform origin-top" />
-              
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-[#cd412b] font-sans uppercase tracking-wider font-mono">{item.desc}</span>
-                  <span className="text-[9px] bg-[#cd412b]/10 text-[#cd412b] px-2 py-0.5 rounded-none border border-[#cd412b]/20 font-bold uppercase tracking-wider font-mono">
-                    {item.impact}
-                  </span>
-                </div>
-                <p className="text-[11px] text-gray-400 font-sans mb-3 leading-relaxed font-medium">
-                  {item.reason}
-                </p>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-[#cd412b] uppercase">{item.desc}</span>
+                <span className="text-[9px] bg-[#cd412b]/10 text-[#cd412b] px-1.5 py-0.5 uppercase">
+                  {item.impact}
+                </span>
               </div>
-
-              <div className="bg-[#0c0d10] border border-[#2a2f3b] group-hover:border-[#cd412b]/30 p-2.5 rounded-none text-xs font-mono text-[#cd412b] break-all select-all flex items-center justify-between mt-2">
-                <span>{item.cmd}</span>
-                <Copy size={10} className="text-gray-500 group-hover:text-[#cd412b]" />
+              <p className="text-[10px] text-gray-400 mb-2 leading-relaxed">
+                {item.reason}
+              </p>
+              <div className="bg-[#0c0d10] p-2 text-[10px] font-mono text-[#cd412b] truncate">
+                {item.cmd}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
 
       {/* Windows & Hardware Tweaks */}
-      <div className="bg-[#14171e]/90 rounded-none border border-[#2a2f3b] p-6 space-y-5 shadow-lg relative overflow-hidden">
-        {/* Tactical Corner Brackets */}
-        <div className="rust-bracket-tl" />
-        <div className="rust-bracket-tr" />
-        <div className="rust-bracket-bl" />
-        <div className="rust-bracket-br" />
-
-        <div className="flex items-center gap-3 border-b border-[#2a2f3b] pb-4">
-          <Monitor className="text-[#cd412b]" size={18} />
-          <h3 className="text-sm font-bold text-white tracking-widest font-teko uppercase text-lg">
+      <div className="bg-[#14171e] border border-[#2a2f3b] p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Monitor className="text-[#cd412b]" size={16} />
+          <h3 className="text-xs font-bold text-white uppercase">
             {fpsTranslationMap.windowsTitle[lang]}
           </h3>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-2">
           {windowsTweaks.map((tweak, i) => (
-            <div key={i} className="flex gap-4 items-start bg-[#1b1e26] p-4 rounded-none border border-[#2a2f3b] relative">
-              <div className="w-6 h-6 rounded-none bg-[#cd412b]/10 border border-[#cd412b]/20 text-[#cd412b] font-mono text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div key={i} className="flex gap-3 items-start bg-[#1b1e26] p-3 border border-[#2a2f3b]">
+              <div className="w-5 h-5 bg-[#cd412b]/10 text-[#cd412b] font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                 {i + 1}
               </div>
-              <div className="space-y-1">
-                <h4 className="text-xs font-bold text-white font-sans uppercase tracking-wider font-mono">{tweak.title}</h4>
-                <p className="text-xs text-gray-400 leading-relaxed font-sans font-medium">{tweak.desc}</p>
+              <div className="space-y-0.5">
+                <h4 className="text-[11px] font-bold text-white uppercase">{tweak.title}</h4>
+                <p className="text-[10px] text-gray-400">{tweak.desc}</p>
               </div>
             </div>
           ))}

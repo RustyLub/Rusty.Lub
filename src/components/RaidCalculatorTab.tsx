@@ -617,84 +617,60 @@ export default function RaidCalculatorTab({ lang }: RaidCalculatorTabProps) {
   const totalMetal = totalWeaponsNeeded * selectedWeapon.metalPer;
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-      {/* Weapon Selector (Left Panel) */}
-      <div className="xl:col-span-4 bg-[#14171e]/90 p-5 rounded-none border border-[#2a2f3b] space-y-5 h-fit shadow-xl relative overflow-hidden">
-        {/* Tactical Corner Brackets */}
-        <div className="rust-bracket-tl" />
-        <div className="rust-bracket-tr" />
-        <div className="rust-bracket-bl" />
-        <div className="rust-bracket-br" />
-
-        {/* Top subtle line */}
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#cd412b]" />
-
-        <h3 className="text-sm font-bold text-white uppercase tracking-widest border-b border-[#2a2f3b] pb-3 flex items-center gap-2 font-teko text-lg">
+    <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+      {/* Weapon Selector */}
+      <div className="xl:col-span-4 bg-[#14171e] p-4 border border-[#2a2f3b] space-y-3 h-fit">
+        <h3 className="text-xs font-bold text-white uppercase flex items-center gap-2">
           <span>⚔️</span> {lang === 'en' ? 'Weapon Selection' : 'Выбор Вооружения'}
         </h3>
 
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {raidWeapons.map((weapon) => {
             const isSelected = selectedWeaponId === weapon.id;
             const wName = weaponTranslationMap[weapon.id]?.[lang] || weapon.name;
             return (
-              <motion.button
+              <button
                 key={weapon.id}
-                whileHover={{ scale: 1.02, x: 2 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 20 }}
                 onClick={() => setSelectedWeaponId(weapon.id)}
-                className={`w-full flex items-center gap-4 p-4 rounded-none border text-left transition-all cursor-pointer relative ${
+                className={`w-full flex items-center gap-3 p-3 border text-left transition-all ${
                   isSelected
-                    ? 'bg-[#cd412b] border-[#e6553f] text-white'
-                    : 'bg-[#1b1e26] border-[#2a2f3b] text-gray-400 hover:text-white hover:border-gray-700'
+                    ? 'bg-[#cd412b] border-[#cd412b] text-white'
+                    : 'bg-[#1b1e26] border-[#2a2f3b] text-gray-400 hover:text-white hover:border-gray-600'
                 }`}
               >
-                <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-gray-600/30" />
-                <span className={`w-11 h-11 rounded-none flex items-center justify-center border relative ${
-                  isSelected ? 'bg-[#0c0d10] border-[#0c0d10]/30' : 'bg-[#14171e] border-[#2a2f3b]'
-                }`}>
-                  <div className="absolute top-0.5 left-0.5 w-0.5 h-0.5 bg-gray-500/50" />
+                <div className={`w-10 h-10 flex items-center justify-center ${isSelected ? 'bg-[#14171e]' : 'bg-[#14171e]'}`}>
                   <WeaponIcon id={weapon.id} size={20} />
-                </span>
+                </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-bold font-mono tracking-tight truncate uppercase">
+                  <h4 className="text-xs font-bold uppercase truncate">
                     {wName}
                   </h4>
-                  <div className={`flex items-center gap-2 text-[10px] font-mono mt-1 ${isSelected ? 'text-white/85' : 'text-gray-500'}`}>
-                    <span>{lang === 'en' ? `Sulfur: ${weapon.sulfurPer}` : `Сера: ${weapon.sulfurPer}`}</span>
-                    <span>•</span>
-                    <span>{lang === 'en' ? `Metal: ${weapon.metalPer}` : `Металл: ${weapon.metalPer}`}</span>
+                  <div className={`text-[9px] mt-0.5 ${isSelected ? 'text-white/80' : 'text-gray-500'}`}>
+                    {lang === 'en' ? `S:${weapon.sulfurPer} M:${weapon.metalPer}` : `Сера:${weapon.sulfurPer} Металл:${weapon.metalPer}`}
                   </div>
                 </div>
-              </motion.button>
+              </button>
             );
           })}
         </div>
       </div>
 
-      {/* Targets & Calculations (Right Panel) */}
-      <div className="xl:col-span-8 space-y-6">
-        {/* Targets Filter and Header */}
-        <div className="bg-[#14171e]/90 p-5 rounded-none border border-[#2a2f3b] flex flex-col sm:flex-row justify-between items-center gap-4 shadow-xl relative overflow-hidden">
-          <div className="rust-bracket-tl" />
-          <div className="rust-bracket-tr" />
-          <div className="rust-bracket-bl" />
-          <div className="rust-bracket-br" />
-
-          <div className="flex gap-1 bg-[#0c0d10] p-1 rounded-none border border-[#2a2f3b] w-full sm:w-auto">
+      {/* Targets & Calculations */}
+      <div className="xl:col-span-8 space-y-4">
+        <div className="bg-[#14171e] p-4 border border-[#2a2f3b] flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div className="flex gap-1 bg-[#0c0d10] p-0.5 border border-[#2a2f3b] w-full sm:w-auto">
             {[
-              { id: 'walls', label: lang === 'en' ? '🧱 Walls / Barriers' : '🧱 Стены / Преграды' },
-              { id: 'doors', label: lang === 'en' ? '🚪 Doors / Hatches' : '🚪 Двери / Люки' },
-              { id: 'deployables', label: lang === 'en' ? '⚙️ Deployables / Turrets' : '⚙️ Объекты / Турели' }
+              { id: 'walls', label: lang === 'en' ? '🧱 Walls' : '🧱 Стены' },
+              { id: 'doors', label: lang === 'en' ? '🚪 Doors' : '🚪 Двери' },
+              { id: 'deployables', label: lang === 'en' ? '⚙️ Items' : '⚙️ Объекты' }
             ].map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id as any)}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-none text-xs font-bold transition-all cursor-pointer font-mono uppercase ${
+                className={`flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-bold uppercase transition-all ${
                   activeCategory === cat.id
-                    ? 'bg-[#cd412b] text-white font-black'
-                    : 'text-gray-400 hover:text-white'
+                    ? 'bg-[#cd412b] text-white'
+                    : 'text-gray-400 hover:text-white bg-[#14171e]'
                 }`}
               >
                 {cat.label}
@@ -702,18 +678,17 @@ export default function RaidCalculatorTab({ lang }: RaidCalculatorTabProps) {
             ))}
           </div>
 
-          {/* Reset button */}
           {Object.keys(quantities).length > 0 && (
             <button
               onClick={clearAll}
-              className="px-3 py-2 text-xs font-bold text-rose-400 hover:text-white hover:bg-rose-500 bg-rose-500/10 border border-rose-500/20 rounded-none transition-all flex items-center gap-1.5 self-end sm:self-auto cursor-pointer uppercase font-mono"
+              className="px-3 py-1.5 text-[10px] font-bold text-rose-400 hover:text-white hover:bg-rose-500 bg-rose-500/10 border border-rose-500/20 uppercase"
             >
-              <Trash2 size={13} />
-              {lang === 'en' ? 'Clear targets' : 'Очистить цели'}
+              <Trash2 size={12} className="inline mr-1" />
+              {lang === 'en' ? 'Clear' : 'Очистить'}
             </button>
           )}
         </div>
-
+        
         {/* Dynamic Target Quantity Sliders Grid / Custom Visual Wall Tier Selector */}
         {activeCategory === 'walls' && (
           <div className="space-y-4">

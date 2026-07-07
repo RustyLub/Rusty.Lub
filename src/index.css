@@ -682,6 +682,44 @@
   color: #cd412b !important;
 }
 
+/* Ensure the Grand Home Banner always keeps its beautiful dark theme styling and highly legible colors in both light and dark modes */
+#grand-home-banner,
+.light-theme #grand-home-banner {
+  background-color: #0c0d10 !important;
+  border-color: #2a2f3b !important;
+}
+
+#grand-home-banner .text-white,
+.light-theme #grand-home-banner .text-white,
+#grand-home-banner h1,
+.light-theme #grand-home-banner h1 {
+  color: #ffffff !important;
+}
+
+#grand-home-banner .text-gray-200,
+.light-theme #grand-home-banner .text-gray-200,
+#grand-home-banner p,
+.light-theme #grand-home-banner p {
+  color: #e2e8f0 !important;
+}
+
+#grand-home-banner .text-gray-400,
+.light-theme #grand-home-banner .text-gray-400 {
+  color: #94a3b8 !important;
+}
+
+#grand-home-banner .text-\[\#cd412b\],
+.light-theme #grand-home-banner .text-\[\#cd412b\],
+#grand-home-banner span.text-\[\#cd412b\],
+.light-theme #grand-home-banner span.text-\[\#cd412b\],
+#grand-home-banner div.text-\[\#cd412b\],
+.light-theme #grand-home-banner div.text-\[\#cd412b\],
+#grand-home-banner svg.text-\[\#cd412b\],
+.light-theme #grand-home-banner svg.text-\[\#cd412b\] {
+  color: #cd412b !important;
+}
+
+
 
 
 
