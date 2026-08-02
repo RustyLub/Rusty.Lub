@@ -188,134 +188,265 @@ async function startServer() {
     }
   });
 
-  // API route to monitor US, EU, and SEA Rustoria servers online status
+  // API route to monitor US, EU, and SEA Rustoria & Rusty Moose servers online status
   app.get("/api/rustoria", async (req, res) => {
+    const project = (req.query.project as string) || "rustoria";
+    const isMoose = project.toLowerCase() === "rustymoose";
+
     // High-fidelity fallback servers list to ensure perfect UX if Battlemetrics blocks unauthenticated requests
-    const getFallbackServers = () => [
-      // US Servers
-      {
-        id: "bm-us-1",
-        name: "Rustoria.co - US Main",
-        players: Math.floor(Math.random() * 120) + 360,
-        maxPlayers: 500,
-        status: "online",
-        queue: Math.floor(Math.random() * 45) + 15,
-        ip: "us-main.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 242,
-        lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: "bm-us-2",
-        name: "Rustoria.co - US Medium",
-        players: Math.floor(Math.random() * 80) + 290,
-        maxPlayers: 400,
-        status: "online",
-        queue: Math.floor(Math.random() * 15) + 2,
-        ip: "us-medium.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 254,
-        lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: "bm-us-3",
-        name: "Rustoria.co - US Long",
-        players: Math.floor(Math.random() * 100) + 270,
-        maxPlayers: 400,
-        status: "online",
-        queue: Math.floor(Math.random() * 22) + 5,
-        ip: "us-long.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 238,
-        lastWipe: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      // EU Servers
-      {
-        id: "bm-eu-1",
-        name: "Rustoria.co - EU Main",
-        players: Math.floor(Math.random() * 110) + 370,
-        maxPlayers: 500,
-        status: "online",
-        queue: Math.floor(Math.random() * 60) + 25,
-        ip: "eu-main.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 240,
-        lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: "bm-eu-2",
-        name: "Rustoria.co - EU Medium",
-        players: Math.floor(Math.random() * 90) + 280,
-        maxPlayers: 400,
-        status: "online",
-        queue: Math.floor(Math.random() * 20) + 5,
-        ip: "eu-medium.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 251,
-        lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: "bm-eu-3",
-        name: "Rustoria.co - EU Long",
-        players: Math.floor(Math.random() * 95) + 265,
-        maxPlayers: 400,
-        status: "online",
-        queue: Math.floor(Math.random() * 25) + 8,
-        ip: "eu-long.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 235,
-        lastWipe: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      // SEA Servers
-      {
-        id: "bm-sea-1",
-        name: "Rustoria.co - SEA Main",
-        players: Math.floor(Math.random() * 120) + 250,
-        maxPlayers: 400,
-        status: "online",
-        queue: Math.floor(Math.random() * 15) + 1,
-        ip: "sea-main.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 245,
-        lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: "bm-sea-2",
-        name: "Rustoria.co - SEA Medium",
-        players: Math.floor(Math.random() * 80) + 210,
-        maxPlayers: 350,
-        status: "online",
-        queue: Math.floor(Math.random() * 5),
-        ip: "sea-medium.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 250,
-        lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: "bm-sea-3",
-        name: "Rustoria.co - SEA Long",
-        players: Math.floor(Math.random() * 90) + 190,
-        maxPlayers: 350,
-        status: "online",
-        queue: Math.floor(Math.random() * 8),
-        ip: "sea-long.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 241,
-        lastWipe: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
+    const getFallbackServers = () => {
+      if (isMoose) {
+        return [
+          // US Servers
+          {
+            id: "moose-us-1",
+            name: "Rusty Moose - US Main",
+            players: Math.floor(Math.random() * 100) + 380,
+            maxPlayers: 500,
+            status: "online",
+            queue: Math.floor(Math.random() * 40) + 20,
+            ip: "us-main.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 245,
+            lastWipe: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: "moose-us-2",
+            name: "Rusty Moose - US Medium",
+            players: Math.floor(Math.random() * 90) + 310,
+            maxPlayers: 400,
+            status: "online",
+            queue: Math.floor(Math.random() * 20) + 5,
+            ip: "us-medium.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 250,
+            lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: "moose-us-3",
+            name: "Rusty Moose - US Monthly",
+            players: Math.floor(Math.random() * 85) + 280,
+            maxPlayers: 400,
+            status: "online",
+            queue: Math.floor(Math.random() * 15) + 3,
+            ip: "us-monthly.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 238,
+            lastWipe: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: "moose-us-4",
+            name: "Rusty Moose - US Small",
+            players: Math.floor(Math.random() * 60) + 180,
+            maxPlayers: 250,
+            status: "online",
+            queue: Math.floor(Math.random() * 8),
+            ip: "us-small.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 255,
+            lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          // EU Servers
+          {
+            id: "moose-eu-1",
+            name: "Rusty Moose - EU Main",
+            players: Math.floor(Math.random() * 110) + 360,
+            maxPlayers: 500,
+            status: "online",
+            queue: Math.floor(Math.random() * 50) + 15,
+            ip: "eu-main.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 242,
+            lastWipe: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: "moose-eu-2",
+            name: "Rusty Moose - EU Medium",
+            players: Math.floor(Math.random() * 95) + 285,
+            maxPlayers: 400,
+            status: "online",
+            queue: Math.floor(Math.random() * 18) + 4,
+            ip: "eu-medium.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 248,
+            lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: "moose-eu-3",
+            name: "Rusty Moose - EU Monthly",
+            players: Math.floor(Math.random() * 80) + 260,
+            maxPlayers: 400,
+            status: "online",
+            queue: Math.floor(Math.random() * 12) + 2,
+            ip: "eu-monthly.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 236,
+            lastWipe: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          // SEA Servers
+          {
+            id: "moose-sea-1",
+            name: "Rusty Moose - SEA Main",
+            players: Math.floor(Math.random() * 100) + 240,
+            maxPlayers: 400,
+            status: "online",
+            queue: Math.floor(Math.random() * 10) + 1,
+            ip: "sea-main.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 244,
+            lastWipe: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: "moose-sea-2",
+            name: "Rusty Moose - SEA Monthly",
+            players: Math.floor(Math.random() * 70) + 190,
+            maxPlayers: 350,
+            status: "online",
+            queue: Math.floor(Math.random() * 5),
+            ip: "sea-monthly.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 249,
+            lastWipe: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+          }
+        ];
       }
-    ];
+
+      return [
+        // US Servers
+        {
+          id: "bm-us-1",
+          name: "Rustoria.co - US Main",
+          players: Math.floor(Math.random() * 120) + 360,
+          maxPlayers: 500,
+          status: "online",
+          queue: Math.floor(Math.random() * 45) + 15,
+          ip: "us-main.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 242,
+          lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: "bm-us-2",
+          name: "Rustoria.co - US Medium",
+          players: Math.floor(Math.random() * 80) + 290,
+          maxPlayers: 400,
+          status: "online",
+          queue: Math.floor(Math.random() * 15) + 2,
+          ip: "us-medium.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 254,
+          lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: "bm-us-3",
+          name: "Rustoria.co - US Long",
+          players: Math.floor(Math.random() * 100) + 270,
+          maxPlayers: 400,
+          status: "online",
+          queue: Math.floor(Math.random() * 22) + 5,
+          ip: "us-long.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 238,
+          lastWipe: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        // EU Servers
+        {
+          id: "bm-eu-1",
+          name: "Rustoria.co - EU Main",
+          players: Math.floor(Math.random() * 110) + 370,
+          maxPlayers: 500,
+          status: "online",
+          queue: Math.floor(Math.random() * 60) + 25,
+          ip: "eu-main.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 240,
+          lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: "bm-eu-2",
+          name: "Rustoria.co - EU Medium",
+          players: Math.floor(Math.random() * 90) + 280,
+          maxPlayers: 400,
+          status: "online",
+          queue: Math.floor(Math.random() * 20) + 5,
+          ip: "eu-medium.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 251,
+          lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: "bm-eu-3",
+          name: "Rustoria.co - EU Long",
+          players: Math.floor(Math.random() * 95) + 265,
+          maxPlayers: 400,
+          status: "online",
+          queue: Math.floor(Math.random() * 25) + 8,
+          ip: "eu-long.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 235,
+          lastWipe: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        // SEA Servers
+        {
+          id: "bm-sea-1",
+          name: "Rustoria.co - SEA Main",
+          players: Math.floor(Math.random() * 120) + 250,
+          maxPlayers: 400,
+          status: "online",
+          queue: Math.floor(Math.random() * 15) + 1,
+          ip: "sea-main.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 245,
+          lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: "bm-sea-2",
+          name: "Rustoria.co - SEA Medium",
+          players: Math.floor(Math.random() * 80) + 210,
+          maxPlayers: 350,
+          status: "online",
+          queue: Math.floor(Math.random() * 5),
+          ip: "sea-medium.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 250,
+          lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: "bm-sea-3",
+          name: "Rustoria.co - SEA Long",
+          players: Math.floor(Math.random() * 90) + 190,
+          maxPlayers: 350,
+          status: "online",
+          queue: Math.floor(Math.random() * 8),
+          ip: "sea-long.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 241,
+          lastWipe: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      ];
+    };
 
     try {
-      const url = "https://api.battlemetrics.com/servers?filter[game]=rust&filter[search]=Rustoria&page[size]=50";
+      const searchQuery = isMoose ? "Rusty Moose" : "Rustoria";
+      const url = `https://api.battlemetrics.com/servers?filter[game]=rust&filter[search]=${encodeURIComponent(searchQuery)}&page[size]=50`;
       const response = await fetch(url, {
         headers: {
           "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -323,8 +454,7 @@ async function startServer() {
       });
 
       if (!response.ok) {
-        // Battlemetrics restricts public API access on certain cloud hosting networks, use high-fidelity fallbacks gracefully
-        console.log(`[INFO] Battlemetrics returned status ${response.status}. Using high-fidelity server data.`);
+        console.log(`[INFO] Battlemetrics returned status ${response.status}. Using high-fidelity server data for ${project}.`);
         return res.json({ servers: getFallbackServers(), isFallback: true });
       }
 
@@ -347,10 +477,10 @@ async function startServer() {
         };
       }).filter((srv: any) => {
         const name = srv.name.toLowerCase();
-        // Keep only actual US, EU, and SEA Rustoria servers
-        const isRustoria = name.includes("rustoria");
-        const isTargetRegion = name.includes("us") || name.includes("eu") || name.includes("sea") || name.includes("asia") || name.includes("main") || name.includes("medium") || name.includes("long") || name.includes("small") || name.includes("2x");
-        return isRustoria && isTargetRegion;
+        if (isMoose) {
+          return name.includes("moose");
+        }
+        return name.includes("rustoria");
       });
 
       if (servers.length === 0) {
@@ -359,7 +489,7 @@ async function startServer() {
 
       res.json({ servers, isFallback: false });
     } catch (err: any) {
-      console.log("[INFO] Error connecting to Battlemetrics endpoint. Serving high-fidelity fallback data.");
+      console.log(`[INFO] Error connecting to Battlemetrics endpoint for ${project}. Serving high-fidelity fallback data.`);
       res.json({ servers: getFallbackServers(), isFallback: true });
     }
   });

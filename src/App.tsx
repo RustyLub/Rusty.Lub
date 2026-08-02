@@ -38,6 +38,8 @@ import {
   Database,
   Coins,
   Gamepad2,
+  Pickaxe,
+  Cpu,
   Twitch,
   Image,
   Download,
@@ -78,6 +80,11 @@ import RecyclerTab from './components/RecyclerTab';
 import ChatTab from './components/ChatTab';
 import NewsTab from './components/NewsTab';
 import AdminTab from './components/AdminTab';
+import RustItemIconsTab from './components/RustItemIconsTab';
+import MonumentsTab from './components/MonumentsTab';
+import WipeTrackerTab from './components/WipeTrackerTab';
+import EcoRaidTab from './components/EcoRaidTab';
+import MiningQuarryTab from './components/MiningQuarryTab';
 import AuthModal from './components/AuthModal';
 import CabinetModal from './components/CabinetModal';
 import TermsModal from './components/TermsModal';
@@ -211,7 +218,7 @@ const appTranslations = {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry'>('home');
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lang, setLang] = useState<'ru' | 'en'>('en');
@@ -237,6 +244,7 @@ export default function App() {
   }, [appTheme]);
 
   const [donationOpen, setDonationOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<'rustoria' | 'rustymoose'>('rustoria');
   const [rustoriaServers, setRustoriaServers] = useState<any[]>([]);
   const [loadingServers, setLoadingServers] = useState(false);
   const [copiedServerId, setCopiedServerId] = useState<string | null>(null);
@@ -577,133 +585,261 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const fetchRustoriaServers = async () => {
+  const fetchRustoriaServers = async (projOverride?: 'rustoria' | 'rustymoose') => {
+    const proj = projOverride || selectedProject;
     setLoadingServers(true);
-    const getClientFallbackServers = () => [
-      // US
-      {
-        id: "bm-us-1",
-        name: "Rustoria.co - US Main",
-        players: Math.floor(Math.random() * 120) + 360,
-        maxPlayers: 500,
-        status: "online",
-        queue: Math.floor(Math.random() * 45) + 15,
-        ip: "us-main.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 242,
-        lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: "bm-us-2",
-        name: "Rustoria.co - US Medium",
-        players: Math.floor(Math.random() * 80) + 290,
-        maxPlayers: 400,
-        status: "online",
-        queue: Math.floor(Math.random() * 15) + 2,
-        ip: "us-medium.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 254,
-        lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: "bm-us-3",
-        name: "Rustoria.co - US Long",
-        players: Math.floor(Math.random() * 100) + 270,
-        maxPlayers: 400,
-        status: "online",
-        queue: Math.floor(Math.random() * 22) + 5,
-        ip: "us-long.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 238,
-        lastWipe: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      // EU
-      {
-        id: "bm-eu-1",
-        name: "Rustoria.co - EU Main",
-        players: Math.floor(Math.random() * 110) + 370,
-        maxPlayers: 500,
-        status: "online",
-        queue: Math.floor(Math.random() * 60) + 25,
-        ip: "eu-main.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 240,
-        lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: "bm-eu-2",
-        name: "Rustoria.co - EU Medium",
-        players: Math.floor(Math.random() * 90) + 280,
-        maxPlayers: 400,
-        status: "online",
-        queue: Math.floor(Math.random() * 20) + 5,
-        ip: "eu-medium.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 251,
-        lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: "bm-eu-3",
-        name: "Rustoria.co - EU Long",
-        players: Math.floor(Math.random() * 95) + 265,
-        maxPlayers: 400,
-        status: "online",
-        queue: Math.floor(Math.random() * 25) + 8,
-        ip: "eu-long.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 235,
-        lastWipe: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      // SEA
-      {
-        id: "bm-sea-1",
-        name: "Rustoria.co - SEA Main",
-        players: Math.floor(Math.random() * 120) + 250,
-        maxPlayers: 400,
-        status: "online",
-        queue: Math.floor(Math.random() * 15) + 1,
-        ip: "sea-main.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 245,
-        lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: "bm-sea-2",
-        name: "Rustoria.co - SEA Medium",
-        players: Math.floor(Math.random() * 80) + 210,
-        maxPlayers: 350,
-        status: "online",
-        queue: Math.floor(Math.random() * 5),
-        ip: "sea-medium.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 250,
-        lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: "bm-sea-3",
-        name: "Rustoria.co - SEA Long",
-        players: Math.floor(Math.random() * 90) + 190,
-        maxPlayers: 350,
-        status: "online",
-        queue: Math.floor(Math.random() * 8),
-        ip: "sea-long.rustoria.co",
-        port: 28015,
-        map: "Procedural Map",
-        fps: 241,
-        lastWipe: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
+    const getClientFallbackServers = () => {
+      if (proj === 'rustymoose') {
+        return [
+          // US
+          {
+            id: "moose-us-1",
+            name: "Rusty Moose - US Main",
+            players: Math.floor(Math.random() * 100) + 380,
+            maxPlayers: 500,
+            status: "online",
+            queue: Math.floor(Math.random() * 40) + 20,
+            ip: "us-main.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 245,
+            lastWipe: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: "moose-us-2",
+            name: "Rusty Moose - US Medium",
+            players: Math.floor(Math.random() * 90) + 310,
+            maxPlayers: 400,
+            status: "online",
+            queue: Math.floor(Math.random() * 20) + 5,
+            ip: "us-medium.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 250,
+            lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: "moose-us-3",
+            name: "Rusty Moose - US Monthly",
+            players: Math.floor(Math.random() * 85) + 280,
+            maxPlayers: 400,
+            status: "online",
+            queue: Math.floor(Math.random() * 15) + 3,
+            ip: "us-monthly.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 238,
+            lastWipe: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: "moose-us-4",
+            name: "Rusty Moose - US Small",
+            players: Math.floor(Math.random() * 60) + 180,
+            maxPlayers: 250,
+            status: "online",
+            queue: Math.floor(Math.random() * 8),
+            ip: "us-small.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 255,
+            lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          // EU
+          {
+            id: "moose-eu-1",
+            name: "Rusty Moose - EU Main",
+            players: Math.floor(Math.random() * 110) + 360,
+            maxPlayers: 500,
+            status: "online",
+            queue: Math.floor(Math.random() * 50) + 15,
+            ip: "eu-main.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 242,
+            lastWipe: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: "moose-eu-2",
+            name: "Rusty Moose - EU Medium",
+            players: Math.floor(Math.random() * 95) + 285,
+            maxPlayers: 400,
+            status: "online",
+            queue: Math.floor(Math.random() * 18) + 4,
+            ip: "eu-medium.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 248,
+            lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: "moose-eu-3",
+            name: "Rusty Moose - EU Monthly",
+            players: Math.floor(Math.random() * 80) + 260,
+            maxPlayers: 400,
+            status: "online",
+            queue: Math.floor(Math.random() * 12) + 2,
+            ip: "eu-monthly.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 236,
+            lastWipe: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          // SEA
+          {
+            id: "moose-sea-1",
+            name: "Rusty Moose - SEA Main",
+            players: Math.floor(Math.random() * 100) + 240,
+            maxPlayers: 400,
+            status: "online",
+            queue: Math.floor(Math.random() * 10) + 1,
+            ip: "sea-main.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 244,
+            lastWipe: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: "moose-sea-2",
+            name: "Rusty Moose - SEA Monthly",
+            players: Math.floor(Math.random() * 70) + 190,
+            maxPlayers: 350,
+            status: "online",
+            queue: Math.floor(Math.random() * 5),
+            ip: "sea-monthly.rustymoose.com",
+            port: 28015,
+            map: "Procedural Map",
+            fps: 249,
+            lastWipe: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+          }
+        ];
       }
-    ];
+
+      return [
+        // US
+        {
+          id: "bm-us-1",
+          name: "Rustoria.co - US Main",
+          players: Math.floor(Math.random() * 120) + 360,
+          maxPlayers: 500,
+          status: "online",
+          queue: Math.floor(Math.random() * 45) + 15,
+          ip: "us-main.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 242,
+          lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: "bm-us-2",
+          name: "Rustoria.co - US Medium",
+          players: Math.floor(Math.random() * 80) + 290,
+          maxPlayers: 400,
+          status: "online",
+          queue: Math.floor(Math.random() * 15) + 2,
+          ip: "us-medium.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 254,
+          lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: "bm-us-3",
+          name: "Rustoria.co - US Long",
+          players: Math.floor(Math.random() * 100) + 270,
+          maxPlayers: 400,
+          status: "online",
+          queue: Math.floor(Math.random() * 22) + 5,
+          ip: "us-long.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 238,
+          lastWipe: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        // EU
+        {
+          id: "bm-eu-1",
+          name: "Rustoria.co - EU Main",
+          players: Math.floor(Math.random() * 110) + 370,
+          maxPlayers: 500,
+          status: "online",
+          queue: Math.floor(Math.random() * 60) + 25,
+          ip: "eu-main.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 240,
+          lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: "bm-eu-2",
+          name: "Rustoria.co - EU Medium",
+          players: Math.floor(Math.random() * 90) + 280,
+          maxPlayers: 400,
+          status: "online",
+          queue: Math.floor(Math.random() * 20) + 5,
+          ip: "eu-medium.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 251,
+          lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: "bm-eu-3",
+          name: "Rustoria.co - EU Long",
+          players: Math.floor(Math.random() * 95) + 265,
+          maxPlayers: 400,
+          status: "online",
+          queue: Math.floor(Math.random() * 25) + 8,
+          ip: "eu-long.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 235,
+          lastWipe: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        // SEA
+        {
+          id: "bm-sea-1",
+          name: "Rustoria.co - SEA Main",
+          players: Math.floor(Math.random() * 120) + 250,
+          maxPlayers: 400,
+          status: "online",
+          queue: Math.floor(Math.random() * 15) + 1,
+          ip: "sea-main.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 245,
+          lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: "bm-sea-2",
+          name: "Rustoria.co - SEA Medium",
+          players: Math.floor(Math.random() * 80) + 210,
+          maxPlayers: 350,
+          status: "online",
+          queue: Math.floor(Math.random() * 5),
+          ip: "sea-medium.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 250,
+          lastWipe: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: "bm-sea-3",
+          name: "Rustoria.co - SEA Long",
+          players: Math.floor(Math.random() * 90) + 190,
+          maxPlayers: 350,
+          status: "online",
+          queue: Math.floor(Math.random() * 8),
+          ip: "sea-long.rustoria.co",
+          port: 28015,
+          map: "Procedural Map",
+          fps: 241,
+          lastWipe: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      ];
+    };
 
     try {
-      const res = await fetch('/api/rustoria');
+      const res = await fetch(`/api/rustoria?project=${proj}`);
       if (!res.ok) {
         throw new Error('Static host fallback triggered');
       }
@@ -722,10 +858,10 @@ export default function App() {
   };
 
   useEffect(() => {
-    fetchRustoriaServers();
-    const interval = setInterval(fetchRustoriaServers, 60000);
+    fetchRustoriaServers(selectedProject);
+    const interval = setInterval(() => fetchRustoriaServers(selectedProject), 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedProject]);
 
   // Copy helper
   const handleCopy = (text: string) => {
@@ -771,16 +907,23 @@ export default function App() {
     { id: 'binds', label: appTranslations.tabs.binds[lang], icon: <Keyboard size={16} /> },
     { id: 'fps', label: appTranslations.tabs.fps[lang], icon: <Settings size={16} /> },
     { id: 'raid', label: appTranslations.tabs.raid[lang], icon: <Flame size={16} /> },
+    { id: 'ecoraid', label: lang === 'ru' ? 'Эко-Рейд & Soft Side' : 'Eco-Raid & Weak Side', icon: <Pickaxe size={16} /> },
     { id: 'decay', label: appTranslations.tabs.decay[lang], icon: <Calculator size={16} /> },
     { id: 'electrical', label: appTranslations.tabs.electrical[lang], icon: <Zap size={16} /> },
     { id: 'weapons', label: appTranslations.tabs.weapons[lang], icon: <Target size={16} /> },
     { id: 'breeder', label: appTranslations.tabs.breeder[lang], icon: <Sprout size={16} /> },
     { id: 'recycler', label: appTranslations.tabs.recycler[lang], icon: <Layers size={16} /> },
+    { id: 'monuments', label: lang === 'ru' ? 'Монументы' : 'Monuments', icon: <MapPin size={16} /> },
+    { id: 'quarry', label: lang === 'ru' ? 'Карьеры & Экскаватор' : 'Mining & Excavator', icon: <Cpu size={16} /> },
+    { id: 'wipe', label: lang === 'ru' ? 'Вайпы & Ивенты' : 'Wipe & Events', icon: <Clock size={16} /> },
     { id: 'chat', label: lang === 'ru' ? 'Чат' : 'Chat', icon: <MessageSquare size={16} /> },
     ...(isVip ? [
       { id: 'radar', label: lang === 'ru' ? 'PLAYER RADAR (VIP)' : 'PLAYER RADAR (VIP)', icon: <Activity size={16} /> }
     ] : []),
-    ...(isAdmin ? [{ id: 'admin', label: 'ADMIN', icon: <ShieldCheck size={16} /> }] : [])
+    ...(isAdmin ? [
+      { id: 'icons', label: lang === 'ru' ? 'Иконки Rust (ADMIN)' : 'Rust Icons (ADMIN)', icon: <Image size={16} /> },
+      { id: 'admin', label: 'ADMIN', icon: <ShieldCheck size={16} /> }
+    ] : [])
   ] as const;
 
   return (
@@ -1355,95 +1498,6 @@ export default function App() {
                 </div>
               )}
 
-              <div className="bg-[#14171e]/90 border border-[#2a2f3b] rounded-none p-6 sm:p-8 shadow-xl relative overflow-hidden rust-metal-pattern">
-                {/* Tactical Corner Brackets */}
-                <div className="rust-bracket-tl" />
-                <div className="rust-bracket-tr" />
-                <div className="rust-bracket-bl" />
-                <div className="rust-bracket-br" />
-
-                {/* Left side decorative hazard stripe */}
-                <div className="absolute left-0 top-0 bottom-0 w-1.5 rust-hazard" />
-                
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-center">
-                  {/* Left Side: Generated Artwork */}
-                  <div className="md:col-span-5 relative group overflow-hidden border border-[#2a2f3b] bg-black/40">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10 pointer-events-none" />
-                    
-                    {/* Corner accents on image */}
-                    <div className="absolute top-2 left-2 w-2 h-2 border-t-2 border-l-2 border-[#cd412b] z-20" />
-                    <div className="absolute top-2 right-2 w-2 h-2 border-t-2 border-r-2 border-[#cd412b] z-20" />
-                    <div className="absolute bottom-2 left-2 w-2 h-2 border-b-2 border-l-2 border-[#cd412b] z-20" />
-                    <div className="absolute bottom-2 right-2 w-2 h-2 border-b-2 border-r-2 border-[#cd412b] z-20" />
-
-                    <img 
-                      src={globalWarfareLogo} 
-                      alt="Global Warfare 4" 
-                      className="w-full h-auto aspect-square object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-                      referrerPolicy="no-referrer"
-                    />
-                    
-                    {/* Date Badge Overlay */}
-                    <div id="global-warfare-dates-badge" className="absolute bottom-4 left-4 right-4 bg-black/85 border-l-2 border-l-[#cd412b] border-y border-r border-[#2a2f3b] px-3.5 py-2 z-20">
-                      <span className="block text-[8px] text-gray-500 uppercase font-bold tracking-wider font-mono">
-                        {lang === 'ru' ? 'Даты Проведения' : 'Event Dates'}
-                      </span>
-                      <span className="text-xs font-black text-[#cd412b] uppercase tracking-wide font-mono">
-                        {appTranslations.globalWarfare.dates[lang]}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Right Side: Event Details */}
-                  <div className="md:col-span-7 space-y-5">
-                    <div className="space-y-2">
-                      {/* Live Indicator Badge & Event Flyer Tag */}
-                      <div className="flex items-center gap-2.5">
-                        <span className="relative flex h-3 w-3">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#cd412b] opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-3 w-3 bg-[#cd412b]"></span>
-                        </span>
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-white bg-[#cd412b]">
-                          {appTranslations.globalWarfare.flyerTitle[lang]}
-                        </span>
-                        <span className="text-[10px] font-mono text-gray-500 font-bold uppercase tracking-wider">
-                          GW4 Esports
-                        </span>
-                      </div>
-
-                      <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white font-sans uppercase leading-none">
-                        {appTranslations.globalWarfare.title[lang]}
-                      </h3>
-                      
-                      <div className="h-[1px] w-20 bg-[#cd412b]" />
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-gray-300 leading-relaxed font-sans font-medium">
-                      {appTranslations.globalWarfare.desc[lang]}
-                    </p>
-
-                    {/* Twitch CTA Button */}
-                    <div className="pt-2">
-                      <motion.a
-                        href="https://www.twitch.tv/tv_cheater/about"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ scale: 1.02, y: -2 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="inline-flex items-center gap-3 px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-white bg-[#6441a5] hover:bg-[#772ce8] transition-all shadow-lg shadow-[#6441a5]/10 rounded-none border border-[#9146ff]/40 hover:border-[#9146ff] relative overflow-hidden group"
-                      >
-                        {/* Shimmer Effect */}
-                        <div className="absolute inset-0 w-1/2 h-full bg-white/10 skew-x-[-25deg] -translate-x-full group-hover:translate-x-[200%] transition-transform duration-1000 ease-out" />
-                        
-                        <Twitch size={15} className="animate-bounce" />
-                        <span>{appTranslations.globalWarfare.watchBtn[lang]}</span>
-                        <ExternalLink size={12} className="opacity-80" />
-                      </motion.a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               {/* Clan EAC Leader & Veteran Bio */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                 {/* Biography card */}
@@ -1733,7 +1787,7 @@ export default function App() {
                 ))}
               </div>
 
-              {/* US, EU & SEA Rustoria Server Monitor Section */}
+              {/* Server Monitor Section */}
               <div id="rustoria-monitor-section" className="bg-[#14171e]/90 border border-[#2a2f3b] rounded-none p-4 sm:p-5 space-y-4 shadow-xl relative overflow-hidden rust-metal-pattern">
                 {/* Tactical Corner Brackets */}
                 <div className="rust-bracket-tl" />
@@ -1746,18 +1800,59 @@ export default function App() {
                 <div className="absolute bottom-2 left-3 text-[7px] font-mono text-gray-600 select-none hidden sm:block uppercase">NET_SYS: ONLINE</div>
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#2a2f3b] pb-3.5">
-                  <div className="space-y-1">
+                  <div className="space-y-2">
+                    {/* Project Selector Switcher */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono text-gray-400 font-bold uppercase tracking-wider">
+                        {lang === 'ru' ? 'Выбор проекта:' : 'Select Project:'}
+                      </span>
+                      <div className="flex bg-[#0c0d10] p-0.5 border border-[#2a2f3b] rounded-sm text-[9px] font-mono uppercase">
+                        <button
+                          onClick={() => {
+                            setSelectedProject('rustoria');
+                            fetchRustoriaServers('rustoria');
+                          }}
+                          className={`px-3 py-1 font-black cursor-pointer transition-all ${
+                            selectedProject === 'rustoria'
+                              ? 'bg-[#cd412b] text-white shadow-sm'
+                              : 'text-gray-400 hover:text-white'
+                          }`}
+                        >
+                          RUSTORIA
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedProject('rustymoose');
+                            fetchRustoriaServers('rustymoose');
+                          }}
+                          className={`px-3 py-1 font-black cursor-pointer transition-all ${
+                            selectedProject === 'rustymoose'
+                              ? 'bg-[#cd412b] text-white shadow-sm'
+                              : 'text-gray-400 hover:text-white'
+                          }`}
+                        >
+                          RUSTY MOOSE
+                        </button>
+                      </div>
+                    </div>
+
                     <div className="flex items-center gap-2">
                       <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#cd412b] opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-[#cd412b]"></span>
                       </span>
                       <h3 className="text-base font-bold tracking-wider text-white font-teko uppercase leading-none">
-                        {appTranslations.rustoriaMonitor.title[lang]}
+                        {selectedProject === 'rustymoose'
+                          ? (lang === 'ru' ? '📊 Мониторинг серверов Rusty Moose (US, EU, SEA)' : '📊 Rusty Moose Servers Monitor (US, EU, SEA)')
+                          : (lang === 'ru' ? '📊 Мониторинг серверов Rustoria (US, EU, SEA)' : '📊 Rustoria Servers Monitor (US, EU, SEA)')
+                        }
                       </h3>
                     </div>
                     <p className="text-[11px] text-gray-400 font-sans leading-relaxed max-w-2xl font-medium">
-                      {appTranslations.rustoriaMonitor.desc[lang]}
+                      {selectedProject === 'rustymoose'
+                        ? (lang === 'ru' ? 'Актуальный онлайн, очереди, карта и показатели производительности серверов Rusty Moose в регионах US, EU и SEA.' : 'Real-time online status, queues, maps, and performance metrics for Rusty Moose servers in US, EU, and SEA.')
+                        : appTranslations.rustoriaMonitor.desc[lang]
+                      }
                     </p>
                   </div>
                   
@@ -1781,7 +1876,7 @@ export default function App() {
 
                     <button
                       onClick={() => {
-                        fetchRustoriaServers();
+                        fetchRustoriaServers(selectedProject);
                       }}
                       disabled={loadingServers}
                       className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-sm text-[10px] font-bold text-gray-300 bg-[#1b1e26] border border-[#2a2f3b] hover:border-[#cd412b]/40 hover:text-white transition-all cursor-pointer disabled:opacity-50 flex-shrink-0 font-mono uppercase"
@@ -2053,6 +2148,66 @@ export default function App() {
               transition={{ duration: 0.2 }}
             >
               <RecyclerTab lang={lang} />
+            </motion.div>
+          )}
+
+          {activeTab === 'monuments' && (
+            <motion.div
+              key="monuments"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <MonumentsTab lang={lang} />
+            </motion.div>
+          )}
+
+          {activeTab === 'wipe' && (
+            <motion.div
+              key="wipe"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <WipeTrackerTab lang={lang} />
+            </motion.div>
+          )}
+
+          {activeTab === 'ecoraid' && (
+            <motion.div
+              key="ecoraid"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <EcoRaidTab lang={lang} />
+            </motion.div>
+          )}
+
+          {activeTab === 'quarry' && (
+            <motion.div
+              key="quarry"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <MiningQuarryTab lang={lang} />
+            </motion.div>
+          )}
+
+          {activeTab === 'icons' && isAdmin && (
+            <motion.div
+              key="icons"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <RustItemIconsTab lang={lang} />
             </motion.div>
           )}
 
