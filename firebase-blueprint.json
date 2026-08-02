@@ -430,6 +430,13 @@
         "read": "true",
         "write": "true"
       }
+    },
+    "/activity_logs/{logId}": {
+      "description": "User activity logs for admin auditing",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     }
   }
 }

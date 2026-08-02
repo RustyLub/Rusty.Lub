@@ -5,6 +5,7 @@ import { ShieldCheck, Send, Search, Crown, Star, Ban, Trash2, Users, Settings, M
 import { CustomUser, NewsItem, VipApplication, APP_VERSION } from '../types';
 import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 import UserProfileModal from './UserProfileModal';
+import { subscribeToActivityLogs, clearAllActivityLogs, UserActivityLog } from '../services/activityLogger';
 
 interface AdminTabProps {
   currentUser: CustomUser | null;
@@ -255,11 +256,16 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
     }, (err) => {
         console.error("Feedbacks subscription error:", err);
     });
+
+    const unsubActivityLogs = subscribeToActivityLogs((logs) => {
+      setActivityLogs(logs);
+    });
     
     return () => {
         unsub();
         unsubVipApps();
         unsubFeedbacks();
+        unsubActivityLogs();
         clearInterval(statsInterval);
     };
   }, []);
@@ -298,7 +304,11 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
   };
 
   const [vipManagerUserId, setVipManagerUserId] = useState<string | null>(null);
-  const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'vip' | 'feedback' | 'news' | 'survivors'>('dashboard');
+  const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'vip' | 'feedback' | 'news' | 'survivors' | 'activity_logs'>('dashboard');
+  
+  const [activityLogs, setActivityLogs] = useState<UserActivityLog[]>([]);
+  const [activitySearch, setActivitySearch] = useState('');
+  const [activityFilter, setActivityFilter] = useState<string>('all');
 
   const filteredUsers = useMemo(() => {
     return registeredUsers.filter(u => {
@@ -662,7 +672,8 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
           { id: 'vip', label_ru: 'VIP Заявки', label_en: 'VIP Apps', icon: Crown, badge: vipApps.filter(a => a.status === 'pending').length },
           { id: 'feedback', label_ru: 'Обратная связь', label_en: 'Feedback', icon: Mail, badge: feedbacks.length },
           { id: 'news', label_ru: 'Новости', label_en: 'News Hub', icon: Megaphone },
-          { id: 'survivors', label_ru: 'Выжившие', label_en: 'Survivors', icon: Users, badge: registeredUsers.length }
+          { id: 'survivors', label_ru: 'Выжившие', label_en: 'Survivors', icon: Users, badge: registeredUsers.length },
+          { id: 'activity_logs', label_ru: 'Блокнот логов', label_en: 'Activity Logs', icon: List, badge: activityLogs.length }
         ].map(tab => {
           const Icon = tab.icon;
           const isActive = activeSubTab === tab.id;
@@ -1681,6 +1692,168 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
                     )}
                     </div>
                 </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeSubTab === 'activity_logs' && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="bg-[#14171e] border border-[#2a2f3b] p-6 rounded-none space-y-6 rust-metal-pattern relative">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2a2f3b] pb-4">
+              <div className="space-y-1">
+                <h3 className="text-xl font-bold text-white uppercase flex items-center gap-2 font-teko tracking-wider">
+                  <List className="text-[#cd412b]" size={20} />
+                  {lang === 'ru' ? 'Блокнот логов пользователей (Аудит)' : 'User Activity Logs Notebook'}
+                </h3>
+                <p className="text-[11px] text-zinc-400 font-mono">
+                  {lang === 'ru' 
+                    ? 'Отслеживание действий пользователей в реальном времени: кто, когда, где и что делал' 
+                    : 'Real-time user tracking log: who, when, where, and what action was taken'}
+                </p>
+              </div>
+
+              {isSuperAdmin && (
+                <button
+                  onClick={async () => {
+                    if (!confirm(lang === 'ru' ? 'Очистить все логи активности?' : 'Clear all activity logs?')) return;
+                    try {
+                      const deleted = await clearAllActivityLogs();
+                      onToast(lang === 'ru' ? `Удалено ${deleted} записей логов` : `Cleared ${deleted} log entries`, 'success');
+                    } catch (err) {
+                      onToast(lang === 'ru' ? 'Ошибка очистки логов' : 'Failed to clear logs', 'error');
+                    }
+                  }}
+                  className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] font-mono font-bold uppercase tracking-wider rounded-none transition flex items-center gap-1.5 shrink-0"
+                >
+                  <Trash2 size={12} />
+                  <span>{lang === 'ru' ? 'Очистить логи' : 'Clear Logs'}</span>
+                </button>
+              )}
+            </div>
+
+            {/* Filter controls */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-2.5 text-zinc-500" size={14} />
+                <input
+                  type="text"
+                  value={activitySearch}
+                  onChange={(e) => setActivitySearch(e.target.value)}
+                  placeholder={lang === 'ru' ? 'Поиск по нику, ID, действию или вкладке...' : 'Search by name, ID, action or tab...'}
+                  className="w-full bg-[#1b1e26] border border-[#2a2f3b] pl-9 pr-4 py-2 text-xs text-white placeholder-zinc-500 rounded-none focus:outline-none focus:border-[#cd412b] font-mono"
+                />
+              </div>
+
+              <select
+                value={activityFilter}
+                onChange={(e) => setActivityFilter(e.target.value)}
+                className="bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white rounded-none focus:outline-none focus:border-[#cd412b] font-mono shrink-0"
+              >
+                <option value="all">{lang === 'ru' ? 'Все действия' : 'All Actions'}</option>
+                <option value="tab_switch">{lang === 'ru' ? 'Переходы по вкладкам' : 'Tab Switch'}</option>
+                <option value="auth">{lang === 'ru' ? 'Авторизация' : 'Auth'}</option>
+                <option value="admin_action">{lang === 'ru' ? 'Действия админов' : 'Admin Actions'}</option>
+                <option value="chat">{lang === 'ru' ? 'Чат' : 'Chat'}</option>
+              </select>
+            </div>
+
+            {/* Logs List Table */}
+            <div className="overflow-x-auto border border-[#2a2f3b] bg-[#0d0f14]">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[#1b1e26] border-b border-[#2a2f3b] text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
+                    <th className="p-3">{lang === 'ru' ? 'Время' : 'Time'}</th>
+                    <th className="p-3">{lang === 'ru' ? 'Пользователь' : 'User'}</th>
+                    <th className="p-3">{lang === 'ru' ? 'Действие' : 'Action'}</th>
+                    <th className="p-3">{lang === 'ru' ? 'Вкладка' : 'Tab'}</th>
+                    <th className="p-3">{lang === 'ru' ? 'Детали' : 'Details'}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#2a2f3b]/60 text-xs font-mono">
+                  {activityLogs
+                    .filter(log => {
+                      const search = activitySearch.toLowerCase();
+                      const matchesSearch = !search || 
+                        log.displayName.toLowerCase().includes(search) ||
+                        log.uid.toLowerCase().includes(search) ||
+                        (log.details && log.details.toLowerCase().includes(search)) ||
+                        (log.action && log.action.toLowerCase().includes(search)) ||
+                        (log.tab && log.tab.toLowerCase().includes(search));
+
+                      if (!matchesSearch) return false;
+
+                      if (activityFilter === 'tab_switch') return log.action === 'tab_switch';
+                      if (activityFilter === 'auth') return log.action.includes('auth') || log.action.includes('login') || log.action.includes('logout');
+                      if (activityFilter === 'admin_action') return log.action.includes('admin') || log.action.includes('ban') || log.action.includes('vip');
+                      if (activityFilter === 'chat') return log.action.includes('chat') || log.tab === 'chat';
+
+                      return true;
+                    })
+                    .map((log, idx) => {
+                      const dateObj = log.timestamp?.seconds 
+                        ? new Date(log.timestamp.seconds * 1000) 
+                        : (log.timestamp ? new Date(log.timestamp) : new Date());
+                      
+                      const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                      const dateStr = dateObj.toLocaleDateString();
+
+                      return (
+                        <tr key={log.id || idx} className="hover:bg-white/[0.02] transition-colors">
+                          <td className="p-3 whitespace-nowrap text-zinc-400 text-[11px]">
+                            <div className="flex flex-col">
+                              <span className="text-white font-bold">{timeStr}</span>
+                              <span className="text-[9px] text-zinc-500">{dateStr}</span>
+                            </div>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              {log.photoURL ? (
+                                <img referrerPolicy="no-referrer" src={log.photoURL} alt="" className="w-5 h-5 rounded-full border border-zinc-700 bg-black shrink-0" />
+                              ) : (
+                                <div className="w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[9px] font-bold text-zinc-300 shrink-0">
+                                  {log.displayName?.[0]?.toUpperCase() || 'U'}
+                                </div>
+                              )}
+                              <div className="flex flex-col">
+                                <span className="text-zinc-200 font-bold text-xs">{log.displayName}</span>
+                                <span className="text-[9px] text-zinc-500">ID: {log.uid.substring(0, 10)}...</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            <span className={`px-2 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border ${
+                              log.action === 'tab_switch' 
+                                ? 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                                : log.action.includes('admin') || log.action.includes('ban')
+                                  ? 'bg-red-500/10 text-red-400 border-red-500/30'
+                                  : log.action.includes('vip')
+                                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                                    : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                            }`}>
+                              {log.action}
+                            </span>
+                          </td>
+                          <td className="p-3 whitespace-nowrap text-zinc-300 font-bold uppercase text-[11px]">
+                            {log.tab || '—'}
+                          </td>
+                          <td className="p-3 text-zinc-400 text-xs">
+                            <div className="max-w-xs sm:max-w-md truncate" title={log.details}>
+                              {log.details || '—'}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  {activityLogs.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-zinc-600 font-mono text-xs">
+                        {lang === 'ru' ? 'Логи еще не зафиксированы.' : 'No activity logs recorded yet.'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

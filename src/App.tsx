@@ -47,7 +47,8 @@ import {
   Mail,
   Target,
   Calculator,
-  Sprout
+  Sprout,
+  FlaskConical
 } from 'lucide-react';
 import { ToastType, CustomUser, APP_VERSION } from './types';
 
@@ -85,9 +86,11 @@ import MonumentsTab from './components/MonumentsTab';
 import WipeTrackerTab from './components/WipeTrackerTab';
 import EcoRaidTab from './components/EcoRaidTab';
 import MiningQuarryTab from './components/MiningQuarryTab';
+import MixingTableTab from './components/MixingTableTab';
 import AuthModal from './components/AuthModal';
 import CabinetModal from './components/CabinetModal';
 import TermsModal from './components/TermsModal';
+import { logUserActivity } from './services/activityLogger';
 import { PlayerRadar } from './components/Radar/PlayerRadar';
 import DiscordWidget from './components/DiscordWidget';
 // @ts-ignore
@@ -218,7 +221,7 @@ const appTranslations = {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing'>('home');
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lang, setLang] = useState<'ru' | 'en'>('en');
@@ -583,6 +586,12 @@ export default function App() {
   const handleTabChange = (tabId: 'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin') => {
     setActiveTab(tabId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    logUserActivity({
+      action: 'tab_switch',
+      tab: tabId,
+      details: `Switched to tab: ${tabId}`,
+      currentUser
+    });
   };
 
   const fetchRustoriaServers = async (projOverride?: 'rustoria' | 'rustymoose') => {
@@ -1192,66 +1201,124 @@ export default function App() {
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 relative z-10">
         <div className="flex flex-col lg:flex-row gap-8 items-start relative">
           {/* Left Sidebar Navigation - Only on Desktop */}
-          <aside className="w-full lg:w-52 shrink-0 lg:sticky lg:top-20 space-y-5 hidden lg:block xl:absolute xl:right-full xl:mr-8 xl:top-0 xl:w-44">
-            <div className="bg-[#14171e]/90 border border-[#2a2f3b] p-2.5 space-y-1.5 rounded-none shadow-xl relative rust-metal-pattern">
-              {/* Corner Brackets to fit the Rust authentic feel */}
+          <aside className="w-full lg:w-56 shrink-0 lg:sticky lg:top-20 space-y-4 hidden lg:block xl:absolute xl:right-full xl:mr-8 xl:top-0 xl:w-52">
+            <div className="bg-[#14171e]/95 border border-[#2a2f3b] p-3 space-y-4 rounded-none shadow-xl relative rust-metal-pattern">
               <div className="rust-bracket-tl" />
               <div className="rust-bracket-tr" />
               <div className="rust-bracket-bl" />
               <div className="rust-bracket-br" />
               
-              <div className="px-3 py-2.5 border-b border-[#2a2f3b] mb-3">
-                <span className="text-[9px] font-mono font-black text-[#cd412b] tracking-widest uppercase block">
-                  {lang === 'ru' ? 'НАВИГАЦИЯ' : 'NAVIGATION'}
+              <div className="px-3 py-2 border-b border-[#2a2f3b] flex items-center justify-between">
+                <span className="text-[10px] font-mono font-black text-[#cd412b] tracking-widest uppercase flex items-center gap-1.5">
+                  <Compass size={13} />
+                  <span>{lang === 'ru' ? 'НАВИГАЦИЯ' : 'NAVIGATION'}</span>
                 </span>
+                <span className="text-[8px] font-mono text-zinc-500">v2.6</span>
               </div>
 
-              {tabs.filter(t => t.id !== 'chat').map((tab) => {
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTabChange(tab.id as any)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer rounded-none relative overflow-hidden font-mono group ${
-                      isActive
-                        ? 'bg-gradient-to-r from-blue-600/10 to-[#ff4d30]/10 text-white border border-[#cd412b]/40 shadow-sm font-black'
-                        : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
-                    }`}
-                  >
-                    <span className={`transition-transform duration-150 group-hover:scale-105 ${isActive ? 'text-[#cd412b]' : 'text-gray-500 group-hover:text-[#cd412b]'}`}>
-                      {tab.icon}
-                    </span>
-                    <span>{tab.label}</span>
-                    {/* Hover indicator side bar */}
-                    <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#cd412b] scale-y-0 group-hover:scale-y-100 transition-transform origin-top" />
-                  </button>
-                );
-              })}
+              {/* Categorized Navigation Groups */}
+              {[
+                {
+                  title: lang === 'ru' ? 'ОСНОВНОЕ' : 'GENERAL',
+                  items: [
+                    { id: 'home', label: appTranslations.tabs.home[lang], icon: <Home size={15} /> },
+                    { id: 'news', label: appTranslations.tabs.news[lang], icon: <Compass size={15} /> },
+                    { id: 'chat', label: lang === 'ru' ? 'Чат Сообщества' : 'Community Chat', icon: <MessageSquare size={15} />, badge: 'LIVE' }
+                  ]
+                },
+                {
+                  title: lang === 'ru' ? 'БАЗА ЗНАНИЙ & ГАЙДЫ' : 'KNOWLEDGE & GUIDES',
+                  items: [
+                    { id: 'errors', label: appTranslations.tabs.errors[lang], icon: <BookOpen size={15} /> },
+                    { id: 'binds', label: appTranslations.tabs.binds[lang], icon: <Keyboard size={15} /> },
+                    { id: 'fps', label: appTranslations.tabs.fps[lang], icon: <Settings size={15} /> },
+                    { id: 'weapons', label: appTranslations.tabs.weapons[lang], icon: <Target size={15} /> },
+                    { id: 'monuments', label: lang === 'ru' ? 'Монументы' : 'Monuments', icon: <MapPin size={15} /> },
+                    { id: 'wipe', label: lang === 'ru' ? 'Вайпы & События' : 'Wipes & Events', icon: <Clock size={15} /> }
+                  ]
+                },
+                {
+                  title: lang === 'ru' ? 'КАЛЬКУЛЯТОРЫ & ФЕРМА' : 'CALCULATORS & FARM',
+                  items: [
+                    { id: 'raid', label: appTranslations.tabs.raid[lang], icon: <Flame size={15} /> },
+                    { id: 'ecoraid', label: lang === 'ru' ? 'Эко-Рейд & Soft Side' : 'Eco-Raid & Weak Side', icon: <Pickaxe size={15} /> },
+                    { id: 'decay', label: appTranslations.tabs.decay[lang], icon: <Calculator size={15} /> },
+                    { id: 'electrical', label: appTranslations.tabs.electrical[lang], icon: <Zap size={15} /> },
+                    { id: 'mixing', label: lang === 'ru' ? 'Стол Смешивания (Tea)' : 'Mixing Table (Tea)', icon: <FlaskConical size={15} className="text-emerald-400" /> },
+                    { id: 'breeder', label: appTranslations.tabs.breeder[lang], icon: <Sprout size={15} /> },
+                    { id: 'recycler', label: appTranslations.tabs.recycler[lang], icon: <Layers size={15} /> },
+                    { id: 'quarry', label: lang === 'ru' ? 'Карьеры & Экскаватор' : 'Mining & Excavator', icon: <Cpu size={15} /> }
+                  ]
+                },
+                ...((isVip || isAdmin) ? [{
+                  title: lang === 'ru' ? 'СПЕЦ. ВОЗМОЖНОСТИ' : 'SPECIAL ACCESS',
+                  items: [
+                    ...(isVip ? [{ id: 'radar', label: lang === 'ru' ? 'Player Radar (VIP)' : 'Player Radar (VIP)', icon: <Activity size={15} className="text-purple-400" /> }] : []),
+                    ...(isAdmin ? [
+                      { id: 'icons', label: lang === 'ru' ? 'Иконки Rust (ADMIN)' : 'Rust Icons (ADMIN)', icon: <Image size={15} /> },
+                      { id: 'admin', label: 'Admin Panel', icon: <ShieldCheck size={15} className="text-red-400" /> }
+                    ] : [])
+                  ]
+                }] : [])
+              ].map((category, catIdx) => (
+                <div key={catIdx} className="space-y-1">
+                  <div className="px-2 py-1 text-[8px] font-mono font-black text-zinc-500 uppercase tracking-wider">
+                    {category.title}
+                  </div>
+                  <div className="space-y-0.5">
+                    {category.items.map((tab) => {
+                      const isActive = activeTab === tab.id;
+                      return (
+                        <button
+                          key={tab.id}
+                          onClick={() => handleTabChange(tab.id as any)}
+                          className={`w-full flex items-center justify-between px-2.5 py-2 text-[10px] font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer rounded-none relative overflow-hidden font-mono group ${
+                            isActive
+                              ? 'bg-gradient-to-r from-blue-600/15 to-[#ff4d30]/15 text-white border border-[#cd412b]/50 shadow-sm font-black'
+                              : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className={`transition-transform duration-150 group-hover:scale-110 shrink-0 ${isActive ? 'text-[#cd412b]' : 'text-zinc-500 group-hover:text-[#cd412b]'}`}>
+                              {tab.icon}
+                            </span>
+                            <span className="truncate">{tab.label}</span>
+                          </div>
+                          {'badge' in tab && tab.badge && (
+                            <span className="px-1.5 py-0.5 text-[7px] font-black uppercase bg-[#cd412b]/20 text-[#cd412b] border border-[#cd412b]/30 shrink-0">
+                              {tab.badge}
+                            </span>
+                          )}
+                          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#cd412b] scale-y-0 group-hover:scale-y-100 transition-transform origin-top" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
 
-              {/* High-quality theme toggle in navigation section */}
-              <div className="pt-2 border-t border-[#2a2f3b]/60 mt-1.5">
+              <div className="pt-2 border-t border-[#2a2f3b]/60 mt-2">
                 <button
                   onClick={() => setAppTheme(appTheme === 'dark' ? 'light' : 'dark')}
-                  className="w-full flex items-center justify-between px-3 py-2 text-[9px] font-bold font-mono uppercase transition-all duration-150 cursor-pointer text-gray-400 hover:text-white hover:bg-white/5 border border-transparent rounded-none"
-                  title={lang === 'ru' ? 'Переключить тему оформления' : 'Toggle application theme'}
+                  className="w-full flex items-center justify-between px-2.5 py-2 text-[9px] font-bold font-mono uppercase transition-all duration-150 cursor-pointer text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent rounded-none"
                 >
                   <span>{lang === 'ru' ? 'СВЕТЛАЯ ТЕМА' : 'LIGHT THEME'}</span>
                   <div className="w-8 h-4 bg-[#1b1e26] border border-[#2a2f3b] rounded-full p-0.5 relative flex items-center shrink-0">
                     <motion.div
                       layout
                       animate={{ x: appTheme === 'light' ? 14 : 0 }}
-                      className={`w-2.5 h-2.5 rounded-full ${appTheme === 'light' ? 'bg-[#cd412b]' : 'bg-gray-500'}`}
+                      className={`w-2.5 h-2.5 rounded-full ${appTheme === 'light' ? 'bg-[#cd412b]' : 'bg-zinc-500'}`}
                     />
                   </div>
                 </button>
               </div>
             </div>
-            
+
             {/* System Status Info block in sidebar */}
-            <div className="bg-[#14171e]/50 border border-[#2a2f3b] p-3 text-[10px] font-mono text-gray-500 space-y-2 rounded-none">
+            <div className="bg-[#14171e]/95 border border-[#2a2f3b] p-3 text-[10px] font-mono text-zinc-500 space-y-2 rounded-none rust-metal-pattern relative">
               <div className="flex justify-between">
                 <span>SYSTEM_SEC:</span>
-                <span className="text-gray-400">SECURE</span>
+                <span className="text-zinc-400">SECURE</span>
               </div>
               <div className="flex justify-between">
                 <span>EAC_STATUS:</span>
@@ -1259,7 +1326,7 @@ export default function App() {
               </div>
               <div className="flex justify-between">
                 <span>VERSION:</span>
-                <span className="text-gray-400">{APP_VERSION}</span>
+                <span className="text-zinc-400">{APP_VERSION}</span>
               </div>
 
               {/* User Agreement Link integrated into sidebar */}
@@ -2124,6 +2191,24 @@ export default function App() {
               transition={{ duration: 0.2 }}
             >
               <ElectricalSimulatorTab lang={lang} />
+            </motion.div>
+          )}
+
+          {activeTab === 'mixing' && (
+            <motion.div
+              key="mixing"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <MixingTableTab lang={lang} onToast={(msg, type) => {
+                const id = Math.random().toString(36).substring(2, 9);
+                setToasts(prev => [...prev, { id, message: msg, type }]);
+                setTimeout(() => {
+                  setToasts(prev => prev.filter(t => t.id !== id));
+                }, 3000);
+              }} />
             </motion.div>
           )}
 
