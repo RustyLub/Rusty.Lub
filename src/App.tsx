@@ -48,7 +48,8 @@ import {
   Target,
   Calculator,
   Sprout,
-  FlaskConical
+  FlaskConical,
+  UserPlus
 } from 'lucide-react';
 import { ToastType, CustomUser, APP_VERSION } from './types';
 
@@ -87,6 +88,7 @@ import WipeTrackerTab from './components/WipeTrackerTab';
 import EcoRaidTab from './components/EcoRaidTab';
 import MiningQuarryTab from './components/MiningQuarryTab';
 import MixingTableTab from './components/MixingTableTab';
+import ClanBoardTab from './components/ClanBoardTab';
 import AuthModal from './components/AuthModal';
 import CabinetModal from './components/CabinetModal';
 import TermsModal from './components/TermsModal';
@@ -104,9 +106,15 @@ import rustWallpaperTwo from './assets/images/rust_wallpaper_two_1782810130672.j
 import { getAvatarUrl } from './customAvatars';
 // @ts-ignore
 import rustWallpaperThree from './assets/images/rust_wallpaper_three_1782810145159.jpg';
+// @ts-ignore
+import customSwampBg from './assets/images/custom_swamp_bg.png';
 
 
 const wallpaperTitles = [
+  {
+    ru: 'БОЛОТО, МЕЛЬНИЦА И МОСТ НА ЗАКАТЕ (RUST SWAMP)',
+    en: 'SWAMP, WINDMILL & BOARDWALK AT SUNSET (RUST SWAMP)'
+  },
   {
     ru: 'СХОД С ПЛАТО У СФЕРЫ (СФЕРА НА ЗАКАТЕ)',
     en: 'RADTOWN DOME OUTPOST AT SUNSET'
@@ -221,7 +229,7 @@ const appTranslations = {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan'>('home');
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lang, setLang] = useState<'ru' | 'en'>('en');
@@ -578,12 +586,12 @@ export default function App() {
       } else {
         clearInterval(interval);
         setWallpaperLoading(false);
-        setCurrentWallpaperIdx(prev => (prev + Math.floor(Math.random() * 2) + 1) % 3);
+        setCurrentWallpaperIdx(prev => (prev + Math.floor(Math.random() * 3) + 1) % 4);
       }
     }, 550);
   };
 
-  const handleTabChange = (tabId: 'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin') => {
+  const handleTabChange = (tabId: any) => {
     setActiveTab(tabId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     logUserActivity({
@@ -912,6 +920,7 @@ export default function App() {
   const tabs = [
     { id: 'home', label: appTranslations.tabs.home[lang], icon: <Home size={16} /> },
     { id: 'news', label: appTranslations.tabs.news[lang], icon: <Compass size={16} /> },
+    { id: 'clan', label: lang === 'ru' ? 'Поиск Клана & Тимейта' : 'Find Clan & Teammates', icon: <UserPlus size={16} className="text-blue-400" /> },
     { id: 'errors', label: appTranslations.tabs.errors[lang], icon: <BookOpen size={16} /> },
     { id: 'binds', label: appTranslations.tabs.binds[lang], icon: <Keyboard size={16} /> },
     { id: 'fps', label: appTranslations.tabs.fps[lang], icon: <Settings size={16} /> },
@@ -936,9 +945,14 @@ export default function App() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-[#0c0d10] text-[#e1e1e6] font-sans relative selection:bg-[#cd412b]/30 selection:text-white pb-20 scanlines">
+    <div 
+      className="min-h-screen text-[#c8d0d8] font-sans relative selection:bg-[#ff2a4d]/30 selection:text-white pb-20 scanlines bg-cover bg-center bg-no-repeat bg-fixed"
+      style={{
+        backgroundImage: `linear-gradient(to bottom, rgba(7, 9, 15, 0.55), rgba(7, 9, 15, 0.72)), url(${customSwampBg})`
+      }}
+    >
       {/* Topmost Warning Hazard Stripe for authentic Facepunch feel */}
-      <div className="h-1 rust-hazard w-full sticky top-0 z-50 shadow-md" />
+      <div className="h-1.5 rust-hazard w-full sticky top-0 z-50 shadow-[0_0_15px_rgba(217,122,34,0.6)]" />
 
       {/* Global Announcement Banner from Owner/Admin */}
       {announcement && announcement.active && (
@@ -949,7 +963,7 @@ export default function App() {
               ? 'bg-red-500/10 border-red-500/30 text-red-500'
               : 'bg-blue-500/10 border-blue-500/30 text-blue-400'
         }`}>
-          <div className="flex items-center gap-2 font-black shrink-0 uppercase tracking-widest text-[10px] bg-black/40 px-2 py-0.5 border border-current">
+          <div className="flex items-center gap-2 font-black shrink-0 uppercase tracking-widest text-[10px] bg-black/60 px-2 py-0.5 border border-current">
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-current"></span>
@@ -966,27 +980,29 @@ export default function App() {
           </div>
           
           <div className="shrink-0 text-[9px] font-bold uppercase tracking-wider font-mono opacity-50 hidden sm:block">
-            SYS_MSG_v1.0
+            SYS_MSG_v2.6
           </div>
         </div>
       )}
 
-      {/* HEADER / NAVIGATION BAR */}
-      <nav className="sticky top-1 z-40 bg-white backdrop-blur-md border-b border-gray-200 shadow-xl">
+      {/* HEADER / NAVIGATION BAR - Cyberpunk Red Tactical Style */}
+      <nav className="sticky top-1 z-40 bg-[#0d1017]/95 backdrop-blur-md border-b border-[#ff2a4d]/30 shadow-[0_4px_25px_rgba(0,0,0,0.8)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <div className="flex items-center gap-2.5 shrink-0">
-              <div className="w-7 h-7 bg-[#cd412b] rounded flex items-center justify-center font-bold text-white shadow-md shadow-[#cd412b]/20 relative overflow-hidden group">
+              <div className="w-8 h-8 bg-gradient-to-br from-[#ff2a4d] to-[#990e25] rounded-none flex items-center justify-center font-bold text-white shadow-[0_0_15px_rgba(255,42,77,0.5)] relative overflow-hidden group clip-path-polygon">
                 <span className="relative z-10 text-sm">🦀</span>
-                <div className="absolute inset-0 bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform" />
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform" />
+                <div className="hud-corner-tl" />
+                <div className="hud-corner-br" />
               </div>
               <div className="flex flex-col justify-center">
-                <span className="font-black text-base tracking-widest text-black font-teko leading-none block">
-                  RUSTY<span className="text-[#cd412b]">.LUB</span>
+                <span className="font-black text-lg tracking-widest text-white font-russo leading-none block cyber-header-glow">
+                  RUSTY<span className="text-[#ff2a4d]">.LUB</span>
                 </span>
-                <span className="block text-[7.5px] font-black text-black tracking-widest font-mono uppercase leading-none mt-0.5">
-                  SURVIVAL KIT {APP_VERSION}
+                <span className="block text-[7.5px] font-bold text-gray-400 tracking-widest font-mono uppercase leading-none mt-0.5">
+                  TACTICAL SURVIVAL {APP_VERSION}
                 </span>
                 {/* Online Users Indicator integrated directly below logo */}
                 <div className="flex items-center gap-1 text-[7.5px] font-mono text-[#10b981] font-bold select-none leading-none mt-1">
@@ -994,8 +1010,8 @@ export default function App() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10b981] opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-1 w-1 bg-[#10b981]"></span>
                   </span>
-                  <span className="tracking-widest uppercase text-black">
-                    {lang === 'ru' ? 'В СЕТИ' : 'ONLINE'}: <span className="text-emerald-600 font-extrabold">{onlineCount}</span>
+                  <span className="tracking-widest uppercase text-gray-300">
+                    {lang === 'ru' ? 'В СЕТИ' : 'ONLINE'}: <span className="text-emerald-400 font-extrabold">{onlineCount}</span>
                   </span>
                 </div>
               </div>
@@ -1202,27 +1218,28 @@ export default function App() {
         <div className="flex flex-col lg:flex-row gap-8 items-start relative">
           {/* Left Sidebar Navigation - Only on Desktop */}
           <aside className="w-full lg:w-56 shrink-0 lg:sticky lg:top-20 space-y-4 hidden lg:block xl:absolute xl:right-full xl:mr-8 xl:top-0 xl:w-52">
-            <div className="bg-[#14171e]/95 border border-[#2a2f3b] p-3 space-y-4 rounded-none shadow-xl relative rust-metal-pattern">
-              <div className="rust-bracket-tl" />
-              <div className="rust-bracket-tr" />
-              <div className="rust-bracket-bl" />
-              <div className="rust-bracket-br" />
+            <div className="cyber-panel p-3 space-y-4 relative">
+              <div className="hud-corner-tl" />
+              <div className="hud-corner-tr" />
+              <div className="hud-corner-bl" />
+              <div className="hud-corner-br" />
               
-              <div className="px-3 py-2 border-b border-[#2a2f3b] flex items-center justify-between">
-                <span className="text-[10px] font-mono font-black text-[#cd412b] tracking-widest uppercase flex items-center gap-1.5">
+              <div className="px-3 py-2 border-b border-[#ff2a4d]/25 flex items-center justify-between">
+                <span className="text-[10px] font-mono font-black text-[#ff2a4d] tracking-widest uppercase flex items-center gap-1.5">
                   <Compass size={13} />
                   <span>{lang === 'ru' ? 'НАВИГАЦИЯ' : 'NAVIGATION'}</span>
                 </span>
-                <span className="text-[8px] font-mono text-zinc-500">v2.6</span>
+                <span className="text-[8px] font-mono text-zinc-500">v3.0</span>
               </div>
 
               {/* Categorized Navigation Groups */}
               {[
                 {
-                  title: lang === 'ru' ? 'ОСНОВНОЕ' : 'GENERAL',
+                  title: lang === 'ru' ? 'СООБЩЕСТВО' : 'COMMUNITY',
                   items: [
                     { id: 'home', label: appTranslations.tabs.home[lang], icon: <Home size={15} /> },
                     { id: 'news', label: appTranslations.tabs.news[lang], icon: <Compass size={15} /> },
+                    { id: 'clan', label: lang === 'ru' ? 'Поиск Клана & Тикеты' : 'Clan & Teammate Board', icon: <UserPlus size={15} className="text-blue-400" />, badge: 'AUTH' },
                     { id: 'chat', label: lang === 'ru' ? 'Чат Сообщества' : 'Community Chat', icon: <MessageSquare size={15} />, badge: 'LIVE' }
                   ]
                 },
@@ -1274,22 +1291,22 @@ export default function App() {
                           onClick={() => handleTabChange(tab.id as any)}
                           className={`w-full flex items-center justify-between px-2.5 py-2 text-[10px] font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer rounded-none relative overflow-hidden font-mono group ${
                             isActive
-                              ? 'bg-gradient-to-r from-blue-600/15 to-[#ff4d30]/15 text-white border border-[#cd412b]/50 shadow-sm font-black'
+                              ? 'bg-gradient-to-r from-[#ff2a4d]/25 to-[#ff2a4d]/10 text-white border border-[#ff2a4d] shadow-[0_0_15px_rgba(255,42,77,0.3)] font-black'
                               : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
                           }`}
                         >
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className={`transition-transform duration-150 group-hover:scale-110 shrink-0 ${isActive ? 'text-[#cd412b]' : 'text-zinc-500 group-hover:text-[#cd412b]'}`}>
+                            <span className={`transition-transform duration-150 group-hover:scale-110 shrink-0 ${isActive ? 'text-[#ff2a4d]' : 'text-zinc-500 group-hover:text-[#ff2a4d]'}`}>
                               {tab.icon}
                             </span>
                             <span className="truncate">{tab.label}</span>
                           </div>
                           {'badge' in tab && tab.badge && (
-                            <span className="px-1.5 py-0.5 text-[7px] font-black uppercase bg-[#cd412b]/20 text-[#cd412b] border border-[#cd412b]/30 shrink-0">
+                            <span className="px-1.5 py-0.5 text-[7px] font-black uppercase bg-[#ff2a4d]/20 text-[#ff2a4d] border border-[#ff2a4d]/35 shrink-0">
                               {tab.badge}
                             </span>
                           )}
-                          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#cd412b] scale-y-0 group-hover:scale-y-100 transition-transform origin-top" />
+                          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#ff2a4d] scale-y-0 group-hover:scale-y-100 transition-transform origin-top" />
                         </button>
                       );
                     })}
@@ -1378,7 +1395,7 @@ export default function App() {
               <div 
                 id="grand-home-banner"
                 className="relative overflow-hidden rounded-none border-2 border-[#2a2f3b] p-8 sm:p-12 text-center space-y-6 shadow-2xl bg-cover bg-center keep-dark"
-                style={{ backgroundImage: `url(${oilRigBg})` }}
+                style={{ backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.65)), url(${customSwampBg})` }}
               >
                 <div className="absolute inset-0 bg-black/60 pointer-events-none" />
                 
@@ -1455,6 +1472,13 @@ export default function App() {
                     className="px-6 py-2.5 bg-[#cd412b] hover:bg-[#b03825] text-white rounded-none text-xs font-black uppercase tracking-wider shadow-lg shadow-[#cd412b]/20 hover:shadow-[#cd412b]/35 transition-all cursor-pointer border border-[#e6553f]"
                   >
                     {appTranslations.bannerBtnRaid[lang]}
+                  </button>
+                  <button
+                    onClick={() => handleTabChange('clan')}
+                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-none text-xs font-black uppercase tracking-wider shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 transition-all cursor-pointer border border-blue-400/60 flex items-center gap-2"
+                  >
+                    <UserPlus size={15} className="animate-pulse text-blue-200" />
+                    <span>{lang === 'ru' ? 'Поиск Клана & Тимейта' : 'Clan & Teammate Board'}</span>
                   </button>
                   <button
                     id="support-dev-btn"
@@ -1781,8 +1805,14 @@ export default function App() {
               </div>
 
               {/* Quick Feature Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
                 {[
+                  {
+                    icon: '👥',
+                    title: lang === 'ru' ? 'Поиск Клана / Тимейта' : 'Clan & Teammate Board',
+                    desc: lang === 'ru' ? 'Набор в кланы, поиск тимейтов и отклики' : 'Clan recruitment, search & applications',
+                    tab: 'clan'
+                  },
                   {
                     icon: '📖',
                     title: appTranslations.features.errors.title[lang],
@@ -2194,21 +2224,21 @@ export default function App() {
             </motion.div>
           )}
 
-          {activeTab === 'mixing' && (
+          {activeTab === 'clan' && (
             <motion.div
-              key="mixing"
+              key="clan"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
             >
-              <MixingTableTab lang={lang} onToast={(msg, type) => {
+              <ClanBoardTab lang={lang} user={currentUser} onToast={(msg, type) => {
                 const id = Math.random().toString(36).substring(2, 9);
                 setToasts(prev => [...prev, { id, message: msg, type }]);
                 setTimeout(() => {
                   setToasts(prev => prev.filter(t => t.id !== id));
                 }, 3000);
-              }} />
+              }} onOpenAuth={() => setAuthModalOpen(true)} />
             </motion.div>
           )}
 
@@ -2586,7 +2616,7 @@ export default function App() {
                   <div className="space-y-5">
                     <div className="relative border border-[#2a2f3b] overflow-hidden group bg-black">
                       <img
-                        src={[rustWallpaperOne, rustWallpaperTwo, rustWallpaperThree][currentWallpaperIdx]}
+                        src={[customSwampBg, rustWallpaperOne, rustWallpaperTwo, rustWallpaperThree][currentWallpaperIdx]}
                         alt="Generated Rust Wallpaper"
                         className="w-full h-auto aspect-video object-cover"
                         referrerPolicy="no-referrer"
@@ -2621,7 +2651,7 @@ export default function App() {
                       </motion.button>
 
                       <motion.a
-                        href={[rustWallpaperOne, rustWallpaperTwo, rustWallpaperThree][currentWallpaperIdx]}
+                        href={[customSwampBg, rustWallpaperOne, rustWallpaperTwo, rustWallpaperThree][currentWallpaperIdx]}
                         download={`rust_wallpaper_${currentWallpaperIdx + 1}.jpg`}
                         target="_blank"
                         rel="noopener noreferrer"

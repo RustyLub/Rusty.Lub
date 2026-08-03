@@ -437,6 +437,27 @@
         "read": "true",
         "write": "true"
       }
+    },
+    "/clan_posts/{postId}": {
+      "description": "Forum posts for clan recruitment and looking for teammates",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
+    },
+    "/clan_comments/{commentId}": {
+      "description": "Public discussion comments on clan board posts",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
+    },
+    "/clan_tickets/{ticketId}": {
+      "description": "Applications submitted to clan posts",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     }
   }
 }

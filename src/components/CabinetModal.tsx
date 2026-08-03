@@ -1822,7 +1822,7 @@ export default function CabinetModal({
                   <div className="relative z-10 space-y-1">
                     <h2 className="text-sm font-black font-mono text-amber-500 uppercase tracking-widest flex items-center gap-2">
                       <Crown size={18} className="text-amber-400" />
-                      {lang === 'ru' ? 'RUSTHUB VIP ПРИВИЛЕГИИ' : 'RUSTHUB VIP PRIVILEGES'}
+                      {lang === 'ru' ? 'RUSTY.LUB VIP ПРИВИЛЕГИИ' : 'RUSTY.LUB VIP PRIVILEGES'}
                     </h2>
                     <p className="text-xs text-zinc-300 max-w-xl leading-relaxed">
                       {lang === 'ru' 
@@ -1876,7 +1876,7 @@ export default function CabinetModal({
                     </div>
                     <ul className="space-y-1.5 pt-2 border-t border-zinc-800/30">
                       {[
-                        { ru: 'Глобальный радио-чат RustHub', en: 'Global RustHub radio chat' },
+                        { ru: 'Глобальный радио-чат Rusty.Lub', en: 'Global Rusty.Lub radio chat' },
                         { ru: 'Калькулятор рейдов (базовый)', en: 'Raid calculator (basic)' },
                         { ru: 'Справочник биндов и консольных команд', en: 'Binds and console command library' },
                         { ru: 'База ошибок Rust и способы их решения', en: 'Rust error database & fixes' },

@@ -224,19 +224,28 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
     };
 
     const fetchStats = async () => {
+        let users = 0;
+        let news = 0;
+        let messages = 0;
         try {
-            const usersCount = await getCountFromServer(collection(db, 'chat_users'));
-            const newsCount = await getCountFromServer(collection(db, 'news'));
-            const messagesCount = await getCountFromServer(collection(db, 'messages'));
-            
-            setStats({
-                users: usersCount.data().count,
-                news: newsCount.data().count,
-                messages: messagesCount.data().count
-            });
+            const usersSnap = await getDocs(collection(db, 'chat_users'));
+            users = usersSnap.size;
         } catch (err) {
-            console.error("Stats error:", err);
+            // fallback or ignore if collection not ready
         }
+        try {
+            const newsSnap = await getDocs(collection(db, 'news'));
+            news = newsSnap.size;
+        } catch (err) {
+            // fallback
+        }
+        try {
+            const messagesSnap = await getDocs(collection(db, 'messages'));
+            messages = messagesSnap.size;
+        } catch (err) {
+            // fallback
+        }
+        setStats({ users, news, messages });
     };
 
     loadSettings();
@@ -660,7 +669,7 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
           </h2>
           <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
             <Activity size={12} className="text-emerald-500 animate-pulse" />
-            RustHub System Infrastructure · {APP_VERSION}
+            Rusty.Lub System Infrastructure · {APP_VERSION}
           </p>
         </div>
       </div>
@@ -1346,7 +1355,7 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
                                             </span>
                                             <div className="flex gap-1.5 mt-1">
                                                 <a
-                                                    href={`mailto:${msg.email}?subject=RustHub Response&body=Hello ${msg.name},\n\n`}
+                                                    href={`mailto:${msg.email}?subject=Rusty.Lub Response&body=Hello ${msg.name},\n\n`}
                                                     className="px-2 py-1 bg-zinc-800 border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-700 text-[9px] text-zinc-300 font-bold uppercase transition rounded-sm flex items-center gap-1"
                                                 >
                                                     <Send size={10} />

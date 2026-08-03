@@ -42,16 +42,14 @@ export async function logUserActivity(params: {
     const user = currentUser || (auth.currentUser ? {
       uid: auth.currentUser.uid,
       displayName: auth.currentUser.displayName || 'Survivor',
-      email: auth.currentUser.email || undefined,
-      photoURL: auth.currentUser.photoURL || undefined,
+      email: auth.currentUser.email || '',
+      photoURL: auth.currentUser.photoURL || '',
       role: 'user'
     } : null);
 
-    const logEntry: Omit<UserActivityLog, 'id'> = {
+    const logEntry: Record<string, any> = {
       uid: user?.uid || 'anonymous',
       displayName: user?.displayName || (auth.currentUser?.isAnonymous ? 'Guest Survivor' : 'Anonymous User'),
-      email: user?.email || auth.currentUser?.email || undefined,
-      photoURL: user?.photoURL || auth.currentUser?.photoURL || undefined,
       role: user?.role || 'user',
       action,
       tab: tab || 'general',
@@ -59,6 +57,12 @@ export async function logUserActivity(params: {
       timestamp: serverTimestamp(),
       userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown'
     };
+
+    const userEmail = user?.email || auth.currentUser?.email;
+    if (userEmail) logEntry.email = userEmail;
+
+    const userPhoto = user?.photoURL || auth.currentUser?.photoURL;
+    if (userPhoto) logEntry.photoURL = userPhoto;
 
     await addDoc(collection(db, 'activity_logs'), logEntry);
   } catch (err) {
