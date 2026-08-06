@@ -89,6 +89,7 @@ import EcoRaidTab from './components/EcoRaidTab';
 import MiningQuarryTab from './components/MiningQuarryTab';
 import MixingTableTab from './components/MixingTableTab';
 import ClanBoardTab from './components/ClanBoardTab';
+import RustPlusTab from './components/RustPlusTab';
 import AuthModal from './components/AuthModal';
 import CabinetModal from './components/CabinetModal';
 import TermsModal from './components/TermsModal';
@@ -229,7 +230,7 @@ const appTranslations = {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus'>('home');
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lang, setLang] = useState<'ru' | 'en'>('en');
@@ -1272,6 +1273,7 @@ export default function App() {
                   items: [
                     ...(isVip ? [{ id: 'radar', label: lang === 'ru' ? 'Player Radar (VIP)' : 'Player Radar (VIP)', icon: <Activity size={15} className="text-purple-400" /> }] : []),
                     ...(isAdmin ? [
+                      { id: 'rustplus', label: lang === 'ru' ? 'Rust+ Bot Hub' : 'Rust+ Bot Hub', icon: <Cpu size={15} className="text-emerald-400" />, badge: 'OWNER' },
                       { id: 'icons', label: lang === 'ru' ? 'Иконки Rust (ADMIN)' : 'Rust Icons (ADMIN)', icon: <Image size={15} /> },
                       { id: 'admin', label: 'Admin Panel', icon: <ShieldCheck size={15} className="text-red-400" /> }
                     ] : [])
@@ -1565,29 +1567,63 @@ export default function App() {
                 </div>
               )}
 
-              {/* Global Warfare 4 Event Section */}
-              {/* Jungle Fever Spoiler Block */}
-              {showJungleFeverSpoiler && (
-                <div className="mb-8 p-6 bg-[#0c0d10] border border-[#2a2f3b] shadow-2xl relative overflow-hidden">
+              {/* Global Warfare 4 Event & Featured News Section */}
+              <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Jungle Fever Spoiler Block */}
+                {showJungleFeverSpoiler && (
+                  <div className="p-6 bg-[#0c0d10] border border-[#2a2f3b] shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                    <div className="rust-bracket-tl" />
+                    <div className="rust-bracket-tr" />
+                    <div className="rust-bracket-bl" />
+                    <div className="rust-bracket-br" />
+                    <div>
+                      <img referrerPolicy="no-referrer" src="https://i.ytimg.com/vi/RxS0ISoktOY/maxresdefault.jpg" alt="Jungle Fever Part 1" className="w-full h-36 object-cover mb-4 border border-[#2a2f3b]" />
+                      <h4 className="text-lg font-black text-white font-sans uppercase mb-2">
+                        {lang === 'ru' ? 'Jungle Fever - Серия фильмов Solo Rust' : 'Jungle Fever - Solo Rust Movie Series'}
+                      </h4>
+                      <p className="text-xs text-gray-300 font-sans mb-4">
+                        {lang === 'ru' ? 'Первая часть моей серии фильмов Jungle Fever!' : 'First part of my Jungle Fever movie series!'}
+                      </p>
+                    </div>
+                    <div>
+                      <button
+                        onClick={() => setActiveTab('news')}
+                        className="inline-block px-4 py-2 bg-[#cd412b] hover:bg-[#b53723] text-white text-[10px] font-bold uppercase tracking-widest font-mono cursor-pointer transition-colors"
+                      >
+                        {lang === 'ru' ? 'СМОТРЕТЬ ПЕРВУЮ ЧАСТЬ' : 'WATCH PART 1'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Rust LFG Bot Featured Banner */}
+                <div className={`p-6 bg-[#0c0d10] border border-[#2a2f3b] shadow-2xl relative overflow-hidden flex flex-col justify-between ${!showJungleFeverSpoiler ? 'md:col-span-2' : ''}`}>
                   <div className="rust-bracket-tl" />
                   <div className="rust-bracket-tr" />
                   <div className="rust-bracket-bl" />
                   <div className="rust-bracket-br" />
-                  <img referrerPolicy="no-referrer" src="https://i.ytimg.com/vi/RxS0ISoktOY/maxresdefault.jpg" alt="Jungle Fever Part 1" className="w-full h-32 object-cover mb-4" />
-                  <h4 className="text-lg font-black text-white font-sans uppercase mb-2">
-                    {lang === 'ru' ? 'Jungle Fever - Серия фильмов Solo Rust' : 'Jungle Fever - Solo Rust Movie Series'}
-                  </h4>
-                  <p className="text-xs text-gray-300 font-sans mb-4">
-                    {lang === 'ru' ? 'Первая часть моей серии фильмов Jungle Fever!' : 'First part of my Jungle Fever movie series!'}
-                  </p>
-                  <button
-                    onClick={() => setActiveTab('news')}
-                    className="inline-block px-4 py-2 bg-[#cd412b] text-white text-[10px] font-bold uppercase tracking-widest font-mono cursor-pointer"
-                  >
-                    {lang === 'ru' ? 'СМОТРЕТЬ ПЕРВУЮ ЧАСТЬ' : 'WATCH PART 1'}
-                  </button>
+                  <div>
+                    <div className="relative mb-4 overflow-hidden border border-[#2a2f3b] bg-black/60 h-36 flex items-center justify-center group">
+                      <img referrerPolicy="no-referrer" src="/images/rust_lfg_bot.png" alt="Rust LFG Bot" className="h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" />
+                    </div>
+                    <h4 className="text-lg font-black text-white font-sans uppercase mb-2 flex items-center gap-2">
+                      <span>🤖</span>
+                      <span>{lang === 'ru' ? 'Новый бот для поиска команды в Rust' : 'New Teammate & Clan Finder Bot'}</span>
+                    </h4>
+                    <p className="text-xs text-gray-300 font-sans mb-4">
+                      {lang === 'ru' ? '@RustLFGBot — теперь находить тиммейтов и кланы стало проще. Бот работает прямо в Telegram.' : '@RustLFGBot — find teammates and clans directly in Telegram.'}
+                    </p>
+                  </div>
+                  <div>
+                    <button
+                      onClick={() => setActiveTab('news')}
+                      className="inline-block px-4 py-2 bg-[#cd412b] hover:bg-[#b53723] text-white text-[10px] font-bold uppercase tracking-widest font-mono cursor-pointer transition-colors"
+                    >
+                      {lang === 'ru' ? 'ПЕРЕЙТИ К НОВОСТИ' : 'READ FULL NEWS'}
+                    </button>
+                  </div>
                 </div>
-              )}
+              </div>
 
               {/* Clan EAC Leader & Veteran Bio */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -2311,6 +2347,27 @@ export default function App() {
               transition={{ duration: 0.2 }}
             >
               <MiningQuarryTab lang={lang} />
+            </motion.div>
+          )}
+
+          {activeTab === 'rustplus' && (
+            <motion.div
+              key="rustplus"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <RustPlusTab 
+                lang={lang} 
+                currentUser={currentUser} 
+                isAdmin={isAdmin} 
+                onToast={(msg, type) => {
+                  const id = Date.now().toString();
+                  setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : (type === 'info' ? 'info' as any : 'success') }]);
+                  setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+                }} 
+              />
             </motion.div>
           )}
 

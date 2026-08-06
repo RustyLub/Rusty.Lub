@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db, handleFirestoreError, OperationType } from '../firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import { motion } from 'motion/react';
 import { NewsItem } from '../types';
 import { 
@@ -15,8 +15,132 @@ import {
   ShieldAlert, 
   CheckCircle2, 
   ChevronRight,
-  Info
+  Info,
+  Send
 } from 'lucide-react';
+
+const DEFAULT_NEWS_ITEMS: NewsItem[] = [
+  {
+    id: 'rust-lfg-bot-news',
+    category: 'events',
+    title: {
+      ru: '🤖 Новый бот для поиска команды в Rust',
+      en: '🤖 New Teammate & Clan Finder Bot for Rust'
+    },
+    date: '2026-08-06T12:00:00.000Z',
+    author: 'RustLFG',
+    badge: {
+      ru: 'TELEGRAM БОТ',
+      en: 'TELEGRAM BOT'
+    },
+    isFeatured: true,
+    coverImage: '/images/rust_lfg_bot.png',
+    summary: {
+      ru: '@RustLFGBot — теперь находить тиммейтов и кланы стало проще. Бот работает прямо в Telegram.',
+      en: '@RustLFGBot makes finding teammates and clans easier than ever, right inside Telegram.'
+    },
+    content: {
+      ru: [
+        {
+          sectionTitle: 'Как это работает:',
+          text: 'Быстрый и удобный сервис поиска соратников и кланов с системой взаимных лайков и свайпов:',
+          highlights: [
+            'Создаёте анкету с возрастом, микрофоном, часовым поясом и целями (тиммейт/клан/набор игроков)',
+            'Листаете анкеты других игроков со свайпами ❤️ или ⛔',
+            'При взаимном интересе бот уведомляет — остаётся только написать'
+          ]
+        },
+        {
+          sectionTitle: 'Для кого:',
+          text: 'Универсальное решение для различных категорий игроков и сообществ Rust:',
+          highlights: [
+            'Игроки в поиске пары, трио или клана',
+            'Кланы, которые набирают людей',
+            'Те, кто хочет просто найти компанию'
+          ]
+        },
+        {
+          sectionTitle: 'Как начать:',
+          text: 'Перейдите в бота → @RustLFGBot, напишите /start, выберите язык и заполните анкету.',
+          highlights: [
+            'Бесплатно. 24/7. Русский и английский языки.',
+            'https://t.me/RustLFGBot'
+          ]
+        }
+      ],
+      en: [
+        {
+          sectionTitle: 'How it works:',
+          text: 'Convenient Telegram service for fast teammate and clan matchmaking with swipes and mutual matches:',
+          highlights: [
+            'Create a profile with your age, mic status, timezone, and goals (teammate/clan/recruiting)',
+            'Browse profiles of other players with swipes ❤️ or ⛔',
+            'Get notified instantly when there is a mutual match — just message them'
+          ]
+        },
+        {
+          sectionTitle: 'Who it is for:',
+          text: 'Universal tool for all kinds of Rust players and teams:',
+          highlights: [
+            'Players looking for a duo, trio, or clan',
+            'Clans actively recruiting players',
+            'Anyone wanting to find friendly company for wipe'
+          ]
+        },
+        {
+          sectionTitle: 'How to get started:',
+          text: 'Go to bot → @RustLFGBot, type /start, choose language and fill out your profile.',
+          highlights: [
+            'Free. 24/7. Russian and English languages.',
+            'https://t.me/RustLFGBot'
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: 'industrial-update-devblog',
+    category: 'updates',
+    title: {
+      ru: 'Rust Industrial Automation & Tech Devblog',
+      en: 'Rust Industrial Automation & Tech Devblog'
+    },
+    date: '2026-08-01T10:00:00.000Z',
+    author: 'Facepunch',
+    badge: {
+      ru: 'ОБНОВЛЕНИЕ',
+      en: 'UPDATE'
+    },
+    isFeatured: false,
+    coverImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=800&auto=format&fit=crop',
+    summary: {
+      ru: 'Новейшие изменения автокравта, оптимизация электрических схем и конвейеров.',
+      en: 'Latest auto-crafting adjustments, power grid optimizations, and pipeline networks.'
+    },
+    content: {
+      ru: [
+        {
+          sectionTitle: 'Автоматизация базы:',
+          text: 'Промышленные конвейеры теперь работают на 15% эффективнее с уменьшенной нагрузкой на сервер.',
+          highlights: [
+            'Улучшена сортировка предметов в печи',
+            'Новые пресеты для быстрых труб'
+          ]
+        }
+      ],
+      en: [
+        {
+          sectionTitle: 'Base Automation:',
+          text: 'Industrial conveyors are now 15% more efficient with reduced server load.',
+          highlights: [
+            'Improved item sorting in furnaces',
+            'New quick-pipe network presets'
+          ]
+        }
+      ]
+    }
+  }
+];
 
 // Robust helper component that falls back to stylized placeholder art if Facepunch CDN is unstable or blocked
 function NewsImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
@@ -56,8 +180,8 @@ interface NewsTabProps {
 
 export default function NewsTab({ lang }: NewsTabProps) {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'updates' | 'blogs' | 'events'>('all');
-  const [activeNewsId, setActiveNewsId] = useState<string>('');
-  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [activeNewsId, setActiveNewsId] = useState<string>('rust-lfg-bot-news');
+  const [newsItems, setNewsItems] = useState<NewsItem[]>(DEFAULT_NEWS_ITEMS);
 
   console.log('NewsTab render - activeNewsId:', activeNewsId, 'newsItems count:', newsItems.length);
 
@@ -70,12 +194,24 @@ export default function NewsTab({ lang }: NewsTabProps) {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'news'), (snapshot) => {
-        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NewsItem));
-        // Sort by date descending
-        items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setNewsItems(items);
-        if (items.length > 0 && !activeNewsId) {
-            setActiveNewsId(items[0].id);
+        const dbItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NewsItem));
+        
+        // Merge db items with default items if not present in DB
+        const mergedMap = new Map<string, NewsItem>();
+        DEFAULT_NEWS_ITEMS.forEach(item => mergedMap.set(item.id, item));
+        dbItems.forEach(item => mergedMap.set(item.id, item));
+
+        const combined = Array.from(mergedMap.values());
+        combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        setNewsItems(combined);
+        if (combined.length > 0 && (!activeNewsId || !combined.some(i => i.id === activeNewsId))) {
+            setActiveNewsId(combined[0].id);
+        }
+
+        // Auto seed rust-lfg-bot-news to firestore if missing in DB
+        if (!dbItems.some(item => item.id === 'rust-lfg-bot-news')) {
+          setDoc(doc(db, 'news', 'rust-lfg-bot-news'), DEFAULT_NEWS_ITEMS[0]).catch(() => {});
         }
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, 'news');
@@ -239,8 +375,15 @@ export default function NewsTab({ lang }: NewsTabProps) {
                                 {h.split(':')[1]}
                               </button>
                             ) : h.startsWith('http') ? (
-                              <a href={h} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">
-                                {h}
+                              <a 
+                                href={h} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 font-bold font-mono bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-sm transition-colors mt-1"
+                              >
+                                <Send size={12} className="text-sky-400" />
+                                <span>{h.includes('t.me') ? (lang === 'ru' ? 'Открыть бота @RustLFGBot в Telegram' : 'Open @RustLFGBot in Telegram') : h}</span>
+                                <ArrowRight size={10} />
                               </a>
                             ) : (
                               h
