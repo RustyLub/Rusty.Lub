@@ -49,7 +49,9 @@ import {
   Calculator,
   Sprout,
   FlaskConical,
-  UserPlus
+  UserPlus,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { ToastType, CustomUser, APP_VERSION } from './types';
 
@@ -251,9 +253,13 @@ export default function App() {
       console.warn(e);
     }
     if (appTheme === 'light') {
+      document.documentElement.classList.add('light-theme');
       document.body.classList.add('light-theme');
+      document.documentElement.classList.remove('dark');
     } else {
+      document.documentElement.classList.remove('light-theme');
       document.body.classList.remove('light-theme');
+      document.documentElement.classList.add('dark');
     }
   }, [appTheme]);
 
@@ -953,9 +959,13 @@ export default function App() {
 
   return (
     <div 
-      className="min-h-screen text-[#c8d0d8] font-sans relative selection:bg-[#ff2a4d]/30 selection:text-white pb-20 scanlines bg-cover bg-center bg-no-repeat bg-fixed"
+      className={`min-h-screen font-sans relative selection:bg-[#ff2a4d]/30 selection:text-white pb-20 scanlines bg-cover bg-center bg-no-repeat bg-fixed transition-colors duration-200 ${
+        appTheme === 'light' ? 'text-[#0f172a]' : 'text-[#c8d0d8]'
+      }`}
       style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(7, 9, 15, 0.55), rgba(7, 9, 15, 0.72)), url(${customSwampBg})`
+        backgroundImage: appTheme === 'light'
+          ? `linear-gradient(to bottom, rgba(241, 245, 249, 0.94), rgba(226, 232, 240, 0.98)), url(${customSwampBg})`
+          : `linear-gradient(to bottom, rgba(7, 9, 15, 0.55), rgba(7, 9, 15, 0.72)), url(${customSwampBg})`
       }}
     >
       {/* Topmost Warning Hazard Stripe for authentic Facepunch feel */}
@@ -993,7 +1003,11 @@ export default function App() {
       )}
 
       {/* HEADER / NAVIGATION BAR - Cyberpunk Red Tactical Style */}
-      <nav className="sticky top-1 z-40 bg-[#0d1017]/95 backdrop-blur-md border-b border-[#ff2a4d]/30 shadow-[0_4px_25px_rgba(0,0,0,0.8)]">
+      <nav className={`sticky top-1 z-40 backdrop-blur-md border-b transition-colors duration-200 ${
+        appTheme === 'light'
+          ? 'bg-white/95 border-[#ff2a4d]/30 shadow-[0_4px_25px_rgba(0,0,0,0.06)]'
+          : 'bg-[#0d1017]/95 border-[#ff2a4d]/30 shadow-[0_4px_25px_rgba(0,0,0,0.8)]'
+      }`}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
@@ -1005,10 +1019,10 @@ export default function App() {
                 <div className="hud-corner-br" />
               </div>
               <div className="flex flex-col justify-center">
-                <span className="font-black text-lg tracking-widest text-white font-russo leading-none block cyber-header-glow">
+                <span className={`font-black text-lg tracking-widest font-russo leading-none block ${appTheme === 'light' ? 'text-slate-900' : 'text-white cyber-header-glow'}`}>
                   RUSTY<span className="text-[#ff2a4d]">.LUB</span>
                 </span>
-                <span className="block text-[7.5px] font-bold text-gray-400 tracking-widest font-mono uppercase leading-none mt-0.5">
+                <span className="block text-[7.5px] font-bold text-gray-500 tracking-widest font-mono uppercase leading-none mt-0.5">
                   TACTICAL SURVIVAL {APP_VERSION}
                 </span>
                 {/* Online Users Indicator integrated directly below logo */}
@@ -1017,19 +1031,19 @@ export default function App() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10b981] opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-1 w-1 bg-[#10b981]"></span>
                   </span>
-                  <span className="tracking-widest uppercase text-gray-300">
-                    {lang === 'ru' ? 'В СЕТИ' : 'ONLINE'}: <span className="text-emerald-400 font-extrabold">{onlineCount}</span>
+                  <span className={`tracking-widest uppercase ${appTheme === 'light' ? 'text-slate-600' : 'text-gray-300'}`}>
+                    {lang === 'ru' ? 'В СЕТИ' : 'ONLINE'}: <span className="text-emerald-500 font-extrabold">{onlineCount}</span>
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Language Selection, Web Push, Config Export, Chat & Login Buttons */}
+            {/* Language Selection, Theme Toggle, Web Push, Config Export, Chat & Login Buttons */}
             <div className="hidden lg:flex items-center gap-2">
               {/* 1-Click Config Exporter Button */}
               <button
                 onClick={() => setConfigExporterModalOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold bg-[#cd412b]/15 hover:bg-[#cd412b]/25 border border-[#cd412b]/50 text-white rounded-md transition-all cursor-pointer font-mono uppercase shadow-sm"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold bg-[#cd412b]/15 hover:bg-[#cd412b]/25 border border-[#cd412b]/50 text-[#cd412b] hover:text-white rounded-md transition-all cursor-pointer font-mono uppercase shadow-sm"
                 title={lang === 'ru' ? 'Экспорт конфигурации autoexec.cfg в один клик' : '1-Click autoexec.cfg Export'}
               >
                 <Download size={12} className="text-[#cd412b]" />
@@ -1039,10 +1053,10 @@ export default function App() {
               {/* Web Push Alerts Button */}
               <button
                 onClick={() => setNotificationModalOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-md transition-all cursor-pointer font-mono uppercase shadow-sm"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-500 rounded-md transition-all cursor-pointer font-mono uppercase shadow-sm"
                 title={lang === 'ru' ? 'Настройка Web Push уведомлений (Вайпы, Рейды, Новости)' : 'Web Push Notification Settings'}
               >
-                <Bell size={12} className="text-amber-400" />
+                <Bell size={12} className="text-amber-500" />
                 <span>{lang === 'ru' ? 'PUSH' : 'ALERTS'}</span>
               </button>
 
@@ -1052,10 +1066,10 @@ export default function App() {
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold border rounded-md transition-all cursor-pointer font-mono uppercase ${
                   activeTab === 'chat'
                     ? 'bg-gradient-to-r from-blue-600 to-[#ff4d30] text-white border-purple-500/40 shadow-md shadow-purple-500/10'
-                    : 'bg-gray-100 hover:bg-gray-200 border-gray-200 hover:border-gray-300 text-black hover:text-black'
+                    : 'bg-[#1b1e26]/40 hover:bg-[#1b1e26] border-[#2a2f3b] text-current'
                 }`}
               >
-                <MessageSquare size={12} className={activeTab === 'chat' ? 'text-white' : 'text-purple-600'} />
+                <MessageSquare size={12} className={activeTab === 'chat' ? 'text-white' : 'text-purple-500'} />
                 <span>{lang === 'ru' ? 'ЧАТ' : 'CHAT'}</span>
               </button>
 
@@ -1063,12 +1077,12 @@ export default function App() {
               {currentUser ? (
                 <button
                   onClick={() => setCabinetModalOpen(true)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold bg-gray-100 hover:bg-gray-200 border border-gray-200 hover:border-gray-300 text-black hover:text-black transition-all cursor-pointer rounded-md font-mono uppercase shrink-0"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold bg-[#1b1e26]/40 hover:bg-[#1b1e26] border border-[#2a2f3b] text-current transition-all cursor-pointer rounded-md font-mono uppercase shrink-0"
                 >
                   <img referrerPolicy="no-referrer" 
                     src={getAvatarUrl(currentUser.photoURL, currentUser.avatarClass)} 
                     alt={currentUser.displayName} 
-                    className="w-4 h-4 rounded-full object-cover border border-gray-300 bg-gray-200 shrink-0"
+                    className="w-4 h-4 rounded-full object-cover border border-[#2a2f3b] shrink-0"
                   />
                   <span className="tracking-wider">
                     {currentUser.uid === 'serustqs' 
@@ -1079,22 +1093,41 @@ export default function App() {
               ) : (
                 <button
                   onClick={() => setAuthModalOpen(true)}
-                  className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-bold bg-[#cd412b]/10 border border-[#cd412b]/30 hover:border-[#cd412b] hover:bg-[#cd412b]/20 text-black transition-all cursor-pointer rounded-md font-mono uppercase shrink-0"
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-bold bg-[#cd412b]/10 border border-[#cd412b]/30 hover:border-[#cd412b] hover:bg-[#cd412b]/20 text-[#cd412b] hover:text-white transition-all cursor-pointer rounded-md font-mono uppercase shrink-0"
                 >
                   <Power size={11} className="text-[#cd412b] animate-pulse" />
                   <span className="tracking-wider">{lang === 'ru' ? 'ВОЙТИ' : 'LOG IN'}</span>
                 </button>
               )}
 
+              {/* Theme Toggle Button */}
+              <button
+                onClick={() => setAppTheme(appTheme === 'dark' ? 'light' : 'dark')}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold bg-[#1b1e26]/40 hover:bg-[#1b1e26] border border-[#2a2f3b] text-current transition-all cursor-pointer rounded-md font-mono uppercase shrink-0"
+                title={appTheme === 'dark' ? (lang === 'ru' ? 'Включить светлую тему' : 'Switch to Light Theme') : (lang === 'ru' ? 'Включить тёмную тему' : 'Switch to Dark Theme')}
+              >
+                {appTheme === 'dark' ? (
+                  <>
+                    <Sun size={12} className="text-amber-400" />
+                    <span className="text-amber-300">{lang === 'ru' ? 'СВЕТ' : 'LIGHT'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon size={12} className="text-indigo-600" />
+                    <span className="text-indigo-600">{lang === 'ru' ? 'ТЬМА' : 'DARK'}</span>
+                  </>
+                )}
+              </button>
+
               {/* Language Selector */}
               <button
                 onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
-                className="flex items-center px-2 py-1.5 text-[9px] font-mono font-bold bg-gray-100 hover:bg-gray-200 border border-gray-200 hover:border-gray-300 text-black hover:text-black transition-all cursor-pointer rounded-md shrink-0"
+                className="flex items-center px-2 py-1.5 text-[9px] font-mono font-bold bg-[#1b1e26]/40 hover:bg-[#1b1e26] border border-[#2a2f3b] text-current transition-all cursor-pointer rounded-md shrink-0"
                 title={lang === 'ru' ? 'Switch to English' : 'Переключить на Русский'}
               >
-                <span className={lang === 'ru' ? 'text-black font-bold' : 'text-gray-500'}>RU</span>
+                <span className={lang === 'ru' ? 'text-[#ff2a4d] font-black' : 'text-gray-500'}>RU</span>
                 <span className="text-gray-400 mx-1">|</span>
-                <span className={lang === 'en' ? 'text-black font-bold' : 'text-gray-500'}>EN</span>
+                <span className={lang === 'en' ? 'text-[#ff2a4d] font-black' : 'text-gray-500'}>EN</span>
               </button>
             </div>
 
@@ -1345,14 +1378,17 @@ export default function App() {
               <div className="pt-2 border-t border-[#2a2f3b]/60 mt-2">
                 <button
                   onClick={() => setAppTheme(appTheme === 'dark' ? 'light' : 'dark')}
-                  className="w-full flex items-center justify-between px-2.5 py-2 text-[9px] font-bold font-mono uppercase transition-all duration-150 cursor-pointer text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent rounded-none"
+                  className="w-full flex items-center justify-between px-2.5 py-2 text-[9px] font-bold font-mono uppercase transition-all duration-150 cursor-pointer text-zinc-400 hover:text-[#ff2a4d] hover:bg-white/5 border border-transparent rounded-none"
                 >
-                  <span>{lang === 'ru' ? 'СВЕТЛАЯ ТЕМА' : 'LIGHT THEME'}</span>
+                  <div className="flex items-center gap-1.5">
+                    {appTheme === 'dark' ? <Moon size={11} className="text-zinc-500" /> : <Sun size={11} className="text-amber-500" />}
+                    <span>{appTheme === 'dark' ? (lang === 'ru' ? 'ТЁМНАЯ ТЕМА' : 'DARK THEME') : (lang === 'ru' ? 'СВЕТЛАЯ ТЕМА' : 'LIGHT THEME')}</span>
+                  </div>
                   <div className="w-8 h-4 bg-[#1b1e26] border border-[#2a2f3b] rounded-full p-0.5 relative flex items-center shrink-0">
                     <motion.div
                       layout
                       animate={{ x: appTheme === 'light' ? 14 : 0 }}
-                      className={`w-2.5 h-2.5 rounded-full ${appTheme === 'light' ? 'bg-[#cd412b]' : 'bg-zinc-500'}`}
+                      className={`w-2.5 h-2.5 rounded-full ${appTheme === 'light' ? 'bg-[#ff2a4d]' : 'bg-zinc-500'}`}
                     />
                   </div>
                 </button>
