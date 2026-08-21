@@ -1100,25 +1100,6 @@ export default function App() {
                 </button>
               )}
 
-              {/* Theme Toggle Button */}
-              <button
-                onClick={() => setAppTheme(appTheme === 'dark' ? 'light' : 'dark')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold bg-[#1b1e26]/40 hover:bg-[#1b1e26] border border-[#2a2f3b] text-current transition-all cursor-pointer rounded-md font-mono uppercase shrink-0"
-                title={appTheme === 'dark' ? (lang === 'ru' ? 'Включить светлую тему' : 'Switch to Light Theme') : (lang === 'ru' ? 'Включить тёмную тему' : 'Switch to Dark Theme')}
-              >
-                {appTheme === 'dark' ? (
-                  <>
-                    <Sun size={12} className="text-amber-400" />
-                    <span className="text-amber-300">{lang === 'ru' ? 'СВЕТ' : 'LIGHT'}</span>
-                  </>
-                ) : (
-                  <>
-                    <Moon size={12} className="text-indigo-600" />
-                    <span className="text-indigo-600">{lang === 'ru' ? 'ТЬМА' : 'DARK'}</span>
-                  </>
-                )}
-              </button>
-
               {/* Language Selector */}
               <button
                 onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
