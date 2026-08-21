@@ -15,6 +15,7 @@ import {
   Hammer, 
   Gauge, 
   Sparkles,
+  Zap,
   Info
 } from 'lucide-react';
 
@@ -727,7 +728,7 @@ export default function RecyclerTab({ lang }: RecyclerTabProps) {
   const [queue, setQueue] = useState<Record<string, number>>({});
   const [activeCategory, setActiveCategory] = useState<'all' | 'components' | 'weapons' | 'armor' | 'utilities'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [efficiency, setEfficiency] = useState<80 | 100>(100); // 100% monument vs 80% safezone tax
+  const [efficiency, setEfficiency] = useState<100 | 80 | 60 | 50>(100); // 100% Red Recycler, 80% Safe Zone, 60% Powered Grid, 50% Unpowered Field
 
   // Filter items based on search and category
   const filteredItems = useMemo(() => {
@@ -789,8 +790,8 @@ export default function RecyclerTab({ lang }: RecyclerTabProps) {
       Object.entries(itemConfig.yields).forEach(([materialId, baseYield]) => {
         if (!baseYield) return;
         
-        // Calculate with efficiency tax (e.g. 100% monument vs 80% Safe Zone)
-        const adjustedYield = efficiency === 100 ? baseYield : baseYield * 0.8;
+        // Calculate with efficiency tax (100% Red Recycler, 80% Safe Zone, 60% Powered, 50% Unpowered)
+        const adjustedYield = baseYield * (efficiency / 100);
         const totalMaterialYield = adjustedYield * qty;
 
         // If it's a fractional result, in Rust it usually rounds or floats but lets use floor to be safe & realistic
@@ -841,33 +842,55 @@ export default function RecyclerTab({ lang }: RecyclerTabProps) {
             </p>
           </div>
 
-          {/* Efficiency Toggle (Monument 100% vs Safe Zone 80%) */}
-          <div className="bg-black/40 border border-zinc-800/80 p-2.5 flex items-center gap-3 shrink-0">
+          {/* Efficiency Toggle (100% Red Recycler, 80% Safe Zone, 60% Powered, 50% Unpowered) */}
+          <div className="bg-black/40 border border-zinc-800/80 p-2.5 flex flex-col sm:flex-row items-start sm:items-center gap-2.5 shrink-0">
             <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-wider">
               {lang === 'ru' ? 'ЛОКАЦИЯ УТИЛИЗАТОРА:' : 'RECYCLER LOCATION:'}
             </span>
-            <div className="flex font-mono text-[10.5px]">
+            <div className="flex flex-wrap gap-1 font-mono text-[10px]">
               <button
                 onClick={() => setEfficiency(100)}
-                className={`px-3 py-1.5 font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`px-2.5 py-1.5 font-bold uppercase transition-all cursor-pointer flex items-center gap-1 ${
                   efficiency === 100
-                    ? 'bg-[#cd412b] text-white'
-                    : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700'
+                    ? 'bg-red-600 text-white shadow-lg'
+                    : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
                 }`}
               >
-                <TrendingUp size={12} />
-                <span>{lang === 'ru' ? 'РТ / Монумент (100%)' : 'Monument (100%)'}</span>
+                <Sparkles size={11} className="text-amber-300" />
+                <span>{lang === 'ru' ? 'Красный Power Plant (100%)' : 'Red Power Plant (100%)'}</span>
               </button>
               <button
                 onClick={() => setEfficiency(80)}
-                className={`px-3 py-1.5 font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`px-2.5 py-1.5 font-bold uppercase transition-all cursor-pointer flex items-center gap-1 ${
                   efficiency === 80
                     ? 'bg-[#cd412b] text-white'
-                    : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700'
+                    : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
                 }`}
               >
-                <Settings size={12} />
+                <Settings size={11} />
                 <span>{lang === 'ru' ? 'Мирный Город (80%)' : 'Safe Zone (80%)'}</span>
+              </button>
+              <button
+                onClick={() => setEfficiency(60)}
+                className={`px-2.5 py-1.5 font-bold uppercase transition-all cursor-pointer flex items-center gap-1 ${
+                  efficiency === 60
+                    ? 'bg-[#cd412b] text-white'
+                    : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
+                }`}
+              >
+                <Zap size={11} className="text-yellow-400" />
+                <span>{lang === 'ru' ? 'Запитанный (60%)' : 'Powered Grid (60%)'}</span>
+              </button>
+              <button
+                onClick={() => setEfficiency(50)}
+                className={`px-2.5 py-1.5 font-bold uppercase transition-all cursor-pointer flex items-center gap-1 ${
+                  efficiency === 50
+                    ? 'bg-[#cd412b] text-white'
+                    : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
+                }`}
+              >
+                <Gauge size={11} />
+                <span>{lang === 'ru' ? 'Полевой (50%)' : 'Field (50%)'}</span>
               </button>
             </div>
           </div>

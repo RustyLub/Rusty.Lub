@@ -16,10 +16,93 @@ import {
   CheckCircle2, 
   ChevronRight,
   Info,
-  Send
+  Send,
+  Bell
 } from 'lucide-react';
 
 const DEFAULT_NEWS_ITEMS: NewsItem[] = [
+  {
+    id: 'rust-august-6-power-trip-update',
+    category: 'updates',
+    title: {
+      ru: '⚡ Глобальное обновление Rust от 6 Августа: «Power Trip»',
+      en: '⚡ Global Rust Update August 6: "Power Trip"'
+    },
+    date: '2026-08-06T19:00:00.000Z',
+    author: 'Facepunch Studios',
+    badge: {
+      ru: 'ПАТЧ 06.08',
+      en: 'PATCH AUG 06'
+    },
+    isFeatured: true,
+    coverImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800&auto=format&fit=crop',
+    summary: {
+      ru: 'В патче от 6 августа добавлена единая электросеть острова, переработано Энергодепо (Power Plant) с красным утилизатором 100%, событие с падением спутника на Космодроме, заправка нефти на Сфере, насос заправки и пищевые морозильники!',
+      en: 'The August 6 update introduces the island interconnected power grid, Power Plant overhaul with 100% Red Recycler, Satellite Crash event at Launch Site, Dome crude oil pump, functional car lifts, and powered freezers!'
+    },
+    content: {
+      ru: [
+        {
+          sectionTitle: 'Единая Электросеть Острова & Power Plant Overhaul:',
+          text: 'Монументы острова теперь соединены линиями ЛЭП. Главный узел сети — переработанная Электростанция (Power Plant).',
+          highlights: [
+            'Новый Предохранитель (Heavy Fuse) — запуск подстанций высоковольтных линий',
+            'Новая Красная Комната и Красный Утилизатор (Red Recycler) с 100% эффективностью переработки',
+            'Подъём по линиям ЛЭП и подключение кабелей на вершинах опор'
+          ]
+        },
+        {
+          sectionTitle: 'Событие Падения Спутника & Обновление Монументов:',
+          text: 'Новые ивенты и механизмы на ключевых точках карты:',
+          highlights: [
+            'Космодром (Launch Site): терминал вызова события «Падение Спутника» (Satellite Crash)',
+            'Сфера (The Dome): функционирующая станция откачки сырой нефти (Crude Oil) из цистерн',
+            'Заправка Oxum\'s: подъемник для авто в гараже с бесплатной заправкой аккумов',
+            'Заброшенный Супермаркет: электрические пищевые морозильники (Food Freezers)'
+          ]
+        },
+        {
+          sectionTitle: 'Баланс, Постройки и Авто-Турели:',
+          text: 'Изменения в экономике и защите баз:',
+          highlights: [
+            'Высокие Внешние Стены и Ворота теперь требуют содержания (Upkeep) в шкафу (TC) и гниют при его отсутствии',
+            'Крафт Авто-турели увеличен до 25 МВК (HQM) + 1 Техно-мусор',
+            'Утилизаторы в Безопасных Зонах работают на 80% (налог на безопасность), а запитанные на монументах — на 60% с ускорением'
+          ]
+        }
+      ],
+      en: [
+        {
+          sectionTitle: 'Island Electrical Grid & Power Plant Overhaul:',
+          text: 'Monuments across the map are now hooked into the island high-voltage grid with Power Plant as the hub.',
+          highlights: [
+            'New Heavy Fuse item required to power up grid sub-stations',
+            'Power Plant Red Room & Red Recycler featuring 100% yield efficiency',
+            'Climbable powerline poles with junction boxes'
+          ]
+        },
+        {
+          sectionTitle: 'Satellite Crash Event & Monument Enhancements:',
+          text: 'New events and mechanics introduced across monuments:',
+          highlights: [
+            'Launch Site: launch terminal to trigger the orbital Satellite Crash event',
+            'The Dome: Crude Oil pump extraction station at the base of the sphere',
+            'Oxum\'s Gas Station: working car lift in garage bay',
+            'Abandoned Supermarket: powered food freezers preserving perishables'
+          ]
+        },
+        {
+          sectionTitle: 'Building Balance & Auto Turrets:',
+          text: 'Updates to upkeep and raiding items:',
+          highlights: [
+            'High External Walls and Gates now require TC upkeep and decay if TC is depleted',
+            'Auto Turret craft cost increased to 25 HQM + 1 Tech Trash',
+            'Safe Zone Recyclers operate at 80% (tax), powered Field Recyclers run at 60% with speed boost'
+          ]
+        }
+      ]
+    }
+  },
   {
     id: 'rust-lfg-bot-news',
     category: 'events',
@@ -176,9 +259,10 @@ function NewsImage({ src, alt, className }: { src: string; alt: string; classNam
 
 interface NewsTabProps {
   lang: 'ru' | 'en';
+  onOpenNotifications?: () => void;
 }
 
-export default function NewsTab({ lang }: NewsTabProps) {
+export default function NewsTab({ lang, onOpenNotifications }: NewsTabProps) {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'updates' | 'blogs' | 'events'>('all');
   const [activeNewsId, setActiveNewsId] = useState<string>('rust-lfg-bot-news');
   const [newsItems, setNewsItems] = useState<NewsItem[]>(DEFAULT_NEWS_ITEMS);
@@ -268,21 +352,34 @@ export default function NewsTab({ lang }: NewsTabProps) {
           </p>
         </div>
 
-        {/* Categories Selectors */}
-        <div className="flex flex-wrap gap-1.5 bg-[#08090d] p-1 border border-[#1f232e] rounded-sm self-stretch md:self-auto justify-start">
-          {categories.map((cat) => (
+        {/* Categories & Push Notification Actions */}
+        <div className="flex flex-wrap items-center gap-2">
+          {onOpenNotifications && (
             <button
-              key={cat.id}
-              onClick={() => handleCategoryChange(cat.id as any)}
-              className={`px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-all duration-150 rounded-sm font-mono cursor-pointer ${
-                selectedCategory === cat.id
-                  ? 'bg-gradient-to-r from-blue-600 to-[#ff4d30] text-white shadow-sm font-black'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
-              }`}
+              onClick={onOpenNotifications}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-500/50 text-amber-300 rounded-sm font-mono cursor-pointer transition-all shadow-sm"
+              title={lang === 'ru' ? 'Получать Web Push уведомления о свежих патчах' : 'Get Web Push alerts on new patches'}
             >
-              {cat.label[lang]}
+              <Bell size={12} className="text-amber-400 animate-pulse" />
+              <span>{lang === 'ru' ? 'Оповещения о новостях' : 'News Alerts'}</span>
             </button>
-          ))}
+          )}
+
+          <div className="flex flex-wrap gap-1.5 bg-[#08090d] p-1 border border-[#1f232e] rounded-sm self-stretch md:self-auto justify-start">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => handleCategoryChange(cat.id as any)}
+                className={`px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-all duration-150 rounded-sm font-mono cursor-pointer ${
+                  selectedCategory === cat.id
+                    ? 'bg-gradient-to-r from-blue-600 to-[#ff4d30] text-white shadow-sm font-black'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {cat.label[lang]}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

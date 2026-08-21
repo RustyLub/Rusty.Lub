@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Clock, Calendar, ShieldAlert, Radio, Play, RotateCcw, Copy, Check, Volume2, VolumeX, AlertTriangle, Cpu, Camera, Bell, Sparkles, Compass } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Clock, Calendar, ShieldAlert, Radio, Play, RotateCcw, Copy, Check, Volume2, VolumeX, AlertTriangle, Cpu, Camera, Bell, Sparkles, Compass, BellRing } from 'lucide-react';
+import { sendWebNotification, getNotificationSettings } from '../services/notificationManager';
 
 interface WipeTrackerTabProps {
   lang: 'ru' | 'en';
+  onOpenNotifications?: () => void;
 }
 
 interface CustomTimer {
@@ -25,7 +27,7 @@ const CCTV_CODES = [
   { monument: { ru: 'Морской Порт (Harbor)', en: 'Harbor' }, codes: ['HARBOR1', 'HARBOR2'] },
 ];
 
-export default function WipeTrackerTab({ lang }: WipeTrackerTabProps) {
+export default function WipeTrackerTab({ lang, onOpenNotifications }: WipeTrackerTabProps) {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [cctvSearch, setCctvSearch] = useState<string>('');
@@ -90,16 +92,19 @@ export default function WipeTrackerTab({ lang }: WipeTrackerTabProps) {
         prevTimers.map(t => {
           if (t.isRunning && t.remainingSeconds > 0) {
             const nextSec = t.remainingSeconds - 1;
-            if (nextSec === 0 && soundEnabled) {
-              try {
-                const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(880, ctx.currentTime);
-                osc.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.5);
-              } catch (e) {}
+            if (nextSec === 0) {
+              const settings = getNotificationSettings();
+              if (settings.eventTimers) {
+                sendWebNotification(
+                  lang === 'ru' ? `⏰ Таймер завершен: ${t.name}` : `⏰ Timer Completed: ${t.name}`,
+                  {
+                    body: lang === 'ru'
+                      ? 'Время события истекло! Проверьте ящик или респавн патруля в Rust.'
+                      : 'Event cooldown finished! Check the monument in Rust.',
+                    soundType: 'timer'
+                  }
+                );
+              }
             }
             return { ...t, remainingSeconds: nextSec, isRunning: nextSec > 0 };
           }
@@ -109,7 +114,7 @@ export default function WipeTrackerTab({ lang }: WipeTrackerTabProps) {
     }, 1000);
 
     return () => clearInterval(timerInterval);
-  }, [soundEnabled]);
+  }, [soundEnabled, lang]);
 
   const toggleTimer = (id: string) => {
     setTimers(prev => prev.map(t => t.id === id ? { ...t, isRunning: !t.isRunning } : t));
@@ -158,6 +163,16 @@ export default function WipeTrackerTab({ lang }: WipeTrackerTabProps) {
           </div>
 
           <div className="flex items-center gap-2 self-start md:self-auto">
+            {onOpenNotifications && (
+              <button
+                onClick={onOpenNotifications}
+                className="px-3 py-1.5 bg-[#cd412b]/20 hover:bg-[#cd412b]/30 border border-[#cd412b]/50 text-xs font-mono font-bold text-white rounded-sm flex items-center gap-2 transition-all cursor-pointer shadow-md"
+              >
+                <BellRing size={14} className="text-[#cd412b] animate-bounce" />
+                <span>{lang === 'ru' ? 'Web Push Оповещения' : 'Web Push Alerts'}</span>
+              </button>
+            )}
+
             <button
               onClick={() => setSoundEnabled(!soundEnabled)}
               className="px-3 py-1.5 bg-[#1b1e26] hover:bg-[#252a36] border border-[#2a2f3b] text-xs font-mono font-bold text-gray-300 rounded-sm flex items-center gap-2 transition-all cursor-pointer"

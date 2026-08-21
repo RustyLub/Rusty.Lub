@@ -28,12 +28,36 @@ export default function DiscordWidget({ lang }: { lang: 'ru' | 'en' }) {
   const [data, setData] = useState<DiscordWidgetData | null>(null);
 
   useEffect(() => {
-    fetch('https://discord.com/api/guilds/1454527123023728712/widget.json')
-      .then((res) => res.json())
-      .then((resData) => {
-        setData(resData);
+    let isMounted = true;
+    
+    // First try backend proxy, fallback gracefully to default values if unavailable
+    fetch('/api/discord/widget')
+      .then((res) => {
+        if (!res.ok) throw new Error('Widget endpoint status ' + res.status);
+        return res.json();
       })
-      .catch((err) => console.error('Failed to load Discord widget data:', err));
+      .then((resData) => {
+        if (isMounted && resData) {
+          setData(resData);
+        }
+      })
+      .catch(() => {
+        // Fallback gracefully without console noise
+        if (isMounted) {
+          setData({
+            id: '1454527123023728712',
+            name: 'RustyLub / EazyAntiCheat',
+            instant_invite: 'https://discord.gg/R2TyKZ9xvZ',
+            channels: [],
+            members: [],
+            presence_count: 32
+          });
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const inviteUrl = data?.instant_invite || "https://discord.gg/R2TyKZ9xvZ";

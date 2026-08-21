@@ -71,7 +71,7 @@ const TwigsIcon = ({ size = 20 }: { size?: number }) => (
 );
 
 interface MaterialInfo {
-  id: 'twigs' | 'wood' | 'stone' | 'metal' | 'armored';
+  id: 'twigs' | 'wood' | 'stone' | 'metal' | 'armored' | 'high_wood' | 'high_stone';
   nameRU: string;
   nameEN: string;
   decayTime: number; // in hours
@@ -79,6 +79,7 @@ interface MaterialInfo {
   resourceNameRU: string;
   resourceNameEN: string;
   icon: React.ReactNode;
+  upkeepInfo?: string;
 }
 
 const materialsData: MaterialInfo[] = [
@@ -131,6 +132,28 @@ const materialsData: MaterialInfo[] = [
     resourceNameRU: 'МВК (HQM)',
     resourceNameEN: 'High Quality Metal',
     icon: <ArmoredIcon size={24} />
+  },
+  {
+    id: 'high_wood',
+    nameRU: 'Высок. Внешн. Дерево ( High Ext. Wood )',
+    nameEN: 'High External Wooden Wall',
+    decayTime: 3,
+    maxHp: 500,
+    resourceNameRU: 'Дерево (Содержание в ТС)',
+    resourceNameEN: 'Wood (TC Upkeep Required)',
+    icon: <WoodIcon size={24} />,
+    upkeepInfo: '⚡ [06.08 Patch]: Требует 100 дерева / 24ч в шкафу (TC). Без содержания гниет за 3 часа.'
+  },
+  {
+    id: 'high_stone',
+    nameRU: 'Высок. Внешн. Камень ( High Ext. Stone )',
+    nameEN: 'High External Stone Wall',
+    decayTime: 4,
+    maxHp: 1000,
+    resourceNameRU: 'Камень (Содержание в ТС)',
+    resourceNameEN: 'Stone (TC Upkeep Required)',
+    icon: <StoneIcon size={24} />,
+    upkeepInfo: '⚡ [06.08 Patch]: Требует 150 камня / 24ч в шкафу (TC). Без содержания гниет за 4 часа.'
   }
 ];
 
@@ -326,6 +349,14 @@ export default function DecayCalculator({ lang }: { lang: 'ru' | 'en' }) {
                   </button>
                 ))}
               </div>
+
+              {/* Upkeep info callout for 06.08 patch */}
+              {selectedMaterial.upkeepInfo && (
+                <div className="mt-3 p-3 bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono flex items-start gap-2">
+                  <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" />
+                  <span>{selectedMaterial.upkeepInfo}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

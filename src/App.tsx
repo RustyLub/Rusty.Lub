@@ -93,6 +93,8 @@ import RustPlusTab from './components/RustPlusTab';
 import AuthModal from './components/AuthModal';
 import CabinetModal from './components/CabinetModal';
 import TermsModal from './components/TermsModal';
+import NotificationSettingsModal from './components/NotificationSettingsModal';
+import ConfigExporterModal from './components/ConfigExporterModal';
 import { logUserActivity } from './services/activityLogger';
 import { PlayerRadar } from './components/Radar/PlayerRadar';
 import DiscordWidget from './components/DiscordWidget';
@@ -557,6 +559,10 @@ export default function App() {
   const [currentWallpaperIdx, setCurrentWallpaperIdx] = useState(0);
   const [wallpaperLogs, setWallpaperLogs] = useState<string[]>([]);
 
+  // Web Push & Config Exporter states
+  const [notificationModalOpen, setNotificationModalOpen] = useState(false);
+  const [configExporterModalOpen, setConfigExporterModalOpen] = useState(false);
+
   const generateWallpaper = () => {
     setWallpaperModalOpen(true);
     setWallpaperLoading(true);
@@ -1018,8 +1024,28 @@ export default function App() {
               </div>
             </div>
 
-            {/* Language Selection, Chat & Login Buttons - Streamlined Horizontal Row */}
+            {/* Language Selection, Web Push, Config Export, Chat & Login Buttons */}
             <div className="hidden lg:flex items-center gap-2">
+              {/* 1-Click Config Exporter Button */}
+              <button
+                onClick={() => setConfigExporterModalOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold bg-[#cd412b]/15 hover:bg-[#cd412b]/25 border border-[#cd412b]/50 text-white rounded-md transition-all cursor-pointer font-mono uppercase shadow-sm"
+                title={lang === 'ru' ? 'Экспорт конфигурации autoexec.cfg в один клик' : '1-Click autoexec.cfg Export'}
+              >
+                <Download size={12} className="text-[#cd412b]" />
+                <span>{lang === 'ru' ? 'ЭКСПОРТ CFG' : 'EXPORT CFG'}</span>
+              </button>
+
+              {/* Web Push Alerts Button */}
+              <button
+                onClick={() => setNotificationModalOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-md transition-all cursor-pointer font-mono uppercase shadow-sm"
+                title={lang === 'ru' ? 'Настройка Web Push уведомлений (Вайпы, Рейды, Новости)' : 'Web Push Notification Settings'}
+              >
+                <Bell size={12} className="text-amber-400" />
+                <span>{lang === 'ru' ? 'PUSH' : 'ALERTS'}</span>
+              </button>
+
               {/* Chat Button */}
               <button
                 onClick={() => handleTabChange('chat')}
@@ -2184,7 +2210,10 @@ export default function App() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
             >
-              <NewsTab lang={lang} />
+              <NewsTab 
+                lang={lang} 
+                onOpenNotifications={() => setNotificationModalOpen(true)}
+              />
             </motion.div>
           )}
 
@@ -2208,7 +2237,11 @@ export default function App() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
             >
-              <BindsTab onCopy={handleCopy} lang={lang} />
+              <BindsTab 
+                onCopy={handleCopy} 
+                lang={lang} 
+                onOpenConfigExporter={() => setConfigExporterModalOpen(true)}
+              />
             </motion.div>
           )}
 
@@ -2220,7 +2253,11 @@ export default function App() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
             >
-              <FpsTab onCopy={handleCopy} lang={lang} />
+              <FpsTab 
+                onCopy={handleCopy} 
+                lang={lang} 
+                onOpenConfigExporter={() => setConfigExporterModalOpen(true)}
+              />
             </motion.div>
           )}
 
@@ -2322,7 +2359,10 @@ export default function App() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
             >
-              <WipeTrackerTab lang={lang} />
+              <WipeTrackerTab 
+                lang={lang} 
+                onOpenNotifications={() => setNotificationModalOpen(true)}
+              />
             </motion.div>
           )}
 
@@ -2362,6 +2402,7 @@ export default function App() {
                 lang={lang} 
                 currentUser={currentUser} 
                 isAdmin={isAdmin} 
+                onOpenNotifications={() => setNotificationModalOpen(true)}
                 onToast={(msg, type) => {
                   const id = Date.now().toString();
                   setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : (type === 'info' ? 'info' as any : 'success') }]);
@@ -2803,6 +2844,40 @@ export default function App() {
           ))}
         </AnimatePresence>
       </div>
+
+      <AnimatePresence>
+        {notificationModalOpen && (
+          <NotificationSettingsModal
+            isOpen={notificationModalOpen}
+            onClose={() => setNotificationModalOpen(false)}
+            lang={lang}
+            onToast={(msg, type) => {
+              const id = Math.random().toString(36).substring(2, 9);
+              setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : 'success' }]);
+              setTimeout(() => {
+                setToasts(prev => prev.filter(t => t.id !== id));
+              }, 3000);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {configExporterModalOpen && (
+          <ConfigExporterModal
+            isOpen={configExporterModalOpen}
+            onClose={() => setConfigExporterModalOpen(false)}
+            lang={lang}
+            onToast={(msg, type) => {
+              const id = Math.random().toString(36).substring(2, 9);
+              setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : 'success' }]);
+              setTimeout(() => {
+                setToasts(prev => prev.filter(t => t.id !== id));
+              }, 3000);
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {showTermsModal && (

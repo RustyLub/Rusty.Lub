@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { bindsDatabase, adminCommandsDatabase } from '../data';
 import { BindItem, AdminCommandItem } from '../types';
-import { Search, Copy, Terminal, Shield, Plus, Zap, Heart, RotateCw, Info, Wrench, Settings } from 'lucide-react';
+import { Search, Copy, Terminal, Shield, Plus, Zap, Heart, RotateCw, Info, Wrench, Settings, Download, FileCode, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { bindsTranslationMap, bindsCategoryMap } from '../translations';
 
 interface BindsTabProps {
   onCopy: (text: string) => void;
   lang: 'ru' | 'en';
+  onOpenConfigExporter?: () => void;
 }
 
-export default function BindsTab({ onCopy, lang }: BindsTabProps) {
+export default function BindsTab({ onCopy, lang, onOpenConfigExporter }: BindsTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
 
@@ -117,6 +118,35 @@ export default function BindsTab({ onCopy, lang }: BindsTabProps) {
 
   return (
     <div className="space-y-4">
+      {/* Quick 1-Click Config Export Banner */}
+      {onOpenConfigExporter && (
+        <div className="bg-gradient-to-r from-[#cd412b]/20 via-[#181c28] to-[#14171e] border border-[#cd412b]/50 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-[#cd412b]/30 text-[#cd412b] border border-[#cd412b]/50">
+              <FileCode size={20} />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-black uppercase text-white font-mono flex items-center gap-2">
+                <span>{lang === 'en' ? 'One-Click Config Export (autoexec.cfg)' : 'Экспорт конфигурации в один клик'}</span>
+                <span className="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 font-mono">1-CLICK</span>
+              </h3>
+              <p className="text-[11px] text-gray-400 font-sans">
+                {lang === 'en'
+                  ? 'Generate & download ready autoexec.cfg with all essential PvP binds, FOV zoom, fast med & FPS tweaks.'
+                  : 'Сгенерируйте и скачайте готовый autoexec.cfg со всеми макро-биндами, быстрым шприцом, FOV зумом и FPS бустом.'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onOpenConfigExporter}
+            className="px-4 py-2 bg-[#cd412b] hover:bg-[#b03522] text-white font-mono font-bold text-xs uppercase transition-all shadow-[0_0_15px_rgba(205,65,43,0.4)] flex items-center gap-1.5 shrink-0 cursor-pointer"
+          >
+            <Download size={14} />
+            <span>{lang === 'en' ? 'Export CFG' : 'Экспортировать CFG'}</span>
+          </button>
+        </div>
+      )}
+
       {/* Mode Switcher */}
       <div className="flex gap-1 border-b border-[#2a2f3b] mb-4">
         <button

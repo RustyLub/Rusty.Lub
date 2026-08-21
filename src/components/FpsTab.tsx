@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { Copy, Settings, Zap, Cpu, Monitor, Sliders, Info } from 'lucide-react';
+import { Copy, Settings, Zap, Cpu, Monitor, Sliders, Info, Download, FileCode, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { fpsTranslationMap } from '../translations';
 
 interface FpsTabProps {
   onCopy: (text: string) => void;
   lang: 'ru' | 'en';
+  onOpenConfigExporter?: () => void;
 }
 
-export default function FpsTab({ onCopy, lang }: FpsTabProps) {
+export default function FpsTab({ onCopy, lang, onOpenConfigExporter }: FpsTabProps) {
   const [ramSize, setRamSize] = useState<number>(16);
 
   // Calculate optimized values based on selected RAM size
@@ -93,6 +94,39 @@ export default function FpsTab({ onCopy, lang }: FpsTabProps) {
 
   return (
     <div className="space-y-4">
+      {/* 1-Click Config Exporter Action Banner */}
+      {onOpenConfigExporter && (
+        <div className="bg-gradient-to-r from-[#cd412b]/25 via-[#1a1f2b] to-[#12151d] border-2 border-[#cd412b]/60 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-[#cd412b]/30 text-[#cd412b] border border-[#cd412b]/50">
+              <Download size={22} className="animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-black uppercase text-white font-mono">
+                  {lang === 'en' ? 'One-Click Config & FPS Export' : 'Экспорт оптимизированного CFG в 1 клик'}
+                </h3>
+                <span className="text-[9px] font-mono bg-[#cd412b] text-white px-2 py-0.5 font-bold uppercase">
+                  autoexec.cfg
+                </span>
+              </div>
+              <p className="text-xs text-gray-300 font-sans mt-0.5">
+                {lang === 'en'
+                  ? 'Download a ready autoexec.cfg with tuned graphics, culling, memory buffers, sensitivity and PvP keybinds.'
+                  : 'Скачайте готовый autoexec.cfg с оптимизацией теней, памяти, куллингом игроков, сенсой и биндами.'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onOpenConfigExporter}
+            className="w-full sm:w-auto px-5 py-2.5 bg-[#cd412b] hover:bg-[#b03522] text-white font-mono font-black text-xs uppercase transition-all shadow-[0_0_20px_rgba(205,65,43,0.5)] flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+          >
+            <FileCode size={15} />
+            <span>{lang === 'en' ? 'Generate & Export CFG' : 'Сгенерировать и Скачать CFG'}</span>
+          </button>
+        </div>
+      )}
+
       {/* Intro Header */}
       <div className="bg-[#14171e] p-4 border border-[#2a2f3b] flex items-center gap-4">
         <Settings size={24} className="text-[#cd412b]" />

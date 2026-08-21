@@ -29,19 +29,22 @@ import {
   Check,
   Flame,
   Radio,
-  Lock
+  Lock,
+  BellRing
 } from 'lucide-react';
 import { CustomUser, ToastType } from '../types';
 import { auth } from '../firebase';
+import { sendWebNotification, getNotificationSettings } from '../services/notificationManager';
 
 interface RustPlusTabProps {
   lang: 'ru' | 'en';
   currentUser: CustomUser | null;
   isAdmin: boolean;
   onToast: (message: string, type?: 'success' | 'info' | 'error') => void;
+  onOpenNotifications?: () => void;
 }
 
-export default function RustPlusTab({ lang, currentUser, isAdmin, onToast }: RustPlusTabProps) {
+export default function RustPlusTab({ lang, currentUser, isAdmin, onToast, onOpenNotifications }: RustPlusTabProps) {
   const [subTab, setSubTab] = useState<'pairing' | 'switches' | 'storage' | 'chat' | 'map' | 'alarms' | 'logs'>('pairing');
   const [loading, setLoading] = useState(false);
   const [botStatus, setBotStatus] = useState<any>({ connected: false, connecting: false, error: null });
@@ -301,7 +304,18 @@ export default function RustPlusTab({ lang, currentUser, isAdmin, onToast }: Rus
 
       const data = await res.json();
       if (data.success) {
-        onToast(lang === 'ru' ? 'Тестовое сирена-уведомление отправлено в Discord!' : 'Test alert sent to Discord!', 'success');
+        // Also trigger local Web Push Raid Alarm
+        const settings = getNotificationSettings();
+        if (settings.rustPlusAlarms) {
+          sendWebNotification(
+            lang === 'ru' ? '🚨 ВНИМАНИЕ: СРАБОТАЛ ТЕСТОВЫЙ РЕЙД-АЛАРМ!' : '🚨 WARNING: TEST RAID ALARM TRIGGERED!',
+            {
+              body: lang === 'ru' ? 'Сигнализация Smart Alarm активна. База под наблюдением!' : 'Smart Alarm active. Base under monitoring!',
+              soundType: 'alarm'
+            }
+          );
+        }
+        onToast(lang === 'ru' ? 'Тестовое сирена-уведомление отправлено в Discord и Web Push!' : 'Test alert sent to Discord & Web Push!', 'success');
       } else {
         onToast(data.error || 'Webhook test failed', 'error');
       }
@@ -889,8 +903,18 @@ export default function RustPlusTab({ lang, currentUser, isAdmin, onToast }: Rus
             <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
               <h3 className="text-base font-bold font-mono text-white uppercase flex items-center gap-2">
                 <Bell size={18} className="text-red-400" />
-                <span>{lang === 'ru' ? 'Настройка Сигнализации Рейда и Discord Уведомлений' : 'Raid Alarms & Discord Integration'}</span>
+                <span>{lang === 'ru' ? 'Настройка Сигнализации Рейда и Discord / Web Push' : 'Raid Alarms & Discord / Web Push'}</span>
               </h3>
+
+              {onOpenNotifications && (
+                <button
+                  onClick={onOpenNotifications}
+                  className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-white font-mono text-xs font-bold uppercase transition flex items-center gap-1.5 cursor-pointer shadow-md"
+                >
+                  <BellRing size={13} className="text-red-400 animate-bounce" />
+                  <span>{lang === 'ru' ? 'Web Push Настройки' : 'Web Push Settings'}</span>
+                </button>
+              )}
             </div>
 
             <div className="space-y-4">

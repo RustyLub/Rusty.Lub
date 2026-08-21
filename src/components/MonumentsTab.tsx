@@ -28,6 +28,195 @@ export interface Monument {
 
 const MONUMENTS_DATA: Monument[] = [
   {
+    id: 'power_plant',
+    name: { ru: 'Электростанция (Power Plant - Grid Hub)', en: 'Power Plant (Grid Hub)' },
+    tier: 'tier3',
+    cardsRequired: ['green', 'blue', 'red'],
+    fusesRequired: 2,
+    hazmatRequired: true,
+    minRadProtection: 15,
+    cctvCodes: ['POWERPLANT1', 'POWERPLANT2'],
+    description: {
+      ru: '⚡ [ОБНОВЛЕНО 06.08] Главный энергоузел острова. Содержит новый Красный Утилизатор (100% эффективность переработки!), требует Heavy Fuse для запитывания высоковольтных подстанций и новую Красную Комнату с Элитными ящиками.',
+      en: '⚡ [UPDATED AUG 6] Main island power grid hub. Features the new 100% Red Recycler, requires Heavy Fuses for high-voltage grid activation, and houses a new Red Keycard room with Elite Crates.'
+    },
+    keycardSteps: {
+      ru: [
+        'Вставьте Heavy Fuse в главный трансформатор у высоковольтной башни.',
+        'Активируйте переключатель подачи питания на распределительный щит.',
+        'Используйте Зеленую и Синюю карточки для последовательного открытия подстанций.',
+        'Проведите Красную карточку в центральном блоке генерации для доступа к Красной Комнате и Красному Утилизатору (100% выгода!)'
+      ],
+      en: [
+        'Insert Heavy Fuse into main transformer near powerlines.',
+        'Flip the main power distribution grid switch.',
+        'Swipe Green and Blue keycards sequentially across sub-stations.',
+        'Swipe Red Keycard in central generator building to access the 100% Red Recycler & Elite Crates!'
+      ]
+    },
+    crates: [
+      { type: { ru: 'Элитный Ящик (Красная Комната)', en: 'Elite Crate (Red Room)' }, count: '2-3x', iconId: 'ak47' },
+      { type: { ru: 'Военный Ящик', en: 'Military Crate' }, count: '5-6x', iconId: 'rifle_body' },
+      { type: { ru: 'Красный Утилизатор (100%)', en: 'Red Recycler (100%)' }, count: '1x', iconId: 'scrap' }
+    ],
+    recyclerCount: 2
+  },
+  {
+    id: 'launch_site',
+    name: { ru: 'Космодром (Launch Site)', en: 'Launch Site' },
+    tier: 'tier3',
+    cardsRequired: ['green', 'red'],
+    fusesRequired: 2,
+    hazmatRequired: true,
+    minRadProtection: 25,
+    cctvCodes: ['LAUNCHSITE1', 'LAUNCHSITE2'],
+    description: {
+      ru: '🚀 [ОБНОВЛЕНО 06.08] Крупнейший монумент. Добавлена консоль запуска ивента «Падение Спутника» (Satellite Crash). Патрулируется танком Брэдли (Bradley APC). В главном здании смертельная радиация (Hazmat + вода).',
+      en: '🚀 [UPDATED AUG 6] Largest land monument. Features the Satellite Crash orbital event activation console. Guarded by Bradley APC. Main rocket building has lethal radiation.'
+    },
+    keycardSteps: {
+      ru: [
+        'Включите первый переключатель в небольшом здании у забора.',
+        'Пройдите к переключателю около пусковой вышки, вставьте предохранитель.',
+        'Проведите Красную карточку у центрального входа главного здания.',
+        'Поднимитесь на крышу по лестницам, постоянно принимая воду для сбивания радиации.',
+        'На крыше заберите лут из Элитных ящиков и активируйте терминал Падения Спутника!'
+      ],
+      en: [
+        'Flip the first switch in the small transformer building near fence.',
+        'Move to rocket launcher tower switch and insert fuse.',
+        'Head to main Rocket Building and swipe Red Keycard at main entrance.',
+        'Climb to roof via stairwells while chugging water to clear high rads.',
+        'Loot Elite Crates on roof and activate the Satellite Crash orbital terminal!'
+      ]
+    },
+    crates: [
+      { type: { ru: 'Элитный Ящик (Крыша)', en: 'Elite Crate (Roof)' }, count: '2-3x', iconId: 'c4' },
+      { type: { ru: 'Военный Ящик', en: 'Military Crate' }, count: '4-6x', iconId: 'rifle_body' },
+    ],
+    recyclerCount: 1
+  },
+  {
+    id: 'dome',
+    name: { ru: 'Сфера (The Dome)', en: 'The Dome' },
+    tier: 'tier2',
+    cardsRequired: [],
+    fusesRequired: 0,
+    hazmatRequired: false,
+    minRadProtection: 10,
+    cctvCodes: ['DOME1', 'DOME2'],
+    description: {
+      ru: '🛢️ [ОБНОВЛЕНО 06.08] Огромный шар. Внизу добавлена рабочая станция откачки сырой нефти (Crude Oil) из наземных резервуаров! Паркур на вершину дает 4 Военных Ящика.',
+      en: '🛢️ [UPDATED AUG 6] Giant sphere. Added a crude oil pumping station at the base to pump oil directly into barrels/modular trucks! Climb to top for 4 Military Crates.'
+    },
+    keycardSteps: {
+      ru: [
+        'Подключите топливо/питание к нижнему насосу для качки сырой нефти.',
+        'Поднимитесь по внешней желтой трубе на вершину сферы.',
+        'Аккуратно перепрыгните через провалы по металлическим балкам.',
+        'Заберитесь на вершину и залутайте 4 зеленых военных ящика!'
+      ],
+      en: [
+        'Power up lower crude oil pump station to fill fuel canisters.',
+        'Climb up outer yellow pipe.',
+        'Carefully parkour across pipe gaps.',
+        'Reach top catwalks and loot 4 Military Crates!'
+      ]
+    },
+    crates: [
+      { type: { ru: 'Военный Ящик (Наверху)', en: 'Military Crate (Top)' }, count: '4x', iconId: 'semibody' },
+      { type: { ru: 'Станция Сырой Нефти', en: 'Crude Oil Pump' }, count: '1x', iconId: 'lowgradefuel' }
+    ],
+    recyclerCount: 1
+  },
+  {
+    id: 'oxums_gas_station',
+    name: { ru: 'Заправка Oxum (Oxum\'s Gas Station)', en: 'Oxum\'s Gas Station' },
+    tier: 'tier1',
+    cardsRequired: ['green'],
+    fusesRequired: 1,
+    hazmatRequired: false,
+    minRadProtection: 0,
+    description: {
+      ru: '🚗 [ОБНОВЛЕНО 06.08] Начальный монумент. В гараже теперь установлен функциональный автомобильный подъемник (Car Lift) с возможностью подзарядки аккумуляторов и модификации модульных авто!',
+      en: '🚗 [UPDATED AUG 6] Starter monument. The garage bay now features a fully functional Car Lift for repairing, battery charging, and customizing modular vehicles!'
+    },
+    keycardSteps: {
+      ru: [
+        'Зеленая карточка лежит на столе в главном офисе заправки.',
+        'Вставьте предохранитель в подсобке за гаражом для открытия задней двери.',
+        'Используйте Car Lift в гараже для обслуживания авто.'
+      ],
+      en: [
+        'Green keycard is located on the desk inside the main gas station office.',
+        'Insert fuse in back utility room to open rear blue loot room.',
+        'Use garage Car Lift to repair and modify vehicles.'
+      ]
+    },
+    crates: [
+      { type: { ru: 'Ящик с Едой / Медикаментами', en: 'Food / Medical Crate' }, count: '2-3x', iconId: 'cloth' },
+      { type: { ru: 'Обычный Ящик', en: 'Regular Crate' }, count: '3x', iconId: 'scrap' }
+    ],
+    recyclerCount: 1
+  },
+  {
+    id: 'supermarket',
+    name: { ru: 'Заброшенный Супермаркет (Abandoned Supermarket)', en: 'Abandoned Supermarket' },
+    tier: 'tier1',
+    cardsRequired: ['green'],
+    fusesRequired: 1,
+    hazmatRequired: false,
+    minRadProtection: 0,
+    description: {
+      ru: '❄️ [ОБНОВЛЕНО 06.08] Популярный зеленый монумент. Добавлены пищевые морозильники (Food Freezers), сохраняющие свежесть продуктов и охлаждающие напитки при подключении питания от электросети.',
+      en: '❄️ [UPDATED AUG 6] Popular Tier 1 monument. Features new powered Food Freezers that keep food fresh and spawn high-calorie rations.'
+    },
+    keycardSteps: {
+      ru: [
+        'Зеленая карточка лежит в офисе администратора на столе.',
+        'Подключите питание к морозильникам для получения элитных рационов питания.',
+        'Вставьте предохранитель в подвале для доступа к закрытой комнате.'
+      ],
+      en: [
+        'Green keycard spawns on office admin desk.',
+        'Connect power grid line to freezers to unlock chilled rations.',
+        'Insert fuse in basement room for keycard puzzle room.'
+      ]
+    },
+    crates: [
+      { type: { ru: 'Пищевой Морозильник', en: 'Food Freezer' }, count: '2x', iconId: 'cloth' },
+      { type: { ru: 'Обычный Ящик', en: 'Regular Crate' }, count: '3x', iconId: 'scrap' }
+    ],
+    recyclerCount: 1
+  },
+  {
+    id: 'powerline_poles',
+    name: { ru: 'Опоры ЛЭП (Powerline Poles)', en: 'Powerline Poles & Grid' },
+    tier: 'tier1',
+    cardsRequired: [],
+    fusesRequired: 1,
+    hazmatRequired: false,
+    minRadProtection: 0,
+    description: {
+      ru: '⚡ [НОВЫЙ МОНУМЕНТ 06.08] Вдоль дорог острова возведены забираемые опоры ЛЭП с лестницами и трансформаторными щитками. Позволяют перенаправлять энергию острова и подключать полевые утилизаторы.',
+      en: '⚡ [NEW FEATURE AUG 6] High-voltage powerline poles lining island roads. Players can climb ladders to access junction boxes, rerouting power to boost nearby recyclers.'
+    },
+    keycardSteps: {
+      ru: [
+        'Заберитесь по встроенной лестнице на верхний ярус опоры ЛЭП.',
+        'Подключите Heavy Fuse в распределитель для подачи тока на соседние подстанции.'
+      ],
+      en: [
+        'Climb side ladders to upper pole catwalk.',
+        'Insert Heavy Fuse into junction box to energize local grid branch.'
+      ]
+    },
+    crates: [
+      { type: { ru: 'Ящик с Предохранителями', en: 'Electrical Crate' }, count: '1-2x', iconId: 'gears' }
+    ],
+    recyclerCount: 0
+  },
+  {
     id: 'oil_rig_large',
     name: { ru: 'Большая Нефтяная Вышка (Large Oil Rig)', en: 'Large Oil Rig' },
     tier: 'tier3',
