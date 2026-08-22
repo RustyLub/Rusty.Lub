@@ -29,6 +29,9 @@ jobs:
         with:
           node-version: 20
           cache: npm
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
       - name: Install dependencies
         run: npm install
       - name: Build
@@ -36,8 +39,7 @@ jobs:
         env:
           NODE_ENV: production
           GITHUB_ACTIONS: "true"
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+          VITE_BASE: ${{ steps.pages.outputs.base_path || '/Rusty.Lub/' }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

@@ -53,13 +53,18 @@ const auth = getAuth(app);
 // Use custom database ID with auto long-polling to prevent connection drops in sandboxed iframe environments
 const firestoreDbId = firebaseConfig.firestoreDatabaseId === "(default)" ? undefined : firebaseConfig.firestoreDatabaseId;
 
-let dbInstance;
+let dbInstance: any;
 try {
   dbInstance = initializeFirestore(app, {
     experimentalAutoDetectLongPolling: true,
   }, firestoreDbId);
-} catch {
-  dbInstance = getFirestore(app, firestoreDbId);
+} catch (e1) {
+  try {
+    dbInstance = getFirestore(app, firestoreDbId);
+  } catch (e2) {
+    console.warn("Falling back to default getFirestore instance:", e2);
+    dbInstance = getFirestore(app);
+  }
 }
 const db = dbInstance;
 
