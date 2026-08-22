@@ -1,6 +1,6 @@
 {
   "name": "Rusty.Lub",
-  "description": "The ultimate Rust reference guide: critical error fixes, tactical keybinds, interactive raid calculator, performance FPS optimization, and Advanced Player Radar for VIP subscribers.",
+  "description": "Multi-functional Rust portal & knowledge hub: exact raid calculator, mixing table recipes, recycler breakdown, EAC error troubleshooting, FPS optimizations, keybind generator, and team/clan finder.",
   "requestFramePermissions": ["camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

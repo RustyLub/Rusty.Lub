@@ -97,6 +97,7 @@ import CabinetModal from './components/CabinetModal';
 import TermsModal from './components/TermsModal';
 import NotificationSettingsModal from './components/NotificationSettingsModal';
 import ConfigExporterModal from './components/ConfigExporterModal';
+import { CommandPaletteModal } from './components/CommandPaletteModal';
 import { logUserActivity } from './services/activityLogger';
 import { PlayerRadar } from './components/Radar/PlayerRadar';
 import DiscordWidget from './components/DiscordWidget';
@@ -268,6 +269,7 @@ export default function App() {
   const [rustoriaServers, setRustoriaServers] = useState<any[]>([]);
   const [loadingServers, setLoadingServers] = useState(false);
   const [copiedServerId, setCopiedServerId] = useState<string | null>(null);
+  const [copiedDiscord, setCopiedDiscord] = useState(false);
   const [regionFilter, setRegionFilter] = useState<'ALL' | 'US' | 'EU' | 'SEA'>('ALL');
   const [serverSearch, setServerSearch] = useState('');
 
@@ -305,7 +307,28 @@ export default function App() {
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [cabinetModalOpen, setCabinetModalOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [announcement, setAnnouncement] = useState<{ text: string; active: boolean; type: 'info' | 'hazard' | 'important' } | null>(null);
+
+  // Global Ctrl+K / Cmd+K / / shortcut to trigger Command Palette
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing inside an input or textarea (unless Ctrl/Cmd is pressed)
+      const target = e.target as HTMLElement;
+      const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA');
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(prev => !prev);
+      } else if (!isInput && e.key === '/') {
+        e.preventDefault();
+        setCommandPaletteOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
   const [showJungleFeverSpoiler, setShowJungleFeverSpoiler] = useState(true);
   const [showTermsModal, setShowTermsModal] = useState(false);
 
@@ -1008,7 +1031,7 @@ export default function App() {
           ? 'bg-white/95 border-[#ff2a4d]/30 shadow-[0_4px_25px_rgba(0,0,0,0.06)]'
           : 'bg-[#0d1017]/95 border-[#ff2a4d]/30 shadow-[0_4px_25px_rgba(0,0,0,0.8)]'
       }`}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <div className="flex items-center gap-2.5 shrink-0">
@@ -1040,6 +1063,19 @@ export default function App() {
 
             {/* Language Selection, Theme Toggle, Web Push, Config Export, Chat & Login Buttons */}
             <div className="hidden lg:flex items-center gap-2">
+              {/* Global Search / Command Palette Trigger */}
+              <button
+                onClick={() => setCommandPaletteOpen(true)}
+                className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold bg-[#11141b] hover:bg-[#1a1f2c] border border-[#ff2a4d]/40 hover:border-[#ff2a4d] text-zinc-300 hover:text-white rounded-md transition-all cursor-pointer font-mono uppercase shadow-sm group"
+                title={lang === 'ru' ? 'Быстрый поиск по сайту (Ctrl + K или /)' : 'Quick Search (Ctrl + K or /)'}
+              >
+                <Search size={12} className="text-[#ff2a4d] group-hover:scale-110 transition-transform" />
+                <span>{lang === 'ru' ? 'ПОИСК...' : 'SEARCH...'}</span>
+                <span className="text-[9px] px-1.5 py-0.2 bg-white/10 text-zinc-400 font-mono rounded">
+                  Ctrl+K
+                </span>
+              </button>
+
               {/* 1-Click Config Exporter Button */}
               <button
                 onClick={() => setConfigExporterModalOpen(true)}
@@ -1112,8 +1148,16 @@ export default function App() {
               </button>
             </div>
 
-            {/* Mobile Actions: Language & Toggle */}
-            <div className="lg:hidden flex items-center gap-2">
+            {/* Mobile Actions: Search, Language & Toggle */}
+            <div className="lg:hidden flex items-center gap-1.5">
+              <button
+                onClick={() => setCommandPaletteOpen(true)}
+                className="p-1.5 bg-[#1b1e26] border border-[#ff2a4d]/40 rounded-sm text-[#ff2a4d] shrink-0"
+                title={lang === 'ru' ? 'Поиск' : 'Search'}
+              >
+                <Search size={14} />
+              </button>
+
               {currentUser ? (
                 <button
                   onClick={() => setCabinetModalOpen(true)}
@@ -1139,7 +1183,7 @@ export default function App() {
               <div className="flex flex-col items-center">
                 <button
                   onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
-                  className="flex items-center gap-1 px-2 py-1 text-[9px] font-bold bg-[#1b1e26] border border-[#2a2f3b] text-white rounded-sm"
+                  className="flex items-center gap-1 px-1.5 py-1 text-[9px] font-bold bg-[#1b1e26] border border-[#2a2f3b] text-white rounded-sm"
                 >
                   <span>{lang === 'ru' ? 'RU' : 'EN'}</span>
                 </button>
@@ -1255,10 +1299,10 @@ export default function App() {
       </nav>
 
       {/* CORE APPLICATION CONTAINER */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 relative z-10">
-        <div className="flex flex-col lg:flex-row gap-8 items-start relative">
-          {/* Left Sidebar Navigation - Only on Desktop */}
-          <aside className="w-full lg:w-56 shrink-0 lg:sticky lg:top-20 space-y-4 hidden lg:block xl:absolute xl:right-full xl:mr-8 xl:top-0 xl:w-52">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 relative z-10 w-full">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start w-full">
+          {/* Left Sidebar Navigation - Desktop */}
+          <aside className="w-full lg:w-56 xl:w-60 shrink-0 lg:sticky lg:top-20 space-y-4 hidden lg:block">
             <div className="cyber-panel p-3 space-y-4 relative">
               <div className="hud-corner-tl" />
               <div className="hud-corner-tr" />
@@ -1436,13 +1480,17 @@ export default function App() {
               transition={{ duration: 0.2 }}
               className="space-y-8"
             >
-              {/* Grand Banner */}
+              {/* Grand Banner - Refined Tactical Layout */}
               <div 
                 id="grand-home-banner"
-                className="relative overflow-hidden rounded-none border-2 border-[#2a2f3b] p-8 sm:p-12 text-center space-y-6 shadow-2xl bg-cover bg-center keep-dark"
-                style={{ backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.65)), url(${customSwampBg})` }}
+                className="relative overflow-hidden rounded-none border-2 border-[#2a344a] p-6 sm:p-9 text-center space-y-4 sm:space-y-5 shadow-2xl bg-[#0d111a] bg-cover bg-center keep-dark"
+                style={{ 
+                  backgroundImage: `linear-gradient(180deg, rgba(13, 17, 26, 0.78) 0%, rgba(8, 10, 16, 0.92) 100%), url(${oilRigBg || customSwampBg})` 
+                }}
               >
-                <div className="absolute inset-0 bg-black/60 pointer-events-none" />
+                {/* Subtle cyber grid and ambient lighting */}
+                <div className="absolute inset-0 bg-[radial-gradient(#ff2a4d_1px,transparent_1px)] [background-size:24px_24px] opacity-15 pointer-events-none" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-[#cd412b]/20 rounded-full blur-[70px] pointer-events-none" />
                 
                 {/* Tactical Corner Brackets */}
                 <div className="rust-bracket-tl" />
@@ -1454,43 +1502,47 @@ export default function App() {
                 <div className="absolute top-0 left-0 right-0 h-1.5 rust-hazard" />
                 
                 {/* Visual HUD Corner details */}
-                <div className="absolute bottom-2 left-3 text-[7px] font-mono text-gray-600 select-none hidden sm:block uppercase">SYS_REF: #F71A</div>
-                <div className="absolute bottom-2 right-3 text-[7px] font-mono text-gray-600 select-none hidden sm:block uppercase">EAC_PROT: INSTALLED</div>
-
-                {/* Visual Glow behind title */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#cd412b]/15 rounded-full blur-[100px] pointer-events-none" />
-
-                <div className="relative z-10 inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#cd412b]/15 border border-[#cd412b]/35 text-[10px] font-bold tracking-wider text-[#cd412b] uppercase font-mono rounded-none">
-                  <Sparkles size={11} className="animate-pulse text-[#cd412b]" />
-                  <span>{appTranslations.bannerSubtitle[lang]}</span>
+                <div className="absolute bottom-2 left-3 text-[7.5px] font-mono text-zinc-500 select-none hidden sm:block uppercase">
+                  SYS_REF: #F71A • TACTICAL_CORE
+                </div>
+                <div className="absolute bottom-2 right-3 text-[7.5px] font-mono text-zinc-500 select-none hidden sm:block uppercase">
+                  EAC_PROT: ACTIVE • {APP_VERSION}
                 </div>
 
-                <h1 className="relative z-10 text-5xl sm:text-7xl font-bold tracking-widest leading-none text-white font-teko uppercase">
-                  RUSTY.LU<span className="text-[#cd412b]">B</span>
-                </h1>
+                {/* Title and Badge Tactical Card */}
+                <div className="relative z-10 space-y-2.5 max-w-2xl mx-auto">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#cd412b]/15 border border-[#cd412b]/40 text-[9.5px] font-bold tracking-widest text-[#ff4d30] uppercase font-mono shadow-sm">
+                    <Sparkles size={11} className="animate-pulse text-[#ff4d30]" />
+                    <span>{appTranslations.bannerSubtitle[lang]}</span>
+                  </div>
 
-                <p className="relative z-10 text-xs sm:text-sm text-gray-200 max-w-2xl mx-auto leading-relaxed font-sans font-medium">
-                  {appTranslations.bannerDesc[lang]}
-                </p>
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-widest leading-none text-white font-russo uppercase drop-shadow-[0_2px_15px_rgba(205,65,43,0.4)]">
+                    RUSTY<span className="text-[#cd412b]">.LUB</span>
+                  </h1>
+
+                  <p className="text-xs sm:text-[13px] text-zinc-300 max-w-xl mx-auto leading-relaxed font-sans font-medium">
+                    {appTranslations.bannerDesc[lang]}
+                  </p>
+                </div>
 
                 {/* Suggestions & Feedback Terminal Banner */}
-                <div id="suggestions-feedback-banner" className="relative z-10 overflow-hidden bg-[#1b1e26]/90 border border-[#2a2f3b] p-3 sm:p-4 max-w-xl mx-auto rounded-none text-left space-y-1 sm:space-y-1.5 shadow-md">
-                  <div className="absolute top-0 right-0 w-2 h-full bg-[#cd412b] opacity-40" />
-                  <div className="flex items-start gap-3">
-                    <div className="bg-[#cd412b]/10 text-[#cd412b] p-1.5 border border-[#cd412b]/20 mt-0.5">
-                      <Mail size={14} className="animate-pulse" />
+                <div id="suggestions-feedback-banner" className="relative z-10 overflow-hidden bg-[#121620]/95 border border-[#2a344a] p-3 sm:p-3.5 max-w-xl mx-auto text-left space-y-1 shadow-md">
+                  <div className="absolute top-0 right-0 w-2 h-full bg-[#cd412b] opacity-60" />
+                  <div className="flex items-start gap-2.5">
+                    <div className="bg-[#cd412b]/15 text-[#cd412b] p-1.5 border border-[#cd412b]/30 shrink-0 mt-0.5">
+                      <Mail size={13} className="animate-pulse" />
                     </div>
-                    <div className="space-y-0.5">
-                      <h4 className="text-[10px] font-black tracking-widest text-[#cd412b] uppercase font-mono leading-none">
-                        {lang === 'ru' ? '📬 SUGGESTIONS & WEBSITE PROPOSALS' : '📬 SUGGESTIONS & WEBSITE PROPOSALS'}
+                    <div className="space-y-0.5 min-w-0">
+                      <h4 className="text-[9.5px] font-black tracking-wider text-[#cd412b] uppercase font-mono leading-none">
+                        {lang === 'ru' ? '📬 ПРЕДЛОЖЕНИЯ И СОТРУДНИЧЕСТВО' : '📬 SUGGESTIONS & WEBSITE PROPOSALS'}
                       </h4>
-                      <p className="text-[10.5px] text-gray-400 leading-normal font-sans font-medium">
+                      <p className="text-[10px] sm:text-[10.5px] text-zinc-300 leading-relaxed font-sans">
                         {lang === 'ru' 
-                          ? 'If anything is missing or you found an error in our database, please write to us at our official contact mail: ' 
-                          : 'If anything is missing or you found an error in our database, please write to us at our official contact mail: '}
+                          ? 'Если чего-то не хватает или нашли ошибку в базе, напишите на почту: ' 
+                          : 'If anything is missing or you found an error in our database, please write to us: '}
                         <a 
                           href="mailto:rusty.lub_offers@bk.ru" 
-                          className="text-[#cd412b] hover:text-[#b03825] font-black underline hover:no-underline transition-colors font-mono"
+                          className="text-[#ff4d30] hover:text-[#ff6b52] font-black underline hover:no-underline transition-colors font-mono"
                         >
                           rusty.lub_offers@bk.ru
                         </a>
@@ -1499,40 +1551,128 @@ export default function App() {
                   </div>
                 </div>
 
-                <div id="banner-tactical-buttons" className="relative z-10 flex flex-wrap items-center justify-center gap-3">
+                <div id="banner-tactical-buttons" className="relative z-10 flex flex-wrap items-center justify-center gap-2.5 pt-1">
                   <button
                     onClick={() => handleTabChange('errors')}
-                    className="px-5 py-2.5 bg-[#1b1e26] hover:bg-white/5 border border-[#2a2f3b] hover:border-gray-500 rounded-none text-xs font-bold uppercase tracking-wider transition-all cursor-pointer text-white"
+                    className="px-4 py-2 bg-[#171b26] hover:bg-white/10 border border-[#2e374d] hover:border-gray-400 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer text-white"
                   >
                     {appTranslations.bannerBtnErrors[lang]}
                   </button>
                   <button
                     onClick={() => handleTabChange('binds')}
-                    className="px-5 py-2.5 bg-[#1b1e26] hover:bg-white/5 border border-[#2a2f3b] hover:border-gray-500 rounded-none text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer text-white"
+                    className="px-4 py-2 bg-[#171b26] hover:bg-white/10 border border-[#2e374d] hover:border-gray-400 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer text-white"
                   >
                     {appTranslations.bannerBtnBinds[lang]}
                   </button>
                   <button
                     onClick={() => handleTabChange('raid')}
-                    className="px-6 py-2.5 bg-[#cd412b] hover:bg-[#b03825] text-white rounded-none text-xs font-black uppercase tracking-wider shadow-lg shadow-[#cd412b]/20 hover:shadow-[#cd412b]/35 transition-all cursor-pointer border border-[#e6553f]"
+                    className="px-5 py-2 bg-[#cd412b] hover:bg-[#b03825] text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-[#cd412b]/25 hover:shadow-[#cd412b]/40 transition-all cursor-pointer border border-[#e6553f]"
                   >
                     {appTranslations.bannerBtnRaid[lang]}
                   </button>
                   <button
                     onClick={() => handleTabChange('clan')}
-                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-none text-xs font-black uppercase tracking-wider shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 transition-all cursor-pointer border border-blue-400/60 flex items-center gap-2"
+                    className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 transition-all cursor-pointer border border-blue-400/60 flex items-center gap-2"
                   >
-                    <UserPlus size={15} className="animate-pulse text-blue-200" />
+                    <UserPlus size={14} className="animate-pulse text-blue-200" />
                     <span>{lang === 'ru' ? 'Поиск Клана & Тимейта' : 'Clan & Teammate Board'}</span>
                   </button>
                   <button
                     id="support-dev-btn"
                     onClick={() => setDonationOpen(true)}
-                    className="px-3 py-1.5 bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/30 text-amber-500/90 hover:text-amber-400 rounded text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1 font-mono"
+                    className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-500/50 text-amber-400 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1 font-mono"
                   >
-                    <Heart size={11} className="fill-amber-500/10 animate-pulse text-amber-500/80" />
+                    <Heart size={11} className="fill-amber-500/20 animate-pulse text-amber-400" />
                     <span>{lang === 'ru' ? 'Поддержать проект' : 'Support development'}</span>
                   </button>
+                </div>
+              </div>
+
+              {/* 2 Featured Promo Modules: Jungle Fever & Telegram LFG Bot (Compact sleek layout) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+                {/* Jungle Fever Spoiler Block */}
+                {showJungleFeverSpoiler && (
+                  <div className="bg-[#0f131c]/95 border border-[#2a344a] hover:border-[#ff2a4d]/60 rounded-none p-3.5 sm:p-4 shadow-lg relative overflow-hidden flex flex-col justify-between group transition-all">
+                    <div className="hud-corner-tl" />
+                    <div className="hud-corner-tr" />
+                    <div className="hud-corner-bl" />
+                    <div className="hud-corner-br" />
+                    
+                    <div>
+                      <div className="relative mb-2.5 overflow-hidden border border-[#2a344a] bg-black/80 aspect-[21/9] sm:aspect-[16/7] max-h-28">
+                        <img 
+                          referrerPolicy="no-referrer" 
+                          src="https://i.ytimg.com/vi/RxS0ISoktOY/maxresdefault.jpg" 
+                          alt="Jungle Fever Part 1" 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                        />
+                        <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-black/80 border border-[#ff2a4d]/50 text-[#ff2a4d] text-[8px] font-mono font-black uppercase tracking-wider flex items-center gap-1">
+                          <span>🎬</span>
+                          <span>{lang === 'ru' ? 'СЕРИЯ ФИЛЬМОВ' : 'MOVIE SERIES'}</span>
+                        </div>
+                      </div>
+                      <h4 className="text-xs sm:text-sm font-black text-white font-sans uppercase mb-1 group-hover:text-[#ff2a4d] transition-colors truncate">
+                        {lang === 'ru' ? 'Jungle Fever - Фильм Solo Rust' : 'Jungle Fever - Solo Rust Movie'}
+                      </h4>
+                      <p className="text-[11px] text-gray-300 font-sans mb-3 line-clamp-2 leading-relaxed">
+                        {lang === 'ru' ? 'Первая часть захватывающей серии фильмов Jungle Fever!' : 'First part of the thrilling Jungle Fever movie series!'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 pt-2 border-t border-[#2a344a]/50">
+                      <button
+                        onClick={() => setActiveTab('news')}
+                        className="w-full py-2 bg-[#cd412b] hover:bg-[#b53723] text-white text-[9px] font-black uppercase tracking-widest font-mono cursor-pointer transition-all border border-[#e6553f] shadow-sm flex items-center justify-center gap-1.5"
+                      >
+                        <Play size={10} className="fill-white" />
+                        <span>{lang === 'ru' ? 'СМОТРЕТЬ ПЕРВУЮ ЧАСТЬ' : 'WATCH PART 1'}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Rust LFG Bot Featured Banner */}
+                <div className={`bg-[#0f131c]/95 border border-[#2a344a] hover:border-blue-500/60 rounded-none p-3.5 sm:p-4 shadow-lg relative overflow-hidden flex flex-col justify-between group transition-all ${!showJungleFeverSpoiler ? 'md:col-span-2' : ''}`}>
+                  <div className="hud-corner-tl" />
+                  <div className="hud-corner-tr" />
+                  <div className="hud-corner-bl" />
+                  <div className="hud-corner-br" />
+                  
+                  <div>
+                    <div className="relative mb-2.5 overflow-hidden border border-[#2a344a] bg-gradient-to-br from-[#0c1017] to-[#121824] aspect-[21/9] sm:aspect-[16/7] max-h-28 flex items-center justify-center">
+                      <img 
+                        referrerPolicy="no-referrer" 
+                        src="/rust_lfg_bot.png" 
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (!target.src.includes('/images/rust_lfg_bot.png')) {
+                            target.src = '/images/rust_lfg_bot.png';
+                          }
+                        }}
+                        alt="Rust LFG Bot" 
+                        className="h-full w-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" 
+                      />
+                      <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-black/80 border border-blue-400/50 text-blue-400 text-[8px] font-mono font-black uppercase tracking-wider flex items-center gap-1">
+                        <span>🤖</span>
+                        <span>TELEGRAM BOT</span>
+                      </div>
+                    </div>
+                    <h4 className="text-xs sm:text-sm font-black text-white font-sans uppercase mb-1 group-hover:text-blue-400 transition-colors flex items-center gap-1.5 truncate">
+                      <span>🤖</span>
+                      <span className="truncate">{lang === 'ru' ? 'Бот для поиска команды в Rust' : 'Teammate & Clan Finder Bot'}</span>
+                    </h4>
+                    <p className="text-[11px] text-gray-300 font-sans mb-3 line-clamp-2 leading-relaxed">
+                      {lang === 'ru' ? '@RustLFGBot — поиск тиммейтов и кланов прямо в Telegram.' : '@RustLFGBot — find teammates and clans directly in Telegram.'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 pt-2 border-t border-[#2a344a]/50">
+                    <button
+                      onClick={() => setActiveTab('news')}
+                      className="w-full py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-[9px] font-black uppercase tracking-widest font-mono cursor-pointer transition-all border border-blue-400/50 shadow-sm flex items-center justify-center gap-1.5"
+                    >
+                      <ExternalLink size={10} />
+                      <span>{lang === 'ru' ? 'ПЕРЕЙТИ К НОВОСТИ' : 'READ FULL NEWS'}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1610,275 +1750,330 @@ export default function App() {
                 </div>
               )}
 
-              {/* Global Warfare 4 Event & Featured News Section */}
-              <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Jungle Fever Spoiler Block */}
-                {showJungleFeverSpoiler && (
-                  <div className="p-6 bg-[#0c0d10] border border-[#2a2f3b] shadow-2xl relative overflow-hidden flex flex-col justify-between">
-                    <div className="rust-bracket-tl" />
-                    <div className="rust-bracket-tr" />
-                    <div className="rust-bracket-bl" />
-                    <div className="rust-bracket-br" />
-                    <div>
-                      <img referrerPolicy="no-referrer" src="https://i.ytimg.com/vi/RxS0ISoktOY/maxresdefault.jpg" alt="Jungle Fever Part 1" className="w-full h-36 object-cover mb-4 border border-[#2a2f3b]" />
-                      <h4 className="text-lg font-black text-white font-sans uppercase mb-2">
-                        {lang === 'ru' ? 'Jungle Fever - Серия фильмов Solo Rust' : 'Jungle Fever - Solo Rust Movie Series'}
-                      </h4>
-                      <p className="text-xs text-gray-300 font-sans mb-4">
-                        {lang === 'ru' ? 'Первая часть моей серии фильмов Jungle Fever!' : 'First part of my Jungle Fever movie series!'}
+              {/* Clan EAC Leader & Veteran Bio + Twitch Pro-Tip + Sidebar */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+                {/* Left Column: Founder Bio + NEW Twitch Advice Tracker */}
+                <div className="md:col-span-8 space-y-4">
+                  {/* Biography card - Compact & Practical */}
+                  <div className="bg-[#11141c]/95 border border-[#2a344a] p-4 sm:p-5 shadow-xl relative overflow-hidden flex flex-col justify-between group">
+                    <div className="hud-corner-tl" />
+                    <div className="hud-corner-tr" />
+                    <div className="hud-corner-bl" />
+                    <div className="hud-corner-br" />
+
+                    <div className="space-y-3">
+                      {/* Header Row */}
+                      <div className="flex items-center justify-between flex-wrap gap-2.5 pb-2.5 border-b border-[#20293a]">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-2xl">👑</span>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h2 className="text-base sm:text-lg font-black text-white tracking-wider font-sans uppercase leading-none">
+                                {appTranslations.founderTitle[lang]}
+                              </h2>
+                              <span className="px-1.5 py-0.5 bg-[#cd412b]/20 border border-[#cd412b]/50 text-[#ff4b36] text-[9px] font-bold font-mono">
+                                [EAC]{'{'}CHEATER{'}'}
+                              </span>
+                              {/* Recruitment Status Badge */}
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 text-[8.5px] font-bold font-mono uppercase">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                <span>{lang === 'ru' ? 'НАБОР АКТИВЕН' : 'RECRUITMENT ACTIVE'}</span>
+                              </span>
+                            </div>
+
+                            {/* In-game Roles Badges */}
+                            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                              <span className="text-[8px] font-mono uppercase font-bold text-zinc-500">
+                                {lang === 'ru' ? 'РОЛИ:' : 'ROLES:'}
+                              </span>
+                              <span className="px-1.5 py-0.2 bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[8.5px] font-mono font-bold">
+                                🏗️ BUILDER
+                              </span>
+                              <span className="px-1.5 py-0.2 bg-red-500/10 border border-red-500/30 text-red-400 text-[8.5px] font-mono font-bold">
+                                💥 RAID LEADER
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Compact Rust Survival Stats HUD */}
+                        <div className="flex items-center gap-3 bg-[#0a0d14] px-2.5 py-1 border border-[#222a38] text-[9px] font-mono">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-orange-400">🥩 FOOD</span>
+                            <span className="font-bold text-white">250</span>
+                          </div>
+                          <span className="text-gray-700">|</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-blue-400">💧 WATER</span>
+                            <span className="font-bold text-white">250</span>
+                          </div>
+                          <span className="text-gray-700">|</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-emerald-400">☢️ RADS</span>
+                            <span className="font-bold text-emerald-400">0</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Brief Bio */}
+                      <p className="text-[11.5px] text-gray-300 leading-relaxed font-sans">
+                        {appTranslations.founderDesc[lang]}
                       </p>
+
+                      {/* Compact 3-Column Metrics Grid */}
+                      <div className="grid grid-cols-3 gap-2.5 pt-0.5">
+                        <div className="bg-[#161a24] p-2 border border-[#263044] text-center">
+                          <span className="block text-[8.5px] text-gray-400 uppercase font-mono font-bold tracking-wider mb-0.5">
+                            {appTranslations.hoursCount[lang]}
+                          </span>
+                          <span className="text-sm sm:text-base font-black text-white font-mono">12 000+</span>
+                        </div>
+
+                        <div className="bg-[#161a24] p-2 border border-[#263044] text-center">
+                          <span className="block text-[8.5px] text-gray-400 uppercase font-mono font-bold tracking-wider mb-0.5">
+                            {lang === 'ru' ? 'РАЗРАБОТКА' : 'DEV STATUS'}
+                          </span>
+                          <span className="text-sm sm:text-base font-black text-blue-400 font-mono">Solo Dev</span>
+                        </div>
+
+                        <div className="bg-[#161a24] p-2 border border-[#263044] text-center">
+                          <span className="block text-[8.5px] text-gray-400 uppercase font-mono font-bold tracking-wider mb-0.5">
+                            {appTranslations.vacStatus[lang]}
+                          </span>
+                          <span className="text-sm sm:text-base font-black text-emerald-400 font-mono">{appTranslations.vacSafe[lang]}</span>
+                        </div>
+                      </div>
+
+                      {/* Author Contact / Cooperation & Bug Reports Bar */}
+                      <div className="bg-[#0c1017] border border-[#20293a] p-2.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-300">
+                          <span className="text-[#cd412b] font-bold">📩</span>
+                          <span className="font-bold uppercase text-zinc-400">
+                            {lang === 'ru' ? 'Связь / Сотрудничество / Баги:' : 'Contact / Collab / Bugs:'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <a
+                            href="https://t.me/S1mreyReserve"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-sky-500/15 hover:bg-sky-500 hover:text-white text-sky-400 text-[9.5px] font-mono font-bold uppercase tracking-wider transition-all border border-sky-500/30"
+                          >
+                            <Send size={10} />
+                            <span>Telegram: @S1mreyReserve</span>
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText('eaccheater');
+                              setCopiedDiscord(true);
+                              setTimeout(() => setCopiedDiscord(false), 2000);
+                            }}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 text-[9.5px] font-mono font-bold uppercase tracking-wider transition-all border cursor-pointer ${
+                              copiedDiscord 
+                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50' 
+                                : 'bg-[#5865f2]/15 hover:bg-[#5865f2] hover:text-white text-[#8891f2] border-[#5865f2]/30'
+                            }`}
+                          >
+                            {copiedDiscord ? <Check size={10} className="text-emerald-400" /> : <Copy size={10} />}
+                            <span>{copiedDiscord ? (lang === 'ru' ? 'СКОПИРОВАНО!' : 'COPIED!') : 'Discord: eaccheater'}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Action buttons row */}
+                      <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                        <a
+                          id="steam-profile-btn"
+                          href="https://steamcommunity.com/id/EACCHEATER"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-white bg-[#171a21] hover:bg-[#232b38] transition-colors border border-[#2a344a] shadow-sm"
+                        >
+                          <Gamepad2 size={12} className="text-blue-400" />
+                          <span>{lang === 'ru' ? 'Steam Профиль' : 'Steam Profile'}</span>
+                          <ExternalLink size={9} className="text-gray-400" />
+                        </a>
+
+                        <a
+                          href="https://www.twitch.tv/tv_cheater/about"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-purple-300 bg-[#6441a5]/15 hover:bg-[#6441a5] hover:text-white transition-all border border-[#6441a5]/40 shadow-sm"
+                        >
+                          <Twitch size={12} className="text-purple-400" />
+                          <span>{lang === 'ru' ? 'Twitch Канал' : 'Twitch Channel'}</span>
+                          <ExternalLink size={9} className="opacity-75" />
+                        </a>
+
+                        <button
+                          onClick={generateWallpaper}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 hover:bg-amber-500 hover:text-black transition-all border border-amber-500/30 shadow-sm cursor-pointer ml-auto"
+                        >
+                          <Sparkles size={12} />
+                          <span>{lang === 'ru' ? 'Обои Rust' : 'Rust Wallpaper'}</span>
+                        </button>
+                      </div>
                     </div>
-                    <div>
-                      <button
-                        onClick={() => setActiveTab('news')}
-                        className="inline-block px-4 py-2 bg-[#cd412b] hover:bg-[#b53723] text-white text-[10px] font-bold uppercase tracking-widest font-mono cursor-pointer transition-colors"
+
+                    <div className="pt-3 mt-3 border-t border-[#20293a] flex items-center justify-between flex-wrap gap-2 text-[10px] text-gray-500 font-mono">
+                      <span>{appTranslations.copyright[lang]}</span>
+                      <a
+                        href="https://discord.gg/R2TyKZ9xvZ"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[#ff4b36] hover:underline font-bold uppercase"
                       >
-                        {lang === 'ru' ? 'СМОТРЕТЬ ПЕРВУЮ ЧАСТЬ' : 'WATCH PART 1'}
-                      </button>
+                        <span>{appTranslations.joinClan[lang]}</span>
+                        <ExternalLink size={10} />
+                      </a>
                     </div>
                   </div>
-                )}
 
-                {/* Rust LFG Bot Featured Banner */}
-                <div className={`p-6 bg-[#0c0d10] border border-[#2a2f3b] shadow-2xl relative overflow-hidden flex flex-col justify-between ${!showJungleFeverSpoiler ? 'md:col-span-2' : ''}`}>
-                  <div className="rust-bracket-tl" />
-                  <div className="rust-bracket-tr" />
-                  <div className="rust-bracket-bl" />
-                  <div className="rust-bracket-br" />
-                  <div>
-                    <div className="relative mb-4 overflow-hidden border border-[#2a2f3b] bg-black/60 h-36 flex items-center justify-center group">
-                      <img referrerPolicy="no-referrer" src="/images/rust_lfg_bot.png" alt="Rust LFG Bot" className="h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" />
-                    </div>
-                    <h4 className="text-lg font-black text-white font-sans uppercase mb-2 flex items-center gap-2">
-                      <span>🤖</span>
-                      <span>{lang === 'ru' ? 'Новый бот для поиска команды в Rust' : 'New Teammate & Clan Finder Bot'}</span>
-                    </h4>
-                    <p className="text-xs text-gray-300 font-sans mb-4">
-                      {lang === 'ru' ? '@RustLFGBot — теперь находить тиммейтов и кланы стало проще. Бот работает прямо в Telegram.' : '@RustLFGBot — find teammates and clans directly in Telegram.'}
-                    </p>
-                  </div>
-                  <div>
-                    <button
-                      onClick={() => setActiveTab('news')}
-                      className="inline-block px-4 py-2 bg-[#cd412b] hover:bg-[#b53723] text-white text-[10px] font-bold uppercase tracking-widest font-mono cursor-pointer transition-colors"
-                    >
-                      {lang === 'ru' ? 'ПЕРЕЙТИ К НОВОСТИ' : 'READ FULL NEWS'}
-                    </button>
-                  </div>
-                </div>
-              </div>
+                  {/* NEW Compact & Practical Widget: Совет начать отслеживать стримы на Twitch */}
+                  <div className="bg-gradient-to-r from-[#141224] via-[#101322] to-[#141224] border border-[#6441a5]/50 hover:border-[#9146ff] p-4 sm:p-5 shadow-xl relative overflow-hidden group transition-all">
+                    <div className="hud-corner-tl" />
+                    <div className="hud-corner-tr" />
+                    <div className="hud-corner-bl" />
+                    <div className="hud-corner-br" />
 
-              {/* Clan EAC Leader & Veteran Bio */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                {/* Biography card */}
-                <div className="md:col-span-8 bg-[#14171e]/90 border border-[#2a2f3b] rounded-none p-6 sm:p-8 space-y-6 flex flex-col justify-between shadow-xl relative overflow-hidden">
-                  <div className="rust-bracket-tl" />
-                  <div className="rust-bracket-tr" />
-                  <div className="rust-bracket-bl" />
-                  <div className="rust-bracket-br" />
-
-                  <div className="absolute top-0 right-0 w-24 h-24 rust-hazard-dark pointer-events-none" />
-                  
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl">👑</span>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-[#6441a5]/20 border border-[#9146ff]/40 text-[#a970ff] shrink-0">
+                          <Twitch size={18} />
+                        </div>
                         <div>
-                          <h2 className="text-lg font-bold text-white tracking-wider font-teko uppercase">
-                            {appTranslations.founderTitle[lang]}
-                          </h2>
-                          <span className="text-xs text-[#cd412b] font-bold font-mono">
-                            [EAC]{'{'}CHEATER{'}'}
+                          <div className="flex items-center gap-2">
+                            <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 bg-[#9146ff]/20 text-[#bf94ff] border border-[#9146ff]/30 uppercase">
+                              {lang === 'ru' ? 'СОВЕТ ИГРОКАМ' : 'PRO-TIP'}
+                            </span>
+                            <span className="flex items-center gap-1 text-[9px] text-purple-300 font-mono">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#9146ff] animate-ping" />
+                              tv_cheater
+                            </span>
+                          </div>
+                          <h3 className="text-sm sm:text-base font-black text-white uppercase font-sans tracking-wide mt-0.5">
+                            {lang === 'ru' ? 'Совет: Начните отслеживать стримы на Twitch канале' : 'Tip: Start Following Live Streams on Twitch'}
+                          </h3>
+                        </div>
+                      </div>
+
+                      <a
+                        href="https://www.twitch.tv/tv_cheater"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3.5 py-1.5 bg-[#9146ff] hover:bg-[#772ce8] text-white text-[10px] font-mono font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md shadow-[#9146ff]/20 border border-[#a970ff] shrink-0"
+                      >
+                        <Twitch size={11} />
+                        <span>{lang === 'ru' ? 'ОТСЛЕЖИВАТЬ КАНАЛ' : 'FOLLOW ON TWITCH'}</span>
+                        <ExternalLink size={10} />
+                      </a>
+                    </div>
+
+                    {/* Practical Benefits 3-Point Checklist */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-[11px] text-zinc-300 font-sans">
+                      <div className="bg-black/30 border border-[#2b2247] p-2.5 flex items-start gap-2">
+                        <span className="text-purple-400 font-bold">⚡</span>
+                        <div>
+                          <span className="font-bold text-white block text-[10.5px] uppercase font-mono">
+                            {lang === 'ru' ? 'Старты вайпов и рейды' : 'Wipe Days & Raids'}
+                          </span>
+                          <span className="text-[10px] text-zinc-400 leading-tight block mt-0.5">
+                            {lang === 'ru' ? 'Смотрите штурмы баз и тактики выживания в реальном времени' : 'Watch real-time base raids, defenses, and live tactics'}
                           </span>
                         </div>
                       </div>
-                      
-                      {/* Interactive Custom Rust Survival Stats HUD */}
-                      <div className="flex gap-4 bg-[#0c0d10] p-2 border border-[#2a2f3b] text-[10px] font-mono">
-                        <div className="space-y-0.5">
-                          <div className="flex justify-between text-gray-500 gap-4">
-                            <span>🥩 FOOD</span>
-                            <span className="text-orange-400">250</span>
-                          </div>
-                          <div className="w-16 h-1 bg-orange-500" />
+
+                      <div className="bg-black/30 border border-[#2b2247] p-2.5 flex items-start gap-2">
+                        <span className="text-purple-400 font-bold">🎯</span>
+                        <div>
+                          <span className="font-bold text-white block text-[10.5px] uppercase font-mono">
+                            {lang === 'ru' ? 'Фишки и схемы баз' : 'Base Builds & Tips'}
+                          </span>
+                          <span className="text-[10px] text-zinc-400 leading-tight block mt-0.5">
+                            {lang === 'ru' ? 'Разборы спреев, схем электрики и оптимизации ресурсов' : 'Recoil breakdowns, electrical setups & cost optimization'}
+                          </span>
                         </div>
-                        <div className="space-y-0.5">
-                          <div className="flex justify-between text-gray-500 gap-4">
-                            <span>💧 WATER</span>
-                            <span className="text-blue-400">250</span>
-                          </div>
-                          <div className="w-16 h-1 bg-blue-500" />
-                        </div>
-                        <div className="space-y-0.5">
-                          <div className="flex justify-between text-gray-500 gap-4">
-                            <span>☢️ RADS</span>
-                            <span className="text-emerald-400">0</span>
-                          </div>
-                          <div className="w-16 h-1 bg-[#2a2f3b]" />
+                      </div>
+
+                      <div className="bg-black/30 border border-[#2b2247] p-2.5 flex items-start gap-2">
+                        <span className="text-purple-400 font-bold">🎁</span>
+                        <div>
+                          <span className="font-bold text-white block text-[10.5px] uppercase font-mono">
+                            {lang === 'ru' ? 'Дропы и розыгрыши' : 'Drops & Giveaways'}
+                          </span>
+                          <span className="text-[10px] text-zinc-400 leading-tight block mt-0.5">
+                            {lang === 'ru' ? 'Включайте колокольчик, чтобы не пропускать подарки и закрытые паки' : 'Turn on the bell notification for exclusive viewer drops'}
+                          </span>
                         </div>
                       </div>
                     </div>
-
-                    <p className="text-xs text-gray-400 leading-relaxed font-sans font-medium">
-                      {appTranslations.founderDesc[lang]}
-                    </p>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2">
-                      <div className="bg-[#1b1e26] p-3.5 rounded-none border border-[#2a2f3b] text-center hover:border-gray-600/50 transition-colors relative">
-                        <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-gray-600" />
-                        <div className="absolute top-0.5 right-0.5 w-1 h-1 bg-gray-600" />
-                        <Clock className="text-[#cd412b] mx-auto mb-1.5" size={18} />
-                        <span className="block text-[9px] text-gray-500 uppercase font-bold tracking-wider font-mono">
-                          {appTranslations.hoursCount[lang]}
-                        </span>
-                        <span className="text-base font-black text-white font-mono">12 000+</span>
-                      </div>
-
-                      <div className="bg-[#1b1e26] p-3.5 rounded-none border border-[#2a2f3b] text-center hover:border-gray-600/50 transition-colors relative">
-                        <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-gray-600" />
-                        <div className="absolute top-0.5 right-0.5 w-1 h-1 bg-gray-600" />
-                        <ShieldAlert className="text-[#cd412b] mx-auto mb-1.5" size={18} />
-                        <span className="block text-[9px] text-gray-500 uppercase font-bold tracking-wider font-mono">
-                          {appTranslations.vacStatus[lang]}
-                        </span>
-                        <span className="text-base font-black text-emerald-400 font-sans">{appTranslations.vacSafe[lang]}</span>
-                      </div>
-
-                      <div className="bg-[#1b1e26] p-3.5 rounded-none border border-[#2a2f3b] text-center col-span-2 sm:col-span-3 hover:border-gray-600/50 transition-colors relative">
-                        <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-gray-600" />
-                        <div className="absolute top-0.5 right-0.5 w-1 h-1 bg-gray-600" />
-                        <Flame className="text-[#cd412b] mx-auto mb-1.5" size={18} />
-                        <span className="block text-[9px] text-gray-500 uppercase font-bold tracking-wider font-mono">
-                          {appTranslations.wipesPlayed[lang]}
-                        </span>
-                        <span className="text-xs font-bold text-gray-200 font-sans block mt-1 uppercase tracking-wide leading-relaxed">
-                          {lang === 'ru'
-                            ? 'Отличный инструмент как для новичка, так и для опытного игрока'
-                            : 'An excellent tool for both beginners and experienced players'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Social profiles row with tactile, beautifully designed masked link buttons */}
-                    <div className="flex flex-wrap items-center gap-3 pt-3">
-                      <motion.a
-                        id="steam-profile-btn"
-                        href="https://steamcommunity.com/id/EACCHEATER"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ scale: 1.02, y: -1 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-white bg-[#171a21] hover:bg-[#2a475e] transition-colors border border-[#2a2f3b] hover:border-blue-400/50 rounded-none shadow-md shadow-black/25 relative"
-                      >
-                        <div className="absolute top-0.5 left-0.5 w-0.5 h-0.5 bg-gray-500/50" />
-                        <Gamepad2 size={13} className="text-blue-400 animate-pulse" />
-                        <span>{lang === 'ru' ? 'Steam Профиль' : 'Steam Profile'}</span>
-                        <ExternalLink size={10} className="text-gray-500" />
-                      </motion.a>
-
-                      <motion.a
-                        href="https://www.twitch.tv/tv_cheater/about"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ scale: 1.02, y: -1 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-white bg-[#6441a5]/10 hover:bg-[#6441a5] hover:text-white text-[#9146ff] transition-all border border-[#6441a5]/30 hover:border-[#9146ff] rounded-none shadow-md relative"
-                      >
-                        <div className="absolute top-0.5 left-0.5 w-0.5 h-0.5 bg-gray-500/50" />
-                        <Twitch size={13} />
-                        <span>{lang === 'ru' ? 'Twitch Канал' : 'Twitch Channel'}</span>
-                        <ExternalLink size={10} className="opacity-75" />
-                      </motion.a>
-
-                      <motion.button
-                        onClick={generateWallpaper}
-                        whileHover={{ scale: 1.02, y: -1 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 hover:bg-amber-500 hover:text-black transition-all border border-amber-500/30 hover:border-amber-400 rounded-none shadow-md relative cursor-pointer"
-                      >
-                        <div className="absolute top-0.5 left-0.5 w-0.5 h-0.5 bg-amber-500/50" />
-                        <Sparkles size={13} className="animate-pulse" />
-                        <span>{lang === 'ru' ? 'Сгенерировать обои Rust' : 'Generate Rust Wallpaper'}</span>
-                      </motion.button>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-[#2a2f3b] flex items-center justify-between flex-wrap gap-4">
-                    <span className="text-[10px] text-gray-500 font-mono">
-                      {appTranslations.copyright[lang]}
-                    </span>
-                    <a
-                      href="https://discord.gg/R2TyKZ9xvZ"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs text-[#cd412b] hover:text-[#b03825] font-bold tracking-wider uppercase font-mono"
-                    >
-                      <span>{appTranslations.joinClan[lang]}</span> <ExternalLink size={12} />
-                    </a>
                   </div>
                 </div>
 
-                {/* Right Side Sidebar Column */}
-                <div className="md:col-span-4 space-y-6 flex flex-col justify-between">
-                  {/* News & Updates Widget - Styled "как на самом вверху" (with hazard stripe, brackets, flashing dot) */}
-                  <div className="bg-gradient-to-b from-[#14171e] via-[#0d0f14] to-[#14171e] border-2 border-[#cd412b]/40 p-6 shadow-xl relative overflow-hidden rust-metal-pattern flex flex-col justify-between">
-                    {/* Tactical Corner Brackets */}
-                    <div className="rust-bracket-tl" />
-                    <div className="rust-bracket-tr" />
-                    <div className="rust-bracket-bl" />
-                    <div className="rust-bracket-br" />
+                {/* Right Column: News & Updates + Discord Widget */}
+                <div className="md:col-span-4 space-y-4">
+                  {/* News & Updates Widget - Compact & Practical */}
+                  <div className="bg-[#11141c]/95 border border-[#2a344a] p-4 shadow-xl relative overflow-hidden group">
+                    <div className="hud-corner-tl" />
+                    <div className="hud-corner-tr" />
+                    <div className="hud-corner-bl" />
+                    <div className="hud-corner-br" />
 
                     {/* Top Hazard Warning Stripe */}
-                    <div className="absolute top-0 left-0 right-0 h-1 rust-hazard" />
+                    <div className="absolute top-0 left-0 right-0 h-0.5 rust-hazard" />
 
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {/* Flashing Alert Indicator */}
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 bg-[#cd412b]/15 border border-[#cd412b]/35 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-[#cd412b] font-mono">
-                          <span className="relative flex h-1 w-1">
+                        <div className="flex items-center gap-1.5 bg-[#cd412b]/15 border border-[#cd412b]/40 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-[#ff4b36] font-mono">
+                          <span className="relative flex h-1.5 w-1.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-1 w-1 bg-[#cd412b]"></span>
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#ff4b36]"></span>
                           </span>
                           <span>{lang === 'ru' ? 'СВЕЖИЕ НОВОСТИ' : 'LATEST NEWS'}</span>
                         </div>
-                        <span className="text-[9px] font-mono text-gray-500 font-bold uppercase">FEED_v2.6</span>
+                        <span className="text-[8.5px] font-mono text-gray-500 font-bold uppercase">FEED_v2.6</span>
                       </div>
 
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-bold text-white tracking-wider font-teko uppercase text-lg">
+                      <div className="space-y-0.5">
+                        <h3 className="text-xs sm:text-sm font-black text-white tracking-wider font-mono uppercase">
                           {lang === 'ru' ? 'Новости и обновления Rust' : 'Rust News & Updates'}
                         </h3>
-                        <div className="h-[1px] w-12 bg-[#cd412b]" />
+                        <div className="h-[1px] w-8 bg-[#cd412b]" />
                       </div>
 
-                      {/* July Update 2026 Promo */}
-                      <div className="bg-black/40 border border-[#2a2f3b] p-3.5 space-y-2 relative text-left">
-                        <div className="absolute top-1 right-2 text-[7px] font-mono text-gray-600 font-bold">02.07.2026</div>
-                        <span className="block text-[9px] text-[#cd412b] font-mono font-bold uppercase tracking-wider">
-                          JULY UPDATE 2026
-                        </span>
-                        <h4 className="text-xs font-black text-white uppercase tracking-wide leading-snug">
+                      {/* July Update Promo */}
+                      <div className="bg-[#171b26] border border-[#222a38] p-3 space-y-1.5 relative text-left">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[8px] text-[#ff4b36] font-mono font-bold uppercase tracking-wider">
+                            UPDATE 2026
+                          </span>
+                          <span className="text-[7.5px] font-mono text-gray-500">02.07.2026</span>
+                        </div>
+                        <h4 className="text-[11.5px] font-black text-white uppercase tracking-wide leading-snug">
                           {lang === 'ru' 
-                            ? 'Июльское обновление Rust и новые функции Rusty.Lub' 
-                            : 'July Rust Update & New Rusty.Lub Features'}
+                            ? 'Июльское обновление Rust & Функции Rusty.Lub' 
+                            : 'July Rust Update & Rusty.Lub Features'}
                         </h4>
-                        <p className="text-[10.5px] text-gray-400 font-sans leading-normal line-clamp-5">
+                        <p className="text-[10px] text-gray-400 font-sans leading-relaxed line-clamp-3">
                           {lang === 'ru'
-                            ? 'Глобальный патч Rust. ПЛЮС ОБНОВЛЕНИЕ САЙТА: Добавлена возможность загружать свой фон визитки в кабинете, а интерфейс стал более прозрачным!'
-                            : 'Global Rust patch. PLUS SITE UPDATE: Added the ability to upload a custom profile card background, and the UI is now more transparent!'}
+                            ? 'Глобальный патч Rust. Калькуляторы обновлены под актуальный баланс, улучшена скорость загрузки и добавлен кастомный фон визитки в кабинете!'
+                            : 'Global Rust patch. Calculators updated for current balance, improved load speeds, and custom card backgrounds added!'}
                         </p>
                       </div>
 
                       <button
                         onClick={() => handleTabChange('news')}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#cd412b] hover:bg-[#b03825] text-white rounded-none text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer border border-[#e6553f]"
+                        className="w-full flex items-center justify-center gap-1.5 py-2 bg-[#cd412b] hover:bg-[#b03825] text-white text-[9px] font-mono font-black uppercase tracking-widest transition-all cursor-pointer border border-[#e6553f] shadow-sm"
                       >
                         <span>{lang === 'ru' ? 'ЧИТАТЬ ОБНОВЛЕНИЕ' : 'READ PATCH LOG'}</span>
-                        <ChevronRight size={12} />
+                        <ChevronRight size={11} />
                       </button>
                     </div>
                   </div>
 
+                  {/* Discord Widget */}
                   <DiscordWidget lang={lang} />
                 </div>
               </div>
@@ -2905,6 +3100,64 @@ export default function App() {
           />
         )}
       </AnimatePresence>
+
+      {/* Global Quick Search & Command Palette Modal (Ctrl+K) */}
+      <CommandPaletteModal
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        onSelectTab={(tab) => handleTabChange(tab as any)}
+        lang={lang}
+      />
+
+      {/* Mobile Sticky Thumb Navigation Bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0d1017]/95 border-t border-[#ff2a4d]/30 backdrop-blur-md px-2 py-1.5 flex items-center justify-around text-[10px] font-mono font-bold shadow-2xl">
+        <button
+          onClick={() => handleTabChange('home')}
+          className={`flex flex-col items-center gap-0.5 p-1 transition-colors ${
+            activeTab === 'home' ? 'text-[#ff2a4d]' : 'text-zinc-400 hover:text-white'
+          }`}
+        >
+          <Home size={18} />
+          <span className="text-[9px] uppercase">{lang === 'ru' ? 'Главная' : 'Home'}</span>
+        </button>
+
+        <button
+          onClick={() => handleTabChange('raid')}
+          className={`flex flex-col items-center gap-0.5 p-1 transition-colors ${
+            activeTab === 'raid' ? 'text-[#ff2a4d]' : 'text-zinc-400 hover:text-white'
+          }`}
+        >
+          <Flame size={18} />
+          <span className="text-[9px] uppercase">{lang === 'ru' ? 'Рейд' : 'Raid'}</span>
+        </button>
+
+        <button
+          onClick={() => setCommandPaletteOpen(true)}
+          className="flex flex-col items-center justify-center -mt-4 w-11 h-11 bg-[#ff2a4d] text-white rounded-full border-2 border-white/30 shadow-[0_0_15px_rgba(255,42,77,0.6)] cursor-pointer"
+        >
+          <Search size={18} />
+        </button>
+
+        <button
+          onClick={() => handleTabChange('binds')}
+          className={`flex flex-col items-center gap-0.5 p-1 transition-colors ${
+            activeTab === 'binds' ? 'text-blue-400' : 'text-zinc-400 hover:text-white'
+          }`}
+        >
+          <Keyboard size={18} />
+          <span className="text-[9px] uppercase">{lang === 'ru' ? 'Бинды' : 'Binds'}</span>
+        </button>
+
+        <button
+          onClick={() => handleTabChange('chat')}
+          className={`flex flex-col items-center gap-0.5 p-1 transition-colors relative ${
+            activeTab === 'chat' ? 'text-purple-400' : 'text-zinc-400 hover:text-white'
+          }`}
+        >
+          <MessageSquare size={18} />
+          <span className="text-[9px] uppercase">{lang === 'ru' ? 'Чат' : 'Chat'}</span>
+        </button>
+      </div>
     </div>
   );
 }

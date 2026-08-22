@@ -384,7 +384,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                   </div>
                 </div>
                 <div className="flex-1 text-[10px] font-mono leading-tight">
-                  <span className="text-gray-500">{lang === 'ru' ? 'Я принимаю ' : 'I accept '}</span>
+                  <span className="text-gray-500">{lang === 'ru' ? 'Я принимаю ' : 'I accept the '}</span>
                   <button
                     type="button"
                     onClick={(e) => {
@@ -393,9 +393,9 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                     }}
                     className="text-[#cd412b] hover:underline font-bold"
                   >
-                    {lang === 'ru' ? 'пользовательское соглашение' : 'user agreement'}
+                    {lang === 'ru' ? 'пользовательское соглашение' : 'Terms of Service'}
                   </button>
-                  <span className="text-gray-500"> {lang === 'ru' ? 'и правила выживания.' : 'and survival rules.'}</span>
+                  <span className="text-gray-500"> {lang === 'ru' ? 'и политику конфиденциальности.' : 'and Privacy Policy.'}</span>
                 </div>
               </div>
             )}
