@@ -160,7 +160,7 @@ const appTranslations = {
   bannerBtnErrors: { ru: '💻 РЕШЕНИЯ ОШИБОК', en: '💻 ERROR SOLUTIONS' },
   bannerBtnBinds: { ru: '⌨️ ПОЛЕЗНЫЕ БИНДЫ', en: '⌨️ KEYBIND GUIDES' },
   bannerBtnRaid: { ru: '🎯 НАЧАТЬ РЕЙД РАСЧЕТ', en: '🎯 START RAID CALCULATOR' },
-  founderTitle: { ru: 'Основатель клана [EAC]', en: 'Founder of clan [EAC]' },
+  founderTitle: { ru: 'Разработал Rusty.Lub', en: 'Developed Rusty.Lub' },
   founderDesc: {
     ru: 'Привет, боец! Этот проект был собран ветераном Rust с суммарным опытом более 12 000 часов на официальных и кастомных серверах. Вся информация в справочнике выверена на практике, а калькулятор идеально считает расходы ресурсов для рейда любого строения.',
     en: 'Welcome, survivor! This project is curated by a Rust veteran with over 12,000 hours on official and custom servers. All information in this guide has been tested in battle, and the calculator precisely computes sulfur, charcoal, and gunpowder costs.'
@@ -1883,17 +1883,18 @@ export default function App() {
 
                       {/* Action buttons row */}
                       <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                        <a
+                        <button
                           id="steam-profile-btn"
-                          href="https://steamcommunity.com/id/EACCHEATER"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-white bg-[#171a21] hover:bg-[#232b38] transition-colors border border-[#2a344a] shadow-sm"
+                          disabled
+                          title={lang === 'ru' ? 'Временно недоступно' : 'Temporarily unavailable'}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 bg-[#12141a] border border-[#1f2637] opacity-60 cursor-not-allowed select-none shadow-sm"
                         >
-                          <Gamepad2 size={12} className="text-blue-400" />
+                          <Gamepad2 size={12} className="text-zinc-500" />
                           <span>{lang === 'ru' ? 'Steam Профиль' : 'Steam Profile'}</span>
-                          <ExternalLink size={9} className="text-gray-400" />
-                        </a>
+                          <span className="text-[8px] px-1 py-0.2 bg-zinc-800 text-zinc-400 border border-zinc-700">
+                            {lang === 'ru' ? 'СКОРО' : 'SOON'}
+                          </span>
+                        </button>
 
                         <a
                           href="https://www.twitch.tv/tv_cheater/about"
