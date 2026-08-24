@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Home,
@@ -50,6 +50,7 @@ import {
   Sprout,
   FlaskConical,
   UserPlus,
+  HelpCircle,
   Sun,
   Moon
 } from 'lucide-react';
@@ -92,6 +93,7 @@ import MiningQuarryTab from './components/MiningQuarryTab';
 import MixingTableTab from './components/MixingTableTab';
 import ClanBoardTab from './components/ClanBoardTab';
 import RustPlusTab from './components/RustPlusTab';
+import FaqTab from './components/FaqTab';
 import AuthModal from './components/AuthModal';
 import CabinetModal from './components/CabinetModal';
 import TermsModal from './components/TermsModal';
@@ -234,8 +236,75 @@ const appTranslations = {
   }
 };
 
+type TabType = 'home' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus';
+
+const VALID_TABS: Record<string, TabType> = {
+  home: 'home',
+  faq: 'faq',
+  news: 'news',
+  clan: 'clan',
+  errors: 'errors',
+  binds: 'binds',
+  fps: 'fps',
+  raid: 'raid',
+  ecoraid: 'ecoraid',
+  decay: 'decay',
+  electrical: 'electrical',
+  mixing: 'mixing',
+  weapons: 'weapons',
+  breeder: 'breeder',
+  recycler: 'recycler',
+  monuments: 'monuments',
+  quarry: 'quarry',
+  wipe: 'wipe',
+  chat: 'chat',
+  radar: 'radar',
+  rustplus: 'rustplus',
+  icons: 'icons',
+  admin: 'admin'
+};
+
+const getTabFromUrl = (): TabType => {
+  try {
+    // 1. Check URL Hash (e.g. #raid, #binds, #clan)
+    const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+    if (hash && VALID_TABS[hash]) {
+      return VALID_TABS[hash];
+    }
+    // 2. Check query parameter (e.g. ?tab=raid)
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab')?.toLowerCase();
+    if (tabParam && VALID_TABS[tabParam]) {
+      return VALID_TABS[tabParam];
+    }
+    // 3. Check clean pathname (e.g. /raid)
+    const path = window.location.pathname.replace(/^\//, '').toLowerCase();
+    if (path && VALID_TABS[path]) {
+      return VALID_TABS[path];
+    }
+  } catch (e) {
+    console.warn('URL tab parse error:', e);
+  }
+  return 'home';
+};
+
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus'>('home');
+  const [activeTab, setActiveTab] = useState<TabType>(() => getTabFromUrl());
+
+  // Listen to browser Back/Forward buttons and hash navigation
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const tab = getTabFromUrl();
+      setActiveTab(tab);
+    };
+
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
+  }, []);
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lang, setLang] = useState<'ru' | 'en'>('en');
@@ -627,8 +696,20 @@ export default function App() {
     }, 550);
   };
 
-  const handleTabChange = (tabId: any) => {
+  const handleTabChange = (tabId: TabType) => {
     setActiveTab(tabId);
+    try {
+      const hash = tabId === 'home' ? '' : `#${tabId}`;
+      const newUrl = tabId === 'home' 
+        ? window.location.pathname + window.location.search 
+        : `${window.location.pathname}${window.location.search}#${tabId}`;
+      
+      if (window.location.hash !== hash) {
+        history.pushState({ tab: tabId }, '', newUrl);
+      }
+    } catch (e) {
+      console.warn('History pushState error:', e);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     logUserActivity({
       action: 'tab_switch',
@@ -955,6 +1036,7 @@ export default function App() {
 
   const tabs = [
     { id: 'home', label: appTranslations.tabs.home[lang], icon: <Home size={16} /> },
+    { id: 'faq', label: lang === 'ru' ? 'Частые Вопросы (FAQ)' : 'FAQ & Beginner Guide', icon: <HelpCircle size={16} className="text-orange-400" /> },
     { id: 'news', label: appTranslations.tabs.news[lang], icon: <Compass size={16} /> },
     { id: 'clan', label: lang === 'ru' ? 'Поиск Клана & Тимейта' : 'Find Clan & Teammates', icon: <UserPlus size={16} className="text-blue-400" /> },
     { id: 'errors', label: appTranslations.tabs.errors[lang], icon: <BookOpen size={16} /> },
@@ -1331,6 +1413,7 @@ export default function App() {
                 {
                   title: lang === 'ru' ? 'БАЗА ЗНАНИЙ & ГАЙДЫ' : 'KNOWLEDGE & GUIDES',
                   items: [
+                    { id: 'faq', label: lang === 'ru' ? 'Частые Вопросы (FAQ)' : 'FAQ & Beginner Guide', icon: <HelpCircle size={15} className="text-orange-400" /> },
                     { id: 'errors', label: appTranslations.tabs.errors[lang], icon: <BookOpen size={15} /> },
                     { id: 'binds', label: appTranslations.tabs.binds[lang], icon: <Keyboard size={15} /> },
                     { id: 'fps', label: appTranslations.tabs.fps[lang], icon: <Settings size={15} /> },
@@ -2335,8 +2418,13 @@ export default function App() {
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
-                              className="flex flex-col lg:flex-row lg:items-center justify-between p-2.5 sm:px-4 rounded-sm bg-[#1b1e26] border-l-4 border-l-[#cd412b] border-y border-r border-[#2a2f3b] hover:border-r-gray-500 hover:border-y-gray-500 transition-all gap-3 group relative overflow-hidden"
+                              whileHover={{ scale: 1.008, x: 2 }}
+                              transition={{ duration: 0.18 }}
+                              className="flex flex-col lg:flex-row lg:items-center justify-between p-2.5 sm:px-4 rounded-sm bg-[#1b1e26] border-l-4 border-l-[#cd412b] border-y border-r border-[#2a2f3b] hover:border-r-[#cd412b]/60 hover:border-y-[#cd412b]/40 hover:shadow-[0_0_18px_rgba(205,65,43,0.22)] hover:bg-[#202530] transition-all duration-300 gap-3 group relative overflow-hidden"
                             >
+                              {/* Ambient hover glow pulse effect */}
+                              <div className="absolute inset-0 bg-gradient-to-r from-[#cd412b]/0 via-[#cd412b]/5 to-[#cd412b]/0 opacity-0 group-hover:opacity-100 group-hover:animate-pulse pointer-events-none transition-opacity duration-300" />
+                              <div className="absolute -left-1 top-0 bottom-0 w-1 bg-gradient-to-b from-[#ff4d30] to-[#cd412b] opacity-0 group-hover:opacity-100 shadow-[0_0_12px_#ff4d30] transition-opacity duration-200" />
                               {/* Server info / Status */}
                               <div className="flex items-start gap-2.5 lg:w-1/3 z-10">
                                 <div className="mt-1 flex-shrink-0">
@@ -2716,6 +2804,18 @@ export default function App() {
                   }, 3000);
                 }} 
               />
+            </motion.div>
+          )}
+
+          {activeTab === 'faq' && (
+            <motion.div
+              key="faq"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <FaqTab lang={lang} />
             </motion.div>
           )}
 

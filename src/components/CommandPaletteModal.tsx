@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Search, X, Flame, Keyboard, BookOpen, Target, 
-  MapPin, FlaskConical, Pickaxe, Zap, ArrowRight, CornerDownLeft, Sparkles
+  MapPin, FlaskConical, Pickaxe, Zap, ArrowRight, CornerDownLeft, Sparkles, HelpCircle
 } from 'lucide-react';
 import { raidTargets, bindsDatabase, errorDatabase, weaponStatsDatabase } from '../data';
 
@@ -85,6 +85,15 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
       tags: ['оружие', 'gun', 'ak47', 'recoil', 'спрей', 'отдача', w.name.toLowerCase()]
     })),
     // Extra tools
+    {
+      id: 'tool-faq',
+      tab: 'faq',
+      category: lang === 'ru' ? 'База Знаний' : 'Knowledge Base',
+      title: lang === 'ru' ? 'Часто задаваемые вопросы (FAQ)' : 'Frequently Asked Questions (FAQ)',
+      subtitle: lang === 'ru' ? 'Гайды для новичков, выбор серверов, стройка 2х1, софтсайд и выживание' : 'Beginner guides, server picking, starter bases, soft-side & survival',
+      icon: <HelpCircle size={16} className="text-orange-400" />,
+      tags: ['faq', 'вопросы', 'ответы', 'новичок', 'гайды', 'сервера', 'софтсайд', 'выживание']
+    },
     {
       id: 'tool-clan',
       tab: 'clan',
