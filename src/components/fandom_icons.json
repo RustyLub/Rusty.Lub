@@ -126,5 +126,7 @@
   "coffee_helmet": "https://wiki.rustclash.com/img/items180/bucket.helmet.png",
   "bucket.helmet": "https://wiki.rustclash.com/img/items180/bucket.helmet.png",
   "wind_turbine": "https://wiki.rustclash.com/img/items180/generator.wind.standalone.png",
-  "generator.wind.standalone": "https://wiki.rustclash.com/img/items180/generator.wind.standalone.png"
+  "generator.wind.standalone": "https://wiki.rustclash.com/img/items180/generator.wind.standalone.png",
+  "propane": "https://wiki.rustclash.com/img/items180/catapult.ammo.explosive.png",
+  "mlrs": "https://wiki.rustclash.com/img/items180/ammo.rocket.mlrs.png"
 }

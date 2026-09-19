@@ -856,7 +856,9 @@ export const weaponsTranslationMap: Record<string, string> = {
   rocket: 'High Velocity Rocket',
   satchel: 'Satchel Charge',
   explosive_ammo: 'Explosive 5.56 Ammo (1 pc)',
-  beancan: 'Beancan Grenade'
+  beancan: 'Beancan Grenade',
+  propane: 'Propane Explosive Bomb',
+  mlrs: 'MLRS Rocket'
 };
 
 // Translate Raid Targets
@@ -1262,7 +1264,9 @@ export const weaponTranslationMap: Record<string, Record<'ru' | 'en', string>> =
   rocket: { ru: 'Боевая ракета', en: 'Rocket' },
   satchel: { ru: 'Сачель (Сумка со взрывчаткой)', en: 'Satchel Charge' },
   explosive_ammo: { ru: 'Разрывной патрон 5.56 (1 шт)', en: '5.56 Explosive Ammo (1 pc)' },
-  beancan: { ru: 'Бобовая граната', en: 'Beancan Grenade' }
+  beancan: { ru: 'Бобовая граната', en: 'Beancan Grenade' },
+  propane: { ru: 'Пропановая бомба', en: 'Propane Explosive Bomb' },
+  mlrs: { ru: 'Ракета MLRS', en: 'MLRS Rocket' }
 };
 
 export const targetTranslationMap: Record<string, Record<'ru' | 'en', string>> = {

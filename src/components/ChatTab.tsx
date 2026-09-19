@@ -67,6 +67,8 @@ interface ChatTabProps {
   onUserLogin: (user: CustomUser) => void;
   onUserLogout: () => void;
   onToast: (msg: string, type: 'success' | 'error' | 'warning') => void;
+  onOpenAuth?: () => void;
+  onOpenClanBoard?: () => void;
 }
 
 interface Message {
@@ -188,7 +190,7 @@ export const SURVIVOR_AVATARS = [
   }),
 ];
 
-export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast }: ChatTabProps) {
+export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast, onOpenAuth }: ChatTabProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [replyTo, setReplyTo] = useState<Message | null>(null);
@@ -213,7 +215,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showMembers, setShowMembers] = useState(true);
-  const [activeChannel, setActiveChannel] = useState<'rust-russian' | 'rust-english' | 'rust-vip'>('rust-russian');
+  const [activeChannel, setActiveChannel] = useState<'rust-russian' | 'rust-english' | 'rust-vip' | 'general' | 'lfg' | 'raids' | 'tech-help' | 'off-topic'>('general');
   const [highlightNextMessage, setHighlightNextMessage] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -921,16 +923,10 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
     user.email === 'misterzet556@gmail.com'
   );
 
-  // Security guard: redirect if non-VIP tries to access rust-vip
-  useEffect(() => {
-    if (activeChannel === 'rust-vip' && !isCurrentVipSub) {
-      setActiveChannel('rust-russian');
-    }
-  }, [activeChannel, isCurrentVipSub]);
-
   const filteredMessages = messages.filter((msg: any) => {
-    const msgChannel = msg.channel || 'rust-russian';
-    return msgChannel === activeChannel;
+    const msgChannel = msg.channel || 'general';
+    const norm = msgChannel === 'rust-russian' || msgChannel === 'rust-english' || msgChannel === 'rust-vip' ? 'general' : msgChannel;
+    return norm === activeChannel;
   });
 
   return (
@@ -1056,12 +1052,12 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                 <div className="pl-3 pr-1 py-1 space-y-1.5 max-h-52 overflow-y-auto font-sans">
                   {registeredUsers
                     .filter(u => (u as any).voiceChannel === 'outpost_radio')
-                    .map((vUser) => {
+                    .map((vUser, idx) => {
                       const vAvatar = SURVIVOR_AVATARS.find(a => a.id === vUser.avatarClass) || SURVIVOR_AVATARS[0];
                       const isVUserAdmin = vUser.username === 'serustqs';
                       const isVUserVip = !!vUser.isChatVip;
                       return (
-                        <div key={vUser.username} className="flex items-center justify-between py-1 px-1.5 rounded bg-zinc-800/15 border border-zinc-800/5 gap-2">
+                        <div key={`${vUser.username || idx}-${idx}`} className="flex items-center justify-between py-1 px-1.5 rounded bg-zinc-800/15 border border-zinc-800/5 gap-2">
                           <div className="flex items-center gap-2 truncate">
                             <img
                               src={getAvatarUrl(vUser.photoURL, vUser.avatarClass)}
@@ -1399,7 +1395,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
               </div>
             ) : (
               <div className="py-4 space-y-0.5">
-                {filteredMessages.map((msg) => {
+                {filteredMessages.map((msg, idx) => {
                   const isOwnMessage = msg.uid === user.uid;
                   const avatarConfig = SURVIVOR_AVATARS.find(a => a.id === msg.avatarClass) || SURVIVOR_AVATARS[0];
                   const msgUser = usersMap[msg.uid] || { role: 'user', isVip: false, isChatVip: false, isScam: false, scamUntil: '' };
@@ -1415,7 +1411,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
 
                   return (
                     <div 
-                      key={msg.id} 
+                      key={`${msg.id || idx}-${idx}`} 
                       className={`flex items-start gap-4 px-4 py-2.5 transition-all duration-150 relative group select-text border-l-2 ${
                         isMsgScamActive
                           ? 'bg-red-900/10 border-red-600 shadow-[inset_1px_0_10px_rgba(220,38,38,0.05)]'
@@ -1685,6 +1681,28 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
               </form>
             </div>
           )}
+
+          {/* Guest Read-Only Prompt Banner */}
+          {!user && (
+            <div className="bg-[#12161e] border-t border-[#1e2633] p-3.5 px-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+              <div className="flex items-center gap-2.5 text-zinc-300 text-xs">
+                <MessageSquare size={16} className="text-[#f97316] shrink-0" />
+                <span>
+                  {lang === 'ru' 
+                    ? 'Чат открыт для чтения. Войдите в аккаунт, чтобы отправлять сообщения и общаться с игроками.' 
+                    : 'Chat is in read-only mode. Log in to your account to send messages and chat with players.'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => onOpenAuth && onOpenAuth()}
+                className="px-4 py-1.5 bg-gradient-to-r from-[#f97316] to-[#ef4444] hover:opacity-90 text-white font-bold text-xs rounded-lg transition-all shrink-0 cursor-pointer shadow-md flex items-center gap-1.5"
+              >
+                <Power size={13} />
+                <span>{lang === 'ru' ? 'Войти в аккаунт' : 'Log In / Register'}</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* 3. DISCORD ACTIVE MEMBERS LIST (RIGHT SIDEBAR) */}
@@ -1733,7 +1751,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                 <div className="space-y-1">
                   {registeredUsers
                     .filter(u => u.username !== 'serustqs')
-                    .map((u) => {
+                    .map((u, idx) => {
                       const userAvatar = SURVIVOR_AVATARS.find(a => a.id === u.avatarClass) || SURVIVOR_AVATARS[0];
                       const isChatVip = !!u.isChatVip;
                       const isScamActive = !!u.isScam && (
@@ -1744,7 +1762,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
 
                       return (
                         <div 
-                          key={u.username} 
+                          key={`${u.username || idx}-${idx}`} 
                           onClick={() => setInspectUserId(u.username)}
                           className={`flex items-center justify-between p-1.5 hover:bg-zinc-700/30 rounded-lg group transition-colors cursor-pointer ${isScamActive ? 'bg-red-900/10' : ''}`}
                         >

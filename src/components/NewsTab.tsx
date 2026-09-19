@@ -514,9 +514,9 @@ export default function NewsTab({ lang, onOpenNotifications }: NewsTabProps) {
             </h3>
 
             <div className="space-y-4">
-              {filteredNews.filter(n => activeItem && n.id !== activeItem.id).map((item) => (
+              {filteredNews.filter(n => activeItem && n.id !== activeItem.id).map((item, idx) => (
                 <div 
-                  key={item.id}
+                  key={`${item.id}-${idx}`}
                   onClick={() => setActiveNewsId(item.id)}
                   className="p-4 bg-[#1b1e26]/40 hover:bg-[#1b1e26]/80 border border-[#2a2f3b] hover:border-gray-600 transition-all cursor-pointer relative group"
                 >

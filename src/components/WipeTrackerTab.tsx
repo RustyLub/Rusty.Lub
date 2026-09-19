@@ -34,10 +34,10 @@ export default function WipeTrackerTab({ lang, onOpenNotifications }: WipeTracke
 
   // Event Timers state
   const [timers, setTimers] = useState<CustomTimer[]>([
-    { id: '1', name: lang === 'ru' ? 'Взлом Locked Crate (Oil Rig / Cargo)' : 'Locked Crate Hack (15m)', durationSeconds: 900, remainingSeconds: 900, isRunning: false, category: 'locked_crate' },
-    { id: '2', name: lang === 'ru' ? 'Респавн Брэдли APC (1 час)' : 'Bradley APC Respawn (1h)', durationSeconds: 3600, remainingSeconds: 3600, isRunning: false, category: 'bradley' },
-    { id: '3', name: lang === 'ru' ? 'Таймер Патрульного Вертолета (2.5ч)' : 'Patrol Heli Cooldown (2.5h)', durationSeconds: 9000, remainingSeconds: 9000, isRunning: false, category: 'heli' },
-    { id: '4', name: lang === 'ru' ? 'Длительность Cargo Ship (45м)' : 'Cargo Ship Duration (45m)', durationSeconds: 2700, remainingSeconds: 2700, isRunning: false, category: 'cargo' },
+    { id: 'wipe-timer-locked-crate', name: lang === 'ru' ? 'Взлом Locked Crate (Oil Rig / Cargo)' : 'Locked Crate Hack (15m)', durationSeconds: 900, remainingSeconds: 900, isRunning: false, category: 'locked_crate' },
+    { id: 'wipe-timer-bradley', name: lang === 'ru' ? 'Респавн Брэдли APC (1 час)' : 'Bradley APC Respawn (1h)', durationSeconds: 3600, remainingSeconds: 3600, isRunning: false, category: 'bradley' },
+    { id: 'wipe-timer-heli', name: lang === 'ru' ? 'Таймер Патрульного Вертолета (2.5ч)' : 'Patrol Heli Cooldown (2.5h)', durationSeconds: 9000, remainingSeconds: 9000, isRunning: false, category: 'heli' },
+    { id: 'wipe-timer-cargo', name: lang === 'ru' ? 'Длительность Cargo Ship (45м)' : 'Cargo Ship Duration (45m)', durationSeconds: 2700, remainingSeconds: 2700, isRunning: false, category: 'cargo' },
   ]);
 
   // Force Wipe Calculation (First Thursday of month at 19:00 UTC)
@@ -321,9 +321,9 @@ export default function WipeTrackerTab({ lang, onOpenNotifications }: WipeTracke
                 <div key={i} className="bg-[#0c0d10] border border-[#2a2f3b] p-3 space-y-2">
                   <p className="text-xs font-bold text-white font-sans">{group.monument[lang]}</p>
                   <div className="flex flex-wrap gap-1.5 font-mono text-xs">
-                    {group.codes.map(code => (
+                    {group.codes.map((code, ci) => (
                       <button
-                        key={code}
+                        key={`${code}-${ci}`}
                         onClick={() => handleCopyCode(code)}
                         className="px-2.5 py-1 bg-[#1b1e26] hover:bg-[#cd412b]/20 border border-[#2a2f3b] hover:border-[#cd412b]/50 text-sky-300 hover:text-white rounded-xs transition-all flex items-center gap-1.5 cursor-pointer text-[11px]"
                       >

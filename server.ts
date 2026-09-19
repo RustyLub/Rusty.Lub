@@ -645,13 +645,13 @@ async function startServer() {
       name: "EazyAntiCheat / RustyLub",
       instant_invite: "https://discord.gg/R2TyKZ9xvZ",
       channels: [
-        { id: "1", name: "🔊 Общий голосовой", position: 1 },
-        { id: "2", name: "🔊 D U O team #1", position: 2 },
-        { id: "3", name: "🔊 T R I O team #1", position: 3 }
+        { id: "discord-chan-1", name: "🔊 Общий голосовой", position: 1 },
+        { id: "discord-chan-2", name: "🔊 D U O team #1", position: 2 },
+        { id: "discord-chan-3", name: "🔊 T R I O team #1", position: 3 }
       ],
       members: [
-        { id: "1", username: "RustPlusBot", status: "online", avatar_url: "", game: { name: "Rust" } },
-        { id: "2", username: "Admin", status: "online", avatar_url: "" }
+        { id: "discord-srv-fallback-member-1", username: "RustPlusBot", status: "online", avatar_url: "", game: { name: "Rust" } },
+        { id: "discord-srv-fallback-member-2", username: "Admin", status: "online", avatar_url: "" }
       ],
       presence_count: 32
     };

@@ -50,11 +50,11 @@ export default function DiscordWidget({ lang }: { lang: 'ru' | 'en' }) {
             instant_invite: 'https://discord.gg/R2TyKZ9xvZ',
             channels: [],
             members: [
-              { id: '1', username: '#gladiator', status: 'online', avatar_url: '', game: { name: 'Rust' } },
-              { id: '2', username: '[EAC]{CHEATER}', status: 'online', avatar_url: '', game: { name: 'Rust / Stream' } },
-              { id: '3', username: 'AutoModerator', status: 'idle', avatar_url: '', game: { name: 'Monitoring' } },
-              { id: '4', username: 'Brady', status: 'online', avatar_url: '' },
-              { id: '5', username: 'Don\'t Cry', status: 'idle', avatar_url: '' }
+              { id: 'discord-fallback-member-1', username: '#gladiator', status: 'online', avatar_url: '', game: { name: 'Rust' } },
+              { id: 'discord-fallback-member-2', username: '[EAC]{CHEATER}', status: 'online', avatar_url: '', game: { name: 'Rust / Stream' } },
+              { id: 'discord-fallback-member-3', username: 'AutoModerator', status: 'idle', avatar_url: '', game: { name: 'Monitoring' } },
+              { id: 'discord-fallback-member-4', username: 'Brady', status: 'online', avatar_url: '' },
+              { id: 'discord-fallback-member-5', username: 'Don\'t Cry', status: 'idle', avatar_url: '' }
             ],
             presence_count: 38
           });
@@ -117,13 +117,13 @@ export default function DiscordWidget({ lang }: { lang: 'ru' | 'en' }) {
 
           <div className="space-y-1.5">
             {(data?.members && data.members.length > 0 ? data.members : [
-              { id: '1', username: '#gladiator', status: 'online', avatar_url: '', game: { name: 'Rust' } },
-              { id: '2', username: '[EAC]{CHEATER}', status: 'online', avatar_url: '', game: { name: 'Rust / Stream' } },
-              { id: '3', username: 'AutoModerator', status: 'idle', avatar_url: '', game: { name: 'Monitoring' } },
-              { id: '4', username: 'Brady', status: 'online', avatar_url: '' },
-              { id: '5', username: 'Don\'t Cry', status: 'idle', avatar_url: '' }
-            ]).slice(0, 5).map((member) => (
-              <div key={member.id} className="flex items-center justify-between px-2 py-1 bg-[#171b26]/60 border border-[#222938] hover:border-blue-500/40 transition-colors">
+              { id: 'discord-fallback-member-1', username: '#gladiator', status: 'online', avatar_url: '', game: { name: 'Rust' } },
+              { id: 'discord-fallback-member-2', username: '[EAC]{CHEATER}', status: 'online', avatar_url: '', game: { name: 'Rust / Stream' } },
+              { id: 'discord-fallback-member-3', username: 'AutoModerator', status: 'idle', avatar_url: '', game: { name: 'Monitoring' } },
+              { id: 'discord-fallback-member-4', username: 'Brady', status: 'online', avatar_url: '' },
+              { id: 'discord-fallback-member-5', username: 'Don\'t Cry', status: 'idle', avatar_url: '' }
+            ]).slice(0, 5).map((member, idx) => (
+              <div key={`discord-member-${member.id || idx}`} className="flex items-center justify-between px-2 py-1 bg-[#171b26]/60 border border-[#222938] hover:border-blue-500/40 transition-colors">
                 <div className="flex items-center gap-2 min-w-0">
                   {/* Avatar wrapper */}
                   <div className="relative shrink-0">

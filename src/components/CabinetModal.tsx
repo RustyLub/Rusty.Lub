@@ -35,7 +35,15 @@ import {
   RefreshCw,
   Lock,
   ShieldAlert,
-  Mail
+  Mail,
+  Flame,
+  Bookmark,
+  FileText,
+  Star,
+  Server,
+  Terminal,
+  Layers,
+  ArrowRight
 } from 'lucide-react';
 import { 
   doc, 
@@ -50,11 +58,14 @@ import {
   arrayUnion,
   arrayRemove,
   getDoc,
+  getDocs,
+  query,
+  where,
   handleFirestoreError,
   OperationType
 } from '../firebase';
 import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
-import { CustomUser } from '../types';
+import { CustomUser, SavedRaid, SavedBind, ClanApplicationItem } from '../types';
 import UserProfileModal, { BADGES, PROFILE_THEMES } from './UserProfileModal';
 import FeedbackTab from './FeedbackTab';
 
@@ -66,6 +77,8 @@ interface CabinetModalProps {
   onUserLogout: () => void;
   onAvatarChange: (newAvatarId: string, newPhotoURL: string) => void;
   onToast: (msg: string, type: 'success' | 'warning' | 'error') => void;
+  onOpenTab?: (tab: string) => void;
+  onLoadRaidInCalc?: (raid: SavedRaid) => void;
 }
 
 interface RegisteredUser {
@@ -92,9 +105,12 @@ export default function CabinetModal({
   user, 
   onUserLogout, 
   onAvatarChange, 
-  onToast 
+  onToast,
+  onOpenTab,
+  onLoadRaidInCalc
 }: CabinetModalProps) {
-  const [activeTab, setActiveTab] = useState<'profile' | 'friends' | 'admin_users' | 'admin_site' | 'vip' | 'feedback'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'raids' | 'binds' | 'favorites' | 'applications' | 'friends' | 'admin_users' | 'admin_site' | 'vip' | 'feedback'>('profile');
+
   
   // USDT TRC20 Payment states
   const [usdtTxId, setUsdtTxId] = useState('');
@@ -164,6 +180,12 @@ export default function CabinetModal({
   // Registered users for admin view and quick friends listing
   const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([]);
 
+  // Cabinet user collections
+  const [savedRaids, setSavedRaids] = useState<SavedRaid[]>([]);
+  const [savedBinds, setSavedBinds] = useState<SavedBind[]>([]);
+  const [clanApplications, setClanApplications] = useState<ClanApplicationItem[]>([]);
+  const [favoriteServers, setFavoriteServers] = useState<any[]>([]);
+
   const [fullProfile, setFullProfile] = useState<CustomUser | null>(null);
 
   const isAdmin = user && (
@@ -171,6 +193,129 @@ export default function CabinetModal({
     user.email === 'misterzet556@gmail.com' || 
     (fullProfile && (fullProfile.badges?.includes('founder') || fullProfile.role === 'admin'))
   );
+
+  // Sync saved raids, binds, clan applications and favorites
+  useEffect(() => {
+    if (!isOpen || !user?.uid) return;
+
+    // Load Local Storage fallbacks
+    try {
+      const localRaids = localStorage.getItem(`saved_raids_${user.uid}`);
+      if (localRaids) setSavedRaids(JSON.parse(localRaids));
+
+      const localBinds = localStorage.getItem(`saved_binds_${user.uid}`);
+      if (localBinds) setSavedBinds(JSON.parse(localBinds));
+
+      const localFavorites = localStorage.getItem('rust_favorite_servers');
+      if (localFavorites) setFavoriteServers(JSON.parse(localFavorites));
+
+      const localApps = localStorage.getItem(`clan_applications_${user.uid}`);
+      if (localApps) setClanApplications(JSON.parse(localApps));
+    } catch (e) {
+      console.error(e);
+    }
+
+    // Subscribe to Firestore saved_raids
+    const unsubRaids = onSnapshot(collection(db, 'saved_raids'), (snap) => {
+      const list: SavedRaid[] = [];
+      snap.forEach((d) => {
+        const data = d.data();
+        if (data.userId === user.uid) {
+          list.push({ id: d.id, ...data } as SavedRaid);
+        }
+      });
+      if (list.length > 0) {
+        setSavedRaids(list);
+      }
+    });
+
+    // Subscribe to Firestore saved_binds
+    const unsubBinds = onSnapshot(collection(db, 'saved_binds'), (snap) => {
+      const list: SavedBind[] = [];
+      snap.forEach((d) => {
+        const data = d.data();
+        if (data.userId === user.uid) {
+          list.push({ id: d.id, ...data } as SavedBind);
+        }
+      });
+      if (list.length > 0) {
+        setSavedBinds(list);
+      }
+    });
+
+    // Subscribe to clan applications
+    const unsubApps = onSnapshot(collection(db, 'clan_applications'), (snap) => {
+      const list: ClanApplicationItem[] = [];
+      snap.forEach((d) => {
+        const data = d.data();
+        if (data.userId === user.uid || data.applicantId === user.uid) {
+          list.push({ id: d.id, ...data } as ClanApplicationItem);
+        }
+      });
+      if (list.length > 0) {
+        setClanApplications(list);
+      }
+    });
+
+    return () => {
+      unsubRaids();
+      unsubBinds();
+      unsubApps();
+    };
+  }, [isOpen, user]);
+
+  const handleDeleteSavedRaid = async (raidId: string) => {
+    if (!user) return;
+    try {
+      // Remove from local storage
+      const localKey = `saved_raids_${user.uid}`;
+      const existing = JSON.parse(localStorage.getItem(localKey) || '[]');
+      const filtered = existing.filter((r: any) => r.id !== raidId);
+      localStorage.setItem(localKey, JSON.stringify(filtered));
+      setSavedRaids(prev => prev.filter(r => r.id !== raidId));
+
+      // Remove from Firestore if not pure local
+      if (!raidId.startsWith('local_')) {
+        await deleteDoc(doc(db, 'saved_raids', raidId));
+      }
+      onToast(lang === 'ru' ? 'Рейд удален' : 'Raid deleted', 'success');
+    } catch (err) {
+      console.error(err);
+      onToast(lang === 'ru' ? 'Рейд удален локально' : 'Raid deleted locally', 'success');
+    }
+  };
+
+  const handleDeleteSavedBind = async (bindId: string) => {
+    if (!user) return;
+    try {
+      const localKey = `saved_binds_${user.uid}`;
+      const existing = JSON.parse(localStorage.getItem(localKey) || '[]');
+      const filtered = existing.filter((b: any) => b.id !== bindId);
+      localStorage.setItem(localKey, JSON.stringify(filtered));
+      setSavedBinds(prev => prev.filter(b => b.id !== bindId));
+
+      if (!bindId.startsWith('local_')) {
+        await deleteDoc(doc(db, 'saved_binds', bindId));
+      }
+      onToast(lang === 'ru' ? 'Бинд удален из профиля' : 'Bind removed from cabinet', 'success');
+    } catch (err) {
+      console.error(err);
+      onToast(lang === 'ru' ? 'Бинд удален локально' : 'Bind deleted locally', 'success');
+    }
+  };
+
+  const handleRemoveFavoriteServer = (serverId: string) => {
+    try {
+      const localFavorites = JSON.parse(localStorage.getItem('rust_favorite_servers') || '[]');
+      const updated = localFavorites.filter((s: any) => (s.id || s.name) !== serverId);
+      localStorage.setItem('rust_favorite_servers', JSON.stringify(updated));
+      setFavoriteServers(updated);
+      onToast(lang === 'ru' ? 'Сервер удален из избранного' : 'Server removed from favorites', 'success');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
 
   // Subscribe to logged-in user's own profile doc live
   useEffect(() => {
@@ -814,8 +959,8 @@ export default function CabinetModal({
                 onClick={() => setActiveTab('profile')}
                 className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
                   activeTab === 'profile'
-                    ? 'bg-[#cd412b]/10 border-[#cd412b]/40 text-[#cd412b] font-black'
-                    : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                    ? 'bg-[#f97316]/15 border-[#f97316]/50 text-[#f97316] font-black'
+                    : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 <User size={13} />
@@ -823,15 +968,83 @@ export default function CabinetModal({
               </button>
 
               <button
+                onClick={() => setActiveTab('raids')}
+                className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
+                  activeTab === 'raids'
+                    ? 'bg-[#f97316]/15 border-[#f97316]/50 text-[#f97316] font-black'
+                    : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Flame size={13} className={savedRaids.length > 0 ? 'text-[#f97316]' : ''} />
+                <span>{lang === 'ru' ? 'Мои Рейды' : 'Saved Raids'}</span>
+                {savedRaids.length > 0 && (
+                  <span className="ml-auto bg-[#f97316]/20 border border-[#f97316]/40 text-[#f97316] text-[9px] px-1.5 py-0.2 rounded-sm font-mono font-bold">
+                    {savedRaids.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setActiveTab('binds')}
+                className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
+                  activeTab === 'binds'
+                    ? 'bg-[#f97316]/15 border-[#f97316]/50 text-[#f97316] font-black'
+                    : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Terminal size={13} className={savedBinds.length > 0 ? 'text-amber-400' : ''} />
+                <span>{lang === 'ru' ? 'Мои Бинды' : 'Saved Binds'}</span>
+                {savedBinds.length > 0 && (
+                  <span className="ml-auto bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[9px] px-1.5 py-0.2 rounded-sm font-mono font-bold">
+                    {savedBinds.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setActiveTab('favorites')}
+                className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
+                  activeTab === 'favorites'
+                    ? 'bg-[#f97316]/15 border-[#f97316]/50 text-[#f97316] font-black'
+                    : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Star size={13} className={favoriteServers.length > 0 ? 'text-amber-400 fill-amber-400' : ''} />
+                <span>{lang === 'ru' ? 'Избранное' : 'Favorites'}</span>
+                {favoriteServers.length > 0 && (
+                  <span className="ml-auto bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[9px] px-1.5 py-0.2 rounded-sm font-mono font-bold">
+                    {favoriteServers.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setActiveTab('applications')}
+                className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
+                  activeTab === 'applications'
+                    ? 'bg-[#f97316]/15 border-[#f97316]/50 text-[#f97316] font-black'
+                    : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <FileText size={13} className={clanApplications.length > 0 ? 'text-blue-400' : ''} />
+                <span>{lang === 'ru' ? 'Заявки в кланы' : 'Clan Applications'}</span>
+                {clanApplications.length > 0 && (
+                  <span className="ml-auto bg-blue-500/20 border border-blue-500/40 text-blue-300 text-[9px] px-1.5 py-0.2 rounded-sm font-mono font-bold">
+                    {clanApplications.length}
+                  </span>
+                )}
+              </button>
+
+              <button
                 onClick={() => setActiveTab('friends')}
                 className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
                   activeTab === 'friends'
-                    ? 'bg-[#cd412b]/10 border-[#cd412b]/40 text-[#cd412b] font-black'
-                    : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                    ? 'bg-[#f97316]/15 border-[#f97316]/50 text-[#f97316] font-black'
+                    : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 <Users size={13} />
-                <span>{lang === 'ru' ? 'Друзья и Контакты' : 'Friends Network'}</span>
+                <span>{lang === 'ru' ? 'Друзья' : 'Friends'}</span>
                 {fullProfile?.friendRequestsReceived && fullProfile.friendRequestsReceived.length > 0 && (
                   <span className="ml-auto bg-red-500 text-white text-[9px] px-1 rounded-sm font-bold animate-pulse font-mono">
                     +{fullProfile.friendRequestsReceived.length}
@@ -843,15 +1056,15 @@ export default function CabinetModal({
                 onClick={() => setActiveTab('vip')}
                 className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
                   activeTab === 'vip'
-                    ? 'bg-amber-500/10 border-amber-500/40 text-amber-500 font-black'
-                    : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                    ? 'bg-amber-500/15 border-amber-500/50 text-amber-400 font-black'
+                    : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 <Crown size={13} className={fullProfile?.isVip ? 'text-amber-500 animate-pulse' : ''} />
-                <span>{lang === 'ru' ? 'VIP Подписка' : 'VIP Subscription'}</span>
+                <span>{lang === 'ru' ? 'VIP Статус' : 'VIP Membership'}</span>
                 {fullProfile?.isVip && (
                   <span className="ml-auto bg-amber-500 text-black text-[8px] px-1 font-black font-mono uppercase tracking-widest rounded-sm">
-                    {lang === 'ru' ? 'АКТИВНО' : 'ACTIVE'}
+                    {lang === 'ru' ? 'АКТИВЕН' : 'ACTIVE'}
                   </span>
                 )}
               </button>
@@ -860,17 +1073,17 @@ export default function CabinetModal({
                 onClick={() => setActiveTab('feedback')}
                 className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
                   activeTab === 'feedback'
-                    ? 'bg-[#cd412b]/10 border-[#cd412b]/40 text-[#cd412b] font-black'
-                    : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                    ? 'bg-[#f97316]/15 border-[#f97316]/50 text-[#f97316] font-black'
+                    : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 <Mail size={13} />
-                <span>{lang === 'ru' ? 'Обратная связь' : 'Feedback & Contacts'}</span>
+                <span>{lang === 'ru' ? 'Связь' : 'Feedback'}</span>
               </button>
 
               {isAdmin && (
                 <>
-                  <div className="pt-2 text-[8px] font-mono font-black text-gray-500 uppercase tracking-widest pl-3">
+                  <div className="pt-2 text-[8px] font-mono font-black text-zinc-500 uppercase tracking-widest pl-3">
                     {lang === 'ru' ? 'АДМИН-ЦЕНТР' : 'ADMIN CONTROL'}
                   </div>
 
@@ -878,8 +1091,8 @@ export default function CabinetModal({
                     onClick={() => setActiveTab('admin_users')}
                     className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
                       activeTab === 'admin_users'
-                        ? 'bg-[#cd412b]/10 border-[#cd412b]/40 text-[#cd412b] font-black'
-                        : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                        ? 'bg-[#f97316]/15 border-[#f97316]/50 text-[#f97316] font-black'
+                        : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
                     }`}
                   >
                     <Settings size={13} />
@@ -890,8 +1103,8 @@ export default function CabinetModal({
                     onClick={() => setActiveTab('admin_site')}
                     className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
                       activeTab === 'admin_site'
-                        ? 'bg-[#cd412b]/10 border-[#cd412b]/40 text-[#cd412b] font-black'
-                        : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                        ? 'bg-[#f97316]/15 border-[#f97316]/50 text-[#f97316] font-black'
+                        : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
                     }`}
                   >
                     <Layout size={13} />
@@ -2212,6 +2425,480 @@ export default function CabinetModal({
                   user={user}
                   onToast={onToast}
                 />
+              </motion.div>
+            )}
+
+            {/* SAVED RAIDS TAB */}
+            {activeTab === 'raids' && (
+              <motion.div
+                key="raids"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="space-y-4"
+              >
+                <div className="flex items-center justify-between border-b border-[#1e2633] pb-3">
+                  <div>
+                    <h3 className="text-sm font-black text-[#eef2f7] uppercase tracking-wider font-mono flex items-center gap-2">
+                      <Flame size={16} className="text-[#f97316]" />
+                      {lang === 'ru' ? 'СОХРАНЕННЫЕ РАСЧЕТЫ РЕЙДОВ' : 'SAVED RAID CALCULATIONS'}
+                    </h3>
+                    <p className="text-[11px] text-[#8b95a8] font-mono mt-0.5">
+                      {lang === 'ru' ? `Всего сохранений: ${savedRaids.length}` : `Total saved calculations: ${savedRaids.length}`}
+                    </p>
+                  </div>
+                  {onOpenTab && (
+                    <button
+                      onClick={() => {
+                        onClose();
+                        onOpenTab('raid');
+                      }}
+                      className="px-3 py-1.5 bg-[#f97316]/20 hover:bg-[#f97316] border border-[#f97316]/50 hover:border-[#f97316] text-[#f97316] hover:text-black text-[10px] font-black uppercase tracking-wider font-mono cursor-pointer transition-all flex items-center gap-1.5"
+                    >
+                      <Plus size={12} />
+                      <span>{lang === 'ru' ? 'НОВЫЙ РАСЧЕТ' : 'NEW CALCULATION'}</span>
+                    </button>
+                  )}
+                </div>
+
+                {savedRaids.length === 0 ? (
+                  <div className="bg-[#12161e] border border-[#1e2633] p-10 text-center space-y-3">
+                    <Flame size={36} className="mx-auto text-zinc-600 animate-pulse" />
+                    <h4 className="text-xs font-black uppercase tracking-wider font-mono text-[#eef2f7]">
+                      {lang === 'ru' ? 'НЕТ СОХРАНЕННЫХ РЕЙДОВ' : 'NO SAVED RAIDS'}
+                    </h4>
+                    <p className="text-[11px] text-[#8b95a8] max-w-sm mx-auto leading-relaxed">
+                      {lang === 'ru' 
+                        ? 'Перейдите в Рейд Калькулятор, настройте цели и нажмите «Сохранить расчет в профиль».'
+                        : 'Open the Raid Calculator, configure targets and click "Save Calculation to Profile".'}
+                    </p>
+                    {onOpenTab && (
+                      <button
+                        onClick={() => {
+                          onClose();
+                          onOpenTab('raid');
+                        }}
+                        className="px-4 py-2 bg-[#f97316] hover:bg-[#ea580c] text-black font-black font-mono text-xs uppercase tracking-wider transition-all"
+                      >
+                        {lang === 'ru' ? 'ОТКРЫТЬ КАЛЬКУЛЯТОР' : 'OPEN RAID CALCULATOR'}
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {savedRaids.map((raid) => (
+                      <div
+                        key={raid.id}
+                        className="bg-[#12161e] border border-[#1e2633] hover:border-[#f97316]/40 p-4 transition-all space-y-3"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-black text-[#eef2f7] uppercase tracking-wider font-mono">
+                                {raid.title || (lang === 'ru' ? 'План Рейда' : 'Raid Target Plan')}
+                              </span>
+                              <span className="text-[9px] font-mono px-1.5 py-0.5 bg-[#08090c] border border-[#1e2633] text-[#f97316]">
+                                {new Date(raid.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-[#8b95a8] font-mono">
+                              {raid.targets?.map((t: any) => `${t.count}x ${t.name}`).join(' • ') || 'Цели рейда'}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {onLoadRaidInCalc && (
+                              <button
+                                onClick={() => {
+                                  onLoadRaidInCalc(raid);
+                                  onClose();
+                                }}
+                                title={lang === 'ru' ? 'Открыть в калькуляторе' : 'Open in calculator'}
+                                className="px-2.5 py-1 bg-[#f97316]/15 hover:bg-[#f97316] text-[#f97316] hover:text-black border border-[#f97316]/40 text-[10px] font-black uppercase font-mono transition-all flex items-center gap-1"
+                              >
+                                <ArrowRight size={11} />
+                                <span className="hidden sm:inline">{lang === 'ru' ? 'ЗАГРУЗИТЬ' : 'LOAD'}</span>
+                              </button>
+                            )}
+                            <button
+                              onClick={() => {
+                                const text = `[Rusty.Lub Raid Plan: ${raid.title}]\nTargets: ${raid.targets?.map((t: any) => `${t.count}x ${t.name}`).join(', ')}\nSulfur Needed: ${raid.totalSulfur?.toLocaleString()} units`;
+                                navigator.clipboard.writeText(text);
+                                onToast(lang === 'ru' ? 'Сводка скопирована в буфер' : 'Raid plan copied to clipboard', 'success');
+                              }}
+                              title={lang === 'ru' ? 'Скопировать сводку' : 'Copy summary'}
+                              className="p-1.5 bg-[#08090c] hover:bg-[#1e2633] border border-[#1e2633] text-zinc-300 hover:text-white transition-colors"
+                            >
+                              <Copy size={13} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteSavedRaid(raid.id)}
+                              title={lang === 'ru' ? 'Удалить расчет' : 'Delete raid'}
+                              className="p-1.5 bg-red-950/30 hover:bg-red-600 border border-red-500/20 hover:border-red-600 text-red-400 hover:text-white transition-colors"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Resource summary banner */}
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#1e2633]/60 bg-[#08090c]/50 p-2 text-center">
+                          <div>
+                            <span className="text-[9px] uppercase font-mono text-zinc-500 block">{lang === 'ru' ? 'СЕРА' : 'SULFUR'}</span>
+                            <span className="text-xs font-black font-mono text-amber-400">
+                              {raid.totalSulfur?.toLocaleString() || 0}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[9px] uppercase font-mono text-zinc-500 block">
+                              {lang === 'ru' ? 'ВЗРЫВЧАТКА' : 'EXPLOSIVE'}
+                            </span>
+                            <span className="text-xs font-black font-mono text-[#f97316]">
+                              {(() => {
+                                const activeWeapon = raid.selectedWeaponId || 
+                                  (raid.totalRockets ? 'rocket' : 
+                                   raid.totalC4 ? 'c4' : 
+                                   raid.totalSatchels ? 'satchel' : 'c4');
+                                const qty = raid.totalWeaponsNeeded || 
+                                  (raid.totalRockets || raid.totalC4 || raid.totalSatchels || 0);
+                                
+                                const weaponNames: Record<string, { ru: string, en: string }> = {
+                                  c4: { ru: 'C4', en: 'C4' },
+                                  rocket: { ru: 'Ракеты', en: 'Rockets' },
+                                  satchel: { ru: 'Сачели', en: 'Satchels' },
+                                  explosive_ammo: { ru: 'Разрывные', en: 'Expl. Ammo' },
+                                  beancan: { ru: 'Бобовые', en: 'Beancans' },
+                                  propane: { ru: 'Пропан', en: 'Propane' },
+                                  mlrs: { ru: 'MLRS', en: 'MLRS' }
+                                };
+                                const nameObj = weaponNames[activeWeapon] || { ru: 'C4', en: 'C4' };
+                                return `${qty}x ${lang === 'ru' ? nameObj.ru : nameObj.en}`;
+                              })()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* SAVED BINDS TAB */}
+            {activeTab === 'binds' && (
+              <motion.div
+                key="binds"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="space-y-4"
+              >
+                <div className="flex items-center justify-between border-b border-[#1e2633] pb-3">
+                  <div>
+                    <h3 className="text-sm font-black text-[#eef2f7] uppercase tracking-wider font-mono flex items-center gap-2">
+                      <Terminal size={16} className="text-amber-400" />
+                      {lang === 'ru' ? 'СОХРАНЕННЫЕ БИНДЫ И СКРИПТЫ' : 'SAVED BINDS & SCRIPTS'}
+                    </h3>
+                    <p className="text-[11px] text-[#8b95a8] font-mono mt-0.5">
+                      {lang === 'ru' ? `Всего биндов в профиле: ${savedBinds.length}` : `Total saved binds: ${savedBinds.length}`}
+                    </p>
+                  </div>
+                  {onOpenTab && (
+                    <button
+                      onClick={() => {
+                        onClose();
+                        onOpenTab('binds');
+                      }}
+                      className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500 border border-amber-500/50 hover:border-amber-500 text-amber-300 hover:text-black text-[10px] font-black uppercase tracking-wider font-mono cursor-pointer transition-all flex items-center gap-1.5"
+                    >
+                      <Plus size={12} />
+                      <span>{lang === 'ru' ? 'ДОБАВИТЬ БИНД' : 'ADD BIND'}</span>
+                    </button>
+                  )}
+                </div>
+
+                {savedBinds.length === 0 ? (
+                  <div className="bg-[#12161e] border border-[#1e2633] p-10 text-center space-y-3">
+                    <Terminal size={36} className="mx-auto text-zinc-600 animate-pulse" />
+                    <h4 className="text-xs font-black uppercase tracking-wider font-mono text-[#eef2f7]">
+                      {lang === 'ru' ? 'НЕТ СОХРАНЕННЫХ БИНДОВ' : 'NO SAVED BINDS'}
+                    </h4>
+                    <p className="text-[11px] text-[#8b95a8] max-w-sm mx-auto leading-relaxed">
+                      {lang === 'ru' 
+                        ? 'Перейдите в раздел Бинды Rust и сохраняйте понравившиеся команды в свой профиль для быстрого доступа.'
+                        : 'Visit the Rust Binds section and bookmark commands to your profile.'}
+                    </p>
+                    {onOpenTab && (
+                      <button
+                        onClick={() => {
+                          onClose();
+                          onOpenTab('binds');
+                        }}
+                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-black font-mono text-xs uppercase tracking-wider transition-all"
+                      >
+                        {lang === 'ru' ? 'КАТАЛОГ БИНДОВ' : 'EXPLORE BINDS'}
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {savedBinds.map((bind) => (
+                      <div
+                        key={bind.id}
+                        className="bg-[#12161e] border border-[#1e2633] hover:border-amber-500/40 p-4 transition-all space-y-2.5"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 bg-black border border-amber-500/50 text-amber-300 text-xs font-mono font-black">
+                              {bind.key || 'KEY'}
+                            </span>
+                            <span className="text-xs font-black text-[#eef2f7] uppercase tracking-wider font-mono">
+                              {bind.title}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteSavedBind(bind.id)}
+                            title={lang === 'ru' ? 'Удалить бинд' : 'Delete bind'}
+                            className="p-1.5 bg-red-950/30 hover:bg-red-600 border border-red-500/20 hover:border-red-600 text-red-400 hover:text-white transition-colors"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+
+                        {bind.description && (
+                          <p className="text-[11px] text-[#8b95a8] leading-relaxed">
+                            {bind.description}
+                          </p>
+                        )}
+
+                        <div className="flex items-center gap-2 bg-[#08090c] border border-[#1e2633] p-2">
+                          <code className="text-xs font-mono text-amber-200 flex-1 truncate select-all">
+                            {bind.command}
+                          </code>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(bind.command);
+                              onToast(lang === 'ru' ? 'Бинд скопирован в буфер!' : 'Bind copied to clipboard!', 'success');
+                            }}
+                            className="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-black border border-amber-500/40 text-[10px] font-black uppercase font-mono transition-all flex items-center gap-1 shrink-0"
+                          >
+                            <Copy size={11} />
+                            <span>{lang === 'ru' ? 'КОПИРОВАТЬ' : 'COPY'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* FAVORITES TAB */}
+            {activeTab === 'favorites' && (
+              <motion.div
+                key="favorites"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="space-y-4"
+              >
+                <div className="flex items-center justify-between border-b border-[#1e2633] pb-3">
+                  <div>
+                    <h3 className="text-sm font-black text-[#eef2f7] uppercase tracking-wider font-mono flex items-center gap-2">
+                      <Star size={16} className="text-amber-400 fill-amber-400" />
+                      {lang === 'ru' ? 'ИЗБРАННЫЕ СЕРВЕРА' : 'FAVORITE SERVERS'}
+                    </h3>
+                    <p className="text-[11px] text-[#8b95a8] font-mono mt-0.5">
+                      {lang === 'ru' ? `В закладках: ${favoriteServers.length}` : `Bookmarked servers: ${favoriteServers.length}`}
+                    </p>
+                  </div>
+                  {onOpenTab && (
+                    <button
+                      onClick={() => {
+                        onClose();
+                        onOpenTab('monitor');
+                      }}
+                      className="px-3 py-1.5 bg-[#f97316]/20 hover:bg-[#f97316] border border-[#f97316]/50 hover:border-[#f97316] text-[#f97316] hover:text-black text-[10px] font-black uppercase tracking-wider font-mono cursor-pointer transition-all flex items-center gap-1.5"
+                    >
+                      <Server size={12} />
+                      <span>{lang === 'ru' ? 'МОНИТОРИНГ RUSTORIA' : 'RUSTORIA MONITOR'}</span>
+                    </button>
+                  )}
+                </div>
+
+                {favoriteServers.length === 0 ? (
+                  <div className="bg-[#12161e] border border-[#1e2633] p-10 text-center space-y-3">
+                    <Star size={36} className="mx-auto text-zinc-600 animate-pulse" />
+                    <h4 className="text-xs font-black uppercase tracking-wider font-mono text-[#eef2f7]">
+                      {lang === 'ru' ? 'СПИСОК ИЗБРАННОГО ПУСТ' : 'NO FAVORITE SERVERS'}
+                    </h4>
+                    <p className="text-[11px] text-[#8b95a8] max-w-sm mx-auto leading-relaxed">
+                      {lang === 'ru'
+                        ? 'Добавляйте серверы Rustoria или кастомные серверы в избранное со страницы мониторинга.'
+                        : 'Star servers on the monitoring tab to keep them in your quick access cabinet.'}
+                    </p>
+                    {onOpenTab && (
+                      <button
+                        onClick={() => {
+                          onClose();
+                          onOpenTab('monitor');
+                        }}
+                        className="px-4 py-2 bg-[#f97316] hover:bg-[#ea580c] text-black font-black font-mono text-xs uppercase tracking-wider transition-all"
+                      >
+                        {lang === 'ru' ? 'ОТКРЫТЬ МОНИТОРИНГ' : 'OPEN MONITOR'}
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {favoriteServers.map((srv: any, idx: number) => (
+                      <div
+                        key={srv.id || srv.name || idx}
+                        className="bg-[#12161e] border border-[#1e2633] hover:border-amber-500/40 p-4 transition-all flex items-center justify-between gap-3"
+                      >
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                            <span className="text-xs font-black text-[#eef2f7] uppercase tracking-wider font-mono truncate">
+                              {srv.name}
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-[#8b95a8] font-mono flex items-center gap-3">
+                            <span>{srv.region || 'EU/US'}</span>
+                            {srv.players && <span>👥 {srv.players} online</span>}
+                            {srv.wipeSchedule && <span>📅 {srv.wipeSchedule}</span>}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          {srv.connectCommand && (
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(srv.connectCommand);
+                                onToast(lang === 'ru' ? 'Команда connect скопирована!' : 'Connect command copied!', 'success');
+                              }}
+                              className="px-2.5 py-1.5 bg-[#f97316]/20 hover:bg-[#f97316] text-[#f97316] hover:text-black border border-[#f97316]/40 text-[10px] font-black uppercase font-mono transition-all flex items-center gap-1"
+                            >
+                              <Terminal size={11} />
+                              <span className="hidden sm:inline">CONNECT</span>
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleRemoveFavoriteServer(srv.id || srv.name)}
+                            title={lang === 'ru' ? 'Удалить из избранного' : 'Remove favorite'}
+                            className="p-1.5 bg-red-950/30 hover:bg-red-600 border border-red-500/20 hover:border-red-600 text-red-400 hover:text-white transition-colors"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* CLAN APPLICATIONS TAB */}
+            {activeTab === 'applications' && (
+              <motion.div
+                key="applications"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="space-y-4"
+              >
+                <div className="flex items-center justify-between border-b border-[#1e2633] pb-3">
+                  <div>
+                    <h3 className="text-sm font-black text-[#eef2f7] uppercase tracking-wider font-mono flex items-center gap-2">
+                      <FileText size={16} className="text-blue-400" />
+                      {lang === 'ru' ? 'ИСТОРИЯ ЗАЯВОК В КЛАНЫ' : 'CLAN RECRUITMENT APPLICATIONS'}
+                    </h3>
+                    <p className="text-[11px] text-[#8b95a8] font-mono mt-0.5">
+                      {lang === 'ru' ? `Ваших заявок: ${clanApplications.length}` : `Submitted applications: ${clanApplications.length}`}
+                    </p>
+                  </div>
+                  {onOpenTab && (
+                    <button
+                      onClick={() => {
+                        onClose();
+                        onOpenTab('clans');
+                      }}
+                      className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500 border border-blue-500/50 hover:border-blue-500 text-blue-300 hover:text-black text-[10px] font-black uppercase tracking-wider font-mono cursor-pointer transition-all flex items-center gap-1.5"
+                    >
+                      <Users size={12} />
+                      <span>{lang === 'ru' ? 'ДОСКА КЛАНОВ' : 'CLAN BOARD'}</span>
+                    </button>
+                  )}
+                </div>
+
+                {clanApplications.length === 0 ? (
+                  <div className="bg-[#12161e] border border-[#1e2633] p-10 text-center space-y-3">
+                    <FileText size={36} className="mx-auto text-zinc-600 animate-pulse" />
+                    <h4 className="text-xs font-black uppercase tracking-wider font-mono text-[#eef2f7]">
+                      {lang === 'ru' ? 'НЕТ ПОДАННЫХ ЗАЯВОК' : 'NO ACTIVE APPLICATIONS'}
+                    </h4>
+                    <p className="text-[11px] text-[#8b95a8] max-w-sm mx-auto leading-relaxed">
+                      {lang === 'ru' 
+                        ? 'Вы еще не подавали заявок в рекрутинг кланов. Найдите подходящий клан на доске объявлений!'
+                        : 'You haven\'t applied to any clans yet. Check out the Clan Board!'}
+                    </p>
+                    {onOpenTab && (
+                      <button
+                        onClick={() => {
+                          onClose();
+                          onOpenTab('clans');
+                        }}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-black font-mono text-xs uppercase tracking-wider transition-all"
+                      >
+                        {lang === 'ru' ? 'НАЙТИ КЛАН' : 'BROWSE CLANS'}
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {clanApplications.map((app) => (
+                      <div
+                        key={app.id}
+                        className="bg-[#12161e] border border-[#1e2633] p-4 space-y-2.5"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <span className="text-xs font-black text-[#eef2f7] uppercase tracking-wider font-mono">
+                              {app.clanName || (lang === 'ru' ? 'Заявка в клан' : 'Clan Application')}
+                            </span>
+                            <span className="text-[10px] text-zinc-500 font-mono block mt-0.5">
+                              {app.role || (lang === 'ru' ? 'Боец / Фармер' : 'PvP / Farmer')}
+                            </span>
+                          </div>
+                          <span className={`px-2 py-0.5 text-[9px] font-black uppercase font-mono rounded-sm border ${
+                            app.status === 'accepted'
+                              ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                              : app.status === 'rejected'
+                              ? 'bg-red-500/20 border-red-500/40 text-red-400'
+                              : 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+                          }`}>
+                            {app.status === 'accepted' 
+                              ? (lang === 'ru' ? 'ПРИНЯТА' : 'ACCEPTED')
+                              : app.status === 'rejected'
+                              ? (lang === 'ru' ? 'ОТКЛОНЕНА' : 'REJECTED')
+                              : (lang === 'ru' ? 'НА РАССМОТРЕНИИ' : 'PENDING')}
+                          </span>
+                        </div>
+
+                        {app.message && (
+                          <p className="text-[11px] text-[#8b95a8] bg-[#08090c] p-2.5 border border-[#1e2633]">
+                            "{app.message}"
+                          </p>
+                        )}
+
+                        <div className="text-[9px] text-zinc-500 font-mono flex justify-between items-center pt-1 border-t border-[#1e2633]/50">
+                          <span>{app.createdAt ? new Date(app.createdAt).toLocaleString() : ''}</span>
+                          <span>ID: {app.id}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
 

@@ -1177,6 +1177,24 @@ export const raidWeapons: RaidWeapon[] = [
     gpPer: 60,
     metalPer: 20,
     icon: '🥫'
+  },
+  {
+    id: 'propane',
+    name: 'Пропановая бомба',
+    sulfurPer: 900,
+    charcoalPer: 1350,
+    gpPer: 450,
+    metalPer: 0,
+    icon: '🛢️'
+  },
+  {
+    id: 'mlrs',
+    name: 'Ракета MLRS (Некрафтится)',
+    sulfurPer: 0,
+    charcoalPer: 0,
+    gpPer: 0,
+    metalPer: 0,
+    icon: '🎯'
   }
 ];
 
@@ -1192,7 +1210,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 2,
     satchel: 3,
     explosive_ammo: 49,
-    beancan: 13
+    beancan: 13,
+    propane: 2,
+    mlrs: 1
   },
   {
     id: 'stone_wall',
@@ -1204,7 +1224,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 4,
     satchel: 10,
     explosive_ammo: 200,
-    beancan: 46
+    beancan: 46,
+    propane: 7,
+    mlrs: 3
   },
   {
     id: 'sheet_wall',
@@ -1216,7 +1238,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 8,
     satchel: 23,
     explosive_ammo: 400,
-    beancan: 112
+    beancan: 112,
+    propane: 13,
+    mlrs: 6
   },
   {
     id: 'armored_wall',
@@ -1228,7 +1252,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 15,
     satchel: 46,
     explosive_ammo: 800,
-    beancan: 223
+    beancan: 223,
+    propane: 25,
+    mlrs: 12
   },
   {
     id: 'high_stone_wall',
@@ -1240,7 +1266,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 4,
     satchel: 10,
     explosive_ammo: 200,
-    beancan: 46
+    beancan: 46,
+    propane: 7,
+    mlrs: 3
   },
   {
     id: 'high_wood_wall',
@@ -1252,7 +1280,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 2,
     satchel: 3,
     explosive_ammo: 49,
-    beancan: 13
+    beancan: 13,
+    propane: 2,
+    mlrs: 1
   },
 
   // --- DOORS ---
@@ -1266,7 +1296,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 1,
     satchel: 2,
     explosive_ammo: 19,
-    beancan: 6
+    beancan: 6,
+    propane: 1,
+    mlrs: 1
   },
   {
     id: 'sheet_door',
@@ -1278,7 +1310,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 2,
     satchel: 4,
     explosive_ammo: 63,
-    beancan: 18
+    beancan: 18,
+    propane: 2,
+    mlrs: 1
   },
   {
     id: 'garage_door',
@@ -1290,7 +1324,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 3,
     satchel: 9,
     explosive_ammo: 150,
-    beancan: 40
+    beancan: 40,
+    propane: 5,
+    mlrs: 3
   },
   {
     id: 'armored_door',
@@ -1302,7 +1338,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 4,
     satchel: 12,
     explosive_ammo: 200,
-    beancan: 56
+    beancan: 56,
+    propane: 8,
+    mlrs: 4
   },
   {
     id: 'armored_hatch',
@@ -1314,7 +1352,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 4,
     satchel: 12,
     explosive_ammo: 200,
-    beancan: 56
+    beancan: 56,
+    propane: 8,
+    mlrs: 4
   },
 
   // --- DEPLOYABLES ---
@@ -1328,7 +1368,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 1,
     satchel: 1,
     explosive_ammo: 10,
-    beancan: 3
+    beancan: 3,
+    propane: 1,
+    mlrs: 1
   },
   {
     id: 'auto_turret',
@@ -1340,7 +1382,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 3,
     satchel: 3,
     explosive_ammo: 40,
-    beancan: 12
+    beancan: 12,
+    propane: 3,
+    mlrs: 2
   },
   {
     id: 'guntrap',
@@ -1352,7 +1396,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 1,
     satchel: 1,
     explosive_ammo: 10,
-    beancan: 3
+    beancan: 3,
+    propane: 1,
+    mlrs: 1
   },
   {
     id: 'flametrap',
@@ -1364,7 +1410,9 @@ export const raidTargets: RaidTarget[] = [
     rocket: 1,
     satchel: 1,
     explosive_ammo: 15,
-    beancan: 4
+    beancan: 4,
+    propane: 1,
+    mlrs: 1
   }
 ];
 

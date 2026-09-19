@@ -1808,7 +1808,7 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
                       const dateStr = dateObj.toLocaleDateString();
 
                       return (
-                        <tr key={log.id || idx} className="hover:bg-white/[0.02] transition-colors">
+                        <tr key={log.id ? `${log.id}-${idx}` : idx} className="hover:bg-white/[0.02] transition-colors">
                           <td className="p-3 whitespace-nowrap text-zinc-400 text-[11px]">
                             <div className="flex flex-col">
                               <span className="text-white font-bold">{timeStr}</span>

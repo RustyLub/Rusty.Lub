@@ -2,190 +2,193 @@
 @import "tailwindcss";
 
 :root {
-  --cyber-dark: #07090f;
-  --cyber-panel: #111520;
-  --cyber-panel-hover: #181f2e;
-  --cyber-border: #ff2a4d;
-  --cyber-red: #ff2a4d;
-  --cyber-red-glow: rgba(255, 42, 77, 0.4);
-  --rust-orange: #d97a22;
-  --text-primary: #e2e8f0;
-  --text-muted: #94a3b8;
-}
-
-body.light-theme {
-  --cyber-dark: #f1f5f9;
-  --cyber-panel: #ffffff;
-  --cyber-panel-hover: #f8fafc;
-  --cyber-border: #ff2a4d;
-  --cyber-red: #ff2a4d;
-  --cyber-red-glow: rgba(255, 42, 77, 0.2);
-  --rust-orange: #ea580c;
-  --text-primary: #0f172a;
-  --text-muted: #475569;
-  background-color: #f1f5f9;
-  color: #0f172a;
+  --app-bg: #08090c;
+  --app-bg-secondary: #0d1016;
+  --card-bg: #12161e;
+  --card-hover: #171d27;
+  --border-color: #1e2633;
+  --border-hover: #2e394b;
+  --orange-blaze: #f97316;
+  --orange-blaze-hover: #ea580c;
+  --orange-blaze-glow: rgba(249, 115, 22, 0.4);
+  --red-tactical: #ef4444;
+  --text-primary: #eef2f7;
+  --text-muted: #8b95a8;
 }
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Roboto Mono", "JetBrains Mono", monospace;
+  --font-mono: "JetBrains Mono", "Roboto Mono", monospace;
   --font-russo: "Russo One", sans-serif;
-  --color-brand: #ff2a4d;
-  --color-brand-hover: #ff4d6d;
-  --color-app-bg: #07090f;
-  --color-panel-bg: #111520;
-  --color-inner-bg: #161c2a;
-  --color-border-dark: #2a344a;
+  --color-brand: #f97316;
+  --color-brand-hover: #ea580c;
+  --color-app-bg: #08090c;
+  --color-panel-bg: #12161e;
+  --color-inner-bg: #0d1016;
+  --color-border-dark: #1e2633;
 }
 
 body {
-  background-color: var(--cyber-dark);
-  color: var(--text-primary);
+  background-color: #08090c;
+  color: #eef2f7;
   font-family: var(--font-sans);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  overflow-x: hidden;
 }
 
-/* Cyberpunk tactical grid & scanlines */
+/* Tactical Command Grid & Atmosphere */
 .cyber-grid {
-  background-color: #07090f;
+  background-color: #08090c;
   background-image: 
-    linear-gradient(rgba(255, 42, 77, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 42, 77, 0.04) 1px, transparent 1px),
-    radial-gradient(circle at 50% 20%, rgba(255, 42, 77, 0.12) 0%, transparent 80%);
-  background-size: 32px 32px, 32px 32px, 100% 100%;
+    linear-gradient(rgba(249, 115, 22, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(249, 115, 22, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 50% 10%, rgba(249, 115, 22, 0.08) 0%, transparent 70%);
+  background-size: 36px 36px, 36px 36px, 100% 100%;
 }
 
-body.light-theme .cyber-grid {
-  background-color: #f1f5f9;
-  background-image: 
-    linear-gradient(rgba(255, 42, 77, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 42, 77, 0.06) 1px, transparent 1px),
-    radial-gradient(circle at 50% 20%, rgba(255, 42, 77, 0.08) 0%, transparent 80%);
+.tactical-card {
+  background: #12161e;
+  border: 1px solid #1e2633;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+  transition: all 0.2s ease;
 }
 
-.scanlines {
-  position: relative;
-}
-
-.scanlines::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  background: linear-gradient(
-    rgba(18, 16, 16, 0) 50%, 
-    rgba(0, 0, 0, 0.22) 50%
-  );
-  background-size: 100% 4px;
-}
-
-body.light-theme .scanlines::before {
-  opacity: 0.1;
+.tactical-card:hover {
+  border-color: rgba(249, 115, 22, 0.4);
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8), 0 0 15px rgba(249, 115, 22, 0.1);
 }
 
 .cyber-panel {
-  background: linear-gradient(135deg, rgba(17, 21, 32, 0.96) 0%, rgba(10, 13, 20, 0.99) 100%);
-  border: 1px solid rgba(255, 42, 77, 0.35);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(255, 42, 77, 0.06);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+  background: #12161e;
+  border: 1px solid #1e2633;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
   transition: all 0.2s ease;
 }
 
 .cyber-panel:hover {
-  border-color: rgba(255, 42, 77, 0.6);
-  box-shadow: 0 12px 45px rgba(0, 0, 0, 0.95), inset 0 0 25px rgba(255, 42, 77, 0.1);
+  border-color: rgba(249, 115, 22, 0.45);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(249, 115, 22, 0.12);
 }
 
-body.light-theme .cyber-panel {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
-  border: 1px solid rgba(255, 42, 77, 0.3);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), inset 0 0 15px rgba(255, 42, 77, 0.03);
+/* Standardized UI-Kit Buttons */
+.btn-orange {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: #ffffff;
+  font-weight: 800;
+  border: 1px solid rgba(251, 146, 60, 0.5);
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-body.light-theme .cyber-panel:hover {
-  border-color: rgba(255, 42, 77, 0.6);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1), inset 0 0 20px rgba(255, 42, 77, 0.05);
+.btn-orange:hover {
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+  box-shadow: 0 0 30px rgba(249, 115, 22, 0.6);
+  transform: translateY(-1px);
 }
 
-.cyber-panel-active {
-  background: linear-gradient(135deg, rgba(24, 30, 44, 0.98) 0%, rgba(12, 16, 24, 1) 100%);
-  border: 1px solid #ff2a4d;
-  box-shadow: 0 0 35px rgba(255, 42, 77, 0.35), inset 0 0 15px rgba(255, 42, 77, 0.15);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+.btn-red {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  font-weight: 800;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-body.light-theme .cyber-panel-active {
-  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-  border: 1px solid #ff2a4d;
-  box-shadow: 0 0 25px rgba(255, 42, 77, 0.2), inset 0 0 10px rgba(255, 42, 77, 0.08);
+.btn-red:hover {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  box-shadow: 0 0 28px rgba(239, 68, 68, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: rgba(18, 22, 30, 0.85);
+  color: #eef2f7;
+  border: 1px solid #1e2633;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+  background: #1a202c;
+  color: #f97316;
+  border-color: rgba(249, 115, 22, 0.5);
+  box-shadow: 0 0 16px rgba(249, 115, 22, 0.18);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #8b95a8;
+  border: 1px solid transparent;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #eef2f7;
 }
 
 .cyber-button {
-  background: linear-gradient(135deg, #ff2a4d 0%, #b81430 100%);
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
   color: #ffffff !important;
   font-family: 'Russo One', sans-serif;
-  letter-spacing: 0.08em;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 0 25px rgba(255, 42, 77, 0.5);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+  letter-spacing: 0.06em;
+  border: 1px solid rgba(251, 146, 60, 0.4);
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
   transition: all 0.2s ease;
 }
 
 .cyber-button:hover {
-  background: linear-gradient(135deg, #ff4d6d 0%, #ff2a4d 100%);
-  box-shadow: 0 0 35px rgba(255, 42, 77, 0.8);
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+  box-shadow: 0 0 30px rgba(249, 115, 22, 0.65);
   transform: translateY(-1px);
 }
 
 .cyber-header-glow {
-  text-shadow: 0 0 15px rgba(255, 42, 77, 0.6), 0 0 30px rgba(255, 42, 77, 0.3);
-}
-
-body.light-theme .cyber-header-glow {
-  text-shadow: none;
+  text-shadow: 0 0 15px rgba(249, 115, 22, 0.5), 0 0 30px rgba(249, 115, 22, 0.25);
 }
 
 .hud-corner-tl {
   position: absolute;
   top: 0;
   left: 0;
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid #ff2a4d;
-  border-left: 2px solid #ff2a4d;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid #f97316;
+  border-left: 2px solid #f97316;
 }
 
 .hud-corner-tr {
   position: absolute;
   top: 0;
   right: 0;
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid #ff2a4d;
-  border-right: 2px solid #ff2a4d;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid #f97316;
+  border-right: 2px solid #f97316;
 }
 
 .hud-corner-bl {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 10px;
-  height: 10px;
-  border-bottom: 2px solid #ff2a4d;
-  border-left: 2px solid #ff2a4d;
+  width: 8px;
+  height: 8px;
+  border-bottom: 2px solid #f97316;
+  border-left: 2px solid #f97316;
 }
 
 .hud-corner-br {
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 10px;
-  height: 10px;
-  border-bottom: 2px solid #ff2a4d;
-  border-right: 2px solid #ff2a4d;
+  width: 8px;
+  height: 8px;
+  border-bottom: 2px solid #f97316;
+  border-right: 2px solid #f97316;
 }
+
 
 .hex-avatar {
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);

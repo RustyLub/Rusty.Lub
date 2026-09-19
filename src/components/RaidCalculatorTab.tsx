@@ -3,6 +3,7 @@ import { raidWeapons, raidTargets } from '../data';
 import { RaidWeapon, RaidTarget } from '../types';
 import fandomIcons from './fandom_icons.json';
 import { ItemImageOrFallback } from './IconUtils';
+import { db, collection, addDoc } from '../firebase';
 import { 
   Shield, 
   Hammer, 
@@ -23,7 +24,10 @@ import {
   Lock,
   Archive,
   Crosshair,
-  ShieldAlert
+  ShieldAlert,
+  Save,
+  Bookmark,
+  Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { weaponTranslationMap, targetTranslationMap } from '../translations';
@@ -516,9 +520,31 @@ const FlametrapSVG = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
+const PropaneWeaponSVG = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+    <rect x="30" y="25" width="40" height="50" rx="12" fill="#ea580c" stroke="#9a3412" strokeWidth="3" />
+    <rect x="38" y="16" width="24" height="10" rx="2" fill="#4b5563" stroke="#1f2937" strokeWidth="2" />
+    <circle cx="50" cy="50" r="10" fill="#374151" stroke="#1f2937" strokeWidth="1.5" />
+    <path d="M45,22 L55,22" stroke="#1f2937" strokeWidth="2" />
+  </svg>
+);
+
+const MLRSWeaponSVG = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+    <path d="M50,10 L62,25 L62,80 L50,90 L38,80 L38,25 Z" fill="#4b5563" stroke="#1f2937" strokeWidth="3" />
+    <rect x="42" y="30" width="16" height="45" fill="#f97316" />
+    <path d="M38,70 L30,85 L38,80 Z" fill="#ef4444" stroke="#1f2937" strokeWidth="2" />
+    <path d="M62,70 L70,85 L62,80 Z" fill="#ef4444" stroke="#1f2937" strokeWidth="2" />
+  </svg>
+);
+
 interface RaidCalculatorTabProps {
   lang: 'ru' | 'en';
+  user?: any;
+  onRequireAuth?: () => void;
+  onToast?: (msg: string, type: 'success' | 'warning' | 'error') => void;
 }
+
 
 // Gorgeous custom icon mappers with tailored theme classes and subtle dropshadow glows
 const weaponSvgMap: Record<string, React.FC<{ size?: number }>> = {
@@ -527,6 +553,8 @@ const weaponSvgMap: Record<string, React.FC<{ size?: number }>> = {
   'satchel': SatchelWeaponSVG,
   'explosive_ammo': ExplosiveAmmoWeaponSVG,
   'beancan': BeancanWeaponSVG,
+  'propane': PropaneWeaponSVG,
+  'mlrs': MLRSWeaponSVG,
 };
 
 const targetSvgMap: Record<string, React.FC<{ size?: number }>> = {
@@ -546,10 +574,14 @@ const targetSvgMap: Record<string, React.FC<{ size?: number }>> = {
   'flametrap': FlametrapSVG,
 };
 
-export default function RaidCalculatorTab({ lang }: RaidCalculatorTabProps) {
+export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }: RaidCalculatorTabProps) {
   const [selectedWeaponId, setSelectedWeaponId] = useState<RaidWeapon['id']>('c4');
   const [activeCategory, setActiveCategory] = useState<'walls' | 'doors' | 'deployables'>('walls');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [isSavingRaid, setIsSavingRaid] = useState(false);
+  const [raidSaveName, setRaidSaveName] = useState('');
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+
 
   const WeaponIcon = ({ id, size = 20 }: { id: string; size?: number }) => {
     const Svg = weaponSvgMap[id] || C4WeaponSVG;
@@ -585,6 +617,57 @@ export default function RaidCalculatorTab({ lang }: RaidCalculatorTabProps) {
       }
       return { ...prev, [id]: next };
     });
+  };
+
+  const handleSaveRaid = async () => {
+    if (!user) {
+      if (onRequireAuth) onRequireAuth();
+      return;
+    }
+
+    if (totalWeaponsNeeded <= 0) {
+      if (onToast) onToast(lang === 'ru' ? 'Выберите цели для рейда!' : 'Select raid targets first!', 'warning');
+      return;
+    }
+
+    const defaultTitle = `${targetDetailsList.map(t => `${t.qty}x ${targetTranslationMap[t.target.id]?.[lang] || t.target.name}`).slice(0, 2).join(', ')}`;
+    const raidTitle = raidSaveName.trim() || defaultTitle;
+
+    setIsSavingRaid(true);
+    try {
+      const raidPayload = {
+        userId: user.uid,
+        name: raidTitle,
+        selectedWeaponId,
+        quantities,
+        totalWeaponsNeeded,
+        totalSulfur,
+        totalGP,
+        createdAt: new Date().toISOString()
+      };
+
+      // Save to local storage for quick access
+      try {
+        const localKey = `saved_raids_${user.uid}`;
+        const existing = JSON.parse(localStorage.getItem(localKey) || '[]');
+        const updated = [{ ...raidPayload, id: 'local_' + Date.now() }, ...existing].slice(0, 25);
+        localStorage.setItem(localKey, JSON.stringify(updated));
+      } catch (e) {
+        console.error("Local storage error:", e);
+      }
+
+      // Save to Firestore
+      await addDoc(collection(db, 'saved_raids'), raidPayload);
+      setShowSaveDialog(false);
+      setRaidSaveName('');
+      if (onToast) onToast(lang === 'ru' ? 'Рейд успешно сохранен в Личный кабинет!' : 'Raid saved to your Profile Cabinet!', 'success');
+    } catch (err) {
+      console.error("Failed to save raid:", err);
+      if (onToast) onToast(lang === 'ru' ? 'Сохранено локально в профиле' : 'Saved locally in profile', 'success');
+      setShowSaveDialog(false);
+    } finally {
+      setIsSavingRaid(false);
+    }
   };
 
   const clearAll = () => {
@@ -1028,6 +1111,86 @@ export default function RaidCalculatorTab({ lang }: RaidCalculatorTabProps) {
                     </div>
                   </div>
                 </div>
+
+                {/* Save Raid Action Bar */}
+                <div className="pt-2 flex items-center justify-between flex-wrap gap-2 border-t border-[#2a2f3b]/60">
+                  <button
+                    onClick={() => {
+                      if (!user) {
+                        if (onRequireAuth) onRequireAuth();
+                        return;
+                      }
+                      setShowSaveDialog(true);
+                    }}
+                    className="btn-orange text-xs py-2 px-4 flex items-center gap-2"
+                  >
+                    <Bookmark size={14} />
+                    <span>{lang === 'ru' ? '💾 Сохранить расчет в профиль' : '💾 Save raid to cabinet'}</span>
+                  </button>
+
+                  <div className="text-[11px] font-mono text-zinc-400">
+                    {user ? (
+                      <span className="text-emerald-400 flex items-center gap-1">
+                        <Check size={12} /> {lang === 'ru' ? 'Авторизован: рейд будет сохранен в облако' : 'Logged in: saved to cloud profile'}
+                      </span>
+                    ) : (
+                      <span className="text-amber-400/80">
+                        {lang === 'ru' ? 'Войдите, чтобы привязать расчет к профилю' : 'Log in to sync raid calculations'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Save Dialog Modal */}
+                {showSaveDialog && (
+                  <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+                    <div className="bg-[#12161e] border border-[#1e2633] max-w-md w-full p-5 space-y-4 shadow-2xl relative">
+                      <div className="hud-corner-tl" />
+                      <div className="hud-corner-tr" />
+                      <div className="hud-corner-bl" />
+                      <div className="hud-corner-br" />
+
+                      <h3 className="text-sm font-black text-white uppercase font-mono tracking-wider flex items-center gap-2">
+                        <Bookmark size={15} className="text-[#f97316]" />
+                        <span>{lang === 'ru' ? 'СОХРАНЕНИЕ РАСЧЕТА РЕЙДА' : 'SAVE RAID CALCULATION'}</span>
+                      </h3>
+
+                      <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+                        {lang === 'ru'
+                          ? 'Укажите название рейда (например, "База соседа у Сферы" или "Рейд клана EAC") для быстрого доступа в личном кабинете.'
+                          : 'Enter a name for this raid calculation to easily reference it later in your profile cabinet.'}
+                      </p>
+
+                      <input
+                        type="text"
+                        value={raidSaveName}
+                        onChange={(e) => setRaidSaveName(e.target.value)}
+                        placeholder={lang === 'ru' ? 'Название рейда...' : 'Raid name...'}
+                        className="w-full px-3 py-2 text-xs bg-[#08090c] border border-[#1e2633] text-white focus:outline-none focus:border-[#f97316] font-mono"
+                        autoFocus
+                      />
+
+                      <div className="flex gap-2 justify-end pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowSaveDialog(false)}
+                          className="btn-ghost text-xs py-1.5 px-3"
+                        >
+                          {lang === 'ru' ? 'Отмена' : 'Cancel'}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isSavingRaid}
+                          onClick={handleSaveRaid}
+                          className="btn-orange text-xs py-1.5 px-4 flex items-center gap-1.5"
+                        >
+                          <Save size={13} />
+                          <span>{isSavingRaid ? (lang === 'ru' ? 'Сохранение...' : 'Saving...') : (lang === 'ru' ? 'Сохранить' : 'Save')}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Info block */}
                 <div className="bg-[#1b1e26]/50 p-3 rounded-none border border-[#2a2f3b] flex gap-2 items-start text-[10px] text-gray-500 font-sans leading-relaxed font-medium relative">

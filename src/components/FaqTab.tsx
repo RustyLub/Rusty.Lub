@@ -238,9 +238,9 @@ export default function FaqTab({ lang }: FaqTabProps) {
               <Sparkles size={12} className="text-orange-400" />
               {lang === 'ru' ? 'Быстрый поиск:' : 'Quick tags:'}
             </span>
-            {quickFilterHints.map((hint, idx) => (
+            {quickFilterHints.map((hint) => (
               <button
-                key={idx}
+                key={hint.query}
                 onClick={() => setSearchQuery(hint.query)}
                 className={`text-[11px] px-2.5 py-1 rounded-lg border transition cursor-pointer ${
                   searchQuery.toLowerCase() === hint.query.toLowerCase()
@@ -334,9 +334,9 @@ export default function FaqTab({ lang }: FaqTabProps) {
                           <span className="text-[11px] font-medium text-stone-500 uppercase tracking-wider mr-1">
                             {lang === 'ru' ? 'Теги:' : 'Tags:'}
                           </span>
-                          {item.tags.map((tag) => (
+                          {item.tags.map((tag, i) => (
                             <span
-                              key={tag}
+                              key={`${tag}-${i}`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSearchQuery(tag);

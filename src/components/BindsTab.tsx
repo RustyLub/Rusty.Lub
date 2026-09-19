@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { bindsDatabase, adminCommandsDatabase } from '../data';
 import { BindItem, AdminCommandItem } from '../types';
-import { Search, Copy, Terminal, Shield, Plus, Zap, Heart, RotateCw, Info, Wrench, Settings, Download, FileCode, Sparkles } from 'lucide-react';
+import { db, collection, addDoc } from '../firebase';
+import { Search, Copy, Terminal, Shield, Plus, Zap, Heart, RotateCw, Info, Wrench, Settings, Download, FileCode, Sparkles, Bookmark, Check, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { bindsTranslationMap, bindsCategoryMap } from '../translations';
 
@@ -9,13 +10,116 @@ interface BindsTabProps {
   onCopy: (text: string) => void;
   lang: 'ru' | 'en';
   onOpenConfigExporter?: () => void;
+  user?: any;
+  onRequireAuth?: () => void;
+  onToast?: (msg: string, type: 'success' | 'warning' | 'error') => void;
 }
 
-export default function BindsTab({ onCopy, lang, onOpenConfigExporter }: BindsTabProps) {
+export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onRequireAuth, onToast }: BindsTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
-
   const [bindsMode, setBindsMode] = useState<'player' | 'admin'>('player');
+  const [savedBindKeys, setSavedBindKeys] = useState<string[]>([]);
+  const [showCreateBindModal, setShowCreateBindModal] = useState(false);
+  const [newBindKey, setNewBindKey] = useState('');
+  const [newBindCommand, setNewBindCommand] = useState('');
+  const [newBindDesc, setNewBindDesc] = useState('');
+  const [isSavingCustomBind, setIsSavingCustomBind] = useState(false);
+
+  useEffect(() => {
+    if (user?.uid) {
+      try {
+        const localKey = `saved_binds_${user.uid}`;
+        const raw = localStorage.getItem(localKey);
+        if (raw) {
+          const list = JSON.parse(raw);
+          setSavedBindKeys(list.map((b: any) => b.command || b.cmd));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [user]);
+
+  const handleSaveBindToProfile = async (bind: BindItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
+      if (onRequireAuth) onRequireAuth();
+      return;
+    }
+
+    try {
+      const payload = {
+        userId: user.uid,
+        name: bindsTranslationMap[bind.cmd]?.[lang]?.desc || bind.desc,
+        command: bind.cmd,
+        key: bind.key || 'Custom',
+        category: bind.category,
+        createdAt: new Date().toISOString()
+      };
+
+      const localKey = `saved_binds_${user.uid}`;
+      const existing = JSON.parse(localStorage.getItem(localKey) || '[]');
+      if (!existing.some((b: any) => (b.command || b.cmd) === bind.cmd)) {
+        const updated = [{ ...payload, id: 'local_' + Date.now() }, ...existing];
+        localStorage.setItem(localKey, JSON.stringify(updated));
+        setSavedBindKeys(prev => [...prev, bind.cmd]);
+      }
+
+      await addDoc(collection(db, 'saved_binds'), payload);
+      if (onToast) onToast(lang === 'ru' ? 'Бинд сохранен в ваш профиль!' : 'Bind saved to your cabinet!', 'success');
+    } catch (err) {
+      console.error(err);
+      if (onToast) onToast(lang === 'ru' ? 'Бинд сохранен локально' : 'Bind saved locally', 'success');
+    }
+  };
+
+  const handleCreateCustomBind = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      if (onRequireAuth) onRequireAuth();
+      return;
+    }
+
+    if (!newBindCommand.trim() || !newBindDesc.trim()) {
+      if (onToast) onToast(lang === 'ru' ? 'Заполните команду и описание!' : 'Fill command and description!', 'warning');
+      return;
+    }
+
+    setIsSavingCustomBind(true);
+    try {
+      const fullCmd = newBindKey.trim() 
+        ? `bind ${newBindKey.trim().toLowerCase()} "${newBindCommand.trim()}"`
+        : newBindCommand.trim();
+
+      const payload = {
+        userId: user.uid,
+        name: newBindDesc.trim(),
+        command: fullCmd,
+        key: newBindKey.trim() || 'Custom',
+        category: 'Пользовательские',
+        createdAt: new Date().toISOString()
+      };
+
+      const localKey = `saved_binds_${user.uid}`;
+      const existing = JSON.parse(localStorage.getItem(localKey) || '[]');
+      localStorage.setItem(localKey, JSON.stringify([{ ...payload, id: 'local_' + Date.now() }, ...existing]));
+
+      await addDoc(collection(db, 'saved_binds'), payload);
+      setSavedBindKeys(prev => [...prev, fullCmd]);
+      setShowCreateBindModal(false);
+      setNewBindKey('');
+      setNewBindCommand('');
+      setNewBindDesc('');
+      if (onToast) onToast(lang === 'ru' ? 'Свой бинд создан и сохранен в кабинет!' : 'Custom bind created & saved to cabinet!', 'success');
+    } catch (err) {
+      console.error(err);
+      if (onToast) onToast(lang === 'ru' ? 'Бинд сохранен в профиль' : 'Bind saved to profile', 'success');
+      setShowCreateBindModal(false);
+    } finally {
+      setIsSavingCustomBind(false);
+    }
+  };
 
   const handleModeChange = (mode: 'player' | 'admin') => {
     setBindsMode(mode);
@@ -147,32 +251,50 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter }: BindsTa
         </div>
       )}
 
-      {/* Mode Switcher */}
-      <div className="flex gap-1 border-b border-[#2a2f3b] mb-4">
-        <button
-          onClick={() => handleModeChange('player')}
-          className={`px-4 py-2 text-xs uppercase transition-all cursor-pointer ${
-            bindsMode === 'player'
-              ? 'text-white border-b-2 border-[#cd412b]'
-              : 'text-gray-400 hover:text-white'
-          }`}
-        >
-          {lang === 'en' ? 'Player Binds' : 'Обычные бинды'}
-        </button>
-        <button
-          onClick={() => handleModeChange('admin')}
-          className={`px-4 py-2 text-xs uppercase transition-all cursor-pointer ${
-            bindsMode === 'admin'
-              ? 'text-white border-b-2 border-[#cd412b]'
-              : 'text-gray-400 hover:text-white'
-          }`}
-        >
-          {lang === 'en' ? 'Admin Panel' : 'Для админов'}
-        </button>
+      {/* Mode Switcher & Actions */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1e2633] pb-2">
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleModeChange('player')}
+            className={`px-4 py-2 text-xs uppercase transition-all cursor-pointer font-bold font-mono ${
+              bindsMode === 'player'
+                ? 'text-[#f97316] border-b-2 border-[#f97316]'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            {lang === 'en' ? 'Player Binds' : 'Обычные бинды'}
+          </button>
+          <button
+            onClick={() => handleModeChange('admin')}
+            className={`px-4 py-2 text-xs uppercase transition-all cursor-pointer font-bold font-mono ${
+              bindsMode === 'admin'
+                ? 'text-[#f97316] border-b-2 border-[#f97316]'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            {lang === 'en' ? 'Admin Panel' : 'Для админов'}
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              if (!user) {
+                if (onRequireAuth) onRequireAuth();
+                return;
+              }
+              setShowCreateBindModal(true);
+            }}
+            className="btn-orange text-xs py-1.5 px-3 flex items-center gap-1.5"
+          >
+            <Plus size={13} />
+            <span>{lang === 'ru' ? 'Свой бинд' : 'New Bind'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Search and Filters Header */}
-      <div className="flex flex-col xl:flex-row gap-3 bg-[#14171e] p-4 border border-[#2a2f3b]">
+      <div className="flex flex-col xl:flex-row gap-3 bg-[#12161e] p-4 border border-[#1e2633]">
         {/* Smart Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
@@ -182,7 +304,7 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter }: BindsTa
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={lang === 'en' ? "Search..." : "Поиск..."}
-            className="w-full bg-[#0c0d10] border border-[#2a2f3b] text-[#e1e1e6] placeholder-gray-600 pl-10 pr-3 py-2 rounded text-sm outline-none transition-all"
+            className="w-full bg-[#08090c] border border-[#1e2633] text-[#eef2f7] placeholder-zinc-600 pl-10 pr-3 py-2 text-xs outline-none font-mono focus:border-[#f97316]"
           />
         </div>
 
@@ -214,10 +336,10 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter }: BindsTa
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-3 py-1.5 text-xs uppercase transition-all ${
+              className={`px-3 py-1.5 text-xs uppercase font-mono transition-all ${
                 activeCategory === cat.id
-                  ? 'bg-[#cd412b] text-white'
-                  : 'text-gray-400 hover:text-white bg-[#1b1e26]'
+                  ? 'bg-[#f97316] text-white font-bold'
+                  : 'text-zinc-400 hover:text-white bg-[#0d1016] border border-[#1e2633]'
               }`}
             >
               {cat.label}
@@ -227,18 +349,18 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter }: BindsTa
       </div>
 
       {/* Info Notice */}
-      <div className="bg-[#14171e] border border-[#2a2f3b] text-white p-4 flex gap-3">
-        <Info size={18} className="text-[#cd412b] mt-0.5 flex-shrink-0" />
+      <div className="bg-[#12161e] border border-[#1e2633] text-white p-4 flex gap-3">
+        <Info size={18} className="text-[#f97316] mt-0.5 flex-shrink-0" />
         <div className="text-xs space-y-1">
-          <p className="font-bold text-[#cd412b] uppercase">
+          <p className="font-bold text-[#f97316] uppercase font-mono">
             {bindsMode === 'player'
               ? (lang === 'en' ? 'How to install?' : 'Как установить?')
               : (lang === 'en' ? 'How to use admin commands?' : 'Как использовать админ-команды?')
             }
           </p>
-          <p className="text-gray-400">
+          <p className="text-zinc-400">
             {bindsMode === 'player' ? (
-              lang === 'en' ? 'Click to copy, open console (F1) in Rust, paste (Ctrl+V) and Enter.' : 'Кликните, чтобы скопировать. В игре откройте консоль (F1), вставьте (Ctrl+V) и нажмите Enter.'
+              lang === 'en' ? 'Click on card to copy command, in Rust open console (F1), paste (Ctrl+V) and press Enter. Click bookmark icon to save to cabinet.' : 'Кликните по карточке, чтобы скопировать. В Rust откройте консоль (F1), вставьте (Ctrl+V) и нажмите Enter. Нажмите значок закладки, чтобы сохранить в кабинет.'
             ) : (
               lang === 'en' ? 'Click to copy. You need auth level 1/2. Paste in console (F1), replace <ID> with actual value, and Enter.' : 'Кликните, чтобы скопировать. Нужен auth level 1/2. Вставьте в консоль (F1), замените <ID> на нужное значение и нажмите Enter.'
             )}
@@ -256,38 +378,127 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter }: BindsTa
           } : bind;
 
           const adminItem = bind as unknown as AdminCommandItem;
+          const isSaved = savedBindKeys.includes(bind.cmd);
 
           return (
             <div
               key={bind.cmd}
               onClick={() => onCopy(bind.cmd)}
-              className="bg-[#14171e] border-2 border-[#cd412b]/50 shadow-[0_0_10px_rgba(205,65,43,0.4),_0_0_10px_rgba(59,130,246,0.4)] p-4 cursor-pointer flex flex-col justify-between transition-all"
+              className="tactical-card p-4 cursor-pointer flex flex-col justify-between group hover:border-[#f97316]/60 transition-all"
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] text-gray-500 uppercase">{bindsCategoryMap[bind.category]?.[lang] || bind.category}</span>
-                  <Copy size={12} className="text-gray-500" />
+                  <span className="text-[10px] text-zinc-500 font-mono uppercase">{bindsCategoryMap[bind.category]?.[lang] || bind.category}</span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={(e) => handleSaveBindToProfile(bind, e)}
+                      title={isSaved ? (lang === 'ru' ? 'Сохранено в профиле' : 'Saved in profile') : (lang === 'ru' ? 'Сохранить в профиль' : 'Save to profile')}
+                      className={`p-1 transition-colors ${isSaved ? 'text-[#f97316]' : 'text-zinc-500 hover:text-white'}`}
+                    >
+                      <Bookmark size={13} className={isSaved ? 'fill-[#f97316]' : ''} />
+                    </button>
+                    <Copy size={12} className="text-zinc-500 group-hover:text-white transition-colors" />
+                  </div>
                 </div>
 
-                <h4 className="text-sm font-bold text-white mb-1 uppercase">{trans.desc}</h4>
+                <h4 className="text-sm font-bold text-white mb-1 uppercase font-sans">{trans.desc}</h4>
                 {trans.explanation && (
-                  <p className="text-xs text-gray-400 mb-3">{trans.explanation}</p>
+                  <p className="text-xs text-zinc-400 mb-3 font-sans leading-relaxed">{trans.explanation}</p>
                 )}
 
                 {adminItem.example && (
-                  <div className="mb-3 bg-[#0c0d10] p-2 border border-[#2a2f3b] text-[10px] font-mono text-amber-500">
+                  <div className="mb-3 bg-[#08090c] p-2 border border-[#1e2633] text-[10px] font-mono text-amber-500">
                     {lang === 'en' ? 'Example: ' : 'Пример: '}{adminItem.example}
                   </div>
                 )}
               </div>
 
-              <div className="mt-2 bg-[#0c0d10] border border-[#2a2f3b] p-2 text-xs font-mono text-[#cd412b] truncate">
+              <div className="mt-2 bg-[#08090c] border border-[#1e2633] p-2 text-xs font-mono text-[#f97316] truncate">
                 {bind.cmd}
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* Modal: Create Custom Bind */}
+      {showCreateBindModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <form onSubmit={handleCreateCustomBind} className="bg-[#12161e] border border-[#1e2633] max-w-md w-full p-5 space-y-4 shadow-2xl relative">
+            <div className="hud-corner-tl" />
+            <div className="hud-corner-tr" />
+            <div className="hud-corner-bl" />
+            <div className="hud-corner-br" />
+
+            <h3 className="text-sm font-black text-white uppercase font-mono tracking-wider flex items-center gap-2">
+              <Plus size={15} className="text-[#f97316]" />
+              <span>{lang === 'ru' ? 'СОЗДАТЬ СВОЙ БИНД' : 'CREATE CUSTOM BIND'}</span>
+            </h3>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[10px] font-mono uppercase text-zinc-400 mb-1">
+                  {lang === 'ru' ? 'Клавиша (например: mouse4, z, f2)' : 'Key (e.g. mouse4, z, f2)'}
+                </label>
+                <input
+                  type="text"
+                  value={newBindKey}
+                  onChange={(e) => setNewBindKey(e.target.value)}
+                  placeholder="mouse4"
+                  className="w-full px-3 py-2 text-xs bg-[#08090c] border border-[#1e2633] text-white focus:outline-none focus:border-[#f97316] font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase text-zinc-400 mb-1">
+                  {lang === 'ru' ? 'Команда / Действие' : 'Command / Action'}
+                </label>
+                <input
+                  type="text"
+                  value={newBindCommand}
+                  onChange={(e) => setNewBindCommand(e.target.value)}
+                  placeholder="+attack;+duck"
+                  required
+                  className="w-full px-3 py-2 text-xs bg-[#08090c] border border-[#1e2633] text-white focus:outline-none focus:border-[#f97316] font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase text-zinc-400 mb-1">
+                  {lang === 'ru' ? 'Описание бинда' : 'Description'}
+                </label>
+                <input
+                  type="text"
+                  value={newBindDesc}
+                  onChange={(e) => setNewBindDesc(e.target.value)}
+                  placeholder={lang === 'ru' ? 'Авто-атака с приседом' : 'Auto-attack crouch'}
+                  required
+                  className="w-full px-3 py-2 text-xs bg-[#08090c] border border-[#1e2633] text-white focus:outline-none focus:border-[#f97316] font-sans"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setShowCreateBindModal(false)}
+                className="btn-ghost text-xs py-1.5 px-3"
+              >
+                {lang === 'ru' ? 'Отмена' : 'Cancel'}
+              </button>
+              <button
+                type="submit"
+                disabled={isSavingCustomBind}
+                className="btn-orange text-xs py-1.5 px-4 flex items-center gap-1.5"
+              >
+                <Save size={13} />
+                <span>{isSavingCustomBind ? (lang === 'ru' ? 'Сохранение...' : 'Saving...') : (lang === 'ru' ? 'Сохранить' : 'Save')}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

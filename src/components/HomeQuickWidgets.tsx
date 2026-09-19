@@ -18,8 +18,8 @@ export const HomeQuickWidgets: React.FC<HomeQuickWidgetsProps> = ({
   lang
 }) => {
   // Quick Raid state
-  const popularTargetIds = ['wood_door', 'sheet_metal_door', 'garage_door', 'armored_door', 'stone_wall', 'sheet_wall', 'armored_wall'];
-  const [selectedTargetId, setSelectedTargetId] = useState<string>('sheet_metal_door');
+  const popularTargetIds = ['wood_door', 'sheet_door', 'garage_door', 'armored_door', 'stone_wall', 'sheet_wall', 'armored_wall'];
+  const [selectedTargetId, setSelectedTargetId] = useState<string>('sheet_door');
   const [copiedBindIdx, setCopiedBindIdx] = useState<number | null>(null);
 
   const currentTarget = raidTargets.find(t => t.id === selectedTargetId) || raidTargets[0];

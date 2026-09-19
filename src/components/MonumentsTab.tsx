@@ -291,41 +291,6 @@ const MONUMENTS_DATA: Monument[] = [
     recyclerCount: 1
   },
   {
-    id: 'launch_site',
-    name: { ru: 'Космодром (Launch Site)', en: 'Launch Site' },
-    tier: 'tier3',
-    cardsRequired: ['green', 'red'],
-    fusesRequired: 2,
-    hazmatRequired: true,
-    minRadProtection: 25,
-    cctvCodes: ['LAUNCHSITE1', 'LAUNCHSITE2'],
-    description: {
-      ru: 'Самый опасный монумент на суше. Патрулируется Брэдли (Bradley APC). В главном здании находится смертельный уровень радиации (требуется Hazmat + вода) и до 3 Элитных Ящиков.',
-      en: 'The most lucrative land monument. Guarded by Bradley APC. Main rocket building has lethal radiation (Hazmat suit + water required) and up to 3 Elite Crates on roof.'
-    },
-    keycardSteps: {
-      ru: [
-        'Включите первый переключатель в небольшом здании у забора.',
-        'Пройдите к переключателю около пусковой вышки, вставьте предохранитель.',
-        'Пройдите к главному зданию ракеты и проведите Красную карточку у центрального входа.',
-        'Поднимитесь на крышу по лестницам, постоянно принимая воду для сбивания смертельной радиации.',
-        'На крыше заберите лут из Элитных ящиков и заберите Зеленую карточку в офисе.'
-      ],
-      en: [
-        'Flip the first switch in the small transformer building near fence.',
-        'Move to rocket launcher tower switch and insert fuse.',
-        'Head to main Rocket Building and swipe Red Keycard at main entrance.',
-        'Climb to roof via stairwells while chugging water to clear high rads.',
-        'Loot Elite Crates on roof and grab Green Keycard in top office.'
-      ]
-    },
-    crates: [
-      { type: { ru: 'Элитный Ящик (Крыша)', en: 'Elite Crate (Roof)' }, count: '2-3x', iconId: 'c4' },
-      { type: { ru: 'Военный Ящик', en: 'Military Crate' }, count: '4-6x', iconId: 'rifle_body' },
-    ],
-    recyclerCount: 1
-  },
-  {
     id: 'military_tunnels',
     name: { ru: 'Военные Тоннели (Military Tunnels)', en: 'Military Tunnels' },
     tier: 'tier3',
@@ -481,36 +446,6 @@ const MONUMENTS_DATA: Monument[] = [
     crates: [
       { type: { ru: 'Военный Ящик', en: 'Military Crate' }, count: '1-2x', iconId: 'smgbody' },
       { type: { ru: 'Обычный Ящик', en: 'Regular Crate' }, count: '4-5x', iconId: 'scrap' },
-    ],
-    recyclerCount: 1
-  },
-  {
-    id: 'dome',
-    name: { ru: 'Сфера (The Dome)', en: 'The Dome' },
-    tier: 'tier2',
-    cardsRequired: [],
-    fusesRequired: 0,
-    hazmatRequired: false,
-    minRadProtection: 10,
-    cctvCodes: ['DOME1', 'DOME2'],
-    description: {
-      ru: 'Огромный гигантский шар. Не требует карточек и предохранителей, но требует паркура на вершину, где стоят 4 Военных Ящика.',
-      en: 'Giant rust sphere. No keycards or fuses needed! Requires parkour up the pipes to reach 4 Military Crates on top.'
-    },
-    keycardSteps: {
-      ru: [
-        'Поднимитесь по внешней желтой трубе.',
-        'Аккуратно перепрыгните через провалы по металлическим балкам.',
-        'Заберитесь на вершину и залутайте 4 зеленых военных ящика!'
-      ],
-      en: [
-        'Climb up outer yellow pipe.',
-        'Carefully parkour across pipe gaps.',
-        'Reach top catwalks and loot 4 Military Crates!'
-      ]
-    },
-    crates: [
-      { type: { ru: 'Военный Ящик (Наверху)', en: 'Military Crate (Top)' }, count: '4x', iconId: 'semibody' },
     ],
     recyclerCount: 1
   },
@@ -790,9 +725,9 @@ export default function MonumentsTab({ lang }: MonumentsTabProps) {
                   </h4>
 
                   <div className="flex flex-wrap gap-2 font-mono text-xs">
-                    {selectedMonument.cctvCodes.map(code => (
+                    {selectedMonument.cctvCodes.map((code, i) => (
                       <button
-                        key={code}
+                        key={`${code}-${i}`}
                         onClick={() => handleCopyCode(code)}
                         className="px-3 py-1.5 bg-[#0c0d10] hover:bg-[#cd412b]/20 border border-[#2a2f3b] hover:border-[#cd412b]/50 text-sky-300 hover:text-white rounded-sm transition-all flex items-center gap-2 cursor-pointer"
                       >

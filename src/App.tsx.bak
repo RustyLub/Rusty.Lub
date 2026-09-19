@@ -52,8 +52,7 @@ import {
   UserPlus,
   HelpCircle,
   Sun,
-  Moon,
-  Smartphone
+  Moon
 } from 'lucide-react';
 import { ToastType, CustomUser, APP_VERSION } from './types';
 
@@ -302,6 +301,7 @@ const getTabFromUrl = (): TabType => {
   }
   return 'home';
 };
+nconsole.log("useState is:", useState);
 
 
 export default function App() {
@@ -369,7 +369,6 @@ export default function App() {
   const [onlineCount, setOnlineCount] = useState<number>(0);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const isAdmin = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'admin');
-  const isOwner = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'owner');
   const isVip = useMemo(() => {
     if (isAdmin) return true;
     if (!currentUser) return false;
@@ -714,11 +713,6 @@ export default function App() {
   };
 
   const handleTabChange = (tabId: TabType) => {
-    if (tabId === 'radar' && !isVip) {
-      setCabinetModalOpen(true);
-      return;
-    }
-
     setActiveTab(tabId);
     try {
       const hash = tabId === 'home' ? '' : `#${tabId}`;
@@ -1075,65 +1069,14 @@ export default function App() {
     { id: 'quarry', label: lang === 'ru' ? 'Карьеры & Экскаватор' : 'Mining & Excavator', icon: <Cpu size={16} /> },
     { id: 'wipe', label: lang === 'ru' ? 'Вайпы & Ивенты' : 'Wipe & Events', icon: <Clock size={16} /> },
     { id: 'chat', label: lang === 'ru' ? 'Чат' : 'Chat', icon: <MessageSquare size={16} /> },
-    { id: 'radar', label: lang === 'ru' ? 'PLAYER RADAR (VIP)' : 'PLAYER RADAR (VIP)', icon: <Activity size={16} /> },
-    ...(isOwner ? [
-      { id: 'rustplus', label: lang === 'ru' ? 'Rust+ Bot Hub (OWNER)' : 'Rust+ Bot Hub (OWNER)', icon: <Smartphone size={16} /> }
+    ...(isVip ? [
+      { id: 'radar', label: lang === 'ru' ? 'PLAYER RADAR (VIP)' : 'PLAYER RADAR (VIP)', icon: <Activity size={16} /> }
     ] : []),
     ...(isAdmin ? [
       { id: 'icons', label: lang === 'ru' ? 'Иконки Rust (ADMIN)' : 'Rust Icons (ADMIN)', icon: <Image size={16} /> },
       { id: 'admin', label: 'ADMIN', icon: <ShieldCheck size={16} /> }
     ] : [])
   ] as const;
-
-  const sidebarCategories = [
-    {
-      title: lang === 'ru' ? 'СООБЩЕСТВО' : 'COMMUNITY',
-      items: [
-        { id: 'home', label: lang === 'ru' ? 'Главная' : 'Home', icon: <Home size={14} /> },
-        { id: 'news', label: lang === 'ru' ? 'Новости' : 'News', icon: <Compass size={14} /> },
-        { id: 'clan', label: lang === 'ru' ? 'Поиск Клана & Тиммейта' : 'Clan & Teammate Board', icon: <UserPlus size={14} className="text-blue-400" /> },
-        { id: 'chat', label: lang === 'ru' ? 'Чат Сообщества' : 'Community Chat', icon: <MessageSquare size={14} /> },
-      ]
-    },
-    {
-      title: lang === 'ru' ? 'ЗНАНИЯ' : 'KNOWLEDGE',
-      items: [
-        { id: 'faq', label: lang === 'ru' ? 'Частые Вопросы (FAQ)' : 'FAQ', icon: <HelpCircle size={14} className="text-orange-400" /> },
-        { id: 'errors', label: lang === 'ru' ? 'Ошибки & Решения' : 'Fixes', icon: <BookOpen size={14} /> },
-        { id: 'binds', label: lang === 'ru' ? 'Бинды & Команды' : 'Binds', icon: <Keyboard size={14} /> },
-        { id: 'fps', label: lang === 'ru' ? 'Оптимизация FPS' : 'FPS', icon: <Settings size={14} /> },
-        { id: 'weapons', label: lang === 'ru' ? 'Оружие & Спреи' : 'Weapons', icon: <Target size={14} /> },
-        { id: 'monuments', label: lang === 'ru' ? 'Монументы' : 'Monuments', icon: <MapPin size={14} /> },
-        { id: 'wipe', label: lang === 'ru' ? 'Вайпы & Ивенты' : 'Wipes', icon: <Clock size={14} /> },
-      ]
-    },
-    {
-      title: lang === 'ru' ? 'КАЛЬКУЛЯТОРЫ' : 'CALCULATORS',
-      items: [
-        { id: 'raid', label: lang === 'ru' ? 'Калькулятор Рейда' : 'Raid Calculator', icon: <Flame size={14} /> },
-        { id: 'ecoraid', label: lang === 'ru' ? 'Эко-Рейд & Soft Side' : 'Eco-Raid', icon: <Pickaxe size={14} /> },
-        { id: 'decay', label: lang === 'ru' ? 'Таймер Гниения' : 'Decay', icon: <Calculator size={14} /> },
-        { id: 'electrical', label: lang === 'ru' ? 'Электрика' : 'Electricity', icon: <Zap size={14} /> },
-        { id: 'mixing', label: lang === 'ru' ? 'Стол Смешивания' : 'Mixing Table', icon: <Cpu size={14} className="text-purple-400" /> },
-        { id: 'breeder', label: lang === 'ru' ? 'Фермерство & Генетика' : 'Farming', icon: <Sprout size={14} /> },
-        { id: 'recycler', label: lang === 'ru' ? 'Переработчик' : 'Recycling', icon: <Layers size={14} /> },
-        { id: 'quarry', label: lang === 'ru' ? 'Карьеры & Добыча' : 'Mining', icon: <Cpu size={14} /> },
-      ]
-    },
-    {
-      title: lang === 'ru' ? 'ОСОБЫЙ ДОСТУП' : 'SPECIAL ACCESS',
-      items: [
-        { id: 'radar', label: lang === 'ru' ? 'PLAYER RADAR (VIP)' : 'Player Radar (VIP)', icon: <Activity size={14} className="text-rose-400" /> },
-        ...(isOwner ? [
-          { id: 'rustplus', label: lang === 'ru' ? 'Rust+ Bot Hub (OWNER)' : 'Rust+ Bot Hub (OWNER)', icon: <Smartphone size={14} className="text-amber-400" /> }
-        ] : []),
-        ...(isAdmin ? [
-          { id: 'icons', label: lang === 'ru' ? 'Иконки Rust (ADMIN)' : 'Rust Icons (ADMIN)', icon: <Image size={14} className="text-[#10b981]" /> },
-          { id: 'admin', label: lang === 'ru' ? 'Панель Админа' : 'Admin Panel', icon: <ShieldCheck size={14} className="text-red-500" /> }
-        ] : [])
-      ]
-    }
-  ];
 
   return (
     <div 
@@ -1214,7 +1157,74 @@ export default function App() {
                 </div>
               </button>
 
+              {/* Desktop Nav Links */}
+              <div className="hidden lg:flex items-center gap-1">
+                <button
+                  onClick={() => handleTabChange('home')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+                    activeTab === 'home'
+                      ? 'text-[#f97316] bg-[#f97316]/10 font-bold'
+                      : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e]'
+                  }`}
+                >
+                  {lang === 'ru' ? 'Главная' : 'Home'}
+                </button>
+                
+                <button
+                  onClick={() => handleTabChange('tools')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+                    activeTab === 'tools' || ['raid', 'ecoraid', 'decay', 'electrical', 'mixing', 'breeder', 'recycler', 'quarry', 'radar', 'rustplus', 'icons'].includes(activeTab)
+                      ? 'text-[#f97316] bg-[#f97316]/10 font-bold'
+                      : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e]'
+                  }`}
+                >
+                  {lang === 'ru' ? 'Инструменты' : 'Tools'}
+                </button>
 
+                <button
+                  onClick={() => handleTabChange('guides')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+                    activeTab === 'guides' || ['errors', 'binds', 'fps', 'weapons', 'monuments', 'wipe'].includes(activeTab)
+                      ? 'text-[#f97316] bg-[#f97316]/10 font-bold'
+                      : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e]'
+                  }`}
+                >
+                  {lang === 'ru' ? 'Гайды' : 'Guides'}
+                </button>
+
+                <button
+                  onClick={() => handleTabChange('clan')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+                    activeTab === 'clan'
+                      ? 'text-[#f97316] bg-[#f97316]/10 font-bold'
+                      : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e]'
+                  }`}
+                >
+                  {lang === 'ru' ? 'Кланы' : 'Clans'}
+                </button>
+
+                <button
+                  onClick={() => handleTabChange('news')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+                    activeTab === 'news'
+                      ? 'text-[#f97316] bg-[#f97316]/10 font-bold'
+                      : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e]'
+                  }`}
+                >
+                  {lang === 'ru' ? 'Новости' : 'News'}
+                </button>
+
+                <button
+                  onClick={() => handleTabChange('faq')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+                    activeTab === 'faq'
+                      ? 'text-[#f97316] bg-[#f97316]/10 font-bold'
+                      : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e]'
+                  }`}
+                >
+                  FAQ
+                </button>
+              </div>
             </div>
 
             {/* Right: Actions, Search, Quick Raid, Chat, Auth & Lang */}
@@ -1460,50 +1470,7 @@ export default function App() {
 
       {/* CORE APPLICATION CONTAINER */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 relative z-10 w-full min-h-[70vh]">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Constant Desktop Left Sidebar */}
-          <aside className="hidden lg:block lg:col-span-3 bg-[#0b0d13]/95 border border-[#1d2532] shadow-2xl p-4 sticky top-[80px] max-h-[85vh] overflow-y-auto space-y-6 text-left relative overflow-hidden custom-scrollbar">
-            <div className="absolute top-0 left-0 right-0 h-1 rust-hazard" />
-            
-            {/* Corner Brackets */}
-            <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-[#f97316]/30" />
-            <div className="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-[#f97316]/30" />
-            <div className="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-[#f97316]/30" />
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-[#f97316]/30" />
-
-            {sidebarCategories.map((category) => (
-              <div key={category.title} className="space-y-1.5">
-                <h3 className="font-mono text-[10px] font-black uppercase tracking-wider text-[#ea580c] mb-2 px-2.5">
-                  {category.title}
-                </h3>
-                <div className="space-y-0.5">
-                  {category.items.map((item) => {
-                    const isActive = activeTab === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => handleTabChange(item.id as any)}
-                        className={`flex items-center gap-2.5 w-full text-left px-3 py-2 text-xs font-semibold transition-all duration-150 rounded-none cursor-pointer ${
-                          isActive
-                            ? 'text-white bg-gradient-to-r from-[#ea580c]/20 to-transparent border-l-2 border-[#ea580c] font-bold'
-                            : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e] border-l-2 border-transparent'
-                        }`}
-                      >
-                        <span className={isActive ? 'text-[#f97316]' : 'text-[#8b95a8]'}>
-                          {item.icon}
-                        </span>
-                        <span className="truncate">{item.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </aside>
-
-          {/* Active Tab View */}
-          <div className="lg:col-span-9 w-full">
-            <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait">
           {activeTab === 'admin' && isAdmin && (
             <motion.div
               key="admin"
@@ -1557,10 +1524,6 @@ export default function App() {
                 onSetRegionFilter={(reg) => setRegionFilter(reg)}
                 serverSearch={serverSearch}
                 onSetServerSearch={(search) => setServerSearch(search)}
-                twitchSettings={twitchSettings}
-                showJungleFeverSpoiler={showJungleFeverSpoiler}
-                onGenerateWallpaper={generateWallpaper}
-                appTranslations={appTranslations}
               />
             </motion.div>
           )}
@@ -1573,7 +1536,7 @@ export default function App() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
             >
-              <ToolsHubTab lang={lang} onNavigate={(tab) => handleTabChange(tab)} isVip={isVip} isAdmin={isAdmin} isOwner={isOwner} onOpenVip={() => setCabinetModalOpen(true)} />
+              <ToolsHubTab lang={lang} onNavigate={(tab) => handleTabChange(tab)} />
             </motion.div>
           )}
 
@@ -1588,6 +1551,501 @@ export default function App() {
               <GuidesHubTab lang={lang} onNavigate={(tab) => handleTabChange(tab)} />
             </motion.div>
           )}
+
+
+
+
+              {/* 2 Featured Promo Modules: Jungle Fever & Telegram LFG Bot (Compact sleek layout) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+                {/* Jungle Fever Spoiler Block */}
+                {showJungleFeverSpoiler && (
+                  <div className="bg-[#0f131c]/95 border border-[#2a344a] hover:border-[#ff2a4d]/60 rounded-none p-3.5 sm:p-4 shadow-lg relative overflow-hidden flex flex-col justify-between group transition-all">
+                    <div className="hud-corner-tl" />
+                    <div className="hud-corner-tr" />
+                    <div className="hud-corner-bl" />
+                    <div className="hud-corner-br" />
+                    
+                    <div>
+                      <div className="relative mb-2.5 overflow-hidden border border-[#2a344a] bg-black/80 aspect-[21/9] sm:aspect-[16/7] max-h-28">
+                        <img 
+                          referrerPolicy="no-referrer" 
+                          src="https://i.ytimg.com/vi/RxS0ISoktOY/maxresdefault.jpg" 
+                          alt="Jungle Fever Part 1" 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                        />
+                        <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-black/80 border border-[#ff2a4d]/50 text-[#ff2a4d] text-[8px] font-mono font-black uppercase tracking-wider flex items-center gap-1">
+                          <span>🎬</span>
+                          <span>{lang === 'ru' ? 'СЕРИЯ ФИЛЬМОВ' : 'MOVIE SERIES'}</span>
+                        </div>
+                      </div>
+                      <h4 className="text-xs sm:text-sm font-black text-white font-sans uppercase mb-1 group-hover:text-[#ff2a4d] transition-colors truncate">
+                        {lang === 'ru' ? 'Jungle Fever - Фильм Solo Rust' : 'Jungle Fever - Solo Rust Movie'}
+                      </h4>
+                      <p className="text-[11px] text-gray-300 font-sans mb-3 line-clamp-2 leading-relaxed">
+                        {lang === 'ru' ? 'Первая часть захватывающей серии фильмов Jungle Fever!' : 'First part of the thrilling Jungle Fever movie series!'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 pt-2 border-t border-[#2a344a]/50">
+                      <button
+                        onClick={() => setActiveTab('news')}
+                        className="w-full py-2 bg-[#cd412b] hover:bg-[#b53723] text-white text-[9px] font-black uppercase tracking-widest font-mono cursor-pointer transition-all border border-[#e6553f] shadow-sm flex items-center justify-center gap-1.5"
+                      >
+                        <Play size={10} className="fill-white" />
+                        <span>{lang === 'ru' ? 'СМОТРЕТЬ ПЕРВУЮ ЧАСТЬ' : 'WATCH PART 1'}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Rust LFG Bot Featured Banner */}
+                <div className={`bg-[#0f131c]/95 border border-[#2a344a] hover:border-blue-500/60 rounded-none p-3.5 sm:p-4 shadow-lg relative overflow-hidden flex flex-col justify-between group transition-all ${!showJungleFeverSpoiler ? 'md:col-span-2' : ''}`}>
+                  <div className="hud-corner-tl" />
+                  <div className="hud-corner-tr" />
+                  <div className="hud-corner-bl" />
+                  <div className="hud-corner-br" />
+                  
+                  <div>
+                    <div className="relative mb-2.5 overflow-hidden border border-[#2a344a] bg-gradient-to-br from-[#0c1017] to-[#121824] aspect-[21/9] sm:aspect-[16/7] max-h-28 flex items-center justify-center">
+                      <img 
+                        referrerPolicy="no-referrer" 
+                        src="/rust_lfg_bot.png" 
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (!target.src.includes('/images/rust_lfg_bot.png')) {
+                            target.src = '/images/rust_lfg_bot.png';
+                          }
+                        }}
+                        alt="Rust LFG Bot" 
+                        className="h-full w-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" 
+                      />
+                      <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-black/80 border border-blue-400/50 text-blue-400 text-[8px] font-mono font-black uppercase tracking-wider flex items-center gap-1">
+                        <span>🤖</span>
+                        <span>TELEGRAM BOT</span>
+                      </div>
+                    </div>
+                    <h4 className="text-xs sm:text-sm font-black text-white font-sans uppercase mb-1 group-hover:text-blue-400 transition-colors flex items-center gap-1.5 truncate">
+                      <span>🤖</span>
+                      <span className="truncate">{lang === 'ru' ? 'Бот для поиска команды в Rust' : 'Teammate & Clan Finder Bot'}</span>
+                    </h4>
+                    <p className="text-[11px] text-gray-300 font-sans mb-3 line-clamp-2 leading-relaxed">
+                      {lang === 'ru' ? '@RustLFGBot — поиск тиммейтов и кланов прямо в Telegram.' : '@RustLFGBot — find teammates and clans directly in Telegram.'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 pt-2 border-t border-[#2a344a]/50">
+                    <button
+                      onClick={() => setActiveTab('news')}
+                      className="w-full py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-[9px] font-black uppercase tracking-widest font-mono cursor-pointer transition-all border border-blue-400/50 shadow-sm flex items-center justify-center gap-1.5"
+                    >
+                      <ExternalLink size={10} />
+                      <span>{lang === 'ru' ? 'ПЕРЕЙТИ К НОВОСТИ' : 'READ FULL NEWS'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Twitch Live Stream Widget */}
+              {twitchSettings && (twitchSettings.isManualLive || twitchSettings.isLiveFromApi) && (
+                <div className="bg-[#14171e]/90 border-2 border-purple-600/50 rounded-none p-6 shadow-[0_0_25px_rgba(168,85,247,0.15)] relative overflow-hidden rust-metal-pattern">
+                  {/* Tactical Corner Brackets with purple hue */}
+                  <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-purple-500" />
+                  <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-purple-500" />
+                  <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-purple-500" />
+                  <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-purple-500" />
+
+                  {/* Twitch Purple top header stripe */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-purple-600" />
+
+                  <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+                    <div className="space-y-3 flex-1">
+                      {/* Live Badge */}
+                      <div className="flex items-center gap-2">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-red-500 font-mono">
+                          {lang === 'ru' ? 'ПРЯМОЙ ЭФИР' : 'LIVE BROADCAST'}
+                        </span>
+                        <span className="text-gray-600 font-mono text-[9px]">•</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-purple-400 font-mono flex items-center gap-1">
+                          <span>TWITCH</span>
+                        </span>
+                        {!!twitchSettings.viewerCount && twitchSettings.viewerCount > 0 && (
+                          <>
+                            <span className="text-gray-600 font-mono text-[9px]">•</span>
+                            <span className="text-[9px] font-bold text-gray-300 font-mono">
+                              👁️ {twitchSettings.viewerCount} {lang === 'ru' ? 'зрителей' : 'viewers'}
+                            </span>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        <h3 className="text-xl sm:text-2xl font-black text-white uppercase leading-tight font-sans tracking-wide">
+                          {twitchSettings.streamTitle || twitchSettings.apiTitle || (lang === 'ru' ? 'НАЧАЛСЯ СТРИМ!' : 'STREAM IS LIVE!')}
+                        </h3>
+                        <p className="text-xs text-zinc-400 font-mono">
+                          {lang === 'ru' ? 'Канал:' : 'Channel:'} <span className="text-purple-400 font-bold hover:underline cursor-pointer" onClick={() => window.open(`https://twitch.tv/${twitchSettings.channelName}`, '_blank')}>{twitchSettings.channelName}</span>
+                          {twitchSettings.gameName && ` • ${lang === 'ru' ? 'Категория' : 'Category'}: ${twitchSettings.gameName}`}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2.5 pt-1">
+                        <a
+                          href={`https://twitch.tv/${twitchSettings.channelName}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-black uppercase tracking-widest font-mono transition-all cursor-pointer flex items-center gap-1.5 shadow-lg shadow-purple-600/20 border border-purple-500"
+                        >
+                          <span className="text-xs">📺</span>
+                          <span>{lang === 'ru' ? 'ПЕРЕЙТИ НА TWITCH КАНАЛ' : 'GO TO TWITCH CHANNEL'}</span>
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Interactive Twitch Stream Frame embed */}
+                    <div className="w-full lg:w-[420px] aspect-video border border-purple-500/20 bg-black/50 relative overflow-hidden shrink-0">
+                      <iframe
+                        src={`https://player.twitch.tv/?channel=${twitchSettings.channelName}&parent=${window.location.hostname}&muted=false`}
+                        frameBorder="0"
+                        allowFullScreen={true}
+                        scrolling="no"
+                        className="w-full h-full"
+                      ></iframe>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Clan EAC Leader & Veteran Bio + Twitch Pro-Tip + Sidebar */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+                {/* Left Column: Founder Bio + NEW Twitch Advice Tracker */}
+                <div className="md:col-span-8 space-y-4">
+                  {/* Biography card - Compact & Practical */}
+                  <div className="bg-[#11141c]/95 border border-[#2a344a] p-4 sm:p-5 shadow-xl relative overflow-hidden flex flex-col justify-between group">
+                    <div className="hud-corner-tl" />
+                    <div className="hud-corner-tr" />
+                    <div className="hud-corner-bl" />
+                    <div className="hud-corner-br" />
+
+                    <div className="space-y-3">
+                      {/* Header Row */}
+                      <div className="flex items-center justify-between flex-wrap gap-2.5 pb-2.5 border-b border-[#20293a]">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-2xl">👑</span>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h2 className="text-base sm:text-lg font-black text-white tracking-wider font-sans uppercase leading-none">
+                                {appTranslations.founderTitle[lang]}
+                              </h2>
+                              <span className="px-1.5 py-0.5 bg-[#cd412b]/20 border border-[#cd412b]/50 text-[#ff4b36] text-[9px] font-bold font-mono">
+                                [EAC]{'{'}CHEATER{'}'}
+                              </span>
+                              {/* Recruitment Status Badge */}
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 text-[8.5px] font-bold font-mono uppercase">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                <span>{lang === 'ru' ? 'НАБОР АКТИВЕН' : 'RECRUITMENT ACTIVE'}</span>
+                              </span>
+                            </div>
+
+                            {/* In-game Roles Badges */}
+                            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                              <span className="text-[8px] font-mono uppercase font-bold text-zinc-500">
+                                {lang === 'ru' ? 'РОЛИ:' : 'ROLES:'}
+                              </span>
+                              <span className="px-1.5 py-0.2 bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[8.5px] font-mono font-bold">
+                                🏗️ BUILDER
+                              </span>
+                              <span className="px-1.5 py-0.2 bg-red-500/10 border border-red-500/30 text-red-400 text-[8.5px] font-mono font-bold">
+                                💥 RAID LEADER
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Compact Rust Survival Stats HUD */}
+                        <div className="flex items-center gap-3 bg-[#0a0d14] px-2.5 py-1 border border-[#222a38] text-[9px] font-mono">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-orange-400">🥩 FOOD</span>
+                            <span className="font-bold text-white">250</span>
+                          </div>
+                          <span className="text-gray-700">|</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-blue-400">💧 WATER</span>
+                            <span className="font-bold text-white">250</span>
+                          </div>
+                          <span className="text-gray-700">|</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-emerald-400">☢️ RADS</span>
+                            <span className="font-bold text-emerald-400">0</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Brief Bio */}
+                      <p className="text-[11.5px] text-gray-300 leading-relaxed font-sans">
+                        {appTranslations.founderDesc[lang]}
+                      </p>
+
+                      {/* Compact 3-Column Metrics Grid */}
+                      <div className="grid grid-cols-3 gap-2.5 pt-0.5">
+                        <div className="bg-[#161a24] p-2 border border-[#263044] text-center">
+                          <span className="block text-[8.5px] text-gray-400 uppercase font-mono font-bold tracking-wider mb-0.5">
+                            {appTranslations.hoursCount[lang]}
+                          </span>
+                          <span className="text-sm sm:text-base font-black text-white font-mono">12 000+</span>
+                        </div>
+
+                        <div className="bg-[#161a24] p-2 border border-[#263044] text-center">
+                          <span className="block text-[8.5px] text-gray-400 uppercase font-mono font-bold tracking-wider mb-0.5">
+                            {lang === 'ru' ? 'РАЗРАБОТКА' : 'DEV STATUS'}
+                          </span>
+                          <span className="text-sm sm:text-base font-black text-blue-400 font-mono">Solo Dev</span>
+                        </div>
+
+                        <div className="bg-[#161a24] p-2 border border-[#263044] text-center">
+                          <span className="block text-[8.5px] text-gray-400 uppercase font-mono font-bold tracking-wider mb-0.5">
+                            {appTranslations.vacStatus[lang]}
+                          </span>
+                          <span className="text-sm sm:text-base font-black text-emerald-400 font-mono">{appTranslations.vacSafe[lang]}</span>
+                        </div>
+                      </div>
+
+                      {/* Author Contact / Cooperation & Bug Reports Bar */}
+                      <div className="bg-[#0c1017] border border-[#20293a] p-2.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-300">
+                          <span className="text-[#cd412b] font-bold">📩</span>
+                          <span className="font-bold uppercase text-zinc-400">
+                            {lang === 'ru' ? 'Связь / Сотрудничество / Баги:' : 'Contact / Collab / Bugs:'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <a
+                            href="https://t.me/S1mreyReserve"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-sky-500/15 hover:bg-sky-500 hover:text-white text-sky-400 text-[9.5px] font-mono font-bold uppercase tracking-wider transition-all border border-sky-500/30"
+                          >
+                            <Send size={10} />
+                            <span>Telegram: @S1mreyReserve</span>
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText('eaccheater');
+                              setCopiedDiscord(true);
+                              setTimeout(() => setCopiedDiscord(false), 2000);
+                            }}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 text-[9.5px] font-mono font-bold uppercase tracking-wider transition-all border cursor-pointer ${
+                              copiedDiscord 
+                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50' 
+                                : 'bg-[#5865f2]/15 hover:bg-[#5865f2] hover:text-white text-[#8891f2] border-[#5865f2]/30'
+                            }`}
+                          >
+                            {copiedDiscord ? <Check size={10} className="text-emerald-400" /> : <Copy size={10} />}
+                            <span>{copiedDiscord ? (lang === 'ru' ? 'СКОПИРОВАНО!' : 'COPIED!') : 'Discord: eaccheater'}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Action buttons row */}
+                      <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                        <button
+                          id="steam-profile-btn"
+                          disabled
+                          title={lang === 'ru' ? 'Временно недоступно' : 'Temporarily unavailable'}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 bg-[#12141a] border border-[#1f2637] opacity-60 cursor-not-allowed select-none shadow-sm"
+                        >
+                          <Gamepad2 size={12} className="text-zinc-500" />
+                          <span>{lang === 'ru' ? 'Steam Профиль' : 'Steam Profile'}</span>
+                          <span className="text-[8px] px-1 py-0.2 bg-zinc-800 text-zinc-400 border border-zinc-700">
+                            {lang === 'ru' ? 'СКОРО' : 'SOON'}
+                          </span>
+                        </button>
+
+                        <a
+                          href="https://www.twitch.tv/tv_cheater/about"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-purple-300 bg-[#6441a5]/15 hover:bg-[#6441a5] hover:text-white transition-all border border-[#6441a5]/40 shadow-sm"
+                        >
+                          <Twitch size={12} className="text-purple-400" />
+                          <span>{lang === 'ru' ? 'Twitch Канал' : 'Twitch Channel'}</span>
+                          <ExternalLink size={9} className="opacity-75" />
+                        </a>
+
+                        <button
+                          onClick={generateWallpaper}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 hover:bg-amber-500 hover:text-black transition-all border border-amber-500/30 shadow-sm cursor-pointer ml-auto"
+                        >
+                          <Sparkles size={12} />
+                          <span>{lang === 'ru' ? 'Обои Rust' : 'Rust Wallpaper'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 mt-3 border-t border-[#20293a] flex items-center justify-between flex-wrap gap-2 text-[10px] text-gray-500 font-mono">
+                      <span>{appTranslations.copyright[lang]}</span>
+                      <a
+                        href="https://discord.gg/R2TyKZ9xvZ"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[#ff4b36] hover:underline font-bold uppercase"
+                      >
+                        <span>{appTranslations.joinClan[lang]}</span>
+                        <ExternalLink size={10} />
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* NEW Compact & Practical Widget: Совет начать отслеживать стримы на Twitch */}
+                  <div className="bg-gradient-to-r from-[#141224] via-[#101322] to-[#141224] border border-[#6441a5]/50 hover:border-[#9146ff] p-4 sm:p-5 shadow-xl relative overflow-hidden group transition-all">
+                    <div className="hud-corner-tl" />
+                    <div className="hud-corner-tr" />
+                    <div className="hud-corner-bl" />
+                    <div className="hud-corner-br" />
+
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-[#6441a5]/20 border border-[#9146ff]/40 text-[#a970ff] shrink-0">
+                          <Twitch size={18} />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 bg-[#9146ff]/20 text-[#bf94ff] border border-[#9146ff]/30 uppercase">
+                              {lang === 'ru' ? 'СОВЕТ ИГРОКАМ' : 'PRO-TIP'}
+                            </span>
+                            <span className="flex items-center gap-1 text-[9px] text-purple-300 font-mono">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#9146ff] animate-ping" />
+                              tv_cheater
+                            </span>
+                          </div>
+                          <h3 className="text-sm sm:text-base font-black text-white uppercase font-sans tracking-wide mt-0.5">
+                            {lang === 'ru' ? 'Совет: Начните отслеживать стримы на Twitch канале' : 'Tip: Start Following Live Streams on Twitch'}
+                          </h3>
+                        </div>
+                      </div>
+
+                      <a
+                        href="https://www.twitch.tv/tv_cheater"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3.5 py-1.5 bg-[#9146ff] hover:bg-[#772ce8] text-white text-[10px] font-mono font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md shadow-[#9146ff]/20 border border-[#a970ff] shrink-0"
+                      >
+                        <Twitch size={11} />
+                        <span>{lang === 'ru' ? 'ОТСЛЕЖИВАТЬ КАНАЛ' : 'FOLLOW ON TWITCH'}</span>
+                        <ExternalLink size={10} />
+                      </a>
+                    </div>
+
+                    {/* Practical Benefits 3-Point Checklist */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-[11px] text-zinc-300 font-sans">
+                      <div className="bg-black/30 border border-[#2b2247] p-2.5 flex items-start gap-2">
+                        <span className="text-purple-400 font-bold">⚡</span>
+                        <div>
+                          <span className="font-bold text-white block text-[10.5px] uppercase font-mono">
+                            {lang === 'ru' ? 'Старты вайпов и рейды' : 'Wipe Days & Raids'}
+                          </span>
+                          <span className="text-[10px] text-zinc-400 leading-tight block mt-0.5">
+                            {lang === 'ru' ? 'Смотрите штурмы баз и тактики выживания в реальном времени' : 'Watch real-time base raids, defenses, and live tactics'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="bg-black/30 border border-[#2b2247] p-2.5 flex items-start gap-2">
+                        <span className="text-purple-400 font-bold">🎯</span>
+                        <div>
+                          <span className="font-bold text-white block text-[10.5px] uppercase font-mono">
+                            {lang === 'ru' ? 'Фишки и схемы баз' : 'Base Builds & Tips'}
+                          </span>
+                          <span className="text-[10px] text-zinc-400 leading-tight block mt-0.5">
+                            {lang === 'ru' ? 'Разборы спреев, схем электрики и оптимизации ресурсов' : 'Recoil breakdowns, electrical setups & cost optimization'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="bg-black/30 border border-[#2b2247] p-2.5 flex items-start gap-2">
+                        <span className="text-purple-400 font-bold">🎁</span>
+                        <div>
+                          <span className="font-bold text-white block text-[10.5px] uppercase font-mono">
+                            {lang === 'ru' ? 'Дропы и розыгрыши' : 'Drops & Giveaways'}
+                          </span>
+                          <span className="text-[10px] text-zinc-400 leading-tight block mt-0.5">
+                            {lang === 'ru' ? 'Включайте колокольчик, чтобы не пропускать подарки и закрытые паки' : 'Turn on the bell notification for exclusive viewer drops'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: News & Updates + Discord Widget */}
+                <div className="md:col-span-4 space-y-4">
+                  {/* News & Updates Widget - Compact & Practical */}
+                  <div className="bg-[#11141c]/95 border border-[#2a344a] p-4 shadow-xl relative overflow-hidden group">
+                    <div className="hud-corner-tl" />
+                    <div className="hud-corner-tr" />
+                    <div className="hud-corner-bl" />
+                    <div className="hud-corner-br" />
+
+                    {/* Top Hazard Warning Stripe */}
+                    <div className="absolute top-0 left-0 right-0 h-0.5 rust-hazard" />
+
+                    <div className="space-y-3">
+                      {/* Flashing Alert Indicator */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 bg-[#cd412b]/15 border border-[#cd412b]/40 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-[#ff4b36] font-mono">
+                          <span className="relative flex h-1.5 w-1.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#ff4b36]"></span>
+                          </span>
+                          <span>{lang === 'ru' ? 'СВЕЖИЕ НОВОСТИ' : 'LATEST NEWS'}</span>
+                        </div>
+                        <span className="text-[8.5px] font-mono text-gray-500 font-bold uppercase">FEED_v2.6</span>
+                      </div>
+
+                      <div className="space-y-0.5">
+                        <h3 className="text-xs sm:text-sm font-black text-white tracking-wider font-mono uppercase">
+                          {lang === 'ru' ? 'Новости и обновления Rust' : 'Rust News & Updates'}
+                        </h3>
+                        <div className="h-[1px] w-8 bg-[#cd412b]" />
+                      </div>
+
+                      {/* July Update Promo */}
+                      <div className="bg-[#171b26] border border-[#222a38] p-3 space-y-1.5 relative text-left">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[8px] text-[#ff4b36] font-mono font-bold uppercase tracking-wider">
+                            UPDATE 2026
+                          </span>
+                          <span className="text-[7.5px] font-mono text-gray-500">02.07.2026</span>
+                        </div>
+                        <h4 className="text-[11.5px] font-black text-white uppercase tracking-wide leading-snug">
+                          {lang === 'ru' 
+                            ? 'Июльское обновление Rust & Функции Rusty.Lub' 
+                            : 'July Rust Update & Rusty.Lub Features'}
+                        </h4>
+                        <p className="text-[10px] text-gray-400 font-sans leading-relaxed line-clamp-3">
+                          {lang === 'ru'
+                            ? 'Глобальный патч Rust. Калькуляторы обновлены под актуальный баланс, улучшена скорость загрузки и добавлен кастомный фон визитки в кабинете!'
+                            : 'Global Rust patch. Calculators updated for current balance, improved load speeds, and custom card backgrounds added!'}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => handleTabChange('news')}
+                        className="w-full flex items-center justify-center gap-1.5 py-2 bg-[#cd412b] hover:bg-[#b03825] text-white text-[9px] font-mono font-black uppercase tracking-widest transition-all cursor-pointer border border-[#e6553f] shadow-sm"
+                      >
+                        <span>{lang === 'ru' ? 'ЧИТАТЬ ОБНОВЛЕНИЕ' : 'READ PATCH LOG'}</span>
+                        <ChevronRight size={11} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Discord Widget */}
+                  <DiscordWidget lang={lang} />
+                </div>
+              </div>
+
 
 
           {activeTab === 'news' && (
@@ -1940,8 +2398,6 @@ export default function App() {
             </motion.div>
           )}
             </AnimatePresence>
-          </div>
-        </div>
       </main>
 
       {/* DONATION MODAL */}

@@ -25,6 +25,7 @@ export interface BindItem {
   category: 'PVP' | 'МЕДИЦИНА' | 'ФАРМ' | 'СТРОЙКА' | 'УПРАВЛЕНИЕ' | 'QOL' | 'МОДОВЫЕ';
   cmd: string;
   desc: string;
+  key?: string;
   explanation?: string;
 }
 
@@ -37,7 +38,7 @@ export interface AdminCommandItem {
 }
 
 export interface RaidWeapon {
-  id: 'c4' | 'rocket' | 'satchel' | 'explosive_ammo' | 'beancan';
+  id: 'c4' | 'rocket' | 'satchel' | 'explosive_ammo' | 'beancan' | 'propane' | 'mlrs';
   name: string;
   sulfurPer: number;
   charcoalPer: number;
@@ -70,6 +71,8 @@ export interface RaidTarget {
   satchel: number;
   explosive_ammo: number;
   beancan: number;
+  propane: number;
+  mlrs: number;
 }
 
 export interface ToastType {
@@ -99,7 +102,7 @@ export interface CustomUser {
   customTheme?: string;
   gender?: 'male' | 'female';
   steamLink?: string;
-  role?: 'admin' | 'user';
+  role?: 'admin' | 'user' | 'owner';
   isVip?: boolean;
   isChatVip?: boolean;
   vipUntil?: string;
@@ -164,6 +167,55 @@ export interface SessionEntry {
   isActive: boolean;
 }
 
-export const APP_VERSION = 'v2.6';
+export interface SavedRaid {
+  id: string;
+  userId: string;
+  name: string;
+  title?: string;
+  createdAt: string;
+  targets?: { id: string; name: string; count: number }[];
+  weapon?: string;
+  totalSulfur?: number;
+  totalGp?: number;
+  totalCharcoal?: number;
+  totalMetal?: number;
+  totalRockets?: number;
+  totalC4?: number;
+  totalSatchels?: number;
+  totalPropane?: number;
+  totalMlrs?: number;
+  selectedWeaponId?: 'c4' | 'rocket' | 'satchel' | 'explosive_ammo' | 'beancan' | 'propane' | 'mlrs';
+  totalWeaponsNeeded?: number;
+}
+
+export interface SavedBind {
+  id: string;
+  userId: string;
+  title: string;
+  description?: string;
+  key: string;
+  command: string;
+  category: string;
+  createdAt: string;
+}
+
+export interface ClanApplicationItem {
+  id: string;
+  clanId: string;
+  clanName: string;
+  userId: string;
+  userDisplayName: string;
+  userAvatar: string;
+  hoursPlayed?: number;
+  playstyle?: string;
+  role?: string;
+  status: 'pending' | 'accepted' | 'declined' | 'rejected';
+  appliedAt?: string;
+  createdAt?: string;
+  message?: string;
+}
+
+export const APP_VERSION = 'v3.0';
+
 
 
