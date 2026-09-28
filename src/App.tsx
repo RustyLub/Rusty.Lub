@@ -53,7 +53,8 @@ import {
   HelpCircle,
   Sun,
   Moon,
-  Smartphone
+  Smartphone,
+  LayoutGrid
 } from 'lucide-react';
 import { ToastType, CustomUser, APP_VERSION } from './types';
 
@@ -105,6 +106,8 @@ import TermsModal from './components/TermsModal';
 import NotificationSettingsModal from './components/NotificationSettingsModal';
 import ConfigExporterModal from './components/ConfigExporterModal';
 import { CommandPaletteModal } from './components/CommandPaletteModal';
+import SectionsDrawer from './components/SectionsDrawer';
+import SpecialAccessGated from './components/SpecialAccessGated';
 import { logUserActivity } from './services/activityLogger';
 import { PlayerRadar } from './components/Radar/PlayerRadar';
 import DiscordWidget from './components/DiscordWidget';
@@ -326,9 +329,9 @@ export default function App() {
   const [lang, setLang] = useState<'ru' | 'en'>('en');
   const [appTheme, setAppTheme] = useState<'dark' | 'light'>(() => {
     try {
-      return (localStorage.getItem('rust_app_theme') as 'dark' | 'light') || 'dark';
+      return (localStorage.getItem('rust_app_theme') as 'dark' | 'light') || 'light';
     } catch {
-      return 'dark';
+      return 'light';
     }
   });
 
@@ -394,18 +397,22 @@ export default function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [cabinetModalOpen, setCabinetModalOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [sectionsDrawerOpen, setSectionsDrawerOpen] = useState(false);
   const [announcement, setAnnouncement] = useState<{ text: string; active: boolean; type: 'info' | 'hazard' | 'important' } | null>(null);
 
-  // Global Ctrl+K / Cmd+K / / shortcut to trigger Command Palette
+  // Global Ctrl+K / Cmd+K / / shortcut to trigger Command Palette & M to trigger Sections Drawer
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       // Don't trigger if user is typing inside an input or textarea (unless Ctrl/Cmd is pressed)
       const target = e.target as HTMLElement;
-      const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA');
+      const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
 
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setCommandPaletteOpen(prev => !prev);
+      } else if (!isInput && e.key.toLowerCase() === 'm' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        setSectionsDrawerOpen(prev => !prev);
       } else if (!isInput && e.key === '/') {
         e.preventDefault();
         setCommandPaletteOpen(true);
@@ -715,7 +722,25 @@ export default function App() {
 
   const handleTabChange = (tabId: TabType) => {
     if (tabId === 'radar' && !isVip) {
-      setCabinetModalOpen(true);
+      if (!currentUser) {
+        setAuthModalOpen(true);
+      } else {
+        setCabinetModalOpen(true);
+      }
+      return;
+    }
+
+    if (tabId === 'rustplus' && !isOwner) {
+      if (!currentUser) {
+        setAuthModalOpen(true);
+      }
+      return;
+    }
+
+    if ((tabId === 'admin' || tabId === 'icons') && !isAdmin) {
+      if (!currentUser) {
+        setAuthModalOpen(true);
+      }
       return;
     }
 
@@ -1075,11 +1100,13 @@ export default function App() {
     { id: 'quarry', label: lang === 'ru' ? 'Карьеры & Экскаватор' : 'Mining & Excavator', icon: <Cpu size={16} /> },
     { id: 'wipe', label: lang === 'ru' ? 'Вайпы & Ивенты' : 'Wipe & Events', icon: <Clock size={16} /> },
     { id: 'chat', label: lang === 'ru' ? 'Чат' : 'Chat', icon: <MessageSquare size={16} /> },
-    { id: 'radar', label: lang === 'ru' ? 'PLAYER RADAR (VIP)' : 'PLAYER RADAR (VIP)', icon: <Activity size={16} /> },
-    ...(isOwner ? [
+    ...(currentUser && isVip ? [
+      { id: 'radar', label: lang === 'ru' ? 'PLAYER RADAR (VIP)' : 'PLAYER RADAR (VIP)', icon: <Activity size={16} /> }
+    ] : []),
+    ...(currentUser && isOwner ? [
       { id: 'rustplus', label: lang === 'ru' ? 'Rust+ Bot Hub (OWNER)' : 'Rust+ Bot Hub (OWNER)', icon: <Smartphone size={16} /> }
     ] : []),
-    ...(isAdmin ? [
+    ...(currentUser && isAdmin ? [
       { id: 'icons', label: lang === 'ru' ? 'Иконки Rust (ADMIN)' : 'Rust Icons (ADMIN)', icon: <Image size={16} /> },
       { id: 'admin', label: 'ADMIN', icon: <ShieldCheck size={16} /> }
     ] : [])
@@ -1120,30 +1147,34 @@ export default function App() {
         { id: 'quarry', label: lang === 'ru' ? 'Карьеры & Добыча' : 'Mining', icon: <Cpu size={14} /> },
       ]
     },
-    {
-      title: lang === 'ru' ? 'ОСОБЫЙ ДОСТУП' : 'SPECIAL ACCESS',
-      items: [
-        { id: 'radar', label: lang === 'ru' ? 'PLAYER RADAR (VIP)' : 'Player Radar (VIP)', icon: <Activity size={14} className="text-rose-400" /> },
-        ...(isOwner ? [
-          { id: 'rustplus', label: lang === 'ru' ? 'Rust+ Bot Hub (OWNER)' : 'Rust+ Bot Hub (OWNER)', icon: <Smartphone size={14} className="text-amber-400" /> }
-        ] : []),
-        ...(isAdmin ? [
-          { id: 'icons', label: lang === 'ru' ? 'Иконки Rust (ADMIN)' : 'Rust Icons (ADMIN)', icon: <Image size={14} className="text-[#10b981]" /> },
-          { id: 'admin', label: lang === 'ru' ? 'Панель Админа' : 'Admin Panel', icon: <ShieldCheck size={14} className="text-red-500" /> }
-        ] : [])
-      ]
-    }
+    ...(Boolean(currentUser && (isVip || isOwner || isAdmin)) ? [
+      {
+        title: lang === 'ru' ? 'ОСОБЫЙ ДОСТУП' : 'SPECIAL ACCESS',
+        items: [
+          ...(currentUser && isVip ? [
+            { id: 'radar', label: lang === 'ru' ? 'PLAYER RADAR (VIP)' : 'Player Radar (VIP)', icon: <Activity size={14} className="text-rose-400" /> }
+          ] : []),
+          ...(currentUser && isOwner ? [
+            { id: 'rustplus', label: lang === 'ru' ? 'Rust+ Bot Hub (OWNER)' : 'Rust+ Bot Hub (OWNER)', icon: <Smartphone size={14} className="text-amber-400" /> }
+          ] : []),
+          ...(currentUser && isAdmin ? [
+            { id: 'icons', label: lang === 'ru' ? 'Иконки Rust (ADMIN)' : 'Rust Icons (ADMIN)', icon: <Image size={14} className="text-[#10b981]" /> },
+            { id: 'admin', label: lang === 'ru' ? 'Панель Админа' : 'Admin Panel', icon: <ShieldCheck size={14} className="text-red-500" /> }
+          ] : [])
+        ]
+      }
+    ] : [])
   ];
 
   return (
     <div 
-      className={`min-h-screen font-sans relative selection:bg-[#ff2a4d]/30 selection:text-white pb-20 scanlines bg-cover bg-center bg-no-repeat bg-fixed transition-colors duration-200 ${
-        appTheme === 'light' ? 'text-[#0f172a]' : 'text-[#c8d0d8]'
+      className={`min-h-screen font-sans relative selection:bg-[#ff2a4d]/30 selection:text-white pb-20 transition-colors duration-200 ${
+        appTheme === 'light' 
+          ? 'bg-[#f4f3f0] text-neutral-900' 
+          : 'bg-[#07090f] text-[#c8d0d8] scanlines bg-cover bg-center bg-no-repeat bg-fixed'
       }`}
-      style={{
-        backgroundImage: appTheme === 'light'
-          ? `linear-gradient(to bottom, rgba(241, 245, 249, 0.94), rgba(226, 232, 240, 0.98)), url(${customSwampBg})`
-          : `linear-gradient(to bottom, rgba(7, 9, 15, 0.55), rgba(7, 9, 15, 0.72)), url(${customSwampBg})`
+      style={appTheme === 'light' ? { backgroundColor: '#f4f3f0' } : {
+        backgroundImage: `linear-gradient(to bottom, rgba(7, 9, 15, 0.55), rgba(7, 9, 15, 0.72)), url(${customSwampBg})`
       }}
     >
       {/* Topmost Warning Hazard Stripe for authentic Facepunch feel */}
@@ -1183,11 +1214,11 @@ export default function App() {
       {/* HEADER / NAVIGATION BAR - Tactical Command × Orange Blaze */}
       <nav className={`sticky top-0 z-40 backdrop-blur-md border-b transition-colors duration-200 ${
         appTheme === 'light'
-          ? 'bg-white/95 border-[#1e2633]/20 shadow-[0_4px_25px_rgba(0,0,0,0.06)]'
+          ? 'bg-white/95 border-neutral-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)]'
           : 'bg-[#08090c]/95 border-[#1e2633] shadow-[0_4px_25px_rgba(0,0,0,0.8)]'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-15">
+          <div className="flex items-center justify-between h-16">
             {/* Left: Brand Logo + Primary Nav */}
             <div className="flex items-center gap-6 sm:gap-8">
               {/* Logo */}
@@ -1195,26 +1226,84 @@ export default function App() {
                 onClick={() => handleTabChange('home')}
                 className="flex items-center gap-2.5 shrink-0 group text-left cursor-pointer"
               >
-                <div className="w-8 h-8 rounded-md bg-gradient-to-br from-[#f97316] to-[#ea580c] flex items-center justify-center font-black text-white shadow-[0_0_15px_rgba(249,115,22,0.4)] relative overflow-hidden group-hover:scale-105 transition-transform">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center font-black text-white shadow-[0_3px_12px_rgba(220,38,38,0.25)] relative overflow-hidden group-hover:scale-105 transition-transform">
                   <span className="font-mono text-xs font-black tracking-tight">RL</span>
                 </div>
                 <div className="flex flex-col justify-center">
-                  <span className="font-black text-lg tracking-wider font-teko uppercase leading-none block text-[#eef2f7]">
-                    RUSTY<span className="text-[#f97316]">.LUB</span>
+                  <span className={`font-black text-lg tracking-wider font-teko uppercase leading-none block ${
+                    appTheme === 'light' ? 'text-[#141414]' : 'text-[#eef2f7]'
+                  }`}>
+                    RUSTY<span className="text-red-600">.LUB</span>
                   </span>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="relative flex h-1.5 w-1.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                     </span>
-                    <span className="text-[9px] font-mono font-bold text-[#8b95a8] uppercase leading-none">
+                    <span className={`text-[9px] font-mono font-bold uppercase leading-none ${
+                      appTheme === 'light' ? 'text-[#141414]/60' : 'text-[#8b95a8]'
+                    }`}>
                       {onlineCount} {lang === 'ru' ? 'ОНЛАЙН' : 'ONLINE'}
                     </span>
                   </div>
                 </div>
               </button>
 
+              {/* Desktop Menu Navigation Links (Soft Light Specification) */}
+              <div className={`hidden lg:flex items-center gap-1 border-l pl-5 ${
+                appTheme === 'light' ? 'border-neutral-200' : 'border-[#1e2633]'
+              }`}>
+                {/* All Sections Catalog Button (Opens Drawer with all 24 sections) */}
+                <button
+                  onClick={() => setSectionsDrawerOpen(true)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer mr-1.5 border ${
+                    sectionsDrawerOpen
+                      ? 'bg-red-600 text-white border-red-600 shadow-sm'
+                      : appTheme === 'light'
+                        ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300/80 shadow-xs'
+                        : 'bg-[#12161e] hover:bg-[#18202d] text-[#eef2f7] border-[#1e2633]'
+                  }`}
+                  title={lang === 'ru' ? 'Открыть каталог всех 24 разделов (M)' : 'Open all 24 sections directory (M)'}
+                >
+                  <LayoutGrid size={13} className={sectionsDrawerOpen ? 'text-white' : 'text-red-600'} />
+                  <span>{lang === 'ru' ? 'Все разделы' : 'All Sections'}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-bold ${
+                    sectionsDrawerOpen ? 'bg-white/20 text-white' : 'bg-red-500/10 text-red-600 border border-red-500/20'
+                  }`}>
+                    24
+                  </span>
+                </button>
 
+                {[
+                  { id: 'home', label: lang === 'ru' ? 'Главная' : 'Home' },
+                  { id: 'tools', label: lang === 'ru' ? 'Калькуляторы' : 'Tools' },
+                  { id: 'raid', label: lang === 'ru' ? 'Рейд' : 'Raid' },
+                  { id: 'guides', label: lang === 'ru' ? 'Гайды' : 'Guides' },
+                  { id: 'clan', label: lang === 'ru' ? 'Кланы' : 'Clans' },
+                  { id: 'chat', label: lang === 'ru' ? 'Чат' : 'Chat' },
+                  { id: 'news', label: lang === 'ru' ? 'Новости' : 'News' },
+                  { id: 'faq', label: lang === 'ru' ? 'FAQ' : 'FAQ' }
+                ].map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleTabChange(item.id as any)}
+                      className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
+                        isActive
+                          ? appTheme === 'light'
+                            ? 'text-red-600 bg-red-500/10'
+                            : 'text-white bg-gradient-to-r from-[#ea580c]/20 to-transparent font-bold border-l-2 border-[#ea580c]'
+                          : appTheme === 'light'
+                            ? 'text-[#141414]/75 hover:text-[#141414] hover:bg-neutral-100'
+                            : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e]'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Right: Actions, Search, Quick Raid, Chat, Auth & Lang */}
@@ -1222,12 +1311,18 @@ export default function App() {
               {/* Search Trigger */}
               <button
                 onClick={() => setCommandPaletteOpen(true)}
-                className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] hover:border-[#f97316]/60 text-[#8b95a8] hover:text-[#eef2f7] rounded-md transition-all cursor-pointer shadow-sm group"
+                className={`flex items-center gap-2 px-3 py-1.5 text-xs font-mono transition-all cursor-pointer rounded-md shadow-sm group ${
+                  appTheme === 'light'
+                    ? 'bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-700'
+                    : 'bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
+                }`}
                 title={lang === 'ru' ? 'Быстрый поиск (Ctrl + K)' : 'Quick Search (Ctrl + K)'}
               >
-                <Search size={13} className="text-[#f97316] group-hover:scale-110 transition-transform" />
+                <Search size={13} className="text-red-600 group-hover:scale-110 transition-transform" />
                 <span className="text-[11px] font-semibold">{lang === 'ru' ? 'Поиск...' : 'Search...'}</span>
-                <span className="text-[9px] px-1.5 py-0.5 bg-white/5 border border-white/10 text-[#8b95a8] font-mono rounded">
+                <span className={`text-[9px] px-1.5 py-0.5 font-mono rounded ${
+                  appTheme === 'light' ? 'bg-neutral-100 text-neutral-500 border border-neutral-200' : 'bg-white/5 border border-white/10 text-[#8b95a8]'
+                }`}>
                   Ctrl+K
                 </span>
               </button>
@@ -1237,48 +1332,62 @@ export default function App() {
                 onClick={() => handleTabChange('chat')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border rounded-md transition-all cursor-pointer ${
                   activeTab === 'chat'
-                    ? 'bg-[#12161e] text-[#f97316] border-[#f97316] shadow-sm shadow-[#f97316]/20'
-                    : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
+                    ? appTheme === 'light'
+                      ? 'bg-red-50 text-red-600 border-red-200 shadow-sm shadow-red-500/5'
+                      : 'bg-[#12161e] text-[#f97316] border-[#f97316] shadow-sm shadow-[#f97316]/20'
+                    : appTheme === 'light'
+                      ? 'bg-white hover:bg-neutral-50 border-neutral-200 text-neutral-700 hover:text-black'
+                      : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
                 }`}
               >
-                <MessageSquare size={13} className={activeTab === 'chat' ? 'text-[#f97316]' : 'text-[#8b95a8]'} />
+                <MessageSquare size={13} className={activeTab === 'chat' ? 'text-red-600' : 'text-neutral-500'} />
                 <span>{lang === 'ru' ? 'Чат' : 'Chat'}</span>
               </button>
 
               {/* Quick Raid CTA button */}
               <button
                 onClick={() => handleTabChange('raid')}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white rounded-md transition-all cursor-pointer shadow-md shadow-[#f97316]/20 hover:scale-[1.02] active:scale-[0.98]"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold bg-red-600 hover:bg-red-700 text-white rounded-md transition-all cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
               >
                 <Flame size={13} />
-                <span>{lang === 'ru' ? 'Калькулятор рейдов' : 'Raid Calculator'}</span>
+                <span>{lang === 'ru' ? 'Рейды' : 'Raid'}</span>
               </button>
 
               {/* Auth Chip: Logged In vs Guest */}
               {currentUser ? (
                 <button
                   onClick={() => setCabinetModalOpen(true)}
-                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] hover:border-[#f97316]/60 text-[#eef2f7] transition-all cursor-pointer rounded-md shadow-sm shrink-0 group"
+                  className={`flex items-center gap-2 px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer rounded-md shadow-sm shrink-0 group ${
+                    appTheme === 'light'
+                      ? 'bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-800'
+                      : 'bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] text-[#eef2f7] hover:text-[#f97316]'
+                  }`}
                   title={lang === 'ru' ? 'Личный кабинет' : 'User Cabinet'}
                 >
                   <img referrerPolicy="no-referrer" 
                     src={getAvatarUrl(currentUser.photoURL, currentUser.avatarClass)} 
                     alt={currentUser.displayName} 
-                    className="w-5 h-5 rounded-full object-cover border border-[#f97316]/40 group-hover:border-[#f97316] shrink-0"
+                    className="w-5 h-5 rounded-full object-cover border border-red-500/30 group-hover:border-red-500 shrink-0"
                   />
-                  <span className="font-mono text-[11px] font-bold text-[#eef2f7] group-hover:text-[#f97316] transition-colors max-w-[90px] truncate">
+                  <span className={`font-mono text-[11px] font-bold group-hover:text-red-600 transition-colors max-w-[90px] truncate ${
+                    appTheme === 'light' ? 'text-neutral-800' : 'text-[#eef2f7]'
+                  }`}>
                     {currentUser.displayName || (currentUser.uid === 'serustqs' ? 'OWNER' : 'SURVIVOR')}
                   </span>
-                  <span className="text-[10px] px-1.5 py-0.5 bg-[#f97316]/15 border border-[#f97316]/30 text-[#f97316] rounded font-bold uppercase">
+                  <span className="text-[10px] px-1.5 py-0.5 bg-red-500/10 border border-red-500/20 text-red-600 rounded font-bold uppercase">
                     {lang === 'ru' ? 'Кабинет' : 'Cabinet'}
                   </span>
                 </button>
               ) : (
                 <button
                   onClick={() => setAuthModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] hover:border-[#f97316] text-[#eef2f7] hover:text-[#f97316] transition-all cursor-pointer rounded-md shadow-sm shrink-0"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold transition-all cursor-pointer rounded-md shadow-sm shrink-0 ${
+                    appTheme === 'light'
+                      ? 'bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-700 hover:text-black'
+                      : 'bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] text-[#eef2f7] hover:text-[#f97316]'
+                  }`}
                 >
-                  <Power size={12} className="text-[#f97316]" />
+                  <Power size={12} className="text-red-600" />
                   <span>{lang === 'ru' ? 'Войти' : 'Log In'}</span>
                 </button>
               )}
@@ -1286,12 +1395,16 @@ export default function App() {
               {/* Language Selector */}
               <button
                 onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
-                className="flex items-center px-2.5 py-1.5 text-[11px] font-mono font-bold bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7] transition-all cursor-pointer rounded-md shrink-0"
+                className={`flex items-center px-2.5 py-1.5 text-[11px] font-mono font-bold transition-all cursor-pointer rounded-md shrink-0 ${
+                  appTheme === 'light'
+                    ? 'bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-600'
+                    : 'bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
+                }`}
                 title={lang === 'ru' ? 'Switch to English' : 'Переключить на Русский'}
               >
-                <span className={lang === 'ru' ? 'text-[#f97316] font-black' : 'text-[#8b95a8]'}>RU</span>
-                <span className="text-[#8b95a8]/50 mx-1">/</span>
-                <span className={lang === 'en' ? 'text-[#f97316] font-black' : 'text-[#8b95a8]'}>EN</span>
+                <span className={lang === 'ru' ? 'text-red-600 font-black' : 'text-neutral-400'}>RU</span>
+                <span className="text-neutral-300 mx-1">/</span>
+                <span className={lang === 'en' ? 'text-red-600 font-black' : 'text-neutral-400'}>EN</span>
               </button>
             </div>
 
@@ -1460,51 +1573,11 @@ export default function App() {
 
       {/* CORE APPLICATION CONTAINER */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 relative z-10 w-full min-h-[70vh]">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Constant Desktop Left Sidebar */}
-          <aside className="hidden lg:block lg:col-span-3 bg-[#0b0d13]/95 border border-[#1d2532] shadow-2xl p-4 sticky top-[80px] max-h-[85vh] overflow-y-auto space-y-6 text-left relative overflow-hidden custom-scrollbar">
-            <div className="absolute top-0 left-0 right-0 h-1 rust-hazard" />
-            
-            {/* Corner Brackets */}
-            <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-[#f97316]/30" />
-            <div className="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-[#f97316]/30" />
-            <div className="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-[#f97316]/30" />
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-[#f97316]/30" />
-
-            {sidebarCategories.map((category) => (
-              <div key={category.title} className="space-y-1.5">
-                <h3 className="font-mono text-[10px] font-black uppercase tracking-wider text-[#ea580c] mb-2 px-2.5">
-                  {category.title}
-                </h3>
-                <div className="space-y-0.5">
-                  {category.items.map((item) => {
-                    const isActive = activeTab === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => handleTabChange(item.id as any)}
-                        className={`flex items-center gap-2.5 w-full text-left px-3 py-2 text-xs font-semibold transition-all duration-150 rounded-none cursor-pointer ${
-                          isActive
-                            ? 'text-white bg-gradient-to-r from-[#ea580c]/20 to-transparent border-l-2 border-[#ea580c] font-bold'
-                            : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e] border-l-2 border-transparent'
-                        }`}
-                      >
-                        <span className={isActive ? 'text-[#f97316]' : 'text-[#8b95a8]'}>
-                          {item.icon}
-                        </span>
-                        <span className="truncate">{item.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </aside>
-
+        <div className="w-full">
           {/* Active Tab View */}
-          <div className="lg:col-span-9 w-full">
+          <div className="w-full">
             <AnimatePresence mode="wait">
-          {activeTab === 'admin' && isAdmin && (
+          {activeTab === 'admin' && (
             <motion.div
               key="admin"
               initial={{ opacity: 0, y: 15 }}
@@ -1513,15 +1586,29 @@ export default function App() {
               transition={{ duration: 0.2 }}
               className="space-y-8"
             >
-              <AdminTab 
-                currentUser={currentUser} 
-                lang={lang} 
-                onToast={(msg, type) => {
-                  const id = Math.random().toString(36).substring(2, 9);
-                  setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : (type === 'info' ? 'info' as any : 'success') }]);
-                  setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
-                }}
-              />
+              {currentUser && isAdmin ? (
+                <AdminTab 
+                  currentUser={currentUser} 
+                  lang={lang} 
+                  onToast={(msg, type) => {
+                    const id = Math.random().toString(36).substring(2, 9);
+                    setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : (type === 'info' ? 'info' as any : 'success') }]);
+                    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+                  }}
+                />
+              ) : (
+                <SpecialAccessGated
+                  moduleTitle={lang === 'ru' ? 'Панель Администратора' : 'Admin Panel & DB'}
+                  moduleIcon="lock.code"
+                  requiredRole="admin"
+                  currentUser={currentUser}
+                  lang={lang}
+                  appTheme={appTheme}
+                  onOpenAuth={() => setAuthModalOpen(true)}
+                  onOpenVip={() => setCabinetModalOpen(true)}
+                  onGoHome={() => handleTabChange('home')}
+                />
+              )}
             </motion.div>
           )}
 
@@ -1561,6 +1648,10 @@ export default function App() {
                 showJungleFeverSpoiler={showJungleFeverSpoiler}
                 onGenerateWallpaper={generateWallpaper}
                 appTranslations={appTranslations}
+                isVip={isVip}
+                isOwner={isOwner}
+                isAdmin={isAdmin}
+                currentUser={currentUser}
               />
             </motion.div>
           )}
@@ -1573,7 +1664,15 @@ export default function App() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
             >
-              <ToolsHubTab lang={lang} onNavigate={(tab) => handleTabChange(tab)} isVip={isVip} isAdmin={isAdmin} isOwner={isOwner} onOpenVip={() => setCabinetModalOpen(true)} />
+              <ToolsHubTab 
+                lang={lang} 
+                onNavigate={(tab) => handleTabChange(tab)} 
+                isVip={isVip} 
+                isAdmin={isAdmin} 
+                isOwner={isOwner} 
+                onOpenVip={() => setCabinetModalOpen(true)}
+                currentUser={currentUser} 
+              />
             </motion.div>
           )}
 
@@ -1806,21 +1905,35 @@ export default function App() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
             >
-              <RustPlusTab 
-                lang={lang} 
-                currentUser={currentUser} 
-                isAdmin={isAdmin} 
-                onOpenNotifications={() => setNotificationModalOpen(true)}
-                onToast={(msg, type) => {
-                  const id = Math.random().toString(36).substring(2, 9);
-                  setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : (type === 'info' ? 'info' as any : 'success') }]);
-                  setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
-                }} 
-              />
+              {currentUser && (isOwner || isAdmin) ? (
+                <RustPlusTab 
+                  lang={lang} 
+                  currentUser={currentUser} 
+                  isAdmin={isAdmin} 
+                  onOpenNotifications={() => setNotificationModalOpen(true)}
+                  onToast={(msg, type) => {
+                    const id = Math.random().toString(36).substring(2, 9);
+                    setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : (type === 'info' ? 'info' as any : 'success') }]);
+                    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+                  }} 
+                />
+              ) : (
+                <SpecialAccessGated
+                  moduleTitle="Rust+ Bot Hub (OWNER)"
+                  moduleIcon="smart.alarm"
+                  requiredRole="owner"
+                  currentUser={currentUser}
+                  lang={lang}
+                  appTheme={appTheme}
+                  onOpenAuth={() => setAuthModalOpen(true)}
+                  onOpenVip={() => setCabinetModalOpen(true)}
+                  onGoHome={() => handleTabChange('home')}
+                />
+              )}
             </motion.div>
           )}
 
-          {activeTab === 'icons' && isAdmin && (
+          {activeTab === 'icons' && (
             <motion.div
               key="icons"
               initial={{ opacity: 0, y: 15 }}
@@ -1828,7 +1941,21 @@ export default function App() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
             >
-              <RustItemIconsTab lang={lang} />
+              {currentUser && isAdmin ? (
+                <RustItemIconsTab lang={lang} />
+              ) : (
+                <SpecialAccessGated
+                  moduleTitle={lang === 'ru' ? 'Библиотека Спрайтов Rust' : 'Rust Item Icons (ADMIN)'}
+                  moduleIcon="spraycan"
+                  requiredRole="admin"
+                  currentUser={currentUser}
+                  lang={lang}
+                  appTheme={appTheme}
+                  onOpenAuth={() => setAuthModalOpen(true)}
+                  onOpenVip={() => setCabinetModalOpen(true)}
+                  onGoHome={() => handleTabChange('home')}
+                />
+              )}
             </motion.div>
           )}
 
@@ -1936,7 +2063,21 @@ export default function App() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
             >
-              <PlayerRadar />
+              {currentUser && isVip ? (
+                <PlayerRadar />
+              ) : (
+                <SpecialAccessGated
+                  moduleTitle="Player Radar (VIP)"
+                  moduleIcon="rf_pager"
+                  requiredRole="vip"
+                  currentUser={currentUser}
+                  lang={lang}
+                  appTheme={appTheme}
+                  onOpenAuth={() => setAuthModalOpen(true)}
+                  onOpenVip={() => setCabinetModalOpen(true)}
+                  onGoHome={() => handleTabChange('home')}
+                />
+              )}
             </motion.div>
           )}
             </AnimatePresence>
@@ -2312,6 +2453,21 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* All Sections Drawer / Full Catalog (Second Photo Registry) */}
+      <SectionsDrawer
+        isOpen={sectionsDrawerOpen}
+        onClose={() => setSectionsDrawerOpen(false)}
+        activeTab={activeTab}
+        onSelectTab={(tab) => handleTabChange(tab)}
+        lang={lang}
+        appTheme={appTheme}
+        isVip={isVip}
+        isAdmin={isAdmin}
+        isOwner={isOwner}
+        onOpenVip={() => setCabinetModalOpen(true)}
+        currentUser={currentUser}
+      />
+
       {/* Global Quick Search & Command Palette Modal (Ctrl+K) */}
       <CommandPaletteModal
         isOpen={commandPaletteOpen}
@@ -2321,11 +2477,17 @@ export default function App() {
       />
 
       {/* Mobile Sticky Thumb Navigation Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0d1017]/95 border-t border-[#ff2a4d]/30 backdrop-blur-md px-2 py-1.5 flex items-center justify-around text-[10px] font-mono font-bold shadow-2xl">
+      <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t backdrop-blur-md px-2 py-1.5 flex items-center justify-around text-[10px] font-mono font-bold shadow-2xl transition-colors ${
+        appTheme === 'light'
+          ? 'bg-white/95 border-neutral-200 text-neutral-600'
+          : 'bg-[#0d1017]/95 border-[#ff2a4d]/30 text-zinc-400'
+      }`}>
         <button
           onClick={() => handleTabChange('home')}
           className={`flex flex-col items-center gap-0.5 p-1 transition-colors ${
-            activeTab === 'home' ? 'text-[#ff2a4d]' : 'text-zinc-400 hover:text-white'
+            activeTab === 'home' 
+              ? 'text-red-600 font-black' 
+              : appTheme === 'light' ? 'text-neutral-500 hover:text-neutral-900' : 'text-zinc-400 hover:text-white'
           }`}
         >
           <Home size={18} />
@@ -2333,9 +2495,31 @@ export default function App() {
         </button>
 
         <button
+          onClick={() => setSectionsDrawerOpen(true)}
+          className={`flex flex-col items-center gap-0.5 p-1 transition-colors ${
+            sectionsDrawerOpen 
+              ? 'text-red-600 font-black' 
+              : appTheme === 'light' ? 'text-neutral-500 hover:text-neutral-900' : 'text-zinc-400 hover:text-white'
+          }`}
+        >
+          <LayoutGrid size={18} className="text-red-600" />
+          <span className="text-[9px] uppercase">{lang === 'ru' ? 'Разделы' : 'Sections'}</span>
+        </button>
+
+        <button
+          onClick={() => setCommandPaletteOpen(true)}
+          className="flex flex-col items-center justify-center -mt-4 w-11 h-11 bg-red-600 hover:bg-red-700 text-white rounded-full border-2 border-white/40 shadow-[0_0_15px_rgba(220,38,38,0.5)] cursor-pointer transition-transform hover:scale-105 active:scale-95"
+          title={lang === 'ru' ? 'Поиск' : 'Search'}
+        >
+          <Search size={18} />
+        </button>
+
+        <button
           onClick={() => handleTabChange('raid')}
           className={`flex flex-col items-center gap-0.5 p-1 transition-colors ${
-            activeTab === 'raid' ? 'text-[#ff2a4d]' : 'text-zinc-400 hover:text-white'
+            activeTab === 'raid' 
+              ? 'text-red-600 font-black' 
+              : appTheme === 'light' ? 'text-neutral-500 hover:text-neutral-900' : 'text-zinc-400 hover:text-white'
           }`}
         >
           <Flame size={18} />
@@ -2343,26 +2527,11 @@ export default function App() {
         </button>
 
         <button
-          onClick={() => setCommandPaletteOpen(true)}
-          className="flex flex-col items-center justify-center -mt-4 w-11 h-11 bg-[#ff2a4d] text-white rounded-full border-2 border-white/30 shadow-[0_0_15px_rgba(255,42,77,0.6)] cursor-pointer"
-        >
-          <Search size={18} />
-        </button>
-
-        <button
-          onClick={() => handleTabChange('binds')}
-          className={`flex flex-col items-center gap-0.5 p-1 transition-colors ${
-            activeTab === 'binds' ? 'text-blue-400' : 'text-zinc-400 hover:text-white'
-          }`}
-        >
-          <Keyboard size={18} />
-          <span className="text-[9px] uppercase">{lang === 'ru' ? 'Бинды' : 'Binds'}</span>
-        </button>
-
-        <button
           onClick={() => handleTabChange('chat')}
           className={`flex flex-col items-center gap-0.5 p-1 transition-colors relative ${
-            activeTab === 'chat' ? 'text-purple-400' : 'text-zinc-400 hover:text-white'
+            activeTab === 'chat' 
+              ? 'text-red-600 font-black' 
+              : appTheme === 'light' ? 'text-neutral-500 hover:text-neutral-900' : 'text-zinc-400 hover:text-white'
           }`}
         >
           <MessageSquare size={18} />

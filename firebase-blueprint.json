@@ -322,6 +322,56 @@
         "serverId",
         "sessionStart"
       ]
+    },
+    "SecurityLog": {
+      "title": "SecurityLog",
+      "description": "Unauthorized access attempt audit records",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "User UID or anonymous identifier"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name"
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address if available"
+        },
+        "module": {
+          "type": "string",
+          "description": "The title or identifier of the gated module"
+        },
+        "requiredRole": {
+          "type": "string",
+          "description": "The role required to access the module (vip, owner, admin)"
+        },
+        "action": {
+          "type": "string",
+          "description": "The security action type"
+        },
+        "details": {
+          "type": "string",
+          "description": "Human-readable description of the security incident"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the unauthorized attempt occurred"
+        },
+        "userAgent": {
+          "type": "string",
+          "description": "Client device and browser user agent"
+        }
+      },
+      "required": [
+        "uid",
+        "module",
+        "requiredRole",
+        "action"
+      ]
     }
   },
   "firestore": {
@@ -433,6 +483,14 @@
     },
     "/activity_logs/{logId}": {
       "description": "User activity logs for admin auditing",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
+    },
+    "/security_logs/{logId}": {
+      "schema": "SecurityLog",
+      "description": "Security audit logs for unauthorized access attempts to gated sections",
       "security": {
         "read": "true",
         "write": "true"

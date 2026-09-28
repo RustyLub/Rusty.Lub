@@ -35,6 +35,16 @@ body {
   overflow-x: hidden;
 }
 
+body.light-theme {
+  background-color: #f4f3f0 !important;
+  color: #141414 !important;
+}
+
+body.light-theme main,
+body.light-theme .page {
+  background-color: #f4f3f0 !important;
+}
+
 /* Tactical Command Grid & Atmosphere */
 .cyber-grid {
   background-color: #08090c;

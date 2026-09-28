@@ -11,6 +11,9 @@ export interface UserActivityLog {
   role?: string;
   action: string;
   tab?: string;
+  module?: string;
+  requiredRole?: string;
+  isSecurityAlert?: boolean;
   details?: string;
   timestamp?: any;
   device?: string;
@@ -19,6 +22,61 @@ export interface UserActivityLog {
 
 // Global throttle cache to avoid log spamming for continuous events
 const lastLoggedMap = new Map<string, number>();
+
+export async function logSecurityAccessAttempt(params: {
+  module: string;
+  requiredRole: 'vip' | 'owner' | 'admin';
+  currentUser?: CustomUser | null;
+  moduleIcon?: string;
+  throttleSeconds?: number;
+}) {
+  try {
+    const { module, requiredRole, currentUser, throttleSeconds = 8 } = params;
+
+    const userUid = currentUser?.uid || auth.currentUser?.uid || 'guest';
+    const throttleKey = `sec_attempt_${userUid}_${module}`;
+    const now = Date.now();
+    const lastTime = lastLoggedMap.get(throttleKey) || 0;
+    if (now - lastTime < throttleSeconds * 1000) {
+      return;
+    }
+    lastLoggedMap.set(throttleKey, now);
+
+    const displayName = currentUser?.displayName || auth.currentUser?.displayName || (currentUser ? 'User' : 'Unauthenticated Guest');
+    const email = currentUser?.email || auth.currentUser?.email || '';
+    const photoURL = currentUser?.photoURL || auth.currentUser?.photoURL || '';
+    const userRole = currentUser?.role || 'guest';
+    const isVip = Boolean(currentUser?.isVip);
+    const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown';
+
+    const securityEntry: Record<string, any> = {
+      uid: userUid,
+      displayName,
+      email,
+      photoURL,
+      role: userRole,
+      isVip,
+      module,
+      requiredRole,
+      action: 'unauthorized_access_attempt',
+      isSecurityAlert: true,
+      tab: module,
+      details: `Попытка несанкционированного доступа к модулю "${module}". Требуемая роль: ${requiredRole.toUpperCase()}. Текущий статус: ${userRole}${isVip ? ' [VIP]' : ''}`,
+      timestamp: serverTimestamp(),
+      userAgent
+    };
+
+    // Write to both activity_logs (for unified audit trail) and security_logs (for dedicated security records)
+    const writePromises = [
+      addDoc(collection(db, 'activity_logs'), securityEntry),
+      addDoc(collection(db, 'security_logs'), securityEntry)
+    ];
+
+    await Promise.allSettled(writePromises);
+  } catch (err) {
+    console.warn('Security logging warning:', err);
+  }
+}
 
 export async function logUserActivity(params: {
   action: string;
@@ -104,3 +162,38 @@ export async function clearAllActivityLogs(): Promise<number> {
   await batch.commit();
   return snapshot.size;
 }
+
+export function subscribeToSecurityLogs(
+  onUpdate: (logs: UserActivityLog[]) => void,
+  maxCount: number = 200
+) {
+  const q = query(
+    collection(db, 'security_logs'),
+    orderBy('timestamp', 'desc'),
+    limit(maxCount)
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const logs: UserActivityLog[] = snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data(),
+    })) as UserActivityLog[];
+    onUpdate(logs);
+  }, (err) => {
+    console.error('Error fetching security logs:', err);
+  });
+}
+
+export async function clearAllSecurityLogs(): Promise<number> {
+  const q = query(collection(db, 'security_logs'), limit(500));
+  const snapshot = await getDocs(q);
+  const batch = writeBatch(db);
+  
+  snapshot.docs.forEach((docSnap) => {
+    batch.delete(docSnap.ref);
+  });
+
+  await batch.commit();
+  return snapshot.size;
+}
+

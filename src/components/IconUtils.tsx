@@ -5,40 +5,83 @@ import fandomIcons from './fandom_icons.json';
 const localImages = import.meta.glob<{ default: string }>('../assets/images/*.(webp|png|jpg|jpeg|svg)', { eager: true });
 
 const ID_ALIASES: Record<string, string> = {
-  assault_rifle: 'ak47',
-  custom_smg: 'custom',
-  rifle_ak: 'ak47',
-  smg_2: 'custom',
-  rifle_semiauto: 'sar',
-  lmg_m249: 'm249',
-  rifle_bolt: 'bolt',
-  shotgun_pump: 'pump_shotgun',
-  pistol_m92: 'm92',
-  pistol_python: 'python',
-  pistol_semiauto: 'sap',
-  pistol_revolver: 'revolver',
-  rifle_m16a2: 'm16a2',
-  rifle_m39: 'm39',
-  rifle_l96: 'l96',
-  shotgun_double: 'double_barrel',
-  shotgun_waterpipe: 'waterpipe',
-  shotgun_spas12: 'spas12',
-  timed_explosive: 'c4',
-  ammo_rocket_basic: 'rocket',
-  explosive_satchel: 'satchel',
-  ammo_rifle_explosive: 'explosive_ammo',
-  grenade_beancan: 'beancan',
-  wall_external_high_stone: 'high_stone_wall',
+  assault_rifle: 'rifle.ak',
+  custom_smg: 'smg.2',
+  rifle_ak: 'rifle.ak',
+  ak47: 'rifle.ak',
+  smg_2: 'smg.2',
+  rifle_semiauto: 'rifle.semiauto',
+  sar: 'rifle.semiauto',
+  lmg_m249: 'lmg.m249',
+  m249: 'lmg.m249',
+  rifle_bolt: 'rifle.bolt',
+  bolt: 'rifle.bolt',
+  shotgun_pump: 'shotgun.pump',
+  pump_shotgun: 'shotgun.pump',
+  pistol_m92: 'pistol.m92',
+  pistol_python: 'pistol.python',
+  pistol_semiauto: 'pistol.semiauto',
+  pistol_revolver: 'pistol.revolver',
+  rifle_m16a2: 'rifle.m16a2',
+  rifle_m39: 'rifle.m39',
+  rifle_l96: 'rifle.l96',
+  shotgun_double: 'shotgun.double',
+  double_barrel: 'shotgun.double',
+  shotgun_waterpipe: 'shotgun.waterpipe',
+  waterpipe: 'shotgun.waterpipe',
+  shotgun_spas12: 'shotgun.spas12',
+  timed_explosive: 'explosive.timed',
+  'timed.explosive': 'explosive.timed',
+  c4: 'explosive.timed',
+  ammo_rocket_basic: 'ammo.rocket.basic',
+  rocket: 'ammo.rocket.basic',
+  explosive_satchel: 'explosive.satchel',
+  satchel: 'explosive.satchel',
+  ammo_rifle_explosive: 'ammo.rifle.explosive',
+  grenade_beancan: 'grenade.beancan',
+  wall_external_high_stone: 'wall.external.high.stone',
   wall_external_high_wood: 'high_wood_wall',
-  door_hinged_wood: 'wood_door',
-  door_hinged_metal: 'sheet_door',
-  wall_frame_garagedoor: 'garage_door',
-  door_hinged_toptier: 'armored_door',
-  floor_ladder_hatch: 'armored_hatch',
-  cupboard_tool: 'tc',
-  autoturret: 'auto_turret',
+  door_hinged_wood: 'door.hinged.wood',
+  door_hinged_metal: 'door.hinged.metal',
+  wall_frame_garagedoor: 'wall.frame.garagedoor',
+  door_hinged_toptier: 'door.hinged.toptier',
+  floor_ladder_hatch: 'floor.ladder.hatch',
+  cupboard_tool: 'cupboard.tool',
+  'cupboard.tool': 'cupboard.tool',
+  tc: 'cupboard.tool',
+  autoturret: 'autoturret',
   shotgun_trap: 'guntrap',
   flamethrower_turret: 'flametrap',
+  'generator.wind': 'generator.wind.scrap',
+  'generator.wind.scrap': 'generator.wind.scrap',
+  wind_turbine: 'generator.wind.scrap',
+  mixing_table: 'mixingtable',
+  'mixing.table': 'mixingtable',
+  'seed.hemp': 'seed.hemp',
+  hemp: 'seed.hemp',
+  clone_hemp: 'clone.hemp',
+  'clone.hemp': 'clone.hemp',
+  pager: 'rf_pager',
+  'rf.pager': 'rf_pager',
+  rf_pager: 'rf_pager',
+  smart_alarm: 'smart.alarm',
+  'smart.alarm': 'smart.alarm',
+  smart_switch: 'smart.switch',
+  'smart.switch': 'smart.switch',
+  code_lock: 'lock.code',
+  'lock.code': 'lock.code',
+  computer_station: 'computerstation',
+  'computer.station': 'computerstation',
+  computerstation: 'computerstation',
+  keycard_red: 'keycard_red',
+  'keycard.red': 'keycard_red',
+  keycard_blue: 'keycard_blue',
+  'keycard.blue': 'keycard_blue',
+  keycard_green: 'keycard_green',
+  'keycard.green': 'keycard_green',
+  box_wooden_large: 'box.wooden.large',
+  'box.wooden.large': 'box.wooden.large',
+  recycler: 'scrap'
 };
 
 const CACHE_KEY = 'rust_icon_cache_v1';
@@ -112,7 +155,16 @@ export const getRustLabsIconUrls = (id: string): string[] => {
     urls.push(cachedUrl);
   }
 
-  // 1. Check local images bundled in Vite
+  // 1. Direct verified mapping from comprehensive dictionary
+  const mappedFandom = (fandomIcons as Record<string, string>)[id] || (fandomIcons as Record<string, string>)[targetId];
+  if (mappedFandom) {
+    urls.push(mappedFandom);
+  }
+
+  // 2. Official RustLabs high-resolution 180x180 item icon mirror
+  urls.push(`https://wiki.rustclash.com/img/items180/${targetId}.png`);
+
+  // 3. Check local images bundled in Vite
   const localWebp = `../assets/images/${targetId}.webp`;
   if (localImages[localWebp]) {
     urls.push(localImages[localWebp].default);
@@ -122,16 +174,9 @@ export const getRustLabsIconUrls = (id: string): string[] => {
     urls.push(localImages[localPng].default);
   }
 
-  // Convert underscore shortname to dotted Rust shortname (e.g. high_stone_wall -> wall.external.high.stone)
-  const mappedFandom = (fandomIcons as Record<string, string>)[id] || (fandomIcons as Record<string, string>)[targetId];
-  if (mappedFandom) {
-    urls.push(mappedFandom);
-  }
-
-  // 2. Official rust-items.com / RustLabs CDN candidates
-  urls.push(`https://www.rust-items.com/images/${targetId}.png`);
+  // 4. Secondary CDN fallbacks
   urls.push(`https://cdn.rustlabs.com/img/items180/${targetId}.png`);
-  urls.push(`https://wiki.rustclash.com/img/items180/${targetId}.png`);
+  urls.push(`https://www.rust-items.com/images/${targetId}.png`);
 
   // Remove duplicates while preserving order
   return Array.from(new Set(urls));

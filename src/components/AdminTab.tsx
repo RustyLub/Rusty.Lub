@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { doc, updateDoc, collection, onSnapshot, deleteDoc, serverTimestamp, getDoc, setDoc, addDoc, getCountFromServer, writeBatch, query, limit, getDocs, where } from 'firebase/firestore';
-import { ShieldCheck, Send, Search, Crown, Star, Ban, Trash2, Users, Settings, Megaphone, EyeOff, Tv, PlusCircle, Activity, MessageSquare, AlertTriangle, ShieldAlert, IdCard, List, BarChart3, Wallet, Clock, Check, X, Mail } from 'lucide-react';
+import { ShieldCheck, Send, Search, Crown, Star, Ban, Trash2, Users, Settings, Megaphone, EyeOff, Tv, PlusCircle, Activity, MessageSquare, AlertTriangle, ShieldAlert, IdCard, List, BarChart3, Wallet, Clock, Check, X, Mail, Copy, Lock } from 'lucide-react';
 import { CustomUser, NewsItem, VipApplication, APP_VERSION } from '../types';
 import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 import UserProfileModal from './UserProfileModal';
-import { subscribeToActivityLogs, clearAllActivityLogs, UserActivityLog } from '../services/activityLogger';
+import { subscribeToActivityLogs, clearAllActivityLogs, clearAllSecurityLogs, UserActivityLog } from '../services/activityLogger';
 
 interface AdminTabProps {
   currentUser: CustomUser | null;
@@ -313,11 +313,17 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
   };
 
   const [vipManagerUserId, setVipManagerUserId] = useState<string | null>(null);
-  const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'vip' | 'feedback' | 'news' | 'survivors' | 'activity_logs'>('dashboard');
+  const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'vip' | 'feedback' | 'news' | 'survivors' | 'activity_logs' | 'security_audit'>('dashboard');
   
   const [activityLogs, setActivityLogs] = useState<UserActivityLog[]>([]);
   const [activitySearch, setActivitySearch] = useState('');
   const [activityFilter, setActivityFilter] = useState<string>('all');
+  const [securitySearch, setSecuritySearch] = useState('');
+  const [securityRoleFilter, setSecurityRoleFilter] = useState<'all' | 'vip' | 'owner' | 'admin'>('all');
+
+  const unauthorizedLogs = useMemo(() => {
+    return activityLogs.filter(l => l.action === 'unauthorized_access_attempt' || l.isSecurityAlert);
+  }, [activityLogs]);
 
   const filteredUsers = useMemo(() => {
     return registeredUsers.filter(u => {
@@ -678,6 +684,14 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
       <div className="flex flex-wrap gap-1 bg-[#14171e]/60 p-1.5 rounded-sm border border-[#2a2f3b] overflow-x-auto custom-scrollbar relative z-10">
         {[
           { id: 'dashboard', label_ru: 'Панель', label_en: 'Dashboard', icon: BarChart3 },
+          { 
+            id: 'security_audit', 
+            label_ru: 'Аудит доступа', 
+            label_en: 'Security Audit', 
+            icon: ShieldAlert, 
+            badge: unauthorizedLogs.length,
+            isSecurity: true
+          },
           { id: 'vip', label_ru: 'VIP Заявки', label_en: 'VIP Apps', icon: Crown, badge: vipApps.filter(a => a.status === 'pending').length },
           { id: 'feedback', label_ru: 'Обратная связь', label_en: 'Feedback', icon: Mail, badge: feedbacks.length },
           { id: 'news', label_ru: 'Новости', label_en: 'News Hub', icon: Megaphone },
@@ -696,15 +710,17 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
                   : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.02] border border-transparent'
               }`}
             >
-              <Icon size={14} className={isActive ? 'text-[#cd412b]' : 'text-zinc-500'} />
+              <Icon size={14} className={isActive ? 'text-[#cd412b]' : ((tab as any).isSecurity && tab.badge && tab.badge > 0 ? 'text-red-500 animate-pulse' : 'text-zinc-500')} />
               <span>{lang === 'ru' ? tab.label_ru : tab.label_en}</span>
               {tab.badge !== undefined && tab.badge > 0 && (
                 <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-sans font-black ${
-                  isActive 
-                    ? 'bg-[#cd412b]/20 text-[#cd412b]' 
-                    : tab.id === 'vip' ? 'bg-amber-500/15 text-amber-500' :
-                      tab.id === 'feedback' ? 'bg-red-500/15 text-red-500' :
-                      'bg-zinc-800 text-zinc-500'
+                  (tab as any).isSecurity
+                    ? 'bg-red-500 text-white animate-pulse shadow-sm'
+                    : isActive 
+                      ? 'bg-[#cd412b]/20 text-[#cd412b]' 
+                      : tab.id === 'vip' ? 'bg-amber-500/15 text-amber-500' :
+                        tab.id === 'feedback' ? 'bg-red-500/15 text-red-500' :
+                        'bg-zinc-800 text-zinc-500'
                 }`}>
                   {tab.badge}
                 </span>
@@ -755,6 +771,40 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
                 </div>
             </div>
           </div>
+
+          {/* Security Alert Banner in Dashboard */}
+          {unauthorizedLogs.length > 0 && (
+            <div className="bg-red-950/30 border border-red-500/40 p-5 rounded-none flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg shadow-red-950/20 relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-600 animate-pulse" />
+              <div className="flex items-center gap-4 pl-2">
+                <div className="w-12 h-12 rounded-sm bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400 shrink-0">
+                  <ShieldAlert size={26} className="animate-pulse" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-black text-white font-mono uppercase tracking-wider">
+                      {lang === 'ru' ? 'Зафиксированы попытки несанкционированного доступа!' : 'Unauthorized Access Attempts Detected!'}
+                    </span>
+                    <span className="px-2 py-0.5 bg-red-600 text-white text-[10px] font-black font-mono uppercase rounded-none">
+                      {unauthorizedLogs.length} {lang === 'ru' ? 'попыток' : 'events'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-300 font-mono mt-1">
+                    {lang === 'ru'
+                      ? `Последняя попытка: пользователь ${unauthorizedLogs[0]?.displayName || 'Гость'} (UID: ${unauthorizedLogs[0]?.uid?.slice(0, 10)}...) пытался открыть «${unauthorizedLogs[0]?.module || unauthorizedLogs[0]?.tab}»`
+                      : `Latest attempt: user ${unauthorizedLogs[0]?.displayName || 'Guest'} (UID: ${unauthorizedLogs[0]?.uid?.slice(0, 10)}...) attempted to open "${unauthorizedLogs[0]?.module || unauthorizedLogs[0]?.tab}"`}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveSubTab('security_audit')}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-mono text-xs font-bold uppercase tracking-wider rounded-none shrink-0 transition flex items-center gap-2 cursor-pointer shadow-md"
+              >
+                <ShieldAlert size={14} />
+                <span>{lang === 'ru' ? 'Открыть аудит доступа' : 'Open Security Audit'}</span>
+              </button>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Global Settings */}
@@ -1760,6 +1810,7 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
                 className="bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white rounded-none focus:outline-none focus:border-[#cd412b] font-mono shrink-0"
               >
                 <option value="all">{lang === 'ru' ? 'Все действия' : 'All Actions'}</option>
+                <option value="security">{lang === 'ru' ? '🚨 Несанкционированный доступ' : '🚨 Unauthorized Access'}</option>
                 <option value="tab_switch">{lang === 'ru' ? 'Переходы по вкладкам' : 'Tab Switch'}</option>
                 <option value="auth">{lang === 'ru' ? 'Авторизация' : 'Auth'}</option>
                 <option value="admin_action">{lang === 'ru' ? 'Действия админов' : 'Admin Actions'}</option>
@@ -1792,6 +1843,7 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
 
                       if (!matchesSearch) return false;
 
+                      if (activityFilter === 'security') return log.action === 'unauthorized_access_attempt' || log.isSecurityAlert;
                       if (activityFilter === 'tab_switch') return log.action === 'tab_switch';
                       if (activityFilter === 'auth') return log.action.includes('auth') || log.action.includes('login') || log.action.includes('logout');
                       if (activityFilter === 'admin_action') return log.action.includes('admin') || log.action.includes('ban') || log.action.includes('vip');
@@ -1806,9 +1858,12 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
                       
                       const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                       const dateStr = dateObj.toLocaleDateString();
+                      const isSecAlert = log.action === 'unauthorized_access_attempt' || log.isSecurityAlert;
 
                       return (
-                        <tr key={log.id ? `${log.id}-${idx}` : idx} className="hover:bg-white/[0.02] transition-colors">
+                        <tr key={log.id ? `${log.id}-${idx}` : idx} className={`transition-colors ${
+                          isSecAlert ? 'bg-red-500/[0.06] hover:bg-red-500/[0.1] border-l-2 border-red-500' : 'hover:bg-white/[0.02]'
+                        }`}>
                           <td className="p-3 whitespace-nowrap text-zinc-400 text-[11px]">
                             <div className="flex flex-col">
                               <span className="text-white font-bold">{timeStr}</span>
@@ -1825,23 +1880,30 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
                                 </div>
                               )}
                               <div className="flex flex-col">
-                                <span className="text-zinc-200 font-bold text-xs">{log.displayName}</span>
+                                <span className={`font-bold text-xs ${isSecAlert ? 'text-red-300' : 'text-zinc-200'}`}>{log.displayName}</span>
                                 <span className="text-[9px] text-zinc-500">ID: {log.uid.substring(0, 10)}...</span>
                               </div>
                             </div>
                           </td>
                           <td className="p-3 whitespace-nowrap">
-                            <span className={`px-2 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border ${
-                              log.action === 'tab_switch' 
-                                ? 'bg-blue-500/10 text-blue-400 border-blue-500/30'
-                                : log.action.includes('admin') || log.action.includes('ban')
-                                  ? 'bg-red-500/10 text-red-400 border-red-500/30'
-                                  : log.action.includes('vip')
-                                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                                    : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                            }`}>
-                              {log.action}
-                            </span>
+                            {isSecAlert ? (
+                              <span className="px-2 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border bg-red-600/20 text-red-400 border-red-500/50 flex items-center gap-1 w-fit">
+                                <ShieldAlert size={10} className="text-red-400" />
+                                <span>{lang === 'ru' ? 'ДОСТУП ЗАБЛОКИРОВАН' : 'ACCESS DENIED'}</span>
+                              </span>
+                            ) : (
+                              <span className={`px-2 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border ${
+                                log.action === 'tab_switch' 
+                                  ? 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                                  : log.action.includes('admin') || log.action.includes('ban')
+                                    ? 'bg-red-500/10 text-red-400 border-red-500/30'
+                                    : log.action.includes('vip')
+                                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                                      : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                              }`}>
+                                {log.action}
+                              </span>
+                            )}
                           </td>
                           <td className="p-3 whitespace-nowrap text-zinc-300 font-bold uppercase text-[11px]">
                             {log.tab || '—'}
@@ -1858,6 +1920,249 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
                     <tr>
                       <td colSpan={5} className="p-8 text-center text-zinc-600 font-mono text-xs">
                         {lang === 'ru' ? 'Логи еще не зафиксированы.' : 'No activity logs recorded yet.'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Security Audit Subtab */}
+      {activeSubTab === 'security_audit' && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="bg-[#14171e] border border-[#2a2f3b] p-6 rounded-none space-y-6 rust-metal-pattern relative">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2a2f3b] pb-4">
+              <div className="space-y-1">
+                <h3 className="text-xl font-bold text-white uppercase flex items-center gap-2 font-teko tracking-wider">
+                  <ShieldAlert className="text-red-500 animate-pulse" size={22} />
+                  {lang === 'ru' ? 'Аудит несанкционированного доступа (Gated Access)' : 'Unauthorized Access Audit Trail (Gated Access)'}
+                </h3>
+                <p className="text-[11px] text-zinc-400 font-mono">
+                  {lang === 'ru' 
+                    ? 'Служба фиксации попыток открытия заблокированных модулей (UID, время, целевой модуль, требуемая роль)' 
+                    : 'Real-time security log of users attempting to access restricted modules (UID, time, module, role)'}
+                </p>
+              </div>
+
+              {isSuperAdmin && (
+                <button
+                  onClick={async () => {
+                    if (!confirm(lang === 'ru' ? 'Очистить историю аудита безопасности?' : 'Clear security audit logs?')) return;
+                    try {
+                      const deleted = await clearAllSecurityLogs();
+                      onToast(lang === 'ru' ? `Удалено ${deleted} записей безопасности` : `Cleared ${deleted} security entries`, 'success');
+                    } catch (err) {
+                      onToast(lang === 'ru' ? 'Ошибка очистки логов' : 'Failed to clear logs', 'error');
+                    }
+                  }}
+                  className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] font-mono font-bold uppercase tracking-wider rounded-none transition flex items-center gap-1.5 shrink-0 cursor-pointer"
+                >
+                  <Trash2 size={12} />
+                  <span>{lang === 'ru' ? 'Очистить журнал безопасности' : 'Clear Security Logs'}</span>
+                </button>
+              )}
+            </div>
+
+            {/* Quick Metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-[#1b1e26] border border-[#2a2f3b] p-4 flex items-center gap-3">
+                <div className="p-3 bg-red-500/10 text-red-400 border border-red-500/20">
+                  <ShieldAlert size={20} />
+                </div>
+                <div>
+                  <div className="text-2xl font-black text-white font-mono">{unauthorizedLogs.length}</div>
+                  <div className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">
+                    {lang === 'ru' ? 'Всего попыток' : 'Total Attempts'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-[#1b1e26] border border-[#2a2f3b] p-4 flex items-center gap-3">
+                <div className="p-3 bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <Users size={20} />
+                </div>
+                <div>
+                  <div className="text-2xl font-black text-white font-mono">
+                    {new Set(unauthorizedLogs.map(l => l.uid)).size}
+                  </div>
+                  <div className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">
+                    {lang === 'ru' ? 'Уникальных аккаунтов' : 'Unique Accounts'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-[#1b1e26] border border-[#2a2f3b] p-4 flex items-center gap-3">
+                <div className="p-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <ShieldCheck size={20} />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-emerald-400 font-mono uppercase">
+                    {lang === 'ru' ? 'Защита активна' : 'Protection Active'}
+                  </div>
+                  <div className="text-[10px] text-zinc-400 font-mono">
+                    {lang === 'ru' ? 'Все попытки блокированы' : '100% Attempts Deflected'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Filter controls */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-2.5 text-zinc-500" size={14} />
+                <input
+                  type="text"
+                  value={securitySearch}
+                  onChange={(e) => setSecuritySearch(e.target.value)}
+                  placeholder={lang === 'ru' ? 'Поиск по нику, UID, email, модулю или деталям...' : 'Search by user, UID, email, module...'}
+                  className="w-full bg-[#1b1e26] border border-[#2a2f3b] pl-9 pr-4 py-2 text-xs text-white placeholder-zinc-500 rounded-none focus:outline-none focus:border-[#cd412b] font-mono"
+                />
+              </div>
+
+              <select
+                value={securityRoleFilter}
+                onChange={(e) => setSecurityRoleFilter(e.target.value as any)}
+                className="bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white rounded-none focus:outline-none focus:border-[#cd412b] font-mono shrink-0"
+              >
+                <option value="all">{lang === 'ru' ? 'Все требуемые роли' : 'All Required Roles'}</option>
+                <option value="vip">{lang === 'ru' ? 'VIP Модули (Radar)' : 'VIP Modules'}</option>
+                <option value="owner">{lang === 'ru' ? 'Owner Модули (Rust+ Bot)' : 'Owner Modules'}</option>
+                <option value="admin">{lang === 'ru' ? 'Admin Модули (Panel / Sprites)' : 'Admin Modules'}</option>
+              </select>
+            </div>
+
+            {/* Security Logs Table */}
+            <div className="overflow-x-auto border border-[#2a2f3b] bg-[#0d0f14]">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[#1b1e26] border-b border-[#2a2f3b] text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
+                    <th className="p-3">{lang === 'ru' ? 'Время' : 'Time'}</th>
+                    <th className="p-3">{lang === 'ru' ? 'Пользователь (UID)' : 'User (UID)'}</th>
+                    <th className="p-3">{lang === 'ru' ? 'Целевой модуль' : 'Target Module'}</th>
+                    <th className="p-3">{lang === 'ru' ? 'Требуемый статус' : 'Required Role'}</th>
+                    <th className="p-3">{lang === 'ru' ? 'Статус защиты' : 'Gate Status'}</th>
+                    <th className="p-3 text-right">{lang === 'ru' ? 'Действия' : 'Actions'}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#2a2f3b]/60 text-xs font-mono">
+                  {unauthorizedLogs
+                    .filter(log => {
+                      const search = securitySearch.toLowerCase();
+                      const matchesSearch = !search ||
+                        log.displayName?.toLowerCase().includes(search) ||
+                        log.uid?.toLowerCase().includes(search) ||
+                        (log.email && log.email.toLowerCase().includes(search)) ||
+                        (log.module && log.module.toLowerCase().includes(search)) ||
+                        (log.tab && log.tab.toLowerCase().includes(search)) ||
+                        (log.details && log.details.toLowerCase().includes(search));
+
+                      if (!matchesSearch) return false;
+                      if (securityRoleFilter !== 'all' && log.requiredRole !== securityRoleFilter) return false;
+                      return true;
+                    })
+                    .map((log, idx) => {
+                      const dateObj = log.timestamp?.seconds 
+                        ? new Date(log.timestamp.seconds * 1000) 
+                        : (log.timestamp ? new Date(log.timestamp) : new Date());
+                      
+                      const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                      const dateStr = dateObj.toLocaleDateString();
+
+                      return (
+                        <tr key={log.id ? `${log.id}-${idx}` : idx} className="hover:bg-red-500/[0.04] transition-colors border-l-2 border-red-500/60">
+                          <td className="p-3 whitespace-nowrap text-zinc-400 text-[11px]">
+                            <div className="flex flex-col">
+                              <span className="text-white font-bold">{timeStr}</span>
+                              <span className="text-[9px] text-zinc-500">{dateStr}</span>
+                            </div>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              {log.photoURL ? (
+                                <img referrerPolicy="no-referrer" src={log.photoURL} alt="" className="w-6 h-6 rounded-full border border-zinc-700 bg-black shrink-0" />
+                              ) : (
+                                <div className="w-6 h-6 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[10px] font-bold text-zinc-300 shrink-0">
+                                  {log.displayName?.[0]?.toUpperCase() || 'U'}
+                                </div>
+                              )}
+                              <div className="flex flex-col">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-zinc-200 font-bold text-xs">{log.displayName}</span>
+                                  {log.role && (
+                                    <span className="px-1 text-[9px] bg-zinc-800 text-zinc-400 border border-zinc-700">
+                                      {log.role}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1 text-[9px] text-zinc-500 font-mono">
+                                  <span>UID:</span>
+                                  <span className="text-zinc-400 font-bold">{log.uid}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5 font-bold text-zinc-200">
+                              <Lock size={13} className="text-red-500 shrink-0" />
+                              <span>{log.module || log.tab || 'Restricted Module'}</span>
+                            </div>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            <span className={`px-2 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border ${
+                              log.requiredRole === 'vip'
+                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                                : log.requiredRole === 'owner'
+                                  ? 'bg-red-500/10 text-red-400 border-red-500/30'
+                                  : 'bg-purple-500/10 text-purple-400 border-purple-500/30'
+                            }`}>
+                              {log.requiredRole?.toUpperCase() || 'RESTRICTED'}
+                            </span>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            <span className="px-2 py-0.5 rounded-none text-[9px] font-mono font-black uppercase tracking-wider bg-red-600/20 text-red-400 border border-red-500/40">
+                              🛑 {lang === 'ru' ? 'ЗАБЛОКИРОВАНО' : 'DEFLECTED'}
+                            </span>
+                          </td>
+                          <td className="p-3 whitespace-nowrap text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(log.uid);
+                                  onToast(lang === 'ru' ? 'UID скопирован в буфер' : 'UID copied to clipboard', 'info');
+                                }}
+                                title={lang === 'ru' ? 'Скопировать UID' : 'Copy UID'}
+                                className="p-1.5 bg-[#1b1e26] hover:bg-zinc-800 text-zinc-400 hover:text-white border border-[#2a2f3b] transition cursor-pointer"
+                              >
+                                <Copy size={12} />
+                              </button>
+                              {log.uid && log.uid !== 'guest' && log.uid !== 'anonymous' && (
+                                <button
+                                  onClick={() => setInspectUserId(log.uid)}
+                                  className="px-2.5 py-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[10px] font-mono uppercase font-bold transition cursor-pointer"
+                                >
+                                  {lang === 'ru' ? 'Профиль' : 'Inspect'}
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  {unauthorizedLogs.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="p-12 text-center font-mono">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <ShieldCheck size={36} className="text-emerald-500" />
+                          <span className="text-white font-bold text-sm">
+                            {lang === 'ru' ? 'Попыток несанкционированного доступа не зафиксировано' : 'No unauthorized access attempts recorded'}
+                          </span>
+                          <span className="text-zinc-500 text-xs">
+                            {lang === 'ru' ? 'Все заблокированные разделы находятся под защитой SpecialAccessGated' : 'All restricted sections are secure'}
+                          </span>
+                        </div>
                       </td>
                     </tr>
                   )}
