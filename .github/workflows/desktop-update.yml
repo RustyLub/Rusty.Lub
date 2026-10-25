@@ -1,0 +1,42 @@
+
+name: Rusty.Lub Desktop Update
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup automatic version
+        shell: pwsh
+        run: |
+          $path = "src-tauri/tauri.conf.json"
+          $config = Get-Content $path -Raw | ConvertFrom-Json
+          $config.version = "1.0.$($env:GITHUB_RUN_NUMBER)"
+          $config | ConvertTo-Json -Depth 100 |
+            Set-Content -Path $path -Encoding utf8
+
+      - name: Build and publish Windows release
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          projectPath: .
+          tagName: v1.0.${{ github.run_number }}
+          releaseName: Rusty.Lub v1.0.${{ github.run_number }}
+          releaseDraft: false
+          prerelease: false
+          uploadUpdaterJson: true
