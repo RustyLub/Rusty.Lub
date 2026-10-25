@@ -59,7 +59,8 @@ export type TabType =
   | 'quarry' 
   | 'mixing' 
   | 'clan' 
-  | 'rustplus';
+  | 'rustplus'
+  | 'special';
 
 interface SectionItem {
   id: TabType;

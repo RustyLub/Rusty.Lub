@@ -1,42 +1,60 @@
-
-name: Rusty.Lub Desktop Update
+name: Build & Release Windows Tauri 2 App
 
 on:
   push:
+    tags:
+      - 'v*'
     branches:
       - main
+      - master
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build-windows:
+  release:
+    name: Build and Publish Tauri 2 Windows Release
     runs-on: windows-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup automatic version
-        shell: pwsh
-        run: |
-          $path = "src-tauri/tauri.conf.json"
-          $config = Get-Content $path -Raw | ConvertFrom-Json
-          $config.version = "1.0.$($env:GITHUB_RUN_NUMBER)"
-          $config | ConvertTo-Json -Depth 100 |
-            Set-Content -Path $path -Encoding utf8
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
 
-      - name: Build and publish Windows release
-        uses: tauri-apps/tauri-action@v1
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install frontend dependencies
+        run: npm ci || npm install
+
+      - name: Build Web Assets
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Build Tauri App & Publish Release
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          projectPath: .
-          tagName: v1.0.${{ github.run_number }}
-          releaseName: Rusty.Lub v1.0.${{ github.run_number }}
+          tagName: v__VERSION__
+          releaseName: 'Rusty.Lub v__VERSION__'
+          releaseBody: 'Official release of Rusty.Lub Windows Desktop Edition built with Tauri 2. Includes signed NSIS (.exe), MSI (.msi) installers, and latest.json update manifest for in-app Tauri 2 updater.'
           releaseDraft: false
           prerelease: false
-          uploadUpdaterJson: true
+          args: --target x86_64-pc-windows-msvc

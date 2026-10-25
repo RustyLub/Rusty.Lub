@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Home,
@@ -76,43 +76,48 @@ import {
   OperationType
 } from './firebase';
 
-// Tab Components
-import ErrorsTab from './components/ErrorsTab';
-import BindsTab from './components/BindsTab';
-import FpsTab from './components/FpsTab';
-import RaidCalculatorTab from './components/RaidCalculatorTab';
-import DecayCalculator from './components/DecayCalculator';
-import ElectricalSimulatorTab from './components/ElectricalSimulatorTab';
-import WeaponGuidesTab from './components/WeaponGuidesTab';
-import RustBreeder from './components/RustBreeder';
-import RecyclerTab from './components/RecyclerTab';
-import ChatTab from './components/ChatTab';
-import NewsTab from './components/NewsTab';
-import AdminTab from './components/AdminTab';
-import RustItemIconsTab from './components/RustItemIconsTab';
-import MonumentsTab from './components/MonumentsTab';
-import WipeTrackerTab from './components/WipeTrackerTab';
-import EcoRaidTab from './components/EcoRaidTab';
-import MiningQuarryTab from './components/MiningQuarryTab';
-import MixingTableTab from './components/MixingTableTab';
-import ClanBoardTab from './components/ClanBoardTab';
-import RustPlusTab from './components/RustPlusTab';
-import FaqTab from './components/FaqTab';
+// Tab Components - Static for instant initial HomeTab render
 import HomeTab from './components/HomeTab';
-import ToolsHubTab from './components/ToolsHubTab';
-import GuidesHubTab from './components/GuidesHubTab';
-import Footer from './components/Footer';
-import AuthModal from './components/AuthModal';
-import CabinetModal from './components/CabinetModal';
-import TermsModal from './components/TermsModal';
-import NotificationSettingsModal from './components/NotificationSettingsModal';
-import ConfigExporterModal from './components/ConfigExporterModal';
-import { CommandPaletteModal } from './components/CommandPaletteModal';
-import SectionsDrawer from './components/SectionsDrawer';
-import SpecialAccessGated from './components/SpecialAccessGated';
-import { logUserActivity } from './services/activityLogger';
-import { PlayerRadar } from './components/Radar/PlayerRadar';
-import DiscordWidget from './components/DiscordWidget';
+
+// Tab Components - Lazy loaded for instant app startup & low memory footprint
+const ErrorsTab = lazy(() => import('./components/ErrorsTab'));
+const BindsTab = lazy(() => import('./components/BindsTab'));
+const FpsTab = lazy(() => import('./components/FpsTab'));
+const RaidCalculatorTab = lazy(() => import('./components/RaidCalculatorTab'));
+const DecayCalculator = lazy(() => import('./components/DecayCalculator'));
+const ElectricalSimulatorTab = lazy(() => import('./components/ElectricalSimulatorTab'));
+const WeaponGuidesTab = lazy(() => import('./components/WeaponGuidesTab'));
+const RustBreeder = lazy(() => import('./components/RustBreeder'));
+const RecyclerTab = lazy(() => import('./components/RecyclerTab'));
+const ChatTab = lazy(() => import('./components/ChatTab'));
+const NewsTab = lazy(() => import('./components/NewsTab'));
+const AdminTab = lazy(() => import('./components/AdminTab'));
+const RustItemIconsTab = lazy(() => import('./components/RustItemIconsTab'));
+const MonumentsTab = lazy(() => import('./components/MonumentsTab'));
+const WipeTrackerTab = lazy(() => import('./components/WipeTrackerTab'));
+const EcoRaidTab = lazy(() => import('./components/EcoRaidTab'));
+const MiningQuarryTab = lazy(() => import('./components/MiningQuarryTab'));
+const MixingTableTab = lazy(() => import('./components/MixingTableTab'));
+const ClanBoardTab = lazy(() => import('./components/ClanBoardTab'));
+const RustPlusTab = lazy(() => import('./components/RustPlusTab'));
+const FaqTab = lazy(() => import('./components/FaqTab'));
+const ToolsHubTab = lazy(() => import('./components/ToolsHubTab'));
+const GuidesHubTab = lazy(() => import('./components/GuidesHubTab'));
+const SpecialAccessHubTab = lazy(() => import('./components/SpecialAccessHubTab'));
+const PlayerRadar = lazy(() => import('./components/Radar/PlayerRadar').then(m => ({ default: m.PlayerRadar })));
+
+const Footer = lazy(() => import('./components/Footer'));
+const AuthModal = lazy(() => import('./components/AuthModal'));
+const CabinetModal = lazy(() => import('./components/CabinetModal'));
+const TermsModal = lazy(() => import('./components/TermsModal'));
+const NotificationSettingsModal = lazy(() => import('./components/NotificationSettingsModal'));
+const ConfigExporterModal = lazy(() => import('./components/ConfigExporterModal'));
+const QuickOverlayModal = lazy(() => import('./components/QuickOverlayModal'));
+const CommandPaletteModal = lazy(() => import('./components/CommandPaletteModal').then(m => ({ default: m.CommandPaletteModal })));
+const SectionsDrawer = lazy(() => import('./components/SectionsDrawer'));
+const SpecialAccessGated = lazy(() => import('./components/SpecialAccessGated'));
+const WindowsTitlebar = lazy(() => import('./components/WindowsTitlebar'));
+const DiscordWidget = lazy(() => import('./components/DiscordWidget'));
 // @ts-ignore
 import globalWarfareLogo from './assets/images/global_warfare_logo_1782807450573.jpg';
 // @ts-ignore
@@ -174,8 +179,8 @@ const appTranslations = {
   bannerBtnRaid: { ru: '🎯 НАЧАТЬ РЕЙД РАСЧЕТ', en: '🎯 START RAID CALCULATOR' },
   founderTitle: { ru: 'Разработал Rusty.Lub', en: 'Developed Rusty.Lub' },
   founderDesc: {
-    ru: 'Привет, боец! Этот проект был собран ветераном Rust с суммарным опытом более 12 000 часов на официальных и кастомных серверах. Вся информация в справочнике выверена на практике, а калькулятор идеально считает расходы ресурсов для рейда любого строения.',
-    en: 'Welcome, survivor! This project is curated by a Rust veteran with over 12,000 hours on official and custom servers. All information in this guide has been tested in battle, and the calculator precisely computes sulfur, charcoal, and gunpowder costs.'
+    ru: 'Привет! Этот проект был создан автором с наигранным стажем более 13 000 часов в Rust на официальных и кастомных серверах. Вся информация в справочнике выверена на реальном игровом опыте, а калькулятор идеально считает расходы ресурсов под любой рейд.',
+    en: 'Welcome, survivor! This project was created by an experienced Rust player with over 13,000 hours of playtime on official and custom servers. All information in this guide has been verified through real gameplay, and the calculator precisely computes sulfur, charcoal, and gunpowder costs.'
   },
   hoursCount: { ru: 'Часов в игре', en: 'Hours played' },
   vacStatus: { ru: 'Разработка', en: 'Development' },
@@ -246,7 +251,7 @@ const appTranslations = {
   }
 };
 
-type TabType = 'home' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus';
+type TabType = 'home' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
 
 const VALID_TABS: Record<string, TabType> = {
   home: 'home',
@@ -281,7 +286,9 @@ const VALID_TABS: Record<string, TabType> = {
   radar: 'radar',
   rustplus: 'rustplus',
   icons: 'icons',
-  admin: 'admin'
+  admin: 'admin',
+  special: 'special',
+  vip: 'special'
 };
 
 const getTabFromUrl = (): TabType => {
@@ -400,6 +407,7 @@ export default function App() {
   const [cabinetModalOpen, setCabinetModalOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [sectionsDrawerOpen, setSectionsDrawerOpen] = useState(false);
+  const [quickOverlayOpen, setQuickOverlayOpen] = useState(false);
   const [announcement, setAnnouncement] = useState<{ text: string; active: boolean; type: 'info' | 'hazard' | 'important' } | null>(null);
 
   const subnavRef = useRef<HTMLDivElement>(null);
@@ -442,16 +450,19 @@ export default function App() {
     }
   }, [activeTab, updateSubnavScrollState]);
 
-  // Global Ctrl+K / Cmd+K / / shortcut to trigger Command Palette & M to trigger Sections Drawer
+  // Global Ctrl+K / Cmd+K / Alt+O / M shortcuts
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing inside an input or textarea (unless Ctrl/Cmd is pressed)
+      // Don't trigger if user is typing inside an input or textarea (unless Ctrl/Cmd or Alt is pressed)
       const target = e.target as HTMLElement;
       const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
 
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setCommandPaletteOpen(prev => !prev);
+      } else if (e.altKey && e.key.toLowerCase() === 'o') {
+        e.preventDefault();
+        setQuickOverlayOpen(prev => !prev);
       } else if (!isInput && e.key.toLowerCase() === 'm' && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
         setSectionsDrawerOpen(prev => !prev);
@@ -1219,8 +1230,23 @@ export default function App() {
         backgroundImage: `linear-gradient(to bottom, rgba(7, 9, 15, 0.55), rgba(7, 9, 15, 0.72)), url(${customSwampBg})`
       }}
     >
+      {/* Windows Tauri 2 Native Frameless Application Titlebar */}
+      <WindowsTitlebar
+        appName="RUSTY.LUB"
+        appVersion="2.6.0"
+        activeTabLabel={activeTab.toUpperCase()}
+        onlineCount={onlineCount}
+        appTheme={appTheme}
+        lang={lang}
+        onToast={(msg, type) => {
+          const id = Math.random().toString(36).substring(2, 9);
+          setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : 'success' }]);
+          setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500);
+        }}
+      />
+
       {/* Topmost Warning Hazard Stripe for authentic Facepunch feel */}
-      <div className="h-1.5 rust-hazard w-full sticky top-0 z-50 shadow-[0_0_15px_rgba(217,122,34,0.6)]" />
+      <div className="h-1.5 rust-hazard w-full sticky top-8 z-50 shadow-[0_0_15px_rgba(217,122,34,0.6)]" />
 
       {/* Global Announcement Banner from Owner/Admin */}
       {announcement && announcement.active && (
@@ -1566,6 +1592,7 @@ export default function App() {
             {/* Quick Tool Navigation Chips */}
             {[
               { id: 'home', labelRu: 'Главная', labelEn: 'Home', icon: <Home size={12} /> },
+              { id: 'special', labelRu: 'Особый Доступ', labelEn: 'Special Access', icon: <ShieldAlert size={12} className="text-rose-500" /> },
               { id: 'raid', labelRu: 'Рейды', labelEn: 'Raid', icon: <Flame size={12} className="text-orange-500" />, isHot: true },
               { id: 'tools', labelRu: 'Калькуляторы', labelEn: 'Tools', icon: <Calculator size={12} /> },
               { id: 'ecoraid', labelRu: 'Эко-Рейд', labelEn: 'Eco-Raid', icon: <Pickaxe size={12} className="text-amber-500" /> },
@@ -1944,7 +1971,14 @@ export default function App() {
         <div className="w-full max-w-full overflow-hidden">
           {/* Active Tab View */}
           <div className="w-full max-w-full overflow-hidden">
-            <AnimatePresence mode="wait">
+            <Suspense fallback={
+              <div className="w-full min-h-[400px] flex flex-col items-center justify-center p-8 text-center font-mono space-y-3">
+                <div className="w-10 h-10 border-3 border-[#2a2f3b] border-t-[#cd412b] rounded-full animate-spin" />
+                <div className="text-lg font-bold text-white tracking-widest uppercase font-teko">RUSTY.LUB</div>
+                <div className="text-xs text-neutral-400">ПОДКЛЮЧЕНИЕ МОДУЛЯ...</div>
+              </div>
+            }>
+              <AnimatePresence mode="wait">
           {activeTab === 'admin' && (
             <motion.div
               key="admin"
@@ -2436,6 +2470,35 @@ export default function App() {
             </motion.div>
           )}
 
+          {activeTab === 'special' && (
+            <motion.div
+              key="special"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <SpecialAccessHubTab
+                lang={lang}
+                currentUser={currentUser}
+                appTheme={appTheme}
+                isVip={isVip}
+                isOwner={isOwner}
+                isAdmin={isAdmin}
+                onOpenAuth={() => setAuthModalOpen(true)}
+                onOpenCabinet={() => setCabinetModalOpen(true)}
+                onNavigateTab={(tab) => handleTabChange(tab as any)}
+                onToast={(msg, type) => {
+                  const id = Math.random().toString(36).substring(2, 9);
+                  setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : (type === 'info' ? 'info' as any : 'success') }]);
+                  setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
+                }}
+                onOpenNotifications={() => setNotificationModalOpen(true)}
+                onOpenConfigExporter={() => setConfigExporterModalOpen(true)}
+              />
+            </motion.div>
+          )}
+
           {activeTab === 'radar' && (
             <motion.div
               key="radar"
@@ -2462,6 +2525,7 @@ export default function App() {
             </motion.div>
           )}
             </AnimatePresence>
+            </Suspense>
           </div>
         </div>
       </main>
@@ -2820,6 +2884,19 @@ export default function App() {
                 setToasts(prev => prev.filter(t => t.id !== id));
               }, 3000);
             }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {quickOverlayOpen && (
+          <QuickOverlayModal
+            isOpen={quickOverlayOpen}
+            onClose={() => setQuickOverlayOpen(false)}
+            lang={lang}
+            appTheme={appTheme}
+            onCopyBind={(code) => handleCopy(code)}
+            onOpenFullRaid={() => handleTabChange('raid')}
           />
         )}
       </AnimatePresence>

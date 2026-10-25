@@ -231,7 +231,11 @@ async function startServer() {
       res.json({ result: response.text });
     } catch (err: any) {
       console.error("Gemini API Error:", err);
-      res.status(500).json({ error: err.message || "Ошибка сервера при обработке запроса ИИ" });
+      const isRateLimit = err?.status === 429 || err?.message?.includes("429") || err?.message?.includes("Quota") || err?.message?.includes("Rate exceeded");
+      const userMessage = isRateLimit 
+        ? "Превышен лимит запросов к ИИ (Rate Exceeded). Пожалуйста, подождите 30–60 секунд и повторите попытку." 
+        : (err.message || "Ошибка сервера при обработке запроса ИИ");
+      res.status(isRateLimit ? 429 : 500).json({ error: userMessage });
     }
   });
 

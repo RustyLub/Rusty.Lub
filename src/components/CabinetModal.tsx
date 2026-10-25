@@ -69,6 +69,7 @@ import { CustomUser, SavedRaid, SavedBind, ClanApplicationItem, UserActivityItem
 import UserProfileModal, { BADGES, PROFILE_THEMES } from './UserProfileModal';
 import FeedbackTab from './FeedbackTab';
 import { getUserActivities, clearUserActivities } from '../services/activityService';
+import { checkForAppUpdates } from '../services/appUpdater';
 
 interface CabinetModalProps {
   isOpen: boolean;
@@ -117,6 +118,21 @@ export default function CabinetModal({
   const [activityFilter, setActivityFilter] = useState<'all' | 'decay' | 'raid' | 'binds'>('all');
   const [isLoadingActivities, setIsLoadingActivities] = useState(false);
   const [isClearingHistory, setIsClearingHistory] = useState(false);
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
+  const [updateStatusText, setUpdateStatusText] = useState('');
+
+  const handleCheckUpdate = async () => {
+    setIsCheckingUpdate(true);
+    setUpdateStatusText(lang === 'ru' ? 'Проверка обновлений...' : 'Checking updates...');
+    const updated = await checkForAppUpdates((msg) => {
+      setUpdateStatusText(msg);
+      onToast(msg, 'success');
+    });
+    setIsCheckingUpdate(false);
+    if (!updated) {
+      setUpdateStatusText('');
+    }
+  };
 
   
   // USDT TRC20 Payment states
@@ -1175,15 +1191,26 @@ export default function CabinetModal({
             </div>
           </div>
 
-          <button
-            onClick={() => {
-              onUserLogout();
-              onClose();
-            }}
-            className="w-full mt-4 py-2 bg-red-600/10 hover:bg-red-600 border border-red-600/20 text-red-500 hover:text-white font-black text-[10px] uppercase tracking-wider font-mono cursor-pointer transition-all"
-          >
-            {lang === 'ru' ? 'ВЫЙТИ ИЗ СЕТИ' : 'DISCONNECT BEACON'}
-          </button>
+          <div className="space-y-2 mt-4">
+            <button
+              onClick={handleCheckUpdate}
+              disabled={isCheckingUpdate}
+              className="w-full py-2 px-3 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold text-[10px] uppercase tracking-wider font-mono cursor-pointer transition-all flex items-center justify-center gap-2"
+            >
+              <RefreshCw size={13} className={isCheckingUpdate ? 'animate-spin' : ''} />
+              <span className="truncate">{updateStatusText || (lang === 'ru' ? 'Проверить обновление' : 'Check for Updates')}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                onUserLogout();
+                onClose();
+              }}
+              className="w-full py-2 bg-red-600/10 hover:bg-red-600 border border-red-600/20 text-red-500 hover:text-white font-black text-[10px] uppercase tracking-wider font-mono cursor-pointer transition-all"
+            >
+              {lang === 'ru' ? 'ВЫЙТИ ИЗ СЕТИ' : 'DISCONNECT BEACON'}
+            </button>
+          </div>
         </div>
 
         {/* CABINET MAIN CONTENT CONTAINER */}

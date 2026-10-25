@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { ItemImageOrFallback } from './IconUtils';
 import { CustomUser } from '../types';
+import AppStatsCounterWidget from './AppStatsCounterWidget';
 
 interface HomeTabProps {
   lang: 'ru' | 'en';
@@ -205,6 +206,9 @@ export default function HomeTab({
           </div>
         </div>
       </section>
+
+      {/* ── REAL-TIME APP INSTALLATIONS & REGISTERED USERS STATS COUNTER ── */}
+      <AppStatsCounterWidget lang={lang} appTheme={appTheme} />
 
       {/* ── 2. FEATURED TOOLS BOXES (RAID, BINDS, FPS) ── */}
       <section className="space-y-4">
@@ -619,6 +623,9 @@ export default function HomeTab({
                     <span className="px-1.5 py-0.5 bg-red-50 text-red-600 text-[8px] font-bold rounded">
                       [EAC]
                     </span>
+                    <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 border border-amber-200/80 text-[8px] font-mono font-black rounded">
+                      13 000+ {lang === 'ru' ? 'ЧАСОВ' : 'HOURS'}
+                    </span>
                   </div>
                   <p className="text-[10px] text-neutral-500 font-mono mt-0.5 uppercase tracking-wider">
                     {lang === 'ru' ? 'СОЗДАТЕЛЬ & РАЗРАБОТЧИК' : 'FOUNDER & SOLO DEV'}
@@ -632,10 +639,20 @@ export default function HomeTab({
             <div className="space-y-2 pt-2 border-t border-neutral-100">
               <div className="flex items-center justify-between gap-1 text-[11px]">
                 <a
+                  href="https://steamcommunity.com/id/eaccheater/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-1.5 bg-neutral-900 hover:bg-black text-white text-[10px] font-bold uppercase text-center rounded-lg flex items-center justify-center gap-1 transition-all shadow-xs cursor-pointer"
+                  title={lang === 'ru' ? 'Открыть профиль Steam' : 'Open Steam Profile'}
+                >
+                  <ExternalLink size={10} className="text-amber-400" />
+                  <span>Steam</span>
+                </a>
+                <a
                   href="https://t.me/S1mreyReserve"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-1.5 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700 text-[10px] font-bold uppercase text-center rounded-lg flex items-center justify-center gap-1"
+                  className="flex-1 py-1.5 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700 text-[10px] font-bold uppercase text-center rounded-lg flex items-center justify-center gap-1 transition-all"
                 >
                   <Send size={10} />
                   <span>Telegram</span>
@@ -643,7 +660,7 @@ export default function HomeTab({
                 <button
                   type="button"
                   onClick={handleCopyDiscord}
-                  className={`flex-1 py-1.5 text-[10px] font-bold uppercase text-center rounded-lg flex items-center justify-center gap-1 border cursor-pointer ${
+                  className={`flex-1 py-1.5 text-[10px] font-bold uppercase text-center rounded-lg flex items-center justify-center gap-1 border cursor-pointer transition-all ${
                     copiedDiscord 
                       ? 'bg-emerald-50 text-emerald-600 border-emerald-200' 
                       : 'bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-700'
