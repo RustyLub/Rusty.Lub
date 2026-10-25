@@ -164,22 +164,11 @@ export default function RustBreeder({ lang }: { lang: 'ru' | 'en' }) {
     setScannerMessage('');
     setCaptureError(null);
     try {
-      let stream: MediaStream;
-      if (captureMode === 'camera') {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            facingMode: 'environment'
-          }
-        });
-      } else {
-        stream = await navigator.mediaDevices.getDisplayMedia({
-          video: {
-            displaySurface: 'window'
-          }
-        });
-      }
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          displaySurface: 'window'
+        }
+      });
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -187,9 +176,7 @@ export default function RustBreeder({ lang }: { lang: 'ru' | 'en' }) {
       }
       setIsStreaming(true);
       setScannerMessage(
-        captureMode === 'camera'
-          ? (lang === 'ru' ? 'Камера запущена. Направьте на экран игры!' : 'Camera stream active. Point it at your game screen!')
-          : (lang === 'ru' ? 'Захват экрана запущен. Выберите окно Rust!' : 'Screen capture active. Select your Rust game window!')
+        lang === 'ru' ? 'Захват экрана запущен. Выберите окно Rust!' : 'Screen capture active. Select your Rust game window!'
       );
       setTimeout(() => setScannerMessage(''), 4000);
     } catch (err: any) {
@@ -205,15 +192,9 @@ export default function RustBreeder({ lang }: { lang: 'ru' | 'en' }) {
           ? `Браузер блокирует захват медиа внутри встроенного фрейма (${technicalMsg}). Пожалуйста, откройте приложение в отдельной вкладке по кнопке ниже!`
           : `Web browsers block media capture inside embedded preview frames (${technicalMsg}). Please open the app in a standalone browser tab using the button below to grant permissions!`;
       } else {
-        if (captureMode === 'screen') {
-          errorMsg = lang === 'ru'
-            ? `Не удалось запустить захват экрана (${technicalMsg}). Убедитесь, что вы предоставили разрешения в всплывающем окне.`
-            : `Screen capture failed (${technicalMsg}). Ensure you granted permissions in your web browser popup.`;
-        } else {
-          errorMsg = lang === 'ru'
-            ? `Не удалось получить доступ к камере (${technicalMsg}). Проверьте настройки разрешений камеры в браузере.`
-            : `Could not access the camera (${technicalMsg}). Check your browser or device camera permission settings.`;
-        }
+        errorMsg = lang === 'ru'
+          ? `Не удалось запустить захват экрана (${technicalMsg}). Убедитесь, что вы предоставили разрешения в всплывающем окне.`
+          : `Screen capture failed (${technicalMsg}). Ensure you granted permissions in your web browser popup.`;
       }
       setCaptureError(errorMsg);
       setScannerMessage(lang === 'ru' ? 'Ошибка захвата. Запущен симулятор.' : 'Capture blocked. Loaded simulated Rust window.');
@@ -1482,35 +1463,11 @@ export default function RustBreeder({ lang }: { lang: 'ru' | 'en' }) {
 
                 {/* Capture Mode Selectors & standalone fallback link */}
                 <div className="flex flex-col sm:flex-row justify-between gap-3 bg-black/20 p-2.5 border border-zinc-800/60">
-                  <div className="flex gap-2 font-mono text-[10.5px]">
-                    <button
-                      onClick={() => {
-                        stopStreaming();
-                        setCaptureMode('screen');
-                      }}
-                      className={`px-3 py-1.5 font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
-                        captureMode === 'screen'
-                          ? 'bg-[#cd412b] text-white'
-                          : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700'
-                      }`}
-                    >
+                  <div className="flex flex-wrap items-center gap-2 font-mono text-[10.5px]">
+                    <div className="px-3 py-1.5 font-bold uppercase flex items-center gap-1.5 bg-[#cd412b] text-white">
                       <Video size={12} />
-                      <span>{lang === 'ru' ? 'Захват экрана' : 'Screen Share'}</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        stopStreaming();
-                        setCaptureMode('camera');
-                      }}
-                      className={`px-3 py-1.5 font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
-                        captureMode === 'camera'
-                          ? 'bg-[#cd412b] text-white'
-                          : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700'
-                      }`}
-                    >
-                      <Camera size={12} />
-                      <span>{lang === 'ru' ? 'Веб-камера / OBS' : 'Camera / OBS'}</span>
-                    </button>
+                      <span>{lang === 'ru' ? 'Захват экрана / Rust' : 'Screen / Rust Window'}</span>
+                    </div>
                   </div>
 
                   {/* Standalone New Tab Button */}

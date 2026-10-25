@@ -39,6 +39,7 @@ interface HomeTabProps {
   showJungleFeverSpoiler: boolean;
   onGenerateWallpaper: () => void;
   appTranslations: any;
+  appTheme?: 'dark' | 'light';
   isVip: boolean;
   isOwner: boolean;
   isAdmin: boolean;
@@ -67,7 +68,8 @@ export default function HomeTab({
   isVip,
   isOwner,
   isAdmin,
-  currentUser
+  currentUser,
+  appTheme = 'dark'
 }: HomeTabProps) {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedDiscord, setCopiedDiscord] = useState(false);

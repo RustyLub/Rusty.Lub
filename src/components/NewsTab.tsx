@@ -21,12 +21,319 @@ import {
 } from 'lucide-react';
 
 const DEFAULT_NEWS_ITEMS: NewsItem[] = [
+  // ==========================================
+  // ОКТЯБРЬ 2026 (OCTOBER 2026)
+  // ==========================================
+  {
+    id: 'rust-october-2026-halloween-event',
+    category: 'events',
+    title: {
+      ru: '🎃 Хэллоуин в Rust 2026: Порталы в Подземелья, Охота за Конфетами и Франкенштейн',
+      en: '🎃 Rust Halloween Event 2026: Dungeon Portals, Trick or Treat & Frankenstein Pet'
+    },
+    date: '2026-10-22T18:00:00.000Z',
+    author: 'Facepunch Studios',
+    badge: {
+      ru: 'ИВЕНТ ХЭЛЛОУИН',
+      en: 'HALLOWEEN EVENT'
+    },
+    isFeatured: true,
+    coverImage: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=800&auto=format&fit=crop',
+    summary: {
+      ru: 'Стартовал грандиозный Хэллоуин в Rust! Жуткие порталы с боссами в подземельях, конфетный блиц (Trick or Treat), оживление ручного Франкенштейна, бродячие мумии и лимитированные скины мастерской.',
+      en: 'The annual Rust Halloween event has arrived! Spooky dungeon portals, Trick or Treat candy blitz, Frankenstein pet assembly, wandering mummies, and limited-time workshop skins.'
+    },
+    content: {
+      ru: [
+        {
+          sectionTitle: 'Порталы в Подземелья и Конфетная Охота:',
+          text: 'По всему острову открылись мистические порталы, ведущие в заброшенные катакомбы:',
+          highlights: [
+            'Порталы в подземелья (Dungeon Portals): зачищайте склепы от мумий и получайте лут высшего тира',
+            'Каждые два игровых дня начинается событие «Trick or Treat» — сбор конфет за 3 минуты с призами',
+            'Улучшение конфетных корзин от малых до золотых с оружием, ресурсами и гранатами'
+          ]
+        },
+        {
+          sectionTitle: 'Стол Франкенштейна и Ручной Питомец:',
+          text: 'Соберите собственного монстра-защитника базы на медицинском столе:',
+          highlights: [
+            'Охотьтесь на пугал и зомби, чтобы добыть голову, туловище и ноги монстра',
+            'Соберите чудовище Франкенштейна и управляйте им клавишами команд (атака, следование, охрана шкафа)',
+            'Питомец обладает высоким здоровьем и помогает отбивать оффлайн-рейды'
+          ]
+        },
+        {
+          sectionTitle: 'Хэллоуинские Рецепты и Декорации:',
+          text: 'Эксклюзивные праздничные предметы для базы:',
+          highlights: [
+            'Ведьмин котёл для быстрого создания целебных отваров и чаёв',
+            'Деревянные гробы повышенной вместимости (замена большим сундукам)',
+            'Светящиеся резные тыквы и паутина для маскировки турелей'
+          ]
+        }
+      ],
+      en: [
+        {
+          sectionTitle: 'Dungeon Portals & Candy Blitz:',
+          text: 'Mystic portals have opened across the island leading to forgotten underground crypts:',
+          highlights: [
+            'Dungeon Portals: clear mummy crypts to claim high-tier sulfur and weapon loot',
+            'Every two in-game days, the 3-minute Trick or Treat event triggers across the map',
+            'Upgrade candy baskets from small up to gold tier for top weapons and explosives'
+          ]
+        },
+        {
+          sectionTitle: 'Frankenstein Table & Monster Pet:',
+          text: 'Assemble your own base guard creature at the operating table:',
+          highlights: [
+            'Hunt wandering scarecrows and mummies to harvest head, torso, and legs parts',
+            'Bring Frankenstein monster to life and issue radial commands (Attack, Guard TC, Follow)',
+            'Monster pet features large health pool and assists in defending against raiders'
+          ]
+        },
+        {
+          sectionTitle: 'Spooky Craftables & Base Items:',
+          text: 'Exclusive seasonal holiday decor and storage:',
+          highlights: [
+            'Witch Cauldron for brewing potent pure healing teas and potions',
+            'Large wooden coffins offering expanded item storage capacity',
+            'Glowing jack-o-lanterns and spiderwebs useful for camouflaging auto-turrets'
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: 'rust-october-2026-siege-defense-patch',
+    category: 'updates',
+    title: {
+      ru: '🛡️ Октябрьский патч Rust: Баланс Осадных Орудий, Ремонт Фундаментов и Клановые Метки',
+      en: '🛡️ October Rust Patch: Siege Balance, Foundation Repair Overhaul & Clan Pings'
+    },
+    date: '2026-10-03T19:00:00.000Z',
+    author: 'Facepunch Studios',
+    badge: {
+      ru: 'ПАТЧ 03.10',
+      en: 'PATCH OCT 03'
+    },
+    isFeatured: false,
+    coverImage: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=800&auto=format&fit=crop',
+    summary: {
+      ru: 'Октябрьский глобальный вайп: введена система экстренного ремонта фундаментов киянкой, тактические компасные метки для кланов, оптимизировано ночное освещение и акустика выстрелов.',
+      en: 'October global wipe introduces emergency foundation repair with hammer, tactical clan compass ping system, night vision lighting optimizations, and improved bullet acoustic propagation.'
+    },
+    content: {
+      ru: [
+        {
+          sectionTitle: 'Ремонт Фундаментов и Защита Баз:',
+          text: 'Критические улучшения баланса защиты построек во время рейда:',
+          highlights: [
+            'Устранена блокировка ремонта фундамента при наличии соответствующих материалов в инвентаре',
+            'Исправлен эксплойт с прохождением сквозь треугольные крыши (Triangle Roof Fix)',
+            'Увеличен запас сопротивления бронированных МВК-дверей против зажигательных ракет'
+          ]
+        },
+        {
+          sectionTitle: 'Клановые Тактические Метки (Ping System 2.0):',
+          text: 'Обновленная система целеуказания для командной игры:',
+          highlights: [
+            'Радиальное меню пингов: Враг, Лут, Опасность, Сбор и Движение на компасе',
+            'Синхронизация меток в мобильном приложении Rust+ и на внутриигровой карте',
+            'Отображение точной дистанции в метрах для снайперской стрельбы'
+          ]
+        },
+        {
+          sectionTitle: 'Освещение и Акустика Выстрелов:',
+          text: 'Переработка визуальных и звуковых эффектов ночного боя:',
+          highlights: [
+            'Увеличен эффективный радиус подсветки факелов и тактических фонарей оружия',
+            'Реалистичное эхо выстрелов в каньонах и внутри монументов'
+          ]
+        }
+      ],
+      en: [
+        {
+          sectionTitle: 'Foundation Repair & Base Defense:',
+          text: 'Critical balance tweaks for defensive base upkeep during active raids:',
+          highlights: [
+            'Removed cooldown block on foundation repair when carrying required upkeep materials',
+            'Patched clipping exploit through triangle roofs (Triangle Roof Fix)',
+            'Boosted armored door resistance against incendiary rockets'
+          ]
+        },
+        {
+          sectionTitle: 'Tactical Clan Ping System 2.0:',
+          text: 'Upgraded target designation for squad coordination:',
+          highlights: [
+            'Radial ping wheel: Enemy, Loot, Danger, Regroup, and Move on compass header',
+            'Instant ping synchronization with Rust+ companion app and in-game map',
+            'Direct distance readout in meters for precision sniper engagements'
+          ]
+        },
+        {
+          sectionTitle: 'Night Optics & Ballistic Acoustics:',
+          text: 'Reworked visual and spatial audio cues:',
+          highlights: [
+            'Expanded effective glow radius for weapon flashlights and torches',
+            'Realistic gunfire echo propagation across canyons and monument interiors'
+          ]
+        }
+      ]
+    }
+  },
+
+  // ==========================================
+  // СЕНТЯБРЬ 2026 (SEPTEMBER 2026)
+  // ==========================================
+  {
+    id: 'rust-september-2026-world-biome-overhaul',
+    category: 'updates',
+    title: {
+      ru: '🌿 Сентябрьское обновление: Переработка Биомов, Реки с Водопадами и Военные Туннели',
+      en: '🌿 September Rust Update: Biome World Overhaul, Waterfalls & Military Tunnels Rework'
+    },
+    date: '2026-09-05T19:00:00.000Z',
+    author: 'Facepunch Studios',
+    badge: {
+      ru: 'ПАТЧ 05.09',
+      en: 'PATCH SEP 05'
+    },
+    isFeatured: true,
+    coverImage: 'https://images.unsplash.com/photo-1511497584788-87676104235f?q=80&w=800&auto=format&fit=crop',
+    summary: {
+      ru: 'Генерация процедурной карты получила масштабный апдейт: новые реалистичные водопады, извилистые реки для лодок, густая растительность джунглей и переработанные ученые в Military Tunnels.',
+      en: 'Procedural map generation receives a massive overhaul with realistic waterfalls, winding boat-navigable rivers, lush canopy vegetation, and revamped scientist AI inside Military Tunnels.'
+    },
+    content: {
+      ru: [
+        {
+          sectionTitle: 'Динамическая Сеть Рек и Водопадов:',
+          text: 'Природные водные артерии острова полностью трансформированы:',
+          highlights: [
+            'Глубоководные извилистые реки позволяют перемещаться на моторных лодках и каяках через всю карту',
+            'Величественные водопады со скрытыми за водяной завесой пещерами для секретных баз',
+            'Естественные источники чистой пресной воды для полива ферм без опреснителей'
+          ]
+        },
+        {
+          sectionTitle: 'Переработка Военных Туннелей (Military Tunnels 2.0):',
+          text: 'Один из самых опасных монументов стал ещё более тактическим:',
+          highlights: [
+            'Новый патрульный Тяжёлый Учёный (Heavy Scientist) у центрального реактора',
+            'Альтернативный дренажный туннель для побега с зелёными и синими ключ-картами',
+            'Лут в элитных ящиках монумента увеличен на 25%'
+          ]
+        },
+        {
+          sectionTitle: 'Флора и Оптимизация Скинов:',
+          text: 'Изменения в сборе ресурсов и производительности клиента:',
+          highlights: [
+            'Увеличен спавн диких кустов конопли в лесных и речных биомах',
+            'Мгновенная прогрузка скинов дверей и ящиков без падения FPS'
+          ]
+        }
+      ],
+      en: [
+        {
+          sectionTitle: 'Dynamic River Networks & Waterfalls:',
+          text: 'Island waterways have been completely revitalized:',
+          highlights: [
+            'Deep navigable riverways allow cross-island travel via motorboats and kayaks',
+            'Majestic waterfalls featuring hidden caves behind the water curtain for stealth base building',
+            'Natural freshwater sources for direct crop hydration without purifiers'
+          ]
+        },
+        {
+          sectionTitle: 'Military Tunnels Overhaul (Military Tunnels 2.0):',
+          text: 'One of the deadliest monuments receives upgraded tactical depth:',
+          highlights: [
+            'New patrol Heavy Scientist defending the central reactor corridor',
+            'Alternative drainage maintenance escape route requiring green and blue keycards',
+            'Elite crate item yields increased by 25%'
+          ]
+        },
+        {
+          sectionTitle: 'Flora & Workshop Skin Optimization:',
+          text: 'Gathering and client performance polish:',
+          highlights: [
+            'Increased wild hemp plant density throughout temperate and river biomes',
+            'Instantaneous door and storage skin streaming eliminating frame rate hiccups'
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: 'rust-september-2026-devblog-netcode',
+    category: 'blogs',
+    title: {
+      ru: '🛠️ Девблог Facepunch #264: Сетевой код, Тикрейт Серверов и Борьба со Статтерами',
+      en: '🛠️ Facepunch Devblog #264: Netcode Overhaul, Server Tickrates & Stutter Fixes'
+    },
+    date: '2026-09-18T14:00:00.000Z',
+    author: 'Facepunch Devs',
+    badge: {
+      ru: 'ДЕВБЛОГ #264',
+      en: 'DEVBLOG #264'
+    },
+    isFeatured: false,
+    coverImage: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop',
+    summary: {
+      ru: 'Инженеры Facepunch раскрыли архитектурные детали переработки системы сетевой репликации сущностей, устранения микрофризов вблизи огромных клан-баз и снижения пинга на заполненных серверах.',
+      en: 'Facepunch engineers break down the deep network entity replication rework, eliminating frame drops near massive clan compounds and drastically cutting map load times.'
+    },
+    content: {
+      ru: [
+        {
+          sectionTitle: 'Entity Pooling 3.0 и Экономия Видеопамяти:',
+          text: 'Оптимизация рендеринга тысяч построек и предметов:',
+          highlights: [
+            'Экономия до 2 ГБ видеопамяти при приближении к крупным клановым деревням',
+            'Асинхронная выгрузка неиспользуемых текстур при перемещении между биомами',
+            'Устранение микростаттеров при открытии больших инвентарей'
+          ]
+        },
+        {
+          sectionTitle: 'Сжатие Трафика и Регистрация Попаданий:',
+          text: 'Сетевые оптимизации для высоконагруженных перестрелок:',
+          highlights: [
+            'Сжатие сетевых пакетов на 40% во время плотного огня из пулемётов М249 и HMG',
+            'Улучшена точность серверной регистрации попаданий (Hit Registration) по движущимся целям'
+          ]
+        }
+      ],
+      en: [
+        {
+          sectionTitle: 'Entity Pooling 3.0 & VRAM Optimization:',
+          text: 'Massive rendering enhancements for large compounds:',
+          highlights: [
+            'Saves up to 2 GB of VRAM when approaching mega clan bases',
+            'Asynchronous unloading of dormant textures between biomes',
+            'Eliminated stutter spikes when opening high-capacity inventories'
+          ]
+        },
+        {
+          sectionTitle: 'Traffic Compression & Hit Registration:',
+          text: 'High-octane gunfight networking tweaks:',
+          highlights: [
+            '40% network packet compression during heavy M249 and HMG sustained fire',
+            'Enhanced server hit validation precision against moving players and vehicles'
+          ]
+        }
+      ]
+    }
+  },
+
+  // ==========================================
+  // АВГУСТ 2026 (AUGUST 2026)
+  // ==========================================
   {
     id: 'rust-august-6-power-trip-update',
     category: 'updates',
     title: {
-      ru: '⚡ Глобальное обновление Rust от 6 Августа: «Power Trip»',
-      en: '⚡ Global Rust Update August 6: "Power Trip"'
+      ru: '⚡ Глобальное обновление Rust: «Power Trip» и Электросеть Острова',
+      en: '⚡ Global Rust Update: "Power Trip" & Island Electrical Grid'
     },
     date: '2026-08-06T19:00:00.000Z',
     author: 'Facepunch Studios',
@@ -37,8 +344,8 @@ const DEFAULT_NEWS_ITEMS: NewsItem[] = [
     isFeatured: true,
     coverImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800&auto=format&fit=crop',
     summary: {
-      ru: 'В патче от 6 августа добавлена единая электросеть острова, переработано Энергодепо (Power Plant) с красным утилизатором 100%, событие с падением спутника на Космодроме, заправка нефти на Сфере, насос заправки и пищевые морозильники!',
-      en: 'The August 6 update introduces the island interconnected power grid, Power Plant overhaul with 100% Red Recycler, Satellite Crash event at Launch Site, Dome crude oil pump, functional car lifts, and powered freezers!'
+      ru: 'В патче добавлена единая электросеть острова, переработано Энергодепо (Power Plant) с красным утилизатором 100%, событие с падением спутника на Космодроме, заправка нефти на Сфере, насос заправки и пищевые морозильники!',
+      en: 'The August update introduces the island interconnected power grid, Power Plant overhaul with 100% Red Recycler, Satellite Crash event at Launch Site, Dome crude oil pump, functional car lifts, and powered freezers!'
     },
     content: {
       ru: [
@@ -116,7 +423,7 @@ const DEFAULT_NEWS_ITEMS: NewsItem[] = [
       ru: 'TELEGRAM БОТ',
       en: 'TELEGRAM BOT'
     },
-    isFeatured: true,
+    isFeatured: false,
     coverImage: '/images/rust_lfg_bot.png',
     summary: {
       ru: '@RustLFGBot — теперь находить тиммейтов и кланы стало проще. Бот работает прямо в Telegram.',
@@ -182,42 +489,200 @@ const DEFAULT_NEWS_ITEMS: NewsItem[] = [
     }
   },
   {
-    id: 'industrial-update-devblog',
-    category: 'updates',
+    id: 'rust-august-2026-global-warfare-tournament',
+    category: 'events',
     title: {
-      ru: 'Rust Industrial Automation & Tech Devblog',
-      en: 'Rust Industrial Automation & Tech Devblog'
+      ru: '🏆 Итоги турнира Global Warfare 4 и Эксклюзивные Twitch Drops',
+      en: '🏆 Global Warfare 4 Tournament Results & Exclusive Twitch Drops Campaign'
     },
-    date: '2026-08-01T10:00:00.000Z',
-    author: 'Facepunch',
+    date: '2026-08-03T18:00:00.000Z',
+    author: 'Facepunch Community',
     badge: {
-      ru: 'ОБНОВЛЕНИЕ',
-      en: 'UPDATE'
+      ru: 'ТУРНИР & DROPS',
+      en: 'TOURNAMENT & DROPS'
     },
     isFeatured: false,
     coverImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=800&auto=format&fit=crop',
     summary: {
-      ru: 'Новейшие изменения автокравта, оптимизация электрических схем и конвейеров.',
-      en: 'Latest auto-crafting adjustments, power grid optimizations, and pipeline networks.'
+      ru: 'Завершилось грандиозное киберспортивное сражение Global Warfare 4! Победители турнира, хайлайты финального рейда мейн-базы и уникальная коллекция наградных скинов Twitch Drops.',
+      en: 'The epic Global Warfare 4 tournament has concluded! Champions crowned, breakdown of the final base raid, and limited-time Twitch Drops rewards.'
     },
     content: {
       ru: [
         {
-          sectionTitle: 'Автоматизация базы:',
-          text: 'Промышленные конвейеры теперь работают на 15% эффективнее с уменьшенной нагрузкой на сервер.',
+          sectionTitle: 'Хайлайты Финала и Статистика Рейдов:',
+          text: 'Кульминация трёхдневного турнира с участием лучших кланов мира:',
           highlights: [
-            'Улучшена сортировка предметов в печи',
-            'Новые пресеты для быстрых труб'
+            'Потрачено свыше 450 ракет за 40 минут финального штурма главной крепости',
+            'Победа сборной EU в ожесточенной защите шкафа на 5 этаже',
+            'Рекорд одновременного онлайна зрителей на Twitch'
+          ]
+        },
+        {
+          sectionTitle: 'Наградные Twitch Drops Скины:',
+          text: 'Коллекция эксклюзивных предметов события:',
+          highlights: [
+            'Светящийся в темноте скин на автомат Калашникова (AK-47 «Global Warfare»)',
+            'Бронированная дверь и металлический шлем с символикой чемпионов'
           ]
         }
       ],
       en: [
         {
-          sectionTitle: 'Base Automation:',
-          text: 'Industrial conveyors are now 15% more efficient with reduced server load.',
+          sectionTitle: 'Final Highlights & Raid Breakdown:',
+          text: 'The culmination of a 3-day battle featuring the world\'s best Rust squads:',
           highlights: [
-            'Improved item sorting in furnaces',
-            'New quick-pipe network presets'
+            'Over 450 rockets fired within 40 minutes of intense main fortress siege',
+            'EU squad clinches victory defending the 5th floor tool cupboard core',
+            'New all-time concurrent viewership peak across Rust Twitch category'
+          ]
+        },
+        {
+          sectionTitle: 'Exclusive Twitch Drops Rewards:',
+          text: 'Commemorative event skins available to claim:',
+          highlights: [
+            'Glow-in-the-dark AK-47 "Global Warfare" assault rifle skin with illuminated sights',
+            'Armored single door and metal facemask sporting tournament crest'
+          ]
+        }
+      ]
+    }
+  },
+
+  // ==========================================
+  // ИЮЛЬ 2026 (JULY 2026)
+  // ==========================================
+  {
+    id: 'rust-july-2026-bikes-roadways-update',
+    category: 'updates',
+    title: {
+      ru: '🏍️ Июльское обновление: Велосипеды, Мотоциклы с Коляской и Наручники',
+      en: '🏍️ July Rust Update: Bicycles, Sidecar Motorbikes & Handcuffs'
+    },
+    date: '2026-07-04T19:00:00.000Z',
+    author: 'Facepunch Studios',
+    badge: {
+      ru: 'ПАТЧ 04.07',
+      en: 'PATCH JUL 04'
+    },
+    isFeatured: true,
+    coverImage: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=800&auto=format&fit=crop',
+    summary: {
+      ru: 'На Остров прибыл легкий двухколесный транспорт: горные велосипеды без топлива, быстрые мотоциклы и мотоциклы с коляской для напарника! Добавлены наручники и мешки на голову для захвата пленных.',
+      en: 'Light two-wheeled transport arrives in Rust: pedal bicycles requiring no fuel, high-speed motorbikes, and sidecar rigs for a teammate! Plus handcuffs and prisoner hoods for taking captives.'
+    },
+    content: {
+      ru: [
+        {
+          sectionTitle: 'Двухколесный Транспорт: Велосипеды и Мотоциклы:',
+          text: 'Новые средства быстрого и тихого передвижения по суше:',
+          highlights: [
+            'Горный велосипед (Bicycle): бесшумная езда без затрат топлива, педальный разгон и прыжки через препятствия',
+            'Мотоцикл (Motorbike): скорость до 90 км/ч, двигатель на топливе низкого качества',
+            'Мотоцикл с люлькой (Sidecar): напарник в коляске может вести огонь из автоматов и РПГ на ходу'
+          ]
+        },
+        {
+          sectionTitle: 'Захват Пленников: Наручники и Мешок на Голову:',
+          text: 'Новые ролевые и тактические инструменты контроля врагов:',
+          highlights: [
+            'Наручники (Handcuffs): сковывают поверженного врага, блокируя доступ к инвентарю и оружию',
+            'Мешок на голову (Prisoner Hood): полностью ослепляет пленника черным экраном',
+            'Возможность конвоировать пленника на веревке или перевозить в транспорте'
+          ]
+        },
+        {
+          sectionTitle: 'Шоссейные Трассы и Рампы:',
+          text: 'Дорожное строительство и каскадерские трюки:',
+          highlights: [
+            'Широкие асфальтированные трассы с дорожной разметкой, соединяющие монументы',
+            'Деревянные рампы и трамплины для прыжков на мотоциклах'
+          ]
+        }
+      ],
+      en: [
+        {
+          sectionTitle: 'Two-Wheeled Transport: Bikes & Motorbikes:',
+          text: 'Brand new agile surface locomotion options:',
+          highlights: [
+            'Mountain Bicycle: silent pedal power requiring zero fuel, bunny-hop jumps over obstacles',
+            'Motorbike: speeds reaching up to 90 km/h powered by Low Grade Fuel',
+            'Sidecar Rig: passenger in the sidecar can fire assault rifles and RPGs on the run'
+          ]
+        },
+        {
+          sectionTitle: 'Prisoner Mechanics: Handcuffs & Hoods:',
+          text: 'Tactical non-lethal hostage capture systems:',
+          highlights: [
+            'Handcuffs: restrain downed players, locking them out of their weapons and inventory',
+            'Prisoner Hood: entirely obscures the captive\'s screen with black cloth',
+            'Escort prisoners via rope lead or load them into vehicle passenger seats'
+          ]
+        },
+        {
+          sectionTitle: 'Paved Highways & Stunt Ramps:',
+          text: 'Roadway expansion across the island:',
+          highlights: [
+            'Wide asphalt highway networks with road markings linking major monuments',
+            'Craftable wooden stunt ramps for high-flying motorcycle maneuvers'
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: 'rust-july-2026-devblog-summer-balance',
+    category: 'blogs',
+    title: {
+      ru: '☀️ Летний Девблог Facepunch #262: Перебалансировка Цен Вендоров и Abyss Pack',
+      en: '☀️ Summer Facepunch Devblog #262: Vendor Economy Rebalance & Abyss Pack'
+    },
+    date: '2026-07-18T15:00:00.000Z',
+    author: 'Facepunch Devs',
+    badge: {
+      ru: 'ДЕВБЛОГ #262',
+      en: 'DEVBLOG #262'
+    },
+    isFeatured: false,
+    coverImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop',
+    summary: {
+      ru: 'Масштабная ревизия экономики мирных зон: пересмотрены лимиты скупки дерева и камня за скрап в Аванпосте, обновлены подводные миссии дайвинга и визуальные эффекты летнего солнца.',
+      en: 'Major overhaul of safe-zone economies: rebalanced scrap-to-stone and scrap-to-wood trade quotas in Outpost, deep-sea diving missions, and updated summer sun and ocean shaders.'
+    },
+    content: {
+      ru: [
+        {
+          sectionTitle: 'Экономика Аванпоста и Города Бандитов:',
+          text: 'Борьба с абьюзом бесконечного фарма через вендоров:',
+          highlights: [
+            'Введен динамический кулдаун на массовую скупку древесины за камень в мирном городе',
+            'Снижена стоимость патронов и револьверов у NPC-торговцев на 15%'
+          ]
+        },
+        {
+          sectionTitle: 'Глубоководные Миссии и Подводные Контейнеры:',
+          text: 'Расширение морского контента:',
+          highlights: [
+            'Миссии на подъём затонувших грузовых контейнеров с помощью надувных буев',
+            'Новый подводный фонарь и скоростной подводный гарпун'
+          ]
+        }
+      ],
+      en: [
+        {
+          sectionTitle: 'Outpost & Bandit Camp Economy:',
+          text: 'Restraining endless safe-zone trade exploitation:',
+          highlights: [
+            'Dynamic cooldown limits on bulk scrap-to-wood and stone-to-wood trading',
+            '15% price cut on basic ammo and revolver purchases from NPC vendors'
+          ]
+        },
+        {
+          sectionTitle: 'Deep Sea Salvage Missions & Abyss Pack:',
+          text: 'Underwater exploration expansion:',
+          highlights: [
+            'Missions to float sunken shipping containers using inflatable salvage bags',
+            'High-power underwater tactical dive light and speargun enhancements'
           ]
         }
       ]
@@ -264,7 +729,8 @@ interface NewsTabProps {
 
 export default function NewsTab({ lang, onOpenNotifications }: NewsTabProps) {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'updates' | 'blogs' | 'events'>('all');
-  const [activeNewsId, setActiveNewsId] = useState<string>('rust-lfg-bot-news');
+  const [selectedMonth, setSelectedMonth] = useState<'all' | '10' | '09' | '08' | '07'>('all');
+  const [activeNewsId, setActiveNewsId] = useState<string>('rust-october-2026-halloween-event');
   const [newsItems, setNewsItems] = useState<NewsItem[]>(DEFAULT_NEWS_ITEMS);
 
   console.log('NewsTab render - activeNewsId:', activeNewsId, 'newsItems count:', newsItems.length);
@@ -274,6 +740,14 @@ export default function NewsTab({ lang, onOpenNotifications }: NewsTabProps) {
     { id: 'updates', label: { ru: 'Обновления', en: 'Game Updates' } },
     { id: 'blogs', label: { ru: 'Блоги разработчиков', en: 'Devblogs' } },
     { id: 'events', label: { ru: 'События', en: 'Events' } }
+  ];
+
+  const months = [
+    { id: 'all', label: { ru: 'Все месяцы', en: 'All Months' } },
+    { id: '10', label: { ru: '🎃 Октябрь', en: '🎃 October' } },
+    { id: '09', label: { ru: '🌿 Сентябрь', en: '🌿 September' } },
+    { id: '08', label: { ru: '⚡ Август', en: '⚡ August' } },
+    { id: '07', label: { ru: '🏍️ Июль', en: '🏍️ July' } }
   ];
 
   useEffect(() => {
@@ -293,9 +767,9 @@ export default function NewsTab({ lang, onOpenNotifications }: NewsTabProps) {
             setActiveNewsId(combined[0].id);
         }
 
-        // Auto seed rust-lfg-bot-news to firestore if missing in DB
-        if (!dbItems.some(item => item.id === 'rust-lfg-bot-news')) {
-          setDoc(doc(db, 'news', 'rust-lfg-bot-news'), DEFAULT_NEWS_ITEMS[0]).catch(() => {});
+        // Auto seed default news to firestore if missing in DB
+        if (!dbItems.some(item => item.id === 'rust-october-2026-halloween-event')) {
+          setDoc(doc(db, 'news', 'rust-october-2026-halloween-event'), DEFAULT_NEWS_ITEMS[0]).catch(() => {});
         }
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, 'news');
@@ -303,22 +777,41 @@ export default function NewsTab({ lang, onOpenNotifications }: NewsTabProps) {
     return () => unsubscribe();
   }, []);
 
-  const filteredNews = selectedCategory === 'all' 
-    ? newsItems 
-    : newsItems.filter(item => item.category === selectedCategory);
+  const filteredNews = newsItems.filter(item => {
+    const matchesCat = selectedCategory === 'all' || item.category === selectedCategory;
+    if (!matchesCat) return false;
+    if (selectedMonth === 'all') return true;
+    const m = new Date(item.date).toISOString().substring(5, 7);
+    return m === selectedMonth;
+  });
 
-  const activeItem = newsItems.find(item => item.id === activeNewsId) || newsItems[0];
+  const activeItem = newsItems.find(item => item.id === activeNewsId) || filteredNews[0] || newsItems[0];
 
   const handleCategoryChange = (catId: 'all' | 'updates' | 'blogs' | 'events') => {
     setSelectedCategory(catId);
-    const matched = catId === 'all'
-      ? newsItems
-      : newsItems.filter(item => item.category === catId);
-    if (matched.length > 0) {
-      // If activeNewsId is not part of the newly selected category, set active to first item in category
-      if (!matched.some(item => item.id === activeNewsId)) {
-        setActiveNewsId(matched[0].id);
-      }
+    const matched = newsItems.filter(item => {
+      const matchCat = catId === 'all' || item.category === catId;
+      if (!matchCat) return false;
+      if (selectedMonth === 'all') return true;
+      const m = new Date(item.date).toISOString().substring(5, 7);
+      return m === selectedMonth;
+    });
+    if (matched.length > 0 && !matched.some(item => item.id === activeNewsId)) {
+      setActiveNewsId(matched[0].id);
+    }
+  };
+
+  const handleMonthChange = (monthId: 'all' | '10' | '09' | '08' | '07') => {
+    setSelectedMonth(monthId);
+    const matched = newsItems.filter(item => {
+      const matchCat = selectedCategory === 'all' || item.category === selectedCategory;
+      if (!matchCat) return false;
+      if (monthId === 'all') return true;
+      const m = new Date(item.date).toISOString().substring(5, 7);
+      return m === monthId;
+    });
+    if (matched.length > 0 && !matched.some(item => item.id === activeNewsId)) {
+      setActiveNewsId(matched[0].id);
     }
   };
 
@@ -380,6 +873,36 @@ export default function NewsTab({ lang, onOpenNotifications }: NewsTabProps) {
               </button>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Month Quick Filter Chips Bar */}
+      <div className="bg-[#14171e]/90 border border-[#2a2f3b] p-3 flex flex-wrap items-center justify-between gap-3 shadow-md relative overflow-hidden">
+        <div className="rust-bracket-tl" />
+        <div className="rust-bracket-br" />
+        <div className="flex items-center gap-2">
+          <Calendar size={13} className="text-[#cd412b]" />
+          <span className="text-[10px] font-mono font-bold uppercase text-zinc-400 tracking-wider">
+            {lang === 'ru' ? 'ФИЛЬТР ПО МЕСЯЦАМ (2026):' : 'MONTH FILTER (2026):'}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {months.map((m) => {
+            const isSelected = selectedMonth === m.id;
+            return (
+              <button
+                key={m.id}
+                onClick={() => handleMonthChange(m.id as any)}
+                className={`px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider rounded-sm transition-all cursor-pointer border ${
+                  isSelected
+                    ? 'bg-[#cd412b] border-[#cd412b] text-white shadow-md shadow-[#cd412b]/25'
+                    : 'bg-[#1b1e26] border-[#2a2f3b] text-zinc-400 hover:text-white hover:border-zinc-500'
+                }`}
+              >
+                {m.label[lang]}
+              </button>
+            );
+          })}
         </div>
       </div>
 

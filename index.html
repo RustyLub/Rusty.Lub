@@ -27,13 +27,125 @@
     
     <script>
       window.__rusty_errors = [];
+
+      // Intercept Vite HMR WebSocket in cloud sandbox preview environment to prevent connection failures
+      (function() {
+        if (typeof window === 'undefined') return;
+        var OriginalWebSocket = window.WebSocket;
+        if (!OriginalWebSocket) return;
+
+        function isViteHmr(url, protocols) {
+          if (protocols === 'vite-hmr') return true;
+          if (Array.isArray(protocols) && protocols.indexOf('vite-hmr') !== -1) return true;
+          var strUrl = typeof url === 'string' ? url : (url && url.href ? String(url.href) : '');
+          if (strUrl) {
+            if (strUrl.indexOf('vite-hmr') !== -1) return true;
+            if (strUrl.indexOf('token=') !== -1 && strUrl.indexOf('socket.io') === -1) return true;
+            if (strUrl.indexOf('/@vite/') !== -1) return true;
+          }
+          return false;
+        }
+
+        function DummyViteHmrSocket(url, protocols) {
+          this.url = String(url || '');
+          this.protocols = protocols;
+          this.readyState = 1; // WebSocket.OPEN
+          this.CONNECTING = 0;
+          this.OPEN = 1;
+          this.CLOSING = 2;
+          this.CLOSED = 3;
+          this.binaryType = 'blob';
+          this.bufferedAmount = 0;
+          this.extensions = '';
+          this.protocol = typeof protocols === 'string' ? protocols : 'vite-hmr';
+          this.onopen = null;
+          this.onclose = null;
+          this.onerror = null;
+          this.onmessage = null;
+          this._listeners = {};
+
+          var self = this;
+          setTimeout(function() {
+            if (typeof self.onopen === 'function') {
+              try { self.onopen({ type: 'open', target: self }); } catch(err){}
+            }
+          }, 0);
+        }
+
+        DummyViteHmrSocket.prototype.send = function() {};
+        DummyViteHmrSocket.prototype.close = function() {
+          this.readyState = 3;
+          if (typeof this.onclose === 'function') {
+            try { this.onclose({ type: 'close', code: 1000, reason: 'normal', wasClean: true, target: this }); } catch(err){}
+          }
+          var closeHandlers = this._listeners['close'];
+          if (Array.isArray(closeHandlers)) {
+            var evt = { type: 'close', code: 1000, reason: 'normal', wasClean: true, target: this };
+            closeHandlers.forEach(function(h) { try { h(evt); } catch(e){} });
+          }
+        };
+        DummyViteHmrSocket.prototype.addEventListener = function(event, handler) {
+          if (!this._listeners[event]) this._listeners[event] = [];
+          this._listeners[event].push(handler);
+          if (event === 'open') {
+            var self = this;
+            setTimeout(function() {
+              try { handler({ type: 'open', target: self }); } catch(err){}
+            }, 0);
+          }
+        };
+        DummyViteHmrSocket.prototype.removeEventListener = function(event, handler) {
+          if (!this._listeners[event]) return;
+          this._listeners[event] = this._listeners[event].filter(function(h) { return h !== handler; });
+        };
+        DummyViteHmrSocket.prototype.dispatchEvent = function() {
+          return true;
+        };
+
+        function PatchedWebSocket(url, protocols) {
+          if (isViteHmr(url, protocols)) {
+            return new DummyViteHmrSocket(url, protocols);
+          }
+          if (protocols !== undefined) {
+            return new OriginalWebSocket(url, protocols);
+          }
+          return new OriginalWebSocket(url);
+        }
+
+        PatchedWebSocket.prototype = OriginalWebSocket.prototype;
+        PatchedWebSocket.CONNECTING = 0;
+        PatchedWebSocket.OPEN = 1;
+        PatchedWebSocket.CLOSING = 2;
+        PatchedWebSocket.CLOSED = 3;
+
+        window.WebSocket = PatchedWebSocket;
+      })();
+
+      // Suppress Vite HMR / WebSocket connection errors in sandbox preview
       window.addEventListener('error', function(e) {
-        console.error('Captured early load error:', e);
+        if (!e) return;
+        var msg = (e.message || '') + ' ' + (e.filename || '');
+        if (msg.includes('WebSocket') || msg.includes('@vite/client') || msg.includes('ModuleRunner') || msg.includes('transport') || msg.includes('hmr') || msg.includes('vite-hmr')) {
+          if (e.preventDefault) e.preventDefault();
+          if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+          return;
+        }
+        if (e.message || e.error) {
+          console.warn('Captured early load error:', { message: e.message, filename: e.filename, lineno: e.lineno, error: e.error });
+        }
         var status = document.getElementById('init-status');
         if (status) {
           status.innerHTML = '<span style="color: #ef4444; font-weight: bold;">Ошибка загрузки: ' + (e.message || 'Сбой скрипта') + '</span><br><br><button onclick="try{localStorage.clear();sessionStorage.clear();}catch(x){}location.reload();" style="padding: 8px 16px; background-color: #cd412b; color: #ffffff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-family: monospace;">🔄 СБРОСИТЬ КЕШ И ПЕРЕЗАГРУЗИТЬ</button>';
         }
-      });
+      }, true);
+      window.addEventListener('unhandledrejection', function(e) {
+        if (!e) return;
+        var reason = e.reason ? (e.reason.message || String(e.reason)) : '';
+        if (reason.includes('WebSocket') || reason.includes('@vite/client') || reason.includes('ModuleRunner') || reason.includes('transport') || reason.includes('vite-hmr') || reason.includes('closed without opened')) {
+          if (e.preventDefault) e.preventDefault();
+          if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        }
+      }, true);
     </script>
   </head>
   <body style="background-color: #0c0d10; color: #f8fafc; margin: 0; min-height: 100vh;" class="bg-[#0c0d10] text-[#f8fafc]">

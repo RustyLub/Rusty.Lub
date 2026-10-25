@@ -369,3 +369,48 @@ body.light-theme [class*="hover:bg-white/10"]:not(.keep-dark):hover {
   color: #0f172a !important;
 }
 
+/* Scrollbar Hide Utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Rust Industrial Tactical Corner Brackets */
+.rust-bracket-tl,
+.rust-bracket-tr,
+.rust-bracket-bl,
+.rust-bracket-br {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  pointer-events: none;
+  z-index: 5;
+}
+.rust-bracket-tl {
+  top: 0;
+  left: 0;
+  border-top: 2px solid #cd412b;
+  border-left: 2px solid #cd412b;
+}
+.rust-bracket-tr {
+  top: 0;
+  right: 0;
+  border-top: 2px solid #cd412b;
+  border-right: 2px solid #cd412b;
+}
+.rust-bracket-bl {
+  bottom: 0;
+  left: 0;
+  border-bottom: 2px solid #cd412b;
+  border-left: 2px solid #cd412b;
+}
+.rust-bracket-br {
+  bottom: 0;
+  right: 0;
+  border-bottom: 2px solid #cd412b;
+  border-right: 2px solid #cd412b;
+}
+

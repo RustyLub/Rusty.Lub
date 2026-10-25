@@ -516,6 +516,13 @@
         "read": "true",
         "write": "true"
       }
+    },
+    "/user_activities/{activityId}": {
+      "description": "User activity and usage history including decay timers, raid calculations, and saves",
+      "security": {
+        "read": "true",
+        "write": "true"
+      }
     }
   }
 }

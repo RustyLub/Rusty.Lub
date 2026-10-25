@@ -34,7 +34,9 @@ import {
   AlertTriangle,
   Play,
   Pause,
+  ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Database,
   Coins,
   Gamepad2,
@@ -399,6 +401,46 @@ export default function App() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [sectionsDrawerOpen, setSectionsDrawerOpen] = useState(false);
   const [announcement, setAnnouncement] = useState<{ text: string; active: boolean; type: 'info' | 'hazard' | 'important' } | null>(null);
+
+  const subnavRef = useRef<HTMLDivElement>(null);
+  const [canScrollSubnavLeft, setCanScrollSubnavLeft] = useState(false);
+  const [canScrollSubnavRight, setCanScrollSubnavRight] = useState(true);
+
+  const updateSubnavScrollState = useCallback(() => {
+    if (subnavRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = subnavRef.current;
+      setCanScrollSubnavLeft(scrollLeft > 6);
+      setCanScrollSubnavRight(scrollLeft < scrollWidth - clientWidth - 6);
+    }
+  }, []);
+
+  const scrollSubnav = (direction: 'left' | 'right') => {
+    if (subnavRef.current) {
+      const offset = direction === 'left' ? -260 : 260;
+      subnavRef.current.scrollBy({ left: offset, behavior: 'smooth' });
+      setTimeout(updateSubnavScrollState, 260);
+    }
+  };
+
+  useEffect(() => {
+    updateSubnavScrollState();
+    const timer = setTimeout(updateSubnavScrollState, 150);
+    window.addEventListener('resize', updateSubnavScrollState);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateSubnavScrollState);
+    };
+  }, [updateSubnavScrollState]);
+
+  useEffect(() => {
+    if (subnavRef.current) {
+      const activeEl = subnavRef.current.querySelector<HTMLElement>('[data-active-tab="true"]');
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+      setTimeout(updateSubnavScrollState, 200);
+    }
+  }, [activeTab, updateSubnavScrollState]);
 
   // Global Ctrl+K / Cmd+K / / shortcut to trigger Command Palette & M to trigger Sections Drawer
   useEffect(() => {
@@ -1211,37 +1253,38 @@ export default function App() {
         </div>
       )}
 
-      {/* HEADER / NAVIGATION BAR - Tactical Command × Orange Blaze */}
+      {/* HEADER / NAVIGATION BAR - Modern Adaptive Tactical Command */}
       <nav className={`sticky top-0 z-40 backdrop-blur-md border-b transition-colors duration-200 ${
         appTheme === 'light'
-          ? 'bg-white/95 border-neutral-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)]'
+          ? 'bg-white/95 border-neutral-200/90 shadow-[0_2px_15px_rgba(0,0,0,0.04)]'
           : 'bg-[#08090c]/95 border-[#1e2633] shadow-[0_4px_25px_rgba(0,0,0,0.8)]'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+        <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 overflow-hidden">
+          <div className="flex items-center justify-between h-14 sm:h-16 gap-1.5 sm:gap-3 w-full min-w-0">
             {/* Left: Brand Logo + Primary Nav */}
-            <div className="flex items-center gap-6 sm:gap-8">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0 shrink">
               {/* Logo */}
               <button 
                 onClick={() => handleTabChange('home')}
-                className="flex items-center gap-2.5 shrink-0 group text-left cursor-pointer"
+                className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 group text-left cursor-pointer"
+                title="Rusty.Lub - Home"
               >
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center font-black text-white shadow-[0_3px_12px_rgba(220,38,38,0.25)] relative overflow-hidden group-hover:scale-105 transition-transform">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-red-600 via-red-600 to-amber-600 flex items-center justify-center font-black text-white shadow-[0_3px_12px_rgba(220,38,38,0.35)] relative overflow-hidden group-hover:scale-105 transition-transform shrink-0">
                   <span className="font-mono text-xs font-black tracking-tight">RL</span>
                 </div>
                 <div className="flex flex-col justify-center">
-                  <span className={`font-black text-lg tracking-wider font-teko uppercase leading-none block ${
-                    appTheme === 'light' ? 'text-[#141414]' : 'text-[#eef2f7]'
+                  <span className={`font-black text-base sm:text-lg tracking-wider font-teko uppercase leading-none block ${
+                    appTheme === 'light' ? 'text-neutral-900' : 'text-[#eef2f7]'
                   }`}>
                     RUSTY<span className="text-red-600">.LUB</span>
                   </span>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="relative flex h-1.5 w-1.5">
+                  <div className="hidden xs:flex items-center gap-1.5 mt-0.5">
+                    <span className="relative flex h-1.5 w-1.5 shrink-0">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                     </span>
-                    <span className={`text-[9px] font-mono font-bold uppercase leading-none ${
-                      appTheme === 'light' ? 'text-[#141414]/60' : 'text-[#8b95a8]'
+                    <span className={`text-[9px] font-mono font-bold uppercase leading-none truncate ${
+                      appTheme === 'light' ? 'text-neutral-500' : 'text-[#8b95a8]'
                     }`}>
                       {onlineCount} {lang === 'ru' ? 'ОНЛАЙН' : 'ONLINE'}
                     </span>
@@ -1249,35 +1292,36 @@ export default function App() {
                 </div>
               </button>
 
-              {/* Desktop Menu Navigation Links (Soft Light Specification) */}
-              <div className={`hidden lg:flex items-center gap-1 border-l pl-5 ${
+              {/* All Sections Catalog Button (Visible on large screens) */}
+              <button
+                onClick={() => setSectionsDrawerOpen(true)}
+                className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer border shrink-0 ${
+                  sectionsDrawerOpen
+                    ? 'bg-red-600 text-white border-red-600 shadow-sm shadow-red-600/30'
+                    : appTheme === 'light'
+                      ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300/80 shadow-xs'
+                      : 'bg-[#12161e] hover:bg-[#18202d] text-[#eef2f7] border-[#1e2633]'
+                }`}
+                title={lang === 'ru' ? 'Каталог всех 24 разделов (M)' : 'All 24 sections directory (M)'}
+              >
+                <LayoutGrid size={13} className={sectionsDrawerOpen ? 'text-white' : 'text-red-600'} />
+                <span className="hidden xl:inline">{lang === 'ru' ? 'Все разделы' : 'All Sections'}</span>
+                <span className="xl:hidden">{lang === 'ru' ? 'Разделы' : 'Sections'}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-bold ${
+                  sectionsDrawerOpen ? 'bg-white/20 text-white' : 'bg-red-500/10 text-red-600 border border-red-500/20'
+                }`}>
+                  24
+                </span>
+              </button>
+
+              {/* Desktop Nav Links - Extra Large Screens (>= 1536px) */}
+              <div className={`hidden 2xl:flex items-center gap-1 border-l pl-3 ${
                 appTheme === 'light' ? 'border-neutral-200' : 'border-[#1e2633]'
               }`}>
-                {/* All Sections Catalog Button (Opens Drawer with all 24 sections) */}
-                <button
-                  onClick={() => setSectionsDrawerOpen(true)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer mr-1.5 border ${
-                    sectionsDrawerOpen
-                      ? 'bg-red-600 text-white border-red-600 shadow-sm'
-                      : appTheme === 'light'
-                        ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300/80 shadow-xs'
-                        : 'bg-[#12161e] hover:bg-[#18202d] text-[#eef2f7] border-[#1e2633]'
-                  }`}
-                  title={lang === 'ru' ? 'Открыть каталог всех 24 разделов (M)' : 'Open all 24 sections directory (M)'}
-                >
-                  <LayoutGrid size={13} className={sectionsDrawerOpen ? 'text-white' : 'text-red-600'} />
-                  <span>{lang === 'ru' ? 'Все разделы' : 'All Sections'}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-bold ${
-                    sectionsDrawerOpen ? 'bg-white/20 text-white' : 'bg-red-500/10 text-red-600 border border-red-500/20'
-                  }`}>
-                    24
-                  </span>
-                </button>
-
                 {[
                   { id: 'home', label: lang === 'ru' ? 'Главная' : 'Home' },
                   { id: 'tools', label: lang === 'ru' ? 'Калькуляторы' : 'Tools' },
-                  { id: 'raid', label: lang === 'ru' ? 'Рейд' : 'Raid' },
+                  { id: 'raid', label: lang === 'ru' ? 'Рейд' : 'Raid', isHot: true },
                   { id: 'guides', label: lang === 'ru' ? 'Гайды' : 'Guides' },
                   { id: 'clan', label: lang === 'ru' ? 'Кланы' : 'Clans' },
                   { id: 'chat', label: lang === 'ru' ? 'Чат' : 'Chat' },
@@ -1289,167 +1333,192 @@ export default function App() {
                     <button
                       key={item.id}
                       onClick={() => handleTabChange(item.id as any)}
-                      className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
+                      className={`px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
                         isActive
                           ? appTheme === 'light'
-                            ? 'text-red-600 bg-red-500/10'
-                            : 'text-white bg-gradient-to-r from-[#ea580c]/20 to-transparent font-bold border-l-2 border-[#ea580c]'
+                            ? 'text-red-600 bg-red-500/10 font-black shadow-xs'
+                            : 'text-white bg-gradient-to-r from-red-600/25 to-transparent border-l-2 border-red-600 font-black'
                           : appTheme === 'light'
-                            ? 'text-[#141414]/75 hover:text-[#141414] hover:bg-neutral-100'
+                            ? 'text-neutral-700 hover:text-black hover:bg-neutral-100'
                             : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e]'
                       }`}
                     >
-                      {item.label}
+                      {item.isHot && <Flame size={12} className={isActive ? 'text-red-500 fill-red-500/20' : 'text-orange-500'} />}
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Compact Nav Links - XL Screens (1280px - 1535px) */}
+              <div className={`hidden xl:flex 2xl:hidden items-center gap-1 border-l pl-2.5 ${
+                appTheme === 'light' ? 'border-neutral-200' : 'border-[#1e2633]'
+              }`}>
+                {[
+                  { id: 'home', label: lang === 'ru' ? 'Главная' : 'Home' },
+                  { id: 'tools', label: lang === 'ru' ? 'Калькуляторы' : 'Tools' },
+                  { id: 'raid', label: lang === 'ru' ? 'Рейд' : 'Raid', isHot: true }
+                ].map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleTabChange(item.id as any)}
+                      className={`px-2 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                        isActive
+                          ? appTheme === 'light'
+                            ? 'text-red-600 bg-red-500/10 font-black'
+                            : 'text-white bg-red-600/20 border-l-2 border-red-600 font-black'
+                          : appTheme === 'light'
+                            ? 'text-neutral-700 hover:text-black hover:bg-neutral-100'
+                            : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e]'
+                      }`}
+                    >
+                      {item.isHot && <Flame size={12} className="text-orange-500" />}
+                      <span>{item.label}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Right: Actions, Search, Quick Raid, Chat, Auth & Lang */}
-            <div className="hidden lg:flex items-center gap-2.5">
+            {/* Right: Actions, Search, Theme, Quick Raid, Cabinet & Lang */}
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               {/* Search Trigger */}
               <button
                 onClick={() => setCommandPaletteOpen(true)}
-                className={`flex items-center gap-2 px-3 py-1.5 text-xs font-mono transition-all cursor-pointer rounded-md shadow-sm group ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1.5 text-xs font-mono transition-all cursor-pointer rounded-md shadow-xs group shrink-0 ${
                   appTheme === 'light'
-                    ? 'bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-700'
+                    ? 'bg-neutral-100 hover:bg-neutral-200 border border-neutral-300/80 text-neutral-700'
                     : 'bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
                 }`}
                 title={lang === 'ru' ? 'Быстрый поиск (Ctrl + K)' : 'Quick Search (Ctrl + K)'}
               >
-                <Search size={13} className="text-red-600 group-hover:scale-110 transition-transform" />
-                <span className="text-[11px] font-semibold">{lang === 'ru' ? 'Поиск...' : 'Search...'}</span>
-                <span className={`text-[9px] px-1.5 py-0.5 font-mono rounded ${
-                  appTheme === 'light' ? 'bg-neutral-100 text-neutral-500 border border-neutral-200' : 'bg-white/5 border border-white/10 text-[#8b95a8]'
+                <Search size={14} className="text-red-600 group-hover:scale-110 transition-transform shrink-0" />
+                <span className="hidden md:inline text-[11px] font-semibold">{lang === 'ru' ? 'Поиск...' : 'Search...'}</span>
+                <span className={`hidden 2xl:inline text-[9px] px-1.5 py-0.5 font-mono rounded ${
+                  appTheme === 'light' ? 'bg-white text-neutral-500 border border-neutral-200' : 'bg-white/5 border border-white/10 text-[#8b95a8]'
                 }`}>
                   Ctrl+K
                 </span>
               </button>
 
-              {/* Chat Button */}
+              {/* Chat Button (Visible on wide screens) */}
               <button
                 onClick={() => handleTabChange('chat')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border rounded-md transition-all cursor-pointer ${
+                className={`hidden 2xl:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold border rounded-md transition-all cursor-pointer shrink-0 ${
                   activeTab === 'chat'
                     ? appTheme === 'light'
-                      ? 'bg-red-50 text-red-600 border-red-200 shadow-sm shadow-red-500/5'
-                      : 'bg-[#12161e] text-[#f97316] border-[#f97316] shadow-sm shadow-[#f97316]/20'
+                      ? 'bg-red-50 text-red-600 border-red-200 shadow-xs'
+                      : 'bg-[#12161e] text-red-500 border-red-500/50 shadow-xs shadow-red-500/20'
                     : appTheme === 'light'
-                      ? 'bg-white hover:bg-neutral-50 border-neutral-200 text-neutral-700 hover:text-black'
+                      ? 'bg-white hover:bg-neutral-100 border-neutral-200 text-neutral-700'
                       : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
                 }`}
+                title={lang === 'ru' ? 'Чат сообщества' : 'Community Chat'}
               >
                 <MessageSquare size={13} className={activeTab === 'chat' ? 'text-red-600' : 'text-neutral-500'} />
                 <span>{lang === 'ru' ? 'Чат' : 'Chat'}</span>
               </button>
 
-              {/* Quick Raid CTA button */}
+              {/* Quick Raid CTA button (Visible on extra-wide screens) */}
               <button
                 onClick={() => handleTabChange('raid')}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold bg-red-600 hover:bg-red-700 text-white rounded-md transition-all cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                className="hidden 2xl:flex items-center gap-1.5 px-3 py-1.5 text-xs font-black uppercase tracking-wider bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white rounded-md transition-all cursor-pointer shadow-sm shadow-red-600/30 hover:scale-[1.02] active:scale-[0.98] shrink-0"
+                title={lang === 'ru' ? 'Калькулятор рейдов' : 'Raid Calculator'}
               >
-                <Flame size={13} />
+                <Flame size={13} className="fill-white/20 animate-pulse" />
                 <span>{lang === 'ru' ? 'Рейды' : 'Raid'}</span>
               </button>
 
-              {/* Auth Chip: Logged In vs Guest */}
+              {/* Theme Toggle (Light / Dark) */}
+              <button
+                onClick={() => setAppTheme(appTheme === 'dark' ? 'light' : 'dark')}
+                className={`p-1.5 sm:p-2 rounded-md transition-all cursor-pointer border shrink-0 ${
+                  appTheme === 'light'
+                    ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-800'
+                    : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-amber-400 hover:text-amber-300'
+                }`}
+                title={
+                  appTheme === 'light'
+                    ? (lang === 'ru' ? 'Переключить на тёмную тему' : 'Switch to Dark Mode')
+                    : (lang === 'ru' ? 'Переключить на светлую тему' : 'Switch to Light Mode')
+                }
+              >
+                {appTheme === 'light' ? (
+                  <Moon size={15} className="text-neutral-700" />
+                ) : (
+                  <Sun size={15} className="text-amber-400" />
+                )}
+              </button>
+
+              {/* Language Selector */}
+              <button
+                onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
+                className={`flex items-center px-1.5 sm:px-2 py-1.5 text-[11px] font-mono font-bold transition-all cursor-pointer rounded-md shrink-0 border ${
+                  appTheme === 'light'
+                    ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-700'
+                    : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
+                }`}
+                title={lang === 'ru' ? 'Switch to English' : 'Переключить на Русский'}
+              >
+                <span className={lang === 'ru' ? 'text-red-600 font-black' : 'opacity-60'}>RU</span>
+                <span className="opacity-40 mx-0.5">/</span>
+                <span className={lang === 'en' ? 'text-red-600 font-black' : 'opacity-60'}>EN</span>
+              </button>
+
+              {/* User Profile / Cabinet / Login */}
               {currentUser ? (
                 <button
                   onClick={() => setCabinetModalOpen(true)}
-                  className={`flex items-center gap-2 px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer rounded-md shadow-sm shrink-0 group ${
+                  className={`flex items-center gap-1.5 sm:gap-2 px-1.5 sm:px-2.5 py-1.5 text-xs font-semibold transition-all cursor-pointer rounded-md shadow-xs shrink-0 group border ${
                     appTheme === 'light'
-                      ? 'bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-800'
-                      : 'bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] text-[#eef2f7] hover:text-[#f97316]'
+                      ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-800'
+                      : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-[#eef2f7] hover:text-red-400'
                   }`}
                   title={lang === 'ru' ? 'Личный кабинет' : 'User Cabinet'}
                 >
                   <img referrerPolicy="no-referrer" 
                     src={getAvatarUrl(currentUser.photoURL, currentUser.avatarClass)} 
                     alt={currentUser.displayName} 
-                    className="w-5 h-5 rounded-full object-cover border border-red-500/30 group-hover:border-red-500 shrink-0"
+                    className="w-5 h-5 rounded-full object-cover border border-red-500/40 group-hover:border-red-500 shrink-0"
                   />
-                  <span className={`font-mono text-[11px] font-bold group-hover:text-red-600 transition-colors max-w-[90px] truncate ${
+                  <span className={`hidden sm:inline font-mono text-[11px] font-bold group-hover:text-red-600 transition-colors max-w-[70px] md:max-w-[85px] truncate ${
                     appTheme === 'light' ? 'text-neutral-800' : 'text-[#eef2f7]'
                   }`}>
                     {currentUser.displayName || (currentUser.uid === 'serustqs' ? 'OWNER' : 'SURVIVOR')}
                   </span>
-                  <span className="text-[10px] px-1.5 py-0.5 bg-red-500/10 border border-red-500/20 text-red-600 rounded font-bold uppercase">
+                  <span className="hidden xl:inline text-[9px] px-1.5 py-0.5 bg-red-500/10 border border-red-500/20 text-red-600 rounded font-bold uppercase">
                     {lang === 'ru' ? 'Кабинет' : 'Cabinet'}
                   </span>
                 </button>
               ) : (
                 <button
                   onClick={() => setAuthModalOpen(true)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold transition-all cursor-pointer rounded-md shadow-sm shrink-0 ${
+                  className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-bold transition-all cursor-pointer rounded-md shadow-xs shrink-0 border ${
                     appTheme === 'light'
-                      ? 'bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-700 hover:text-black'
-                      : 'bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] text-[#eef2f7] hover:text-[#f97316]'
+                      ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-800 hover:text-black'
+                      : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-[#eef2f7] hover:text-red-400'
                   }`}
+                  title={lang === 'ru' ? 'Войти в аккаунт' : 'Log In'}
                 >
-                  <Power size={12} className="text-red-600" />
-                  <span>{lang === 'ru' ? 'Войти' : 'Log In'}</span>
+                  <Power size={13} className="text-red-600 shrink-0" />
+                  <span className="hidden sm:inline">{lang === 'ru' ? 'Войти' : 'Log In'}</span>
                 </button>
               )}
 
-              {/* Language Selector */}
-              <button
-                onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
-                className={`flex items-center px-2.5 py-1.5 text-[11px] font-mono font-bold transition-all cursor-pointer rounded-md shrink-0 ${
-                  appTheme === 'light'
-                    ? 'bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-600'
-                    : 'bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
-                }`}
-                title={lang === 'ru' ? 'Switch to English' : 'Переключить на Русский'}
-              >
-                <span className={lang === 'ru' ? 'text-red-600 font-black' : 'text-neutral-400'}>RU</span>
-                <span className="text-neutral-300 mx-1">/</span>
-                <span className={lang === 'en' ? 'text-red-600 font-black' : 'text-neutral-400'}>EN</span>
-              </button>
-            </div>
-
-            {/* Mobile Actions */}
-            <div className="lg:hidden flex items-center gap-2">
-              <button
-                onClick={() => setCommandPaletteOpen(true)}
-                className="p-2 bg-[#12161e] border border-[#1e2633] text-[#f97316] rounded-md shrink-0 cursor-pointer"
-                title={lang === 'ru' ? 'Поиск' : 'Search'}
-              >
-                <Search size={15} />
-              </button>
-
-              {currentUser ? (
-                <button
-                  onClick={() => setCabinetModalOpen(true)}
-                  className="p-1.5 bg-[#12161e] border border-[#1e2633] rounded-md shrink-0 cursor-pointer"
-                  title={lang === 'ru' ? 'Кабинет' : 'Profile'}
-                >
-                  <img referrerPolicy="no-referrer" 
-                    src={getAvatarUrl(currentUser.photoURL, currentUser.avatarClass)} 
-                    alt={currentUser.displayName} 
-                    className="w-6 h-6 rounded-full object-cover border border-[#f97316]/50 bg-black"
-                  />
-                </button>
-              ) : (
-                <button
-                  onClick={() => setAuthModalOpen(true)}
-                  className="px-2.5 py-1.5 bg-[#12161e] border border-[#1e2633] hover:border-[#f97316] rounded-md text-xs font-bold text-[#eef2f7] shrink-0 cursor-pointer flex items-center gap-1"
-                >
-                  <Power size={13} className="text-[#f97316]" />
-                  <span>{lang === 'ru' ? 'Войти' : 'Login'}</span>
-                </button>
-              )}
-
-              <button
-                onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
-                className="px-2 py-1 text-[10px] font-mono font-bold bg-[#12161e] border border-[#1e2633] text-[#eef2f7] rounded-md cursor-pointer"
-              >
-                {lang === 'ru' ? 'RU' : 'EN'}
-              </button>
-
+              {/* Mobile / Tablet Hamburger Toggle */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-md text-[#8b95a8] hover:text-white bg-[#12161e] border border-[#1e2633] cursor-pointer"
+                className={`xl:hidden p-1.5 sm:p-2 rounded-md transition-all cursor-pointer border shrink-0 ${
+                  mobileMenuOpen
+                    ? 'bg-red-600 text-white border-red-600'
+                    : appTheme === 'light'
+                      ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-800'
+                      : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
+                }`}
+                title={mobileMenuOpen ? 'Close Menu' : 'Open Menu'}
+                aria-label="Navigation Menu"
               >
                 {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
               </button>
@@ -1457,30 +1526,158 @@ export default function App() {
           </div>
         </div>
 
-        {/* Mobile Navigation Drawer */}
+        {/* ADAPTIVE HORIZONTAL SUB-NAVBAR (Fast 1-Tap Access to Popular Tools on All Screens) */}
+        <div className={`w-full border-t transition-colors duration-200 relative group/subnav ${
+          appTheme === 'light'
+            ? 'bg-neutral-100/95 border-neutral-200/80 shadow-[inset_0_-1px_0_rgba(0,0,0,0.04)]'
+            : 'bg-[#0a0d13]/95 border-[#18202c] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]'
+        }`}>
+          {/* Left Scroll Navigation Button */}
+          {canScrollSubnavLeft && (
+            <button
+              onClick={() => scrollSubnav('left')}
+              className={`absolute left-0 top-0 bottom-0 z-30 w-7 sm:w-8 flex items-center justify-center transition-all cursor-pointer shadow-md border-r ${
+                appTheme === 'light'
+                  ? 'bg-white/95 hover:bg-white text-neutral-800 border-neutral-200/90'
+                  : 'bg-[#0c0f16]/95 hover:bg-[#151a24] text-neutral-200 border-[#1e2633]'
+              }`}
+              title={lang === 'ru' ? 'Прокрутить влево' : 'Scroll left'}
+            >
+              <ChevronLeft size={15} />
+            </button>
+          )}
+
+          {/* CSS SELECTOR 2: div#root:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) */}
+          <div 
+            ref={subnavRef}
+            onScroll={updateSubnavScrollState}
+            className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-1.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap overscroll-x-contain"
+          >
+            {/* Quick All Sections Pill */}
+            <button
+              onClick={() => setSectionsDrawerOpen(true)}
+              className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider rounded-md bg-red-600/10 text-red-600 border border-red-500/30 hover:bg-red-600 hover:text-white transition-all cursor-pointer shrink-0"
+              title={lang === 'ru' ? 'Открыть каталог всех 24 разделов' : 'Open full 24 sections directory'}
+            >
+              <LayoutGrid size={12} />
+              <span>{lang === 'ru' ? 'Каталог (24)' : 'Directory (24)'}</span>
+            </button>
+
+            {/* Quick Tool Navigation Chips */}
+            {[
+              { id: 'home', labelRu: 'Главная', labelEn: 'Home', icon: <Home size={12} /> },
+              { id: 'raid', labelRu: 'Рейды', labelEn: 'Raid', icon: <Flame size={12} className="text-orange-500" />, isHot: true },
+              { id: 'tools', labelRu: 'Калькуляторы', labelEn: 'Tools', icon: <Calculator size={12} /> },
+              { id: 'ecoraid', labelRu: 'Эко-Рейд', labelEn: 'Eco-Raid', icon: <Pickaxe size={12} className="text-amber-500" /> },
+              { id: 'electrical', labelRu: 'Электрика', labelEn: 'Electricity', icon: <Zap size={12} className="text-yellow-400" /> },
+              { id: 'mixing', labelRu: 'Смешивание', labelEn: 'Mixing', icon: <FlaskConical size={12} className="text-purple-400" /> },
+              { id: 'breeder', labelRu: 'Ферма', labelEn: 'Breeding', icon: <Sprout size={12} className="text-emerald-400" /> },
+              { id: 'recycler', labelRu: 'Переработка', labelEn: 'Recycler', icon: <Layers size={12} className="text-blue-400" /> },
+              { id: 'decay', labelRu: 'Гниение', labelEn: 'Decay', icon: <Clock size={12} /> },
+              { id: 'guides', labelRu: 'Гайды', labelEn: 'Guides', icon: <BookOpen size={12} /> },
+              { id: 'weapons', labelRu: 'Оружие', labelEn: 'Weapons', icon: <Target size={12} className="text-red-400" /> },
+              { id: 'monuments', labelRu: 'Монументы', labelEn: 'Monuments', icon: <MapPin size={12} className="text-teal-400" /> },
+              { id: 'wipe', labelRu: 'Вайпы', labelEn: 'Wipes', icon: <Clock size={12} className="text-cyan-400" /> },
+              { id: 'clan', labelRu: 'Кланы', labelEn: 'Clans', icon: <UserPlus size={12} className="text-indigo-400" /> },
+              { id: 'chat', labelRu: 'Чат', labelEn: 'Chat', icon: <MessageSquare size={12} /> },
+              { id: 'news', labelRu: 'Новости', labelEn: 'News', icon: <Compass size={12} /> },
+              { id: 'faq', labelRu: 'FAQ', labelEn: 'FAQ', icon: <HelpCircle size={12} className="text-orange-400" /> }
+            ].map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  data-active-tab={isActive ? "true" : "false"}
+                  onClick={() => handleTabChange(tab.id as any)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer shrink-0 border ${
+                    isActive
+                      ? 'bg-red-600 text-white border-red-600 shadow-xs shadow-red-600/30'
+                      : appTheme === 'light'
+                        ? 'bg-white hover:bg-neutral-200/70 border-neutral-200 text-neutral-700'
+                        : 'bg-[#12161e] hover:bg-[#18202d] border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
+                  }`}
+                >
+                  {tab.icon}
+                  <span>{lang === 'ru' ? tab.labelRu : tab.labelEn}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Right Scroll Navigation Button */}
+          {canScrollSubnavRight && (
+            <button
+              onClick={() => scrollSubnav('right')}
+              className={`absolute right-0 top-0 bottom-0 z-30 w-7 sm:w-8 flex items-center justify-center transition-all cursor-pointer shadow-md border-l ${
+                appTheme === 'light'
+                  ? 'bg-white/95 hover:bg-white text-neutral-800 border-neutral-200/90'
+                  : 'bg-[#0c0f16]/95 hover:bg-[#151a24] text-neutral-200 border-[#1e2633]'
+              }`}
+              title={lang === 'ru' ? 'Прокрутить вправо' : 'Scroll right'}
+            >
+              <ChevronRight size={15} />
+            </button>
+          )}
+
+          {/* Subtle Visual Gradient Overlay - Left Edge (visible when scrollable to left) */}
+          <div
+            className={`pointer-events-none absolute left-0 top-0 bottom-0 w-12 sm:w-20 z-20 transition-opacity duration-300 ${
+              canScrollSubnavLeft ? 'opacity-100' : 'opacity-0'
+            } ${
+              appTheme === 'light'
+                ? 'bg-gradient-to-r from-neutral-100 via-neutral-100/90 to-transparent'
+                : 'bg-gradient-to-r from-[#0a0d13] via-[#0a0d13]/85 to-transparent'
+            }`}
+            aria-hidden="true"
+          />
+
+          {/* Subtle Visual Gradient Overlay - Right Edge (visible when scrollable to right) */}
+          <div
+            className={`pointer-events-none absolute right-0 top-0 bottom-0 w-12 sm:w-20 z-20 transition-opacity duration-300 ${
+              canScrollSubnavRight ? 'opacity-100' : 'opacity-0'
+            } ${
+              appTheme === 'light'
+                ? 'bg-gradient-to-l from-neutral-100 via-neutral-100/90 to-transparent'
+                : 'bg-gradient-to-l from-[#0a0d13] via-[#0a0d13]/85 to-transparent'
+            }`}
+            aria-hidden="true"
+          />
+        </div>
+
+        {/* Mobile Navigation Drawer - Organized, Categorized & Ergonomic */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden border-t border-[#1e2633] bg-[#0d1016]/98 px-4 pt-3 pb-6 space-y-3"
+              className={`xl:hidden border-t max-h-[85vh] overflow-y-auto px-4 pt-3 pb-6 space-y-4 shadow-2xl transition-colors duration-200 ${
+                appTheme === 'light'
+                  ? 'bg-white/98 border-neutral-200'
+                  : 'bg-[#0d1016]/98 border-[#1e2633]'
+              }`}
             >
-              {/* User section in mobile drawer */}
+              {/* User Section / Auth Status */}
               {currentUser ? (
-                <div className="p-3 bg-[#12161e] border border-[#1e2633] rounded-lg flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
+                <div className={`p-3 border rounded-xl flex items-center justify-between gap-3 shadow-xs ${
+                  appTheme === 'light'
+                    ? 'bg-neutral-50 border-neutral-200'
+                    : 'bg-[#12161e] border-[#1e2633]'
+                }`}>
+                  <div className="flex items-center gap-3 min-w-0">
                     <img referrerPolicy="no-referrer" 
                       src={getAvatarUrl(currentUser.photoURL, currentUser.avatarClass)} 
                       alt={currentUser.displayName} 
-                      className="w-10 h-10 rounded-full object-cover border border-[#f97316]/50 bg-black shrink-0"
+                      className="w-10 h-10 rounded-full object-cover border-2 border-red-500/50 bg-black shrink-0"
                     />
-                    <div>
-                      <div className="text-sm font-bold text-[#eef2f7] font-mono">
+                    <div className="min-w-0">
+                      <div className={`text-sm font-bold font-mono truncate ${
+                        appTheme === 'light' ? 'text-neutral-900' : 'text-[#eef2f7]'
+                      }`}>
                         {currentUser.displayName}
                       </div>
-                      <div className="text-[10px] text-[#8b95a8]">
-                        {currentUser.uid === 'serustqs' ? 'OWNER' : (currentUser.role || 'SURVIVOR')}
+                      <div className="text-[10px] text-red-500 font-mono font-bold uppercase">
+                        {currentUser.uid === 'serustqs' ? '👑 OWNER' : (currentUser.role || 'SURVIVOR')}
                       </div>
                     </div>
                   </div>
@@ -1489,7 +1686,7 @@ export default function App() {
                       setCabinetModalOpen(true);
                       setMobileMenuOpen(false);
                     }}
-                    className="px-3 py-1.5 bg-[#f97316]/15 hover:bg-[#f97316]/25 border border-[#f97316]/40 text-[#f97316] font-bold text-xs rounded-md transition-all cursor-pointer"
+                    className="px-3 py-1.5 bg-red-600/10 hover:bg-red-600/20 border border-red-500/30 text-red-600 font-bold text-xs rounded-lg transition-all cursor-pointer shrink-0"
                   >
                     {lang === 'ru' ? 'Кабинет' : 'Cabinet'}
                   </button>
@@ -1500,82 +1697,253 @@ export default function App() {
                     setAuthModalOpen(true);
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:opacity-90 rounded-lg shadow-md cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-red-600 to-orange-600 hover:opacity-95 rounded-xl shadow-md cursor-pointer"
                 >
                   <Power size={15} />
                   <span>{lang === 'ru' ? 'Войти в аккаунт / Регистрация' : 'Log In / Register'}</span>
                 </button>
               )}
 
-              {/* Quick Actions in Mobile Drawer */}
-              <div className="grid grid-cols-2 gap-2">
+              {/* Quick Actions Bar (Search, Theme, Language) */}
+              <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => {
-                    handleTabChange('raid');
+                    setCommandPaletteOpen(true);
                     setMobileMenuOpen(false);
                   }}
-                  className="p-2.5 bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] hover:border-[#f97316] text-[#eef2f7] rounded-md text-xs font-bold flex items-center gap-2 justify-center cursor-pointer"
+                  className={`p-2.5 border rounded-lg text-xs font-bold flex items-center gap-2 justify-center cursor-pointer transition-all ${
+                    appTheme === 'light'
+                      ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-200 text-neutral-800'
+                      : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-[#eef2f7]'
+                  }`}
                 >
-                  <Flame size={14} className="text-[#f97316]" />
-                  <span>{lang === 'ru' ? 'Рейд' : 'Raid Calc'}</span>
+                  <Search size={14} className="text-red-500" />
+                  <span>{lang === 'ru' ? 'Поиск' : 'Search'}</span>
                 </button>
+
                 <button
-                  onClick={() => {
-                    handleTabChange('chat');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="p-2.5 bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] hover:border-[#f97316] text-[#eef2f7] rounded-md text-xs font-bold flex items-center gap-2 justify-center cursor-pointer"
+                  onClick={() => setAppTheme(appTheme === 'dark' ? 'light' : 'dark')}
+                  className={`p-2.5 border rounded-lg text-xs font-bold flex items-center gap-2 justify-center cursor-pointer transition-all ${
+                    appTheme === 'light'
+                      ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-200 text-neutral-800'
+                      : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-amber-400'
+                  }`}
                 >
-                  <MessageSquare size={14} className="text-[#f97316]" />
-                  <span>{lang === 'ru' ? 'Чат' : 'Chat'}</span>
+                  {appTheme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
+                  <span>{appTheme === 'light' ? (lang === 'ru' ? 'Тёмная' : 'Dark') : (lang === 'ru' ? 'Светлая' : 'Light')}</span>
+                </button>
+
+                <button
+                  onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
+                  className={`p-2.5 border rounded-lg text-xs font-mono font-bold flex items-center gap-2 justify-center cursor-pointer transition-all ${
+                    appTheme === 'light'
+                      ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-200 text-neutral-800'
+                      : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-[#eef2f7]'
+                  }`}
+                >
+                  <span className="text-red-500 font-black">{lang === 'ru' ? 'RU' : 'EN'}</span>
+                  <span className="text-[10px] opacity-70">➔ {lang === 'ru' ? 'EN' : 'RU'}</span>
                 </button>
               </div>
 
-              {/* Tab list */}
-              <div className="space-y-1 pt-2">
-                {tabs.map((tab) => {
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => {
-                        handleTabChange(tab.id as any);
-                        setMobileMenuOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold uppercase tracking-wider transition-all rounded-md cursor-pointer ${
-                        isActive
-                          ? 'bg-[#f97316] text-white shadow-sm'
-                          : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e]'
-                      }`}
-                    >
-                      {tab.icon}
-                      <span>{tab.label}</span>
-                    </button>
-                  );
-                })}
+              {/* Categorized Tabs: Калькуляторы & Инструменты */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[10px] font-mono font-bold text-red-500 uppercase tracking-widest px-1">
+                  <span>{lang === 'ru' ? 'Калькуляторы & Рейды' : 'Calculators & Raiding'}</span>
+                  <span className="text-neutral-500 font-normal">8 {lang === 'ru' ? 'инструментов' : 'tools'}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[
+                    { id: 'raid', label: lang === 'ru' ? 'Калькулятор Рейда' : 'Raid Calculator', icon: <Flame size={13} className="text-orange-500" /> },
+                    { id: 'ecoraid', label: lang === 'ru' ? 'Эко-Рейд & Soft Side' : 'Eco-Raid', icon: <Pickaxe size={13} className="text-amber-500" /> },
+                    { id: 'tools', label: lang === 'ru' ? 'Хаб Калькуляторов' : 'All Calculators', icon: <Calculator size={13} /> },
+                    { id: 'decay', label: lang === 'ru' ? 'Гниение Базы' : 'Decay Calculator', icon: <Clock size={13} /> },
+                    { id: 'electrical', label: lang === 'ru' ? 'Электрика Rust' : 'Electricity Sim', icon: <Zap size={13} className="text-yellow-400" /> },
+                    { id: 'mixing', label: lang === 'ru' ? 'Стол Смешивания' : 'Mixing Table', icon: <FlaskConical size={13} className="text-purple-400" /> },
+                    { id: 'breeder', label: lang === 'ru' ? 'Ферма & Гены' : 'Plant Breeding', icon: <Sprout size={13} className="text-emerald-400" /> },
+                    { id: 'recycler', label: lang === 'ru' ? 'Переработчик' : 'Recycler Calc', icon: <Layers size={13} className="text-blue-400" /> }
+                  ].map((item) => {
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          handleTabChange(item.id as any);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`p-2 rounded-lg text-left text-xs font-bold flex items-center gap-2 transition-all cursor-pointer border ${
+                          isActive
+                            ? 'bg-red-600 text-white border-red-600 shadow-sm'
+                            : appTheme === 'light'
+                              ? 'bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-800'
+                              : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
+                        }`}
+                      >
+                        <span className="shrink-0">{item.icon}</span>
+                        <span className="truncate">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Mobile Donation button */}
-              <button
-                onClick={() => {
-                  setDonationOpen(true);
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-amber-400 hover:text-white hover:bg-amber-600/10 border border-amber-500/20 rounded-md mt-2 cursor-pointer"
-              >
-                <Heart size={14} className="fill-amber-500/20" />
-                <span>{lang === 'ru' ? 'Пожертвование проекту' : 'Donate'}</span>
-              </button>
+              {/* Categorized Tabs: База Знаний & Гайды */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[10px] font-mono font-bold text-sky-500 uppercase tracking-widest px-1">
+                  <span>{lang === 'ru' ? 'Гайды & Справочники' : 'Guides & Reference'}</span>
+                  <span className="text-neutral-500 font-normal">7 {lang === 'ru' ? 'разделов' : 'sections'}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[
+                    { id: 'guides', label: lang === 'ru' ? 'Хаб Гайдов' : 'Guides Hub', icon: <BookOpen size={13} className="text-sky-400" /> },
+                    { id: 'errors', label: lang === 'ru' ? 'Ошибки & EAC' : 'Fix Rust Errors', icon: <ShieldAlert size={13} className="text-rose-400" /> },
+                    { id: 'binds', label: lang === 'ru' ? 'Бинды & Консоль' : 'Keybinds', icon: <Keyboard size={13} className="text-amber-400" /> },
+                    { id: 'fps', label: lang === 'ru' ? 'Оптимизация FPS' : 'FPS Boost', icon: <Settings size={13} className="text-emerald-400" /> },
+                    { id: 'weapons', label: lang === 'ru' ? 'Оружие & Спреи' : 'Weapons & Spray', icon: <Target size={13} className="text-red-400" /> },
+                    { id: 'monuments', label: lang === 'ru' ? 'Монументы & CCTV' : 'Monuments', icon: <MapPin size={13} className="text-teal-400" /> },
+                    { id: 'wipe', label: lang === 'ru' ? 'Вайпы & Таймеры' : 'Wipes & Events', icon: <Clock size={13} className="text-cyan-400" /> },
+                    { id: 'faq', label: lang === 'ru' ? 'FAQ для Новичка' : 'FAQ & Basics', icon: <HelpCircle size={13} className="text-orange-400" /> }
+                  ].map((item) => {
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          handleTabChange(item.id as any);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`p-2 rounded-lg text-left text-xs font-bold flex items-center gap-2 transition-all cursor-pointer border ${
+                          isActive
+                            ? 'bg-red-600 text-white border-red-600 shadow-sm'
+                            : appTheme === 'light'
+                              ? 'bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-800'
+                              : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
+                        }`}
+                      >
+                        <span className="shrink-0">{item.icon}</span>
+                        <span className="truncate">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Categorized Tabs: Сообщество & Кланы */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[10px] font-mono font-bold text-emerald-500 uppercase tracking-widest px-1">
+                  <span>{lang === 'ru' ? 'Сообщество' : 'Community'}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { id: 'clan', label: lang === 'ru' ? 'Кланы' : 'Clans', icon: <UserPlus size={13} className="text-indigo-400" /> },
+                    { id: 'chat', label: lang === 'ru' ? 'Чат' : 'Chat', icon: <MessageSquare size={13} className="text-blue-400" /> },
+                    { id: 'news', label: lang === 'ru' ? 'Новости' : 'News', icon: <Compass size={13} className="text-teal-400" /> }
+                  ].map((item) => {
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          handleTabChange(item.id as any);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`p-2 rounded-lg text-center text-xs font-bold flex flex-col items-center gap-1 transition-all cursor-pointer border ${
+                          isActive
+                            ? 'bg-red-600 text-white border-red-600 shadow-sm'
+                            : appTheme === 'light'
+                              ? 'bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-800'
+                              : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
+                        }`}
+                      >
+                        <span>{item.icon}</span>
+                        <span className="truncate text-[11px]">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Special Access Sections (if user has permissions) */}
+              {(Boolean(currentUser && (isVip || isOwner || isAdmin))) && (
+                <div className="space-y-1.5">
+                  <div className="text-[10px] font-mono font-bold text-rose-400 uppercase tracking-widest px-1">
+                    {lang === 'ru' ? 'Особый доступ' : 'Special Access'}
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {currentUser && isVip && (
+                      <button
+                        onClick={() => {
+                          handleTabChange('radar');
+                          setMobileMenuOpen(false);
+                        }}
+                        className="p-2 bg-rose-950/30 border border-rose-500/30 text-rose-300 rounded-lg text-xs font-bold flex items-center gap-2 cursor-pointer"
+                      >
+                        <Activity size={13} />
+                        <span>RADAR (VIP)</span>
+                      </button>
+                    )}
+                    {currentUser && isOwner && (
+                      <button
+                        onClick={() => {
+                          handleTabChange('rustplus');
+                          setMobileMenuOpen(false);
+                        }}
+                        className="p-2 bg-amber-950/30 border border-amber-500/30 text-amber-300 rounded-lg text-xs font-bold flex items-center gap-2 cursor-pointer"
+                      >
+                        <Smartphone size={13} />
+                        <span>Rust+ (OWNER)</span>
+                      </button>
+                    )}
+                    {currentUser && isAdmin && (
+                      <button
+                        onClick={() => {
+                          handleTabChange('admin');
+                          setMobileMenuOpen(false);
+                        }}
+                        className="p-2 bg-red-950/30 border border-red-500/30 text-red-300 rounded-lg text-xs font-bold flex items-center gap-2 cursor-pointer"
+                      >
+                        <ShieldCheck size={13} />
+                        <span>ADMIN</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Drawer Footer Actions */}
+              <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800 space-y-2">
+                <button
+                  onClick={() => {
+                    setSectionsDrawerOpen(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-black uppercase tracking-wider text-red-600 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-lg transition-all cursor-pointer"
+                >
+                  <LayoutGrid size={14} />
+                  <span>{lang === 'ru' ? 'Открыть полный каталог 24 разделов' : 'Open All 24 Sections Catalog'}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setDonationOpen(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider text-amber-500 hover:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-lg transition-all cursor-pointer"
+                >
+                  <Heart size={14} className="fill-amber-500/20" />
+                  <span>{lang === 'ru' ? 'Поддержать проект (Донат)' : 'Support Project (Donate)'}</span>
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </nav>
 
       {/* CORE APPLICATION CONTAINER */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 relative z-10 w-full min-h-[70vh]">
-        <div className="w-full">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 mt-5 relative z-10 w-full max-w-full min-h-[70vh] overflow-x-hidden">
+        <div className="w-full max-w-full overflow-hidden">
           {/* Active Tab View */}
-          <div className="w-full">
+          <div className="w-full max-w-full overflow-hidden">
             <AnimatePresence mode="wait">
           {activeTab === 'admin' && (
             <motion.div
@@ -1648,6 +2016,7 @@ export default function App() {
                 showJungleFeverSpoiler={showJungleFeverSpoiler}
                 onGenerateWallpaper={generateWallpaper}
                 appTranslations={appTranslations}
+                appTheme={appTheme}
                 isVip={isVip}
                 isOwner={isOwner}
                 isAdmin={isAdmin}
@@ -1671,6 +2040,7 @@ export default function App() {
                 isAdmin={isAdmin} 
                 isOwner={isOwner} 
                 onOpenVip={() => setCabinetModalOpen(true)}
+                appTheme={appTheme}
                 currentUser={currentUser} 
               />
             </motion.div>
@@ -1712,7 +2082,7 @@ export default function App() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
             >
-              <ErrorsTab onCopy={handleCopy} lang={lang} />
+              <ErrorsTab onCopy={handleCopy} lang={lang} appTheme={appTheme} />
             </motion.div>
           )}
 
@@ -1788,7 +2158,18 @@ export default function App() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
             >
-              <DecayCalculator lang={lang} />
+              <DecayCalculator 
+                lang={lang} 
+                user={currentUser}
+                onToast={(msg, type) => {
+                  const id = Math.random().toString(36).substring(2, 9);
+                  setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : 'success' }]);
+                  setTimeout(() => {
+                    setToasts(prev => prev.filter(t => t.id !== id));
+                  }, 4000);
+                }}
+                onOpenProfile={() => setCabinetModalOpen(true)}
+              />
             </motion.div>
           )}
 

@@ -217,5 +217,39 @@ export interface ClanApplicationItem {
 
 export const APP_VERSION = 'v3.0';
 
+export interface DecayTimer {
+  id: string;
+  name: string;
+  materialId: 'twigs' | 'wood' | 'stone' | 'metal' | 'armored' | 'high_wood' | 'high_stone' | 'custom';
+  materialName: string;
+  initialHp: number;
+  maxHp: number;
+  totalDurationSeconds: number;
+  remainingSeconds: number;
+  targetTimestamp: number; // Unix timestamp ms when timer reaches 0
+  createdAt: number;
+  status: 'running' | 'paused' | 'completed' | 'cancelled';
+  notifyTauri: boolean;
+  notifyBrowser: boolean;
+  soundAlert: boolean;
+  notes?: string;
+  userId?: string;
+}
 
-
+export interface UserActivityItem {
+  id: string;
+  userId?: string;
+  type: 'decay_timer_start' | 'decay_timer_complete' | 'decay_timer_cancel' | 'raid_calculation' | 'bind_saved' | 'bind_copied' | 'server_favorited';
+  title: string;
+  description: string;
+  category: 'decay' | 'raid' | 'binds' | 'servers' | 'profile';
+  timestamp: number; // ms
+  details?: {
+    material?: string;
+    structureName?: string;
+    durationFormatted?: string;
+    durationSeconds?: number;
+    hp?: number;
+    [key: string]: any;
+  };
+}

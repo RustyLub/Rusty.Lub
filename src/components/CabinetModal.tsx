@@ -65,9 +65,10 @@ import {
   OperationType
 } from '../firebase';
 import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
-import { CustomUser, SavedRaid, SavedBind, ClanApplicationItem } from '../types';
+import { CustomUser, SavedRaid, SavedBind, ClanApplicationItem, UserActivityItem } from '../types';
 import UserProfileModal, { BADGES, PROFILE_THEMES } from './UserProfileModal';
 import FeedbackTab from './FeedbackTab';
+import { getUserActivities, clearUserActivities } from '../services/activityService';
 
 interface CabinetModalProps {
   isOpen: boolean;
@@ -109,7 +110,13 @@ export default function CabinetModal({
   onOpenTab,
   onLoadRaidInCalc
 }: CabinetModalProps) {
-  const [activeTab, setActiveTab] = useState<'profile' | 'raids' | 'binds' | 'favorites' | 'applications' | 'friends' | 'admin_users' | 'admin_site' | 'vip' | 'feedback'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'history' | 'raids' | 'binds' | 'favorites' | 'applications' | 'friends' | 'admin_users' | 'admin_site' | 'vip' | 'feedback'>('profile');
+
+  // Activity History State
+  const [activities, setActivities] = useState<UserActivityItem[]>([]);
+  const [activityFilter, setActivityFilter] = useState<'all' | 'decay' | 'raid' | 'binds'>('all');
+  const [isLoadingActivities, setIsLoadingActivities] = useState(false);
+  const [isClearingHistory, setIsClearingHistory] = useState(false);
 
   
   // USDT TRC20 Payment states
@@ -215,6 +222,26 @@ export default function CabinetModal({
       console.error(e);
     }
 
+    // Load activity history
+    const loadActs = async () => {
+      setIsLoadingActivities(true);
+      try {
+        const acts = await getUserActivities(user.uid);
+        setActivities(acts);
+      } catch (err) {
+        console.warn('Error loading activities:', err);
+      } finally {
+        setIsLoadingActivities(false);
+      }
+    };
+    loadActs();
+
+    const handleActUpdate = () => {
+      loadActs();
+    };
+    window.addEventListener('rusty_activity_logged', handleActUpdate);
+    window.addEventListener('rusty_activity_cleared', handleActUpdate);
+
     // Subscribe to Firestore saved_raids
     const unsubRaids = onSnapshot(collection(db, 'saved_raids'), (snap) => {
       const list: SavedRaid[] = [];
@@ -261,8 +288,24 @@ export default function CabinetModal({
       unsubRaids();
       unsubBinds();
       unsubApps();
+      window.removeEventListener('rusty_activity_logged', handleActUpdate);
+      window.removeEventListener('rusty_activity_cleared', handleActUpdate);
     };
   }, [isOpen, user]);
+
+  const handleClearActivities = async () => {
+    if (!user) return;
+    setIsClearingHistory(true);
+    try {
+      await clearUserActivities(user.uid);
+      setActivities([]);
+      onToast(lang === 'ru' ? 'История действий очищена' : 'Activity history cleared', 'success');
+    } catch (e) {
+      console.warn(e);
+    } finally {
+      setIsClearingHistory(false);
+    }
+  };
 
   const handleDeleteSavedRaid = async (raidId: string) => {
     if (!user) return;
@@ -965,6 +1008,23 @@ export default function CabinetModal({
               >
                 <User size={13} />
                 <span>{lang === 'ru' ? 'Мой Профиль' : 'My Profile'}</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('history')}
+                className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
+                  activeTab === 'history'
+                    ? 'bg-[#f97316]/15 border-[#f97316]/50 text-[#f97316] font-black'
+                    : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Clock size={13} className={activities.length > 0 ? 'text-[#f97316]' : ''} />
+                <span>{lang === 'ru' ? 'История действий' : 'Activity History'}</span>
+                {activities.length > 0 && (
+                  <span className="ml-auto bg-[#f97316]/20 border border-[#f97316]/40 text-[#f97316] text-[9px] px-1.5 py-0.2 rounded-sm font-mono font-bold">
+                    {activities.length}
+                  </span>
+                )}
               </button>
 
               <button
@@ -2425,6 +2485,211 @@ export default function CabinetModal({
                   user={user}
                   onToast={onToast}
                 />
+              </motion.div>
+            )}
+
+            {/* ACTIVITY & USAGE HISTORY TAB */}
+            {activeTab === 'history' && (
+              <motion.div
+                key="history"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="space-y-4"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1e2633] pb-3 gap-2">
+                  <div>
+                    <h3 className="text-sm font-black text-[#eef2f7] uppercase tracking-wider font-mono flex items-center gap-2">
+                      <Clock size={16} className="text-[#f97316]" />
+                      {lang === 'ru' ? 'ИСТОРИЯ ДЕЙСТВИЙ И ИСПОЛЬЗОВАНИЯ' : 'ACTIVITY & USAGE HISTORY'}
+                    </h3>
+                    <p className="text-[11px] text-[#8b95a8] font-mono mt-0.5">
+                      {lang === 'ru' 
+                        ? `Лог запущенных таймеров гниения, расчетов и действий (всего: ${activities.length})` 
+                        : `Logged decay timers, raid calculations, and actions (total: ${activities.length})`}
+                    </p>
+                  </div>
+
+                  {activities.length > 0 && (
+                    <button
+                      onClick={handleClearActivities}
+                      disabled={isClearingHistory}
+                      className="self-start sm:self-auto flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-mono text-red-400 hover:text-white bg-red-950/20 hover:bg-red-900/40 border border-red-900/40 cursor-pointer transition-all"
+                    >
+                      <Trash2 size={12} />
+                      <span>{lang === 'ru' ? 'Очистить историю' : 'Clear History'}</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Filter chips */}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {[
+                    { id: 'all', labelRu: 'Все', labelEn: 'All', count: activities.length },
+                    { id: 'decay', labelRu: 'Таймеры гниения', labelEn: 'Decay Timers', count: activities.filter(a => a.category === 'decay' || a.type.startsWith('decay')).length },
+                    { id: 'raid', labelRu: 'Рейды', labelEn: 'Raids', count: activities.filter(a => a.category === 'raid' || a.type.includes('raid')).length },
+                    { id: 'binds', labelRu: 'Бинды', labelEn: 'Binds', count: activities.filter(a => a.category === 'binds' || a.type.includes('bind')).length }
+                  ].map((filter) => {
+                    const isSelected = activityFilter === filter.id;
+                    return (
+                      <button
+                        key={filter.id}
+                        onClick={() => setActivityFilter(filter.id as any)}
+                        className={`px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider border cursor-pointer transition-all flex items-center gap-1.5 ${
+                          isSelected
+                            ? 'bg-[#f97316]/20 border-[#f97316] text-[#f97316]'
+                            : 'bg-[#12161e] border-[#1e2633] text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        <span>{lang === 'ru' ? filter.labelRu : filter.labelEn}</span>
+                        <span className="text-[9px] px-1 bg-black/40 border border-white/10 rounded-xs">
+                          {filter.count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Activity List */}
+                {activities.length === 0 ? (
+                  <div className="p-8 text-center bg-black/20 border border-zinc-800/80 space-y-3">
+                    <Clock size={32} className="mx-auto text-zinc-600" />
+                    <div className="text-xs font-mono font-bold text-zinc-300 uppercase tracking-wider">
+                      {lang === 'ru' ? 'История использования пока пуста' : 'Activity history is empty'}
+                    </div>
+                    <p className="text-[11px] text-zinc-500 font-mono max-w-md mx-auto">
+                      {lang === 'ru' 
+                        ? 'Запустите таймер в разделе "Гниение", рассчитайте рейд или сохраните бинд — все действия автоматически фиксируются в вашем профиле.' 
+                        : 'Launch a decay timer, calculate a raid, or save binds — all your actions are recorded here.'}
+                    </p>
+                    {onOpenTab && (
+                      <button
+                        onClick={() => {
+                          onOpenTab('decay');
+                          onClose();
+                        }}
+                        className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#cd412b] hover:bg-[#e04832] text-white font-mono text-xs font-bold uppercase tracking-wider cursor-pointer transition-all shadow-md"
+                      >
+                        <Clock size={13} />
+                        <span>{lang === 'ru' ? 'Перейти в раздел Decay' : 'Go to Decay Tab'}</span>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-2.5 max-h-[550px] overflow-y-auto pr-1">
+                    {activities
+                      .filter((item) => {
+                        if (activityFilter === 'all') return true;
+                        if (activityFilter === 'decay') return item.category === 'decay' || item.type.startsWith('decay');
+                        if (activityFilter === 'raid') return item.category === 'raid' || item.type.includes('raid');
+                        if (activityFilter === 'binds') return item.category === 'binds' || item.type.includes('bind');
+                        return true;
+                      })
+                      .map((item) => {
+                        const date = new Date(item.timestamp);
+                        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        const dateStr = date.toLocaleDateString([], { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+                        const isDecay = item.category === 'decay' || item.type.startsWith('decay');
+                        const isComplete = item.type === 'decay_timer_complete';
+                        const isCancel = item.type === 'decay_timer_cancel';
+
+                        return (
+                          <div
+                            key={item.id}
+                            className={`p-3 border relative overflow-hidden transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                              isComplete
+                                ? 'bg-red-950/20 border-red-800/40'
+                                : isCancel
+                                  ? 'bg-zinc-900/40 border-zinc-800'
+                                  : 'bg-[#12161e] border-[#1e2633] hover:border-zinc-600'
+                            }`}
+                          >
+                            <div className="flex items-start gap-3 min-w-0">
+                              <span className={`p-2 border shrink-0 ${
+                                isComplete
+                                  ? 'bg-red-500/20 border-red-500/40 text-red-400'
+                                  : isDecay
+                                    ? 'bg-[#f97316]/20 border-[#f97316]/40 text-[#f97316]'
+                                    : 'bg-blue-500/20 border-blue-500/40 text-blue-400'
+                              }`}>
+                                {isComplete ? <AlertTriangle size={15} /> : <Clock size={15} />}
+                              </span>
+
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-xs font-bold font-mono text-white tracking-wider">
+                                    {item.title}
+                                  </span>
+
+                                  <span className={`text-[8.5px] px-1.5 py-0.2 font-mono font-bold uppercase rounded-xs border ${
+                                    isComplete
+                                      ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                                      : isCancel
+                                        ? 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                                        : isDecay
+                                          ? 'bg-[#f97316]/15 text-[#f97316] border-[#f97316]/30'
+                                          : 'bg-blue-500/15 text-blue-400 border-blue-500/30'
+                                  }`}>
+                                    {isComplete 
+                                      ? (lang === 'ru' ? 'ОБРУШЕНИЕ' : 'EXPIRED') 
+                                      : isCancel 
+                                        ? (lang === 'ru' ? 'ОТМЕНЕН' : 'CANCELLED') 
+                                        : (lang === 'ru' ? 'АКТИВНОСТЬ' : 'LOG')}
+                                  </span>
+                                </div>
+
+                                <p className="text-[11px] text-zinc-400 font-mono mt-0.5">
+                                  {item.description}
+                                </p>
+
+                                {/* Metadata chips */}
+                                {item.details && (item.details.material || item.details.durationFormatted) && (
+                                  <div className="flex items-center gap-2 mt-1.5 text-[9px] font-mono text-zinc-500 flex-wrap">
+                                    {item.details.material && (
+                                      <span className="px-1.5 py-0.5 bg-black/40 border border-zinc-800 text-zinc-300">
+                                        🧱 {item.details.material}
+                                      </span>
+                                    )}
+                                    {item.details.durationFormatted && (
+                                      <span className="px-1.5 py-0.5 bg-black/40 border border-zinc-800 text-amber-400">
+                                        ⏱️ {item.details.durationFormatted}
+                                      </span>
+                                    )}
+                                    {item.details.structureName && (
+                                      <span className="px-1.5 py-0.5 bg-black/40 border border-zinc-800 text-zinc-400">
+                                        📍 {item.details.structureName}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-zinc-800/60">
+                              <span className="text-[10px] font-mono text-zinc-500">
+                                {dateStr} в {timeStr}
+                              </span>
+
+                              {isDecay && onOpenTab && (
+                                <button
+                                  onClick={() => {
+                                    onOpenTab('decay');
+                                    onClose();
+                                  }}
+                                  className="px-2 py-1 bg-[#1b1e26] hover:bg-[#252a36] text-zinc-300 border border-[#2a2f3b] text-[10px] font-mono font-bold cursor-pointer transition-all flex items-center gap-1"
+                                  title={lang === 'ru' ? 'Открыть в калькуляторе гниения' : 'Open in Decay Tab'}
+                                >
+                                  <span>{lang === 'ru' ? 'В Decay' : 'To Decay'}</span>
+                                  <ArrowRight size={10} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
               </motion.div>
             )}
 
