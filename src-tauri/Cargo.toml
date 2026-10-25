@@ -1,0 +1,18 @@
+[package]
+name = "rustylub"
+version = "1.0.0"
+description = "Rusty.Lub Windows desktop app"
+authors = ["Rusty.Lub"]
+edition = "2021"
+
+[lib]
+name = "rustylub_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+serde_json = "1.0.154"
+tauri = { version = "2", features = [] }
+tauri-plugin-updater = "2"

@@ -18,25 +18,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install frontend dependencies
-        run: npm ci
-
-      - name: Set version
+      - name: Setup automatic version
         shell: pwsh
         run: |
           $path = "src-tauri/tauri.conf.json"
           $config = Get-Content $path -Raw | ConvertFrom-Json
-          $config.version = "1.0.$env:GITHUB_RUN_NUMBER"
-          $config | ConvertTo-Json -Depth 100 | Set-Content $path -Encoding utf8
+          $config.version = "1.0.$($env:GITHUB_RUN_NUMBER)"
+          $config | ConvertTo-Json -Depth 100 |
+            Set-Content -Path $path -Encoding utf8
 
       - name: Build and publish Windows release
         uses: tauri-apps/tauri-action@v1
