@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Minus, Square, Copy, X, RefreshCw, Shield, Sparkles, Monitor, Radio } from 'lucide-react';
+import { Minus, Square, Copy, X, RefreshCw, Shield, Sparkles, Monitor, Radio, Settings } from 'lucide-react';
 import { checkForAppUpdates } from '../services/appUpdater';
 
 interface WindowsTitlebarProps {
@@ -10,16 +10,18 @@ interface WindowsTitlebarProps {
   appTheme: 'light' | 'dark';
   lang: 'ru' | 'en';
   onToast?: (msg: string, type: 'success' | 'error' | 'info') => void;
+  onOpenSettings?: () => void;
 }
 
 export const WindowsTitlebar: React.FC<WindowsTitlebarProps> = ({
-  appName = 'RUSTY.LUB',
-  appVersion = '2.6.0',
+  appName = 'RUSTY.LUB LAUNCHER',
+  appVersion = '2.6.4',
   activeTabLabel,
   onlineCount = 1,
   appTheme,
   lang,
-  onToast
+  onToast,
+  onOpenSettings
 }) => {
   const isLight = appTheme === 'light';
   const [isMaximized, setIsMaximized] = useState(false);
@@ -144,8 +146,24 @@ export const WindowsTitlebar: React.FC<WindowsTitlebarProps> = ({
         )}
       </div>
 
-      {/* Right: Updater & Native Windows Controls */}
+      {/* Right: Settings, Updater & Native Windows Controls */}
       <div className="flex items-center gap-1 shrink-0">
+        {/* Launcher Settings Button */}
+        {onOpenSettings && (
+          <button
+            onClick={onOpenSettings}
+            className={`p-1 rounded text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer border ${
+              isLight
+                ? 'bg-neutral-100 hover:bg-white text-neutral-800 border-neutral-300'
+                : 'bg-[#121620] hover:bg-[#1a202c] text-amber-400 border-[#20293a]'
+            }`}
+            title={lang === 'ru' ? 'Настройки лаунчера и игры' : 'Launcher & Game Settings'}
+          >
+            <Settings size={11} className="text-amber-400" />
+            <span className="hidden xl:inline text-[9px] uppercase">{lang === 'ru' ? 'Настройки' : 'Settings'}</span>
+          </button>
+        )}
+
         {/* Quick Tauri Auto-Update Button */}
         <button
           onClick={handleManualCheckUpdate}

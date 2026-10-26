@@ -23,10 +23,12 @@ import {
   FileCode,
   Download,
   Terminal,
-  Activity
+  Activity,
+  Settings
 } from 'lucide-react';
 import { sendWindowsNotification, playNotificationAudio } from '../services/tauriNotifications';
 import { ItemImageOrFallback } from './IconUtils';
+import { getLauncherSettings } from '../services/launcherSettings';
 
 interface QuickOverlayModalProps {
   isOpen: boolean;
@@ -35,6 +37,7 @@ interface QuickOverlayModalProps {
   appTheme: 'light' | 'dark';
   onCopyBind: (code: string) => void;
   onOpenFullRaid: () => void;
+  onOpenSettings?: () => void;
 }
 
 type TargetType = 
@@ -56,13 +59,19 @@ export const QuickOverlayModal: React.FC<QuickOverlayModalProps> = ({
   lang,
   appTheme,
   onCopyBind,
-  onOpenFullRaid
+  onOpenFullRaid,
+  onOpenSettings
 }) => {
-  const [activeTab, setActiveTab] = useState<'raid' | 'weapons' | 'binds' | 'alerts'>('raid');
+  const launcherSettings = getLauncherSettings();
+  const [activeTab, setActiveTab] = useState<'raid' | 'weapons' | 'binds' | 'alerts'>(
+    launcherSettings.hudStartSection || 'raid'
+  );
   const [selectedTarget, setSelectedTarget] = useState<TargetType>('garage_door');
   const [targetCount, setTargetCount] = useState<number>(1);
-  const [opacity, setOpacity] = useState<number>(0.92);
-  const [isPinned, setIsPinned] = useState<boolean>(true);
+  const [opacity, setOpacity] = useState<number>(
+    launcherSettings.hudDefaultOpacity ? launcherSettings.hudDefaultOpacity / 100 : 0.92
+  );
+  const [isPinned, setIsPinned] = useState<boolean>(launcherSettings.hudAlwaysOnTop ?? true);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [selectedWeapon, setSelectedWeapon] = useState<'ak' | 'mp5' | 'thompson' | 'bolt'>('ak');
 
@@ -234,14 +243,25 @@ export const QuickOverlayModal: React.FC<QuickOverlayModalProps> = ({
               HUD
             </div>
             <span className="font-black text-sm sm:text-base tracking-wider font-teko uppercase truncate">
-              RUSTY.LUB IN-GAME HUD OVERLAY (ALT + O)
+              RUSTY.LUB IN-GAME HUD OVERLAY ({launcherSettings.hudHotkey || 'ALT + O'})
             </span>
             <span className="hidden sm:inline-block text-[9px] px-1.5 py-0.2 rounded font-bold bg-black/30 text-amber-300 border border-white/20">
-              v2.6
+              v{launcherSettings.appVersion || '2.6.4'}
             </span>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {/* Launcher Settings Button */}
+            {onOpenSettings && (
+              <button
+                onClick={onOpenSettings}
+                className="p-1.5 rounded transition-all cursor-pointer hover:bg-black/30 text-white/80 hover:text-amber-400"
+                title={lang === 'ru' ? 'Настройки оверлея и лаунчера' : 'Overlay & Launcher Settings'}
+              >
+                <Settings size={13} />
+              </button>
+            )}
+
             {/* Window Pin Toggle */}
             <button
               onClick={() => setIsPinned(!isPinned)}

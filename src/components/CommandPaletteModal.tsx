@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Search, X, Flame, Keyboard, BookOpen, Target, 
-  MapPin, FlaskConical, Pickaxe, Zap, ArrowRight, CornerDownLeft, Sparkles, HelpCircle
+  MapPin, FlaskConical, Pickaxe, Zap, ArrowRight, CornerDownLeft, Sparkles, HelpCircle,
+  Settings, Monitor
 } from 'lucide-react';
 import { raidTargets, bindsDatabase, errorDatabase, weaponStatsDatabase } from '../data';
 
@@ -85,6 +86,33 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
       tags: ['оружие', 'gun', 'ak47', 'recoil', 'спрей', 'отдача', w.name.toLowerCase()]
     })),
     // Extra tools
+    {
+      id: 'tool-launcher-settings',
+      tab: 'launcher_settings',
+      category: lang === 'ru' ? 'Настройки Windows Лаунчера' : 'Windows Launcher Settings',
+      title: lang === 'ru' ? 'Параметры Лаунчера & Запуска Rust' : 'Launcher & Rust Client Settings',
+      subtitle: lang === 'ru' ? 'Аргументы запуска Rust, пресеты FPS, HUD оверлей, сирены Rust+, избранные серверы' : 'Rust launch args, FPS presets, HUD overlay, raid sirens, servers',
+      icon: <Settings size={16} className="text-amber-400" />,
+      tags: ['лаунчер', 'launcher', 'настройки', 'settings', 'fps', 'параметры', 'steam', 'клиент', 'tauri', 'windows']
+    },
+    {
+      id: 'tool-toggle-launcher',
+      tab: 'toggle_launcher',
+      category: lang === 'ru' ? 'Windows Приложение' : 'Windows Application',
+      title: lang === 'ru' ? 'Переключить Режим Лаунчера (Превью)' : 'Toggle Windows Launcher Mode (Preview)',
+      subtitle: lang === 'ru' ? 'Оболочка десктопного игрового клиента с кнопкой запуска Rust и избранными серверами' : 'Desktop gaming client shell with Play Rust action and server connect',
+      icon: <Monitor size={16} className="text-sky-400" />,
+      tags: ['лаунчер', 'launcher', 'режим', 'windows', 'desktop', 'играть', 'play', 'серверы']
+    },
+    {
+      id: 'tool-hud-overlay',
+      tab: 'hud_overlay',
+      category: lang === 'ru' ? 'Быстрый HUD Оверлей' : 'HUD In-Game Overlay',
+      title: lang === 'ru' ? 'HUD Оверлей (Alt + O)' : 'HUD In-Game Overlay (Alt + O)',
+      subtitle: lang === 'ru' ? 'Тактический оверлей для Rust: калькулятор рейдов, бинды, ТТХ оружия и звуковые алерты' : 'Tactical Rust HUD overlay: raid calculator, binds, weapon TTK & alerts',
+      icon: <Target size={16} className="text-red-500" />,
+      tags: ['hud', 'оверлей', 'overlay', 'альт о', 'alt+o', 'тактический', 'рейды', 'быстрый']
+    },
     {
       id: 'tool-faq',
       tab: 'faq',

@@ -113,10 +113,15 @@ const TermsModal = lazy(() => import('./components/TermsModal'));
 const NotificationSettingsModal = lazy(() => import('./components/NotificationSettingsModal'));
 const ConfigExporterModal = lazy(() => import('./components/ConfigExporterModal'));
 const QuickOverlayModal = lazy(() => import('./components/QuickOverlayModal'));
+const WindowsTitlebar = lazy(() => import('./components/WindowsTitlebar'));
+const LauncherBar = lazy(() => import('./components/LauncherBar'));
+const LauncherSettingsModal = lazy(() => import('./components/LauncherSettingsModal'));
 const CommandPaletteModal = lazy(() => import('./components/CommandPaletteModal').then(m => ({ default: m.CommandPaletteModal })));
 const SectionsDrawer = lazy(() => import('./components/SectionsDrawer'));
 const SpecialAccessGated = lazy(() => import('./components/SpecialAccessGated'));
 const DiscordWidget = lazy(() => import('./components/DiscordWidget'));
+import { getLauncherSettings, LauncherSettings } from './services/launcherSettings';
+import { registerTauriGlobalShortcut } from './services/globalShortcuts';
 // @ts-ignore
 import globalWarfareLogo from './assets/images/global_warfare_logo_1782807450573.jpg';
 // @ts-ignore
@@ -408,20 +413,44 @@ export default function App() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [sectionsDrawerOpen, setSectionsDrawerOpen] = useState(false);
   const [quickOverlayOpen, setQuickOverlayOpen] = useState(false);
+  const [launcherSettings, setLauncherSettings] = useState<LauncherSettings>(getLauncherSettings);
+  const [launcherSettingsOpen, setLauncherSettingsOpen] = useState(false);
+  const isTauri = typeof window !== 'undefined' && Boolean((window as any).__TAURI__ || (window as any).__TAURI_INTERNALS__);
+  const [isLauncherPreview, setIsLauncherPreview] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return isTauri || localStorage.getItem('rustylub_launcher_preview') === 'true' || window.location.search.includes('launcher=1');
+  });
+
+  const isWindowsApp = isTauri || isLauncherPreview;
+
+  const handleToggleLauncherPreview = useCallback(() => {
+    setIsLauncherPreview(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('rustylub_launcher_preview', String(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
   const [announcement, setAnnouncement] = useState<{ text: string; active: boolean; type: 'info' | 'hazard' | 'important' } | null>(null);
 
-
-  // Global Ctrl+K / Cmd+K / Alt+O / M shortcuts
+  // Global Ctrl+K / Cmd+K / Alt+O / M shortcuts & custom HUD hotkey
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       // Don't trigger if user is typing inside an input or textarea (unless Ctrl/Cmd or Alt is pressed)
       const target = e.target as HTMLElement;
       const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
 
+      const isAltO = e.altKey && e.key.toLowerCase() === 'o';
+      const isCustomHud = launcherSettings.hudHotkey === 'Ctrl+F1' ? (e.ctrlKey && e.key === 'F1') :
+                          launcherSettings.hudHotkey === 'F12' ? (e.key === 'F12') :
+                          launcherSettings.hudHotkey === 'F8' ? (e.key === 'F8') : false;
+
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setCommandPaletteOpen(prev => !prev);
-      } else if (e.altKey && e.key.toLowerCase() === 'o') {
+      } else if (isAltO || isCustomHud) {
         e.preventDefault();
         setQuickOverlayOpen(prev => !prev);
       } else if (!isInput && e.key.toLowerCase() === 'm' && !e.ctrlKey && !e.metaKey && !e.altKey) {
@@ -435,7 +464,16 @@ export default function App() {
 
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, []);
+  }, [launcherSettings.hudHotkey]);
+
+  // Tauri Native Global Shortcut Registration
+  useEffect(() => {
+    if (isTauri && launcherSettings.hudHotkey) {
+      registerTauriGlobalShortcut(launcherSettings.hudHotkey, () => {
+        setQuickOverlayOpen(prev => !prev);
+      }).catch(() => {});
+    }
+  }, [isTauri, launcherSettings.hudHotkey]);
   const [showJungleFeverSpoiler, setShowJungleFeverSpoiler] = useState(true);
   const [showTermsModal, setShowTermsModal] = useState(false);
 
@@ -1224,6 +1262,40 @@ export default function App() {
         </div>
       )}
 
+      {/* WINDOWS APPLICATION LAUNCHER SHELL (Rendered in Windows Desktop Tauri or when previewing Launcher) */}
+      {isWindowsApp && (
+        <Suspense fallback={null}>
+          <WindowsTitlebar
+            appName="RUSTY.LUB LAUNCHER"
+            appVersion={launcherSettings.appVersion || '2.6.4'}
+            activeTabLabel={activeTab.toUpperCase()}
+            onlineCount={onlineCount}
+            appTheme={appTheme}
+            lang={lang}
+            onToast={(msg, type) => {
+              const id = Math.random().toString(36).substring(2, 9);
+              setToasts(prev => [...prev, { id, message: msg, type }]);
+              setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
+            }}
+            onOpenSettings={() => setLauncherSettingsOpen(true)}
+          />
+
+          <LauncherBar
+            settings={launcherSettings}
+            lang={lang}
+            appTheme={appTheme}
+            onOpenSettings={() => setLauncherSettingsOpen(true)}
+            onToggleHud={() => setQuickOverlayOpen(prev => !prev)}
+            isHudOpen={quickOverlayOpen}
+            onToast={(msg, type) => {
+              const id = Math.random().toString(36).substring(2, 9);
+              setToasts(prev => [...prev, { id, message: msg, type }]);
+              setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
+            }}
+          />
+        </Suspense>
+      )}
+
       {/* HEADER / NAVIGATION BAR - Modern Adaptive Tactical Command */}
       <nav className={`sticky top-0 z-40 backdrop-blur-md border-b transition-colors duration-200 ${
         appTheme === 'light'
@@ -1355,6 +1427,29 @@ export default function App() {
 
             {/* Right: Actions, Search, Theme, Quick Raid, Cabinet & Lang */}
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              {/* HUD Overlay Quick Trigger */}
+              <button
+                onClick={() => setQuickOverlayOpen(prev => !prev)}
+                className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 text-xs font-mono transition-all cursor-pointer rounded-md shadow-xs group shrink-0 ${
+                  quickOverlayOpen
+                    ? 'bg-red-600 text-white border border-red-500 shadow-sm shadow-red-600/30'
+                    : appTheme === 'light'
+                      ? 'bg-neutral-100 hover:bg-neutral-200 border border-neutral-300/80 text-neutral-700'
+                      : 'bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
+                }`}
+                title={lang === 'ru' ? 'HUD Оверлей поверх игры (Alt + O)' : 'In-Game HUD Overlay (Alt + O)'}
+              >
+                <Target size={14} className={quickOverlayOpen ? 'text-white' : 'text-red-500 group-hover:scale-110 transition-transform shrink-0'} />
+                <span className="hidden xl:inline text-[11px] font-semibold">HUD</span>
+                <span className={`hidden 2xl:inline text-[9px] px-1 py-0.5 font-mono rounded ${
+                  quickOverlayOpen
+                    ? 'bg-black/30 text-white'
+                    : appTheme === 'light' ? 'bg-white text-neutral-500 border border-neutral-200' : 'bg-white/5 border border-white/10 text-[#8b95a8]'
+                }`}>
+                  Alt+O
+                </span>
+              </button>
+
               {/* Search Trigger */}
               <button
                 onClick={() => setCommandPaletteOpen(true)}
@@ -2605,6 +2700,19 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* Footer */}
+      <Suspense fallback={null}>
+        <Footer
+          lang={lang}
+          onNavigate={(tab) => handleTabChange(tab)}
+          onOpenCabinet={() => (currentUser ? setCabinetModalOpen(true) : setAuthModalOpen(true))}
+          onOpenDonation={() => setCabinetModalOpen(true)}
+          onOpenTerms={() => setShowTermsModal(true)}
+          isWindowsApp={isWindowsApp}
+          onToggleLauncherMode={handleToggleLauncherPreview}
+        />
+      </Suspense>
+
       {/* GLOBAL AUTHORIZATION MODALS */}
       <AnimatePresence>
         {authModalOpen && (
@@ -2725,6 +2833,29 @@ export default function App() {
             appTheme={appTheme}
             onCopyBind={(code) => handleCopy(code)}
             onOpenFullRaid={() => handleTabChange('raid')}
+            onOpenSettings={() => setLauncherSettingsOpen(true)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Windows Launcher & In-Game Client Settings Modal */}
+      <AnimatePresence>
+        {launcherSettingsOpen && (
+          <LauncherSettingsModal
+            isOpen={launcherSettingsOpen}
+            onClose={() => setLauncherSettingsOpen(false)}
+            lang={lang}
+            appTheme={appTheme}
+            onToast={(msg, type) => {
+              const id = Math.random().toString(36).substring(2, 9);
+              setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : 'success' }]);
+              setTimeout(() => {
+                setToasts(prev => prev.filter(t => t.id !== id));
+              }, 3000);
+            }}
+            onSettingsSaved={(newSettings) => {
+              setLauncherSettings(newSettings);
+            }}
           />
         )}
       </AnimatePresence>
@@ -2758,7 +2889,17 @@ export default function App() {
       <CommandPaletteModal
         isOpen={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
-        onSelectTab={(tab) => handleTabChange(tab as any)}
+        onSelectTab={(tab) => {
+          if (tab === 'hud_overlay') {
+            setQuickOverlayOpen(true);
+          } else if (tab === 'launcher_settings') {
+            setLauncherSettingsOpen(true);
+          } else if (tab === 'toggle_launcher') {
+            handleToggleLauncherPreview();
+          } else {
+            handleTabChange(tab as any);
+          }
+        }}
         lang={lang}
       />
 

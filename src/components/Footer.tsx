@@ -1,4 +1,5 @@
 import React from 'react';
+import { Monitor } from 'lucide-react';
 
 interface FooterProps {
   lang: 'ru' | 'en';
@@ -6,6 +7,8 @@ interface FooterProps {
   onOpenCabinet?: () => void;
   onOpenDonation?: () => void;
   onOpenTerms?: () => void;
+  isWindowsApp?: boolean;
+  onToggleLauncherMode?: () => void;
 }
 
 export default function Footer({
@@ -13,7 +16,9 @@ export default function Footer({
   onNavigate,
   onOpenCabinet,
   onOpenDonation,
-  onOpenTerms
+  onOpenTerms,
+  isWindowsApp,
+  onToggleLauncherMode
 }: FooterProps) {
   return (
     <footer className="w-full border-t border-[#1e2633] bg-[#0d1016] mt-16 pt-12 pb-8 px-4 sm:px-6 lg:px-8 text-left">
@@ -131,7 +136,27 @@ export default function Footer({
         {/* Bottom bar */}
         <div className="pt-6 border-t border-[#1e2633] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#5a6578]">
           <span>© 2026 Rusty.Lub · {lang === 'ru' ? 'Не аффилирован с Facepunch Studios' : 'Not affiliated with Facepunch Studios'}</span>
-          <span className="font-mono">Tactical Command × Orange Blaze · v2.0</span>
+
+          {onToggleLauncherMode && (
+            <button
+              onClick={onToggleLauncherMode}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border font-mono text-[11px] font-bold transition-all cursor-pointer ${
+                isWindowsApp
+                  ? 'border-red-500/60 bg-red-600/20 text-red-400 shadow-xs'
+                  : 'border-white/10 bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white'
+              }`}
+              title={lang === 'ru' ? 'Включить или выключить режим Windows Лаунчера' : 'Toggle Windows Launcher Client Mode'}
+            >
+              <Monitor size={12} className={isWindowsApp ? 'text-red-400 animate-pulse' : 'text-neutral-400'} />
+              <span>
+                {isWindowsApp 
+                  ? (lang === 'ru' ? 'Режим Windows Лаунчера (Активен)' : 'Windows Launcher Mode (Active)') 
+                  : (lang === 'ru' ? 'Режим Windows Лаунчера (Превью)' : 'Windows Launcher Mode (Preview)')}
+              </span>
+            </button>
+          )}
+
+          <span className="font-mono">Tactical Command × Orange Blaze · v2.6.4</span>
         </div>
       </div>
     </footer>
