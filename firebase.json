@@ -16,9 +16,17 @@
     ],
     "rewrites": [
       {
+        "source": "/api/**",
+        "function": "apiServer"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
     ]
+  },
+  "functions": {
+    "source": ".",
+    "codebase": "default"
   }
 }

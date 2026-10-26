@@ -116,7 +116,6 @@ const QuickOverlayModal = lazy(() => import('./components/QuickOverlayModal'));
 const CommandPaletteModal = lazy(() => import('./components/CommandPaletteModal').then(m => ({ default: m.CommandPaletteModal })));
 const SectionsDrawer = lazy(() => import('./components/SectionsDrawer'));
 const SpecialAccessGated = lazy(() => import('./components/SpecialAccessGated'));
-const WindowsTitlebar = lazy(() => import('./components/WindowsTitlebar'));
 const DiscordWidget = lazy(() => import('./components/DiscordWidget'));
 // @ts-ignore
 import globalWarfareLogo from './assets/images/global_warfare_logo_1782807450573.jpg';
@@ -131,6 +130,7 @@ import { getAvatarUrl } from './customAvatars';
 import rustWallpaperThree from './assets/images/rust_wallpaper_three_1782810145159.jpg';
 // @ts-ignore
 import customSwampBg from './assets/images/custom_swamp_bg.png';
+import { logUserActivity } from './services/activityLogger';
 
 
 const wallpaperTitles = [
@@ -410,45 +410,6 @@ export default function App() {
   const [quickOverlayOpen, setQuickOverlayOpen] = useState(false);
   const [announcement, setAnnouncement] = useState<{ text: string; active: boolean; type: 'info' | 'hazard' | 'important' } | null>(null);
 
-  const subnavRef = useRef<HTMLDivElement>(null);
-  const [canScrollSubnavLeft, setCanScrollSubnavLeft] = useState(false);
-  const [canScrollSubnavRight, setCanScrollSubnavRight] = useState(true);
-
-  const updateSubnavScrollState = useCallback(() => {
-    if (subnavRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = subnavRef.current;
-      setCanScrollSubnavLeft(scrollLeft > 6);
-      setCanScrollSubnavRight(scrollLeft < scrollWidth - clientWidth - 6);
-    }
-  }, []);
-
-  const scrollSubnav = (direction: 'left' | 'right') => {
-    if (subnavRef.current) {
-      const offset = direction === 'left' ? -260 : 260;
-      subnavRef.current.scrollBy({ left: offset, behavior: 'smooth' });
-      setTimeout(updateSubnavScrollState, 260);
-    }
-  };
-
-  useEffect(() => {
-    updateSubnavScrollState();
-    const timer = setTimeout(updateSubnavScrollState, 150);
-    window.addEventListener('resize', updateSubnavScrollState);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', updateSubnavScrollState);
-    };
-  }, [updateSubnavScrollState]);
-
-  useEffect(() => {
-    if (subnavRef.current) {
-      const activeEl = subnavRef.current.querySelector<HTMLElement>('[data-active-tab="true"]');
-      if (activeEl) {
-        activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-      }
-      setTimeout(updateSubnavScrollState, 200);
-    }
-  }, [activeTab, updateSubnavScrollState]);
 
   // Global Ctrl+K / Cmd+K / Alt+O / M shortcuts
   useEffect(() => {
@@ -1230,23 +1191,7 @@ export default function App() {
         backgroundImage: `linear-gradient(to bottom, rgba(7, 9, 15, 0.55), rgba(7, 9, 15, 0.72)), url(${customSwampBg})`
       }}
     >
-      {/* Windows Tauri 2 Native Frameless Application Titlebar */}
-      <WindowsTitlebar
-        appName="RUSTY.LUB"
-        appVersion="2.6.0"
-        activeTabLabel={activeTab.toUpperCase()}
-        onlineCount={onlineCount}
-        appTheme={appTheme}
-        lang={lang}
-        onToast={(msg, type) => {
-          const id = Math.random().toString(36).substring(2, 9);
-          setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : 'success' }]);
-          setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500);
-        }}
-      />
 
-      {/* Topmost Warning Hazard Stripe for authentic Facepunch feel */}
-      <div className="h-1.5 rust-hazard w-full sticky top-8 z-50 shadow-[0_0_15px_rgba(217,122,34,0.6)]" />
 
       {/* Global Announcement Banner from Owner/Admin */}
       {announcement && announcement.active && (
@@ -1552,124 +1497,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* ADAPTIVE HORIZONTAL SUB-NAVBAR (Fast 1-Tap Access to Popular Tools on All Screens) */}
-        <div className={`w-full border-t transition-colors duration-200 relative group/subnav ${
-          appTheme === 'light'
-            ? 'bg-neutral-100/95 border-neutral-200/80 shadow-[inset_0_-1px_0_rgba(0,0,0,0.04)]'
-            : 'bg-[#0a0d13]/95 border-[#18202c] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]'
-        }`}>
-          {/* Left Scroll Navigation Button */}
-          {canScrollSubnavLeft && (
-            <button
-              onClick={() => scrollSubnav('left')}
-              className={`absolute left-0 top-0 bottom-0 z-30 w-7 sm:w-8 flex items-center justify-center transition-all cursor-pointer shadow-md border-r ${
-                appTheme === 'light'
-                  ? 'bg-white/95 hover:bg-white text-neutral-800 border-neutral-200/90'
-                  : 'bg-[#0c0f16]/95 hover:bg-[#151a24] text-neutral-200 border-[#1e2633]'
-              }`}
-              title={lang === 'ru' ? 'Прокрутить влево' : 'Scroll left'}
-            >
-              <ChevronLeft size={15} />
-            </button>
-          )}
 
-          {/* CSS SELECTOR 2: div#root:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) */}
-          <div 
-            ref={subnavRef}
-            onScroll={updateSubnavScrollState}
-            className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-1.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap overscroll-x-contain"
-          >
-            {/* Quick All Sections Pill */}
-            <button
-              onClick={() => setSectionsDrawerOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider rounded-md bg-red-600/10 text-red-600 border border-red-500/30 hover:bg-red-600 hover:text-white transition-all cursor-pointer shrink-0"
-              title={lang === 'ru' ? 'Открыть каталог всех 24 разделов' : 'Open full 24 sections directory'}
-            >
-              <LayoutGrid size={12} />
-              <span>{lang === 'ru' ? 'Каталог (24)' : 'Directory (24)'}</span>
-            </button>
-
-            {/* Quick Tool Navigation Chips */}
-            {[
-              { id: 'home', labelRu: 'Главная', labelEn: 'Home', icon: <Home size={12} /> },
-              { id: 'special', labelRu: 'Особый Доступ', labelEn: 'Special Access', icon: <ShieldAlert size={12} className="text-rose-500" /> },
-              { id: 'raid', labelRu: 'Рейды', labelEn: 'Raid', icon: <Flame size={12} className="text-orange-500" />, isHot: true },
-              { id: 'tools', labelRu: 'Калькуляторы', labelEn: 'Tools', icon: <Calculator size={12} /> },
-              { id: 'ecoraid', labelRu: 'Эко-Рейд', labelEn: 'Eco-Raid', icon: <Pickaxe size={12} className="text-amber-500" /> },
-              { id: 'electrical', labelRu: 'Электрика', labelEn: 'Electricity', icon: <Zap size={12} className="text-yellow-400" /> },
-              { id: 'mixing', labelRu: 'Смешивание', labelEn: 'Mixing', icon: <FlaskConical size={12} className="text-purple-400" /> },
-              { id: 'breeder', labelRu: 'Ферма', labelEn: 'Breeding', icon: <Sprout size={12} className="text-emerald-400" /> },
-              { id: 'recycler', labelRu: 'Переработка', labelEn: 'Recycler', icon: <Layers size={12} className="text-blue-400" /> },
-              { id: 'decay', labelRu: 'Гниение', labelEn: 'Decay', icon: <Clock size={12} /> },
-              { id: 'guides', labelRu: 'Гайды', labelEn: 'Guides', icon: <BookOpen size={12} /> },
-              { id: 'weapons', labelRu: 'Оружие', labelEn: 'Weapons', icon: <Target size={12} className="text-red-400" /> },
-              { id: 'monuments', labelRu: 'Монументы', labelEn: 'Monuments', icon: <MapPin size={12} className="text-teal-400" /> },
-              { id: 'wipe', labelRu: 'Вайпы', labelEn: 'Wipes', icon: <Clock size={12} className="text-cyan-400" /> },
-              { id: 'clan', labelRu: 'Кланы', labelEn: 'Clans', icon: <UserPlus size={12} className="text-indigo-400" /> },
-              { id: 'chat', labelRu: 'Чат', labelEn: 'Chat', icon: <MessageSquare size={12} /> },
-              { id: 'news', labelRu: 'Новости', labelEn: 'News', icon: <Compass size={12} /> },
-              { id: 'faq', labelRu: 'FAQ', labelEn: 'FAQ', icon: <HelpCircle size={12} className="text-orange-400" /> }
-            ].map((tab) => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  data-active-tab={isActive ? "true" : "false"}
-                  onClick={() => handleTabChange(tab.id as any)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer shrink-0 border ${
-                    isActive
-                      ? 'bg-red-600 text-white border-red-600 shadow-xs shadow-red-600/30'
-                      : appTheme === 'light'
-                        ? 'bg-white hover:bg-neutral-200/70 border-neutral-200 text-neutral-700'
-                        : 'bg-[#12161e] hover:bg-[#18202d] border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
-                  }`}
-                >
-                  {tab.icon}
-                  <span>{lang === 'ru' ? tab.labelRu : tab.labelEn}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Right Scroll Navigation Button */}
-          {canScrollSubnavRight && (
-            <button
-              onClick={() => scrollSubnav('right')}
-              className={`absolute right-0 top-0 bottom-0 z-30 w-7 sm:w-8 flex items-center justify-center transition-all cursor-pointer shadow-md border-l ${
-                appTheme === 'light'
-                  ? 'bg-white/95 hover:bg-white text-neutral-800 border-neutral-200/90'
-                  : 'bg-[#0c0f16]/95 hover:bg-[#151a24] text-neutral-200 border-[#1e2633]'
-              }`}
-              title={lang === 'ru' ? 'Прокрутить вправо' : 'Scroll right'}
-            >
-              <ChevronRight size={15} />
-            </button>
-          )}
-
-          {/* Subtle Visual Gradient Overlay - Left Edge (visible when scrollable to left) */}
-          <div
-            className={`pointer-events-none absolute left-0 top-0 bottom-0 w-12 sm:w-20 z-20 transition-opacity duration-300 ${
-              canScrollSubnavLeft ? 'opacity-100' : 'opacity-0'
-            } ${
-              appTheme === 'light'
-                ? 'bg-gradient-to-r from-neutral-100 via-neutral-100/90 to-transparent'
-                : 'bg-gradient-to-r from-[#0a0d13] via-[#0a0d13]/85 to-transparent'
-            }`}
-            aria-hidden="true"
-          />
-
-          {/* Subtle Visual Gradient Overlay - Right Edge (visible when scrollable to right) */}
-          <div
-            className={`pointer-events-none absolute right-0 top-0 bottom-0 w-12 sm:w-20 z-20 transition-opacity duration-300 ${
-              canScrollSubnavRight ? 'opacity-100' : 'opacity-0'
-            } ${
-              appTheme === 'light'
-                ? 'bg-gradient-to-l from-neutral-100 via-neutral-100/90 to-transparent'
-                : 'bg-gradient-to-l from-[#0a0d13] via-[#0a0d13]/85 to-transparent'
-            }`}
-            aria-hidden="true"
-          />
-        </div>
 
         {/* Mobile Navigation Drawer - Organized, Categorized & Ergonomic */}
         <AnimatePresence>

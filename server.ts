@@ -29,8 +29,10 @@ import { FieldValue } from "firebase-admin/firestore";
 
 dotenv.config();
 
+const app = express();
+export { app };
+
 async function startServer() {
-  const app = express();
   const server = http.createServer(app);
   const io = new SocketServer(server, {
     cors: {
