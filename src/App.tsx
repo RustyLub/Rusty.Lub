@@ -257,10 +257,13 @@ const appTranslations = {
   }
 };
 
-type TabType = 'home' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
+type TabType = 'home' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
 
 const VALID_TABS: Record<string, TabType> = {
   home: 'home',
+  terms: 'terms',
+  agreement: 'terms',
+  legal: 'terms',
   tools: 'tools',
   guides: 'guides',
   faq: 'faq',
@@ -1931,6 +1934,27 @@ export default function App() {
             </motion.div>
           )}
 
+          {activeTab === 'terms' && (
+            <motion.div
+              key="terms-page"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#f28a24]">R.L. / DOCUMENTS</p>
+                  <h1 className="mt-1 text-2xl font-bold text-white">{lang === 'ru' ? 'Документы проекта' : 'Project documents'}</h1>
+                </div>
+                <button type="button" onClick={() => handleTabChange('home')} className="rounded-md border border-white/10 px-3 py-2 text-sm text-zinc-300 hover:border-orange-400/40 hover:text-white">
+                  {lang === 'ru' ? 'На главную' : 'Back home'}
+                </button>
+              </div>
+              <TermsModal isOpen={true} pageMode={true} onClose={() => handleTabChange('home')} lang={lang} />
+            </motion.div>
+          )}
+
           {activeTab === 'home' && (
             <motion.div
               key="home"
@@ -2701,7 +2725,7 @@ export default function App() {
           onNavigate={(tab) => handleTabChange(tab)}
           onOpenCabinet={() => (currentUser ? setCabinetModalOpen(true) : setAuthModalOpen(true))}
           onOpenDonation={() => setCabinetModalOpen(true)}
-          onOpenTerms={() => setShowTermsModal(true)}
+          onOpenTerms={() => handleTabChange('terms')}
         />
       </Suspense>
 
