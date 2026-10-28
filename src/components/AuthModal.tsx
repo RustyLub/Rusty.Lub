@@ -43,23 +43,23 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
     const cleanUsername = usernameInput.trim().toLowerCase();
     const cleanPassword = passwordInput;
     const cleanDisplayName = displayNameInput.trim();
-    if (!/^[a-z0-9_-]{3,20}$/.test(cleanUsername)) {
-      onToast(lang === 'ru' ? 'Логин: 3–20 символов, латиница, цифры, _ или -.' : 'Username must be 3–20 characters using letters, numbers, _ or -.', 'warning');
+    if (!/^[a-z0-9_-]{6,20}$/.test(cleanUsername)) {
+      onToast(lang === 'ru' ? 'Логин: 6–20 символов, латиница, цифры, _ или -.' : 'Username must be 6–20 characters using letters, numbers, _ or -.', 'warning');
       return;
     }
     if (authMode === 'register' && cleanUsername === 'serustqs') {
       onToast(lang === 'ru' ? 'Этот логин зарезервирован.' : 'This username is reserved.', 'warning');
       return;
     }
-    if (authMode === 'register' && (cleanDisplayName.length < 2 || cleanDisplayName.length > 32 || /[<>]/.test(cleanDisplayName))) {
-      onToast(lang === 'ru' ? 'Никнейм должен содержать 2–32 символа.' : 'Nickname must be 2–32 characters.', 'warning');
+    if (authMode === 'register' && (cleanDisplayName.length < 6 || cleanDisplayName.length > 32 || /[<>]/.test(cleanDisplayName))) {
+      onToast(lang === 'ru' ? 'Никнейм должен содержать 6–32 символа.' : 'Nickname must be 6–32 characters.', 'warning');
       return;
     }
     if (cleanPassword.length < (authMode === 'register' ? 8 : 1) || cleanPassword.length > 128) {
       onToast(lang === 'ru' ? (authMode === 'register' ? 'Пароль должен содержать от 8 до 128 символов.' : 'Введите пароль.') : (authMode === 'register' ? 'Password must be 8–128 characters.' : 'Enter your password.'), 'warning');
       return;
     }
-    if (authMode === 'register' && cleanPassword !== confirmPasswordInput) {
+    if (authMode === 'register' && (!/[A-Z]/.test(cleanPassword) || !/[a-z]/.test(cleanPassword) || !/[0-9]/.test(cleanPassword) || !/[^A-Za-z0-9]/.test(cleanPassword))) {\n      onToast(lang === 'ru' ? 'Пароль должен содержать заглавную и строчную буквы, цифру и специальный символ.' : 'Password must include an uppercase letter, a lowercase letter, a number, and a special character.', 'warning');\n      return;\n    }\n    if (authMode === 'register' && cleanPassword !== confirmPasswordInput) {
       onToast(lang === 'ru' ? 'Пароли не совпадают.' : 'Passwords do not match.', 'warning');
       return;
     }
@@ -226,7 +226,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                   autoComplete="username"
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value)}
-                  placeholder={lang === 'ru' ? 'Придумайте логин' : 'Choose a username'}
+                  placeholder={lang === 'ru' ? 'Логин (6–20 символов)' : 'Username (6–20 characters)'}
                   className="w-full bg-[#0c0d10] border border-[#2a2f3b] focus:border-[#cd412b]/60 text-white placeholder-gray-600 pl-9 pr-4 py-2 text-xs font-mono outline-none transition-all"
                 />
               </div>
@@ -247,7 +247,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                   autoComplete={authMode === 'register' ? 'new-password' : 'current-password'}
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder={authMode === 'register' ? (lang === 'ru' ? '8+ символов, A-z, цифра, знак' : '8+ chars, A-z, number, symbol') : '••••••••'}
                   className="w-full bg-[#0c0d10] border border-[#2a2f3b] focus:border-[#cd412b]/60 text-white pl-9 pr-4 py-2 text-xs font-mono outline-none transition-all"
                 />
               </div>
@@ -283,7 +283,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                     maxLength={32}
                     value={displayNameInput}
                     onChange={(e) => setDisplayNameInput(e.target.value)}
-                    placeholder={lang === 'ru' ? 'Введите свой никнейм' : 'Enter your nickname'}
+                    placeholder={lang === 'ru' ? 'Никнейм (6–32 символа)' : 'Nickname (6–32 characters)'}
                     className="w-full bg-[#0c0d10] border border-[#2a2f3b] focus:border-[#cd412b]/60 text-white placeholder-gray-600 pl-9 pr-4 py-2 text-xs font-mono outline-none transition-all"
                   />
                 </div>
