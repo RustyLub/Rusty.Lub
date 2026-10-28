@@ -1,50 +1,47 @@
-name: Deploy Static Content to Pages
+name: Build and verify website
 
 on:
   push:
     branches: ["main", "master"]
-
+  pull_request:
+    branches: ["main", "master"]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: website-build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Set up Node
-        uses: actions/setup-node@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 20
-          cache: npm
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v5
-      - name: Install dependencies
-        run: npm install
-      - name: Build
-        run: npm run build
+          bun-version: latest
+
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build static website
+        run: bun run build
         env:
           NODE_ENV: production
-          GITHUB_ACTIONS: "true"
-          # Relative asset URLs work both on the project Pages URL and the custom domain root.
-          VITE_BASE: './'
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+          VITE_BASE: "./"
+
+      - name: Verify static entry point
+        run: test -s dist/index.html
+
+      - name: Upload built website
+        uses: actions/upload-artifact@v4
         with:
-          path: './dist'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          name: rusty-lub-static-site
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
