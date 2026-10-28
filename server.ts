@@ -191,6 +191,186 @@ async function startServer() {
 
   app.use(express.json());
 
+  // CMS endpoints use verified Firebase ID tokens and server-side role records.
+  // The legacy verifyToken middleware accepts caller-supplied UID headers; do not use it here.
+  const cmsOwnerUids = new Set(['serustqs']);
+  const cmsOwnerEmails = new Set(['misterzet556@gmail.com']);
+
+  const verifyCmsIdentity = async (req: any, res: any, next: any) => {
+    try {
+      const authHeader = String(req.headers.authorization || '');
+      if (!authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'A Firebase ID token is required.' });
+      }
+      const token = authHeader.slice(7);
+      const identity = await adminAuth.verifyIdToken(token, true);
+      const uid = String(identity.uid || '');
+      const email = String(identity.email || '').toLowerCase();
+      const isOwner = cmsOwnerUids.has(uid) || cmsOwnerEmails.has(email);
+      let role = isOwner ? 'owner' : '';
+      if (!role) {
+        const roleSnap = await adminDb.collection('cms_admins').doc(uid).get();
+        if (roleSnap.exists) role = String(roleSnap.data()?.role || '');
+      }
+      if (!['owner', 'admin', 'editor', 'viewer'].includes(role)) {
+        return res.status(403).json({ message: 'CMS access is not assigned to this account.' });
+      }
+      req.cmsActor = { uid, email, role };
+      next();
+    } catch (error) {
+      console.warn('CMS authentication rejected:', error instanceof Error ? error.message : 'unknown error');
+      return res.status(401).json({ message: 'Invalid or expired Firebase ID token.' });
+    }
+  };
+
+  const requireCmsRole = (...allowed: string[]) => (req: any, res: any, next: any) => {
+    if (!req.cmsActor || !allowed.includes(req.cmsActor.role)) {
+      return res.status(403).json({ message: 'Insufficient CMS permissions.' });
+    }
+    next();
+  };
+
+  const cmsAudit = async (actor: any, action: string, target: string, details = '') => {
+    await adminDb.collection('cms_audit_logs').add({
+      actorUid: actor.uid,
+      actorEmail: actor.email || '',
+      actorRole: actor.role,
+      action,
+      target,
+      details: String(details).slice(0, 500),
+      createdAt: FieldValue.serverTimestamp()
+    });
+  };
+
+  const serializeCmsDoc = (doc: any) => {
+    const data = doc.data() || {};
+    const createdAt = data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt || null;
+    const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt || null;
+    return { id: doc.id, ...data, createdAt, updatedAt };
+  };
+
+  app.get('/api/cms/pages', verifyCmsIdentity, requireCmsRole('owner', 'admin', 'editor', 'viewer'), async (_req: any, res: any) => {
+    try {
+      const snap = await adminDb.collection('cms_pages').orderBy('order', 'asc').limit(200).get();
+      return res.json({ pages: snap.docs.map(serializeCmsDoc) });
+    } catch (error) {
+      console.error('CMS page list failed:', error);
+      return res.status(500).json({ message: 'Unable to load CMS pages.' });
+    }
+  });
+
+  app.post('/api/cms/pages', verifyCmsIdentity, requireCmsRole('owner', 'admin', 'editor'), async (req: any, res: any) => {
+    try {
+      const body = req.body || {};
+      const slug = String(body.slug || '').trim().toLowerCase().replace(/^\\/+|\\/+$/g, '');
+      if (!slug || slug.length > 120 || !/^[a-z0-9]+(?:[/-][a-z0-9]+)*$/.test(slug)) {
+        return res.status(400).json({ message: 'Slug must contain only lowercase letters, numbers, hyphens or path separators.' });
+      }
+      const title = body.title || {};
+      const description = body.description || {};
+      const pageBody = body.body || {};
+      if (typeof title.ru !== 'string' || typeof title.en !== 'string' || !title.ru.trim() || !title.en.trim()) {
+        return res.status(400).json({ message: 'Russian and English titles are required.' });
+      }
+      if ([title.ru, title.en, description.ru || '', description.en || '', pageBody.ru || '', pageBody.en || ''].some((value: any) => typeof value !== 'string' || value.length > 30000)) {
+        return res.status(400).json({ message: 'Page fields must be text under 30,000 characters each.' });
+      }
+      const id = String(body.id || slug).trim().replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 140);
+      if (!id) return res.status(400).json({ message: 'Invalid page ID.' });
+      const ref = adminDb.collection('cms_pages').doc(id);
+      const previous = await ref.get();
+      const data = {
+        slug,
+        title: { ru: title.ru.trim(), en: title.en.trim() },
+        description: { ru: String(description.ru || ''), en: String(description.en || '') },
+        body: { ru: String(pageBody.ru || ''), en: String(pageBody.en || '') },
+        visible: body.visible !== false,
+        order: Number.isFinite(Number(body.order)) ? Math.max(0, Math.min(10000, Number(body.order))) : 0,
+        updatedAt: FieldValue.serverTimestamp(),
+        ...(previous.exists ? {} : { createdAt: FieldValue.serverTimestamp(), createdBy: req.cmsActor.uid })
+      };
+      await ref.set(data, { merge: true });
+      await cmsAudit(req.cmsActor, previous.exists ? 'page.update' : 'page.create', id, slug);
+      const saved = await ref.get();
+      return res.json({ page: serializeCmsDoc(saved) });
+    } catch (error) {
+      console.error('CMS page save failed:', error);
+      return res.status(500).json({ message: 'Unable to save CMS page.' });
+    }
+  });
+
+  app.get('/api/cms/settings', verifyCmsIdentity, requireCmsRole('owner', 'admin', 'editor', 'viewer'), async (_req: any, res: any) => {
+    try {
+      const snap = await adminDb.collection('cms_settings').doc('global').get();
+      return res.json({ settings: snap.exists ? (snap.data()?.settings || {}) : { siteTitle: 'Rusty.Lub', maintenanceMode: false, showNews: true, showCommunity: true } });
+    } catch (error) {
+      console.error('CMS settings read failed:', error);
+      return res.status(500).json({ message: 'Unable to load CMS settings.' });
+    }
+  });
+
+  app.put('/api/cms/settings', verifyCmsIdentity, requireCmsRole('owner', 'admin'), async (req: any, res: any) => {
+    try {
+      const settings = req.body?.settings;
+      if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
+        return res.status(400).json({ message: 'Settings object is required.' });
+      }
+      const siteTitle = String(settings.siteTitle || 'Rusty.Lub').slice(0, 100);
+      const safeSettings = {
+        siteTitle,
+        maintenanceMode: settings.maintenanceMode === true,
+        showNews: settings.showNews !== false,
+        showCommunity: settings.showCommunity !== false,
+        updatedAt: FieldValue.serverTimestamp(),
+        updatedBy: req.cmsActor.uid
+      };
+      await adminDb.collection('cms_settings').doc('global').set({ settings: safeSettings }, { merge: true });
+      await cmsAudit(req.cmsActor, 'settings.update', 'global', 'Updated global site settings');
+      return res.json({ success: true, settings: { ...safeSettings, updatedAt: new Date().toISOString() } });
+    } catch (error) {
+      console.error('CMS settings save failed:', error);
+      return res.status(500).json({ message: 'Unable to save CMS settings.' });
+    }
+  });
+
+  app.get('/api/cms/roles', verifyCmsIdentity, requireCmsRole('owner', 'admin'), async (_req: any, res: any) => {
+    try {
+      const snap = await adminDb.collection('cms_admins').limit(200).get();
+      return res.json({ roles: snap.docs.map(serializeCmsDoc) });
+    } catch (error) {
+      console.error('CMS roles list failed:', error);
+      return res.status(500).json({ message: 'Unable to load CMS roles.' });
+    }
+  });
+
+  app.post('/api/cms/roles', verifyCmsIdentity, requireCmsRole('owner'), async (req: any, res: any) => {
+    try {
+      const uid = String(req.body?.uid || '').trim();
+      const email = String(req.body?.email || '').trim().slice(0, 254);
+      const role = String(req.body?.role || '');
+      if (!uid || uid.length > 128 || !/^[a-zA-Z0-9_-]+$/.test(uid)) return res.status(400).json({ message: 'A valid Firebase UID is required.' });
+      if (!['admin', 'editor', 'viewer'].includes(role)) return res.status(400).json({ message: 'Role must be admin, editor or viewer.' });
+      if (cmsOwnerUids.has(uid) || cmsOwnerEmails.has(email.toLowerCase())) return res.status(400).json({ message: 'The owner account cannot be reassigned.' });
+      const ref = adminDb.collection('cms_admins').doc(uid);
+      await ref.set({ uid, email, role, updatedAt: FieldValue.serverTimestamp(), updatedBy: req.cmsActor.uid }, { merge: true });
+      await cmsAudit(req.cmsActor, 'role.assign', uid, role);
+      return res.json({ success: true });
+    } catch (error) {
+      console.error('CMS role assignment failed:', error);
+      return res.status(500).json({ message: 'Unable to assign CMS role.' });
+    }
+  });
+
+  app.get('/api/cms/audit', verifyCmsIdentity, requireCmsRole('owner', 'admin'), async (_req: any, res: any) => {
+    try {
+      const snap = await adminDb.collection('cms_audit_logs').orderBy('createdAt', 'desc').limit(100).get();
+      return res.json({ entries: snap.docs.map(serializeCmsDoc) });
+    } catch (error) {
+      console.error('CMS audit read failed:', error);
+      return res.status(500).json({ message: 'Unable to load the audit log.' });
+    }
+  });
+
   // Health check endpoint
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
