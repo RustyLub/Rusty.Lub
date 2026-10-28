@@ -24,8 +24,8 @@ jobs:
         uses: oven-sh/setup-bun@v2
       - name: Install dependencies
         run: bun install --frozen-lockfile
-      - name: Build for GitHub project Pages
-        run: bun run build --base=/Rusty.Lub/
+      - name: Build for custom domain
+        run: bun run build --base=/
       - name: Verify build output
         run: test -s dist/index.html
       - name: Upload Pages artifact
