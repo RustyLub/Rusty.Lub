@@ -25,17 +25,6 @@ interface HomeTabProps {
   lang: 'ru' | 'en';
   onNavigate: (tab: any) => void;
   onOpenDonation?: () => void;
-  selectedProject: 'rustoria' | 'rustymoose';
-  onSelectProject: (proj: 'rustoria' | 'rustymoose') => void;
-  rustoriaServers: any[];
-  loadingServers: boolean;
-  onRefreshServers: (proj: 'rustoria' | 'rustymoose') => void;
-  copiedServerId: string | null;
-  onCopyServer: (cmd: string, id: string) => void;
-  regionFilter: 'ALL' | 'US' | 'EU' | 'SEA';
-  onSetRegionFilter: (reg: 'ALL' | 'US' | 'EU' | 'SEA') => void;
-  serverSearch: string;
-  onSetServerSearch: (search: string) => void;
   twitchSettings: any;
   showJungleFeverSpoiler: boolean;
   onGenerateWallpaper: () => void;
@@ -51,17 +40,6 @@ export default function HomeTab({
   lang,
   onNavigate,
   onOpenDonation,
-  selectedProject,
-  onSelectProject,
-  rustoriaServers,
-  loadingServers,
-  onRefreshServers,
-  copiedServerId,
-  onCopyServer,
-  regionFilter,
-  onSetRegionFilter,
-  serverSearch,
-  onSetServerSearch,
   twitchSettings,
   showJungleFeverSpoiler,
   onGenerateWallpaper,
