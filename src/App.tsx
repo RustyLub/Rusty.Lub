@@ -257,10 +257,12 @@ const appTranslations = {
   }
 };
 
-type TabType = 'home' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
+type TabType = 'home' | 'account' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
 
 const VALID_TABS: Record<string, TabType> = {
   home: 'home',
+  account: 'account',
+  cabinet: 'account',
   terms: 'terms',
   agreement: 'terms',
   legal: 'terms',
@@ -1934,6 +1936,60 @@ export default function App() {
             </motion.div>
           )}
 
+          {activeTab === 'account' && (
+            <motion.div
+              key="account-page"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#f28a24]">R.L. / ACCOUNT</p>
+                  <h1 className="mt-1 text-2xl font-bold text-white">{lang === 'ru' ? 'Личный кабинет' : 'User cabinet'}</h1>
+                </div>
+                <button type="button" onClick={() => handleTabChange('home')} className="rounded-md border border-white/10 px-3 py-2 text-sm text-zinc-300 hover:border-orange-400/40 hover:text-white">
+                  {lang === 'ru' ? 'На главную' : 'Back home'}
+                </button>
+              </div>
+              {currentUser ? (
+                <CabinetModal
+                  isOpen={true}
+                  pageMode={true}
+                  onClose={() => handleTabChange('home')}
+                  lang={lang}
+                  user={currentUser}
+                  onOpenTab={(tab) => handleTabChange(tab as any)}
+                  onUserLogout={() => {
+                    setCurrentUser(null);
+                    localStorage.removeItem('rust_survivor_user');
+                    handleTabChange('home');
+                  }}
+                  onAvatarChange={(avatarId, photoURL) => {
+                    if (currentUser) {
+                      const updated = { ...currentUser, avatarClass: avatarId, photoURL };
+                      setCurrentUser(updated);
+                      localStorage.setItem('rust_survivor_user', JSON.stringify(updated));
+                    }
+                  }}
+                  onToast={(msg, type) => {
+                    const id = Math.random().toString(36).substring(2, 9);
+                    setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : 'success' }]);
+                    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id), 3000);
+                  }}
+                />
+              ) : (
+                <div className="mx-auto flex min-h-[360px] max-w-3xl flex-col items-center justify-center gap-4 rounded-xl border border-white/10 bg-[#10161d] p-8 text-center">
+                  <div className="text-4xl text-[#f28a24]">R.L.</div>
+                  <h2 className="text-xl font-bold text-white">{lang === 'ru' ? 'Войдите в аккаунт' : 'Sign in to your account'}</h2>
+                  <p className="max-w-lg text-sm text-zinc-400">{lang === 'ru' ? 'После входа здесь будут доступны профиль, история активности, сохранённые данные и настройки аккаунта.' : 'Sign in to access your profile, activity history, saved data and account settings here.'}</p>
+                  <button type="button" onClick={() => setAuthModalOpen(true)} className="rounded-md bg-[#f28a24] px-5 py-3 font-bold text-black hover:bg-orange-300">{lang === 'ru' ? 'Войти / зарегистрироваться' : 'Sign in / create account'}</button>
+                </div>
+              )}
+            </motion.div>
+          )}
+
           {activeTab === 'terms' && (
             <motion.div
               key="terms-page"
@@ -2723,7 +2779,7 @@ export default function App() {
         <Footer
           lang={lang}
           onNavigate={(tab) => handleTabChange(tab)}
-          onOpenCabinet={() => (currentUser ? setCabinetModalOpen(true) : setAuthModalOpen(true))}
+          onOpenCabinet={() => handleTabChange('account')}
           onOpenDonation={() => setCabinetModalOpen(true)}
           onOpenTerms={() => handleTabChange('terms')}
         />
