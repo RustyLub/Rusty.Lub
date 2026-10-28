@@ -5,13 +5,7 @@ import {
   doc, 
   getDoc, 
   setDoc, 
-  query, 
-  collection, 
-  where, 
-  getDocs, 
-  deleteDoc,
-  db, 
-  auth
+  db
 } from '../firebase';
 import { CUSTOM_AVATARS } from '../customAvatars';
 import { CustomUser } from '../types';
@@ -29,96 +23,116 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
   const [displayNameInput, setDisplayNameInput] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState('whiteout');
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [authLoading, setAuthLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
-  const [emailInput, setEmailInput] = useState('');
-  const [emailCode, setEmailCode] = useState('');
-  const [emailVerified, setEmailVerified] = useState(false);
-  const [emailCodeSent, setEmailCodeSent] = useState(false);
+
 
   if (!isOpen) return null;
-
-  const requestEmailCode = async () => {
-    const email = emailInput.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      onToast(lang === 'ru' ? 'Введите корректный email.' : 'Enter a valid email.', 'warning');
-      return;
-    }
-    setAuthLoading(true);
-    try {
-      const response = await fetch('/api/auth/email/send-code', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Email send failed');
-      setEmailCodeSent(true);
-      setEmailVerified(false);
-      onToast(lang === 'ru' ? 'Код отправлен на почту.' : 'Verification code sent.', 'success');
-    } catch (error: any) {
-      onToast(error.message || (lang === 'ru' ? 'Не удалось отправить код.' : 'Could not send code.'), 'error');
-    } finally { setAuthLoading(false); }
-  };
-
-  const verifyEmailCode = async () => {
-    setAuthLoading(true);
-    try {
-      const response = await fetch('/api/auth/email/verify-code', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailInput.trim().toLowerCase(), code: emailCode.trim() })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Verification failed');
-      setEmailVerified(true);
-      onToast(lang === 'ru' ? 'Email подтверждён.' : 'Email verified.', 'success');
-    } catch (error: any) {
-      onToast(error.message || (lang === 'ru' ? 'Неверный код.' : 'Invalid code.'), 'error');
-    } finally { setAuthLoading(false); }
-  };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (authMode === 'register' && !acceptedTerms) {
-      onToast(lang === 'ru' ? 'Вы должны принять пользовательское соглашение!' : 'You must accept the user agreement!', 'warning');
+      onToast(lang === 'ru' ? 'Для регистрации необходимо принять пользовательское соглашение.' : 'You must accept the user agreement to register.', 'warning');
       return;
     }
     const cleanUsername = usernameInput.trim().toLowerCase();
     const cleanPassword = passwordInput;
-    const cleanDisplayName = displayNameInput.trim() || usernameInput.trim();
-    if (cleanUsername.length < 3 || cleanUsername.length > 20 || !/^[a-zA-Z0-9_-]+$/.test(cleanUsername)) {
-      onToast(lang === 'ru' ? 'Логин: 3–20 символов, латиница, цифры, _ или -.' : 'Username must be 3–20 characters using letters, numbers, _ or -.', 'warning');
+    const cleanDisplayName = displayNameInput.trim();
+    if (!/^[a-z0-9_-]{6,20}$/.test(cleanUsername)) {
+      onToast(lang === 'ru' ? 'Логин: 6–20 символов, латиница, цифры, _ или -.' : 'Username must be 6–20 characters using letters, numbers, _ or -.', 'warning');
       return;
     }
-    if (authMode === 'register' && !emailVerified) {
-      onToast(lang === 'ru' ? 'Сначала подтвердите email.' : 'Verify your email first.', 'warning');
+    if (authMode === 'register' && cleanUsername === 'serustqs') {
+      onToast(lang === 'ru' ? 'Этот логин зарезервирован.' : 'This username is reserved.', 'warning');
       return;
     }
-    if (cleanPassword.length < (authMode === 'register' ? 8 : 4)) {
-      onToast(lang === 'ru' ? (authMode === 'register' ? 'Пароль должен быть не короче 8 символов.' : 'Введите пароль.') : (authMode === 'register' ? 'Password must be at least 8 characters.' : 'Enter your password.'), 'warning');
+    if (authMode === 'register' && (cleanDisplayName.length < 6 || cleanDisplayName.length > 32 || /[<>]/.test(cleanDisplayName))) {
+      onToast(lang === 'ru' ? 'Никнейм должен содержать 6–32 символа.' : 'Nickname must be 6–32 characters.', 'warning');
+      return;
+    }
+    if (cleanPassword.length < (authMode === 'register' ? 8 : 1) || cleanPassword.length > 128) {
+      onToast(lang === 'ru' ? (authMode === 'register' ? 'Пароль должен содержать от 8 до 128 символов.' : 'Введите пароль.') : (authMode === 'register' ? 'Password must be 8–128 characters.' : 'Enter your password.'), 'warning');
+      return;
+    }
+    if (authMode === 'register' && (!/[A-Z]/.test(cleanPassword) || !/[a-z]/.test(cleanPassword) || !/[0-9]/.test(cleanPassword) || !/[^A-Za-z0-9]/.test(cleanPassword))) {\n      onToast(lang === 'ru' ? 'Пароль должен содержать заглавную и строчную буквы, цифру и специальный символ.' : 'Password must include an uppercase letter, a lowercase letter, a number, and a special character.', 'warning');\n      return;\n    }\n    if (authMode === 'register' && cleanPassword !== confirmPasswordInput) {
+      onToast(lang === 'ru' ? 'Пароли не совпадают.' : 'Passwords do not match.', 'warning');
       return;
     }
     setAuthLoading(true);
     try {
-      const matchedAvatar = CUSTOM_AVATARS.find(a => a.id === selectedAvatar) || CUSTOM_AVATARS[0];
-      const endpoint = authMode === 'register' ? '/api/auth/register' : '/api/auth/login';
-      const payload = authMode === 'register'
-        ? { email: emailInput.trim().toLowerCase(), username: cleanUsername, password: cleanPassword, displayName: cleanDisplayName, avatarClass: selectedAvatar, photoURL: matchedAvatar.url, gender }
-        : { username: cleanUsername, password: cleanPassword };
-      const response = await fetch(endpoint, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || 'Auth error');
-      onUserLogin(result.user as CustomUser);
-      onToast(lang === 'ru' ? (authMode === 'register' ? 'Регистрация прошла успешно!' : 'С возвращением!') : (authMode === 'register' ? 'Registration successful!' : 'Welcome back!'), 'success');
+      const userRef = doc(db, 'chat_users', cleanUsername);
+      const userSnap = await getDoc(userRef);
+      if (authMode === 'register') {
+        if (userSnap.exists()) {
+          onToast(lang === 'ru' ? 'Этот логин уже занят. Выберите другой.' : 'This username is already taken. Choose another.', 'warning');
+          return;
+        }
+        const matchedAvatar = CUSTOM_AVATARS.find(a => a.id === selectedAvatar) || CUSTOM_AVATARS[0];
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const saltHex = Array.from(salt, b => b.toString(16).padStart(2, '0')).join('');
+        const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(cleanPassword), 'PBKDF2', false, ['deriveBits']);
+        const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, key, 256);
+        const hashHex = Array.from(new Uint8Array(bits), b => b.toString(16).padStart(2, '0')).join('');
+        await setDoc(userRef, {
+          username: cleanUsername, displayName: cleanDisplayName,
+          passwordHash: hashHex, passwordSalt: saltHex, passwordAlgorithm: 'PBKDF2-SHA256',
+          avatarClass: selectedAvatar, photoURL: matchedAvatar.url, gender,
+          role: 'user', isBlocked: false, createdAt: new Date().toISOString()
+        });
+        onUserLogin({ uid: cleanUsername, displayName: cleanDisplayName, photoURL: matchedAvatar.url, avatarClass: selectedAvatar, gender, role: 'user' } as CustomUser);
+        onToast(lang === 'ru' ? 'Аккаунт создан!' : 'Account created!', 'success');
+      } else {
+        if (!userSnap.exists()) {
+          onToast(lang === 'ru' ? 'Неверный логин или пароль.' : 'Incorrect username or password.', 'error');
+          return;
+        }
+        const data = userSnap.data() as any;
+        if (data.isBlocked) {
+          onToast(lang === 'ru' ? 'Аккаунт заблокирован.' : 'This account is blocked.', 'error');
+          return;
+        }
+        let passwordValid = false;
+        if (data.passwordAlgorithm === 'PBKDF2-SHA256' && data.passwordHash && data.passwordSalt) {
+          const salt = Uint8Array.from(data.passwordSalt.match(/.{2}/g) || [], (byte: string) => parseInt(byte, 16));
+          const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(cleanPassword), 'PBKDF2', false, ['deriveBits']);
+          const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, key, 256);
+          const actual = Array.from(new Uint8Array(bits), b => b.toString(16).padStart(2, '0')).join('');
+          passwordValid = actual === data.passwordHash;
+        } else {
+          passwordValid = typeof data.password === 'string' && data.password === cleanPassword;
+          if (passwordValid) {
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            const saltHex = Array.from(salt, b => b.toString(16).padStart(2, '0')).join('');
+            const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(cleanPassword), 'PBKDF2', false, ['deriveBits']);
+            const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, key, 256);
+            const hashHex = Array.from(new Uint8Array(bits), b => b.toString(16).padStart(2, '0')).join('');
+            await setDoc(userRef, { passwordHash: hashHex, passwordSalt: saltHex, passwordAlgorithm: 'PBKDF2-SHA256', password: null }, { merge: true });
+          }
+        }
+        if (!passwordValid) {
+          onToast(lang === 'ru' ? 'Неверный логин или пароль.' : 'Incorrect username or password.', 'error');
+          return;
+        }
+        onUserLogin({
+          uid: cleanUsername, displayName: data.displayName || cleanUsername,
+          email: data.email || undefined, photoURL: data.photoURL || '',
+          avatarClass: data.avatarClass || 'whiteout', gender: data.gender || 'male',
+          role: data.role || 'user', isVip: Boolean(data.isVip), vipUntil: data.vipUntil
+        } as CustomUser);
+        onToast(lang === 'ru' ? 'С возвращением!' : 'Welcome back!', 'success');
+      }
       onClose();
     } catch (error: any) {
-      console.error(error);
-      onToast(error.message || (lang === 'ru' ? 'Ошибка авторизации' : 'Auth error'), 'error');
-    } finally { setAuthLoading(false); }
+      console.error('Auth error:', error);
+      onToast(lang === 'ru' ? 'Не удалось выполнить операцию. Проверьте соединение и попробуйте ещё раз.' : 'Could not complete the request. Check your connection and try again.', 'error');
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   return (
@@ -197,20 +211,6 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
           </div>
 
           <form onSubmit={handleAuthSubmit} className="space-y-4">
-            {authMode === 'register' && (
-              <div className="space-y-2">
-                <label className="block text-xs font-semibold tracking-wide text-zinc-300">{lang === 'ru' ? 'Электронная почта' : 'Email'} *</label>
-                <div className="flex gap-2">
-                  <input type="email" required value={emailInput} disabled={emailVerified} onChange={(e) => { setEmailInput(e.target.value); setEmailVerified(false); setEmailCodeSent(false); }} placeholder="you@example.com" className="min-w-0 flex-1 bg-[#0c0d10] border border-[#2a2f3b] focus:border-orange-400 text-white px-3 py-3 text-xs outline-none" />
-                  <button type="button" disabled={authLoading || emailVerified} onClick={requestEmailCode} className="border border-orange-500/50 px-3 text-xs font-bold text-orange-300 disabled:opacity-50">{emailCodeSent ? (lang === 'ru' ? 'Повторить' : 'Resend') : (lang === 'ru' ? 'Получить код' : 'Send code')}</button>
-                </div>
-                {emailCodeSent && !emailVerified && <div className="flex gap-2">
-                  <input inputMode="numeric" maxLength={6} value={emailCode} onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder={lang === 'ru' ? '6-значный код' : '6-digit code'} className="min-w-0 flex-1 bg-[#0c0d10] border border-[#2a2f3b] text-white px-3 py-3 text-xs outline-none" />
-                  <button type="button" disabled={authLoading || emailCode.length !== 6} onClick={verifyEmailCode} className="border border-white/20 px-3 text-xs font-bold disabled:opacity-50">{lang === 'ru' ? 'Подтвердить' : 'Verify'}</button>
-                </div>}
-                {emailVerified && <p className="text-xs text-green-400">✓ {lang === 'ru' ? 'Email подтверждён' : 'Email verified'}</p>}
-              </div>
-            )}
             {/* Username */}
             <div className="space-y-1.5">
               <label className="mb-2 block text-xs font-semibold tracking-wide text-zinc-300">
@@ -221,9 +221,12 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                 <input
                   type="text"
                   required
+                  minLength={3}
+                  maxLength={20}
+                  autoComplete="username"
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value)}
-                  placeholder={lang === 'ru' ? 'Придумайте логин' : 'Choose a username'}
+                  placeholder={lang === 'ru' ? 'Логин (6–20 символов)' : 'Username (6–20 characters)'}
                   className="w-full bg-[#0c0d10] border border-[#2a2f3b] focus:border-[#cd412b]/60 text-white placeholder-gray-600 pl-9 pr-4 py-2 text-xs font-mono outline-none transition-all"
                 />
               </div>
@@ -239,14 +242,32 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                 <input
                   type="password"
                   required
+                  minLength={authMode === 'register' ? 8 : 1}
+                  maxLength={128}
+                  autoComplete={authMode === 'register' ? 'new-password' : 'current-password'}
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder={authMode === 'register' ? (lang === 'ru' ? '8+ символов, A-z, цифра, знак' : '8+ chars, A-z, number, symbol') : '••••••••'}
                   className="w-full bg-[#0c0d10] border border-[#2a2f3b] focus:border-[#cd412b]/60 text-white pl-9 pr-4 py-2 text-xs font-mono outline-none transition-all"
                 />
               </div>
             </div>
 
+            {authMode === 'register' && (
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block font-mono">
+                  {lang === 'ru' ? 'Подтвердите пароль' : 'Confirm password'} <span className="text-[#cd412b]">*</span>
+                </label>
+                <div className="relative">
+                  <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <input type="password" required minLength={8} maxLength={128} autoComplete="new-password" value={confirmPasswordInput}
+                    onChange={(e) => setConfirmPasswordInput(e.target.value)}
+                    placeholder={lang === 'ru' ? 'Повторите пароль' : 'Repeat password'}
+                    className={`w-full bg-[#0c0d10] border ${confirmPasswordInput && confirmPasswordInput !== passwordInput ? 'border-red-500' : 'border-[#2a2f3b]'} focus:border-[#cd412b]/60 text-white pl-9 pr-4 py-2 text-xs font-mono outline-none transition-all`} />
+                </div>
+                {confirmPasswordInput && <p className={`text-[10px] ${confirmPasswordInput === passwordInput ? 'text-green-400' : 'text-red-400'}`}>{confirmPasswordInput === passwordInput ? (lang === 'ru' ? 'Пароли совпадают' : 'Passwords match') : (lang === 'ru' ? 'Пароли не совпадают' : 'Passwords do not match')}</p>}
+              </div>
+            )}
             {/* Display Name (if registering) */}
             {authMode === 'register' && (
               <div className="space-y-1.5">
@@ -258,9 +279,11 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                   <input
                     type="text"
                     required
+                    minLength={2}
+                    maxLength={32}
                     value={displayNameInput}
                     onChange={(e) => setDisplayNameInput(e.target.value)}
-                    placeholder={lang === 'ru' ? 'Введите свой никнейм' : 'Enter your nickname'}
+                    placeholder={lang === 'ru' ? 'Никнейм (6–32 символа)' : 'Nickname (6–32 characters)'}
                     className="w-full bg-[#0c0d10] border border-[#2a2f3b] focus:border-[#cd412b]/60 text-white placeholder-gray-600 pl-9 pr-4 py-2 text-xs font-mono outline-none transition-all"
                   />
                 </div>
