@@ -1303,7 +1303,7 @@ export default function App() {
           ? 'bg-white/95 border-neutral-200/90 shadow-[0_2px_15px_rgba(0,0,0,0.04)]'
           : 'bg-[#08090c]/95 border-[#1e2633] shadow-[0_4px_25px_rgba(0,0,0,0.8)]'
       }`}>
-        <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 overflow-hidden">
+        <div className="w-full max-w-[1560px] mx-auto px-3 sm:px-5 lg:px-8 overflow-hidden">
           <div className="flex items-center justify-between h-14 sm:h-16 gap-1.5 sm:gap-3 w-full min-w-0">
             {/* Left: Brand Logo + Primary Nav */}
             <div className="flex items-center gap-2 sm:gap-4 min-w-0 shrink">
@@ -1884,7 +1884,7 @@ export default function App() {
       </nav>
 
       {/* CORE APPLICATION CONTAINER */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 mt-5 relative z-10 w-full max-w-full min-h-[70vh] overflow-x-hidden">
+      <main className="industrial-workspace mx-auto px-3 sm:px-4 lg:px-8 mt-5 relative z-10 w-full min-h-[70vh] overflow-x-hidden">
         <div className="w-full max-w-full overflow-hidden">
           {/* Active Tab View */}
           <div className="w-full max-w-full overflow-hidden">
