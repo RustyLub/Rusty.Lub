@@ -39,7 +39,8 @@ jobs:
         env:
           NODE_ENV: production
           GITHUB_ACTIONS: "true"
-          VITE_BASE: ${{ steps.pages.outputs.base_path || '/Rusty.Lub/' }}
+          # Relative asset URLs work both on the project Pages URL and the custom domain root.
+          VITE_BASE: './'
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
