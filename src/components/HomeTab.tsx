@@ -148,7 +148,7 @@ export default function HomeTab({
       {/* ── 1. PREMIUM SOFT LIGHT HERO SECTION ── */}
       <section className="bg-gradient-to-br from-[#171f28] via-[#10161d] to-[#0d1218] border border-[#35404b] rounded-xl p-4 sm:p-6 lg:p-7 shadow-[0_18px_55px_rgba(0,0,0,0.28)] relative overflow-hidden">
         {/* Glow Accent */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/100/[0.02] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="grid grid-cols-1 gap-5 items-center relative z-10">
           {/* Left Hero Column */}
@@ -187,6 +187,17 @@ export default function HomeTab({
               >
                 <span>{lang === 'ru' ? 'Все инструменты' : 'See tools'}</span>
               </button>
+
+              <a
+                href="https://discord.gg/R2TyKZ9xvZ"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-3 bg-transparent hover:bg-orange-500/10 text-orange-300 hover:text-orange-200 border border-orange-500/30 hover:border-orange-500/60 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-1.5"
+              >
+                <Send size={13} />
+                <span>{lang === 'ru' ? 'Наш Discord' : 'Join Discord'}</span>
+                <ExternalLink size={11} />
+              </a>
             </div>
           </div>
 
