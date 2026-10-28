@@ -143,27 +143,27 @@ export default function HomeTab({
   ];
 
   return (
-    <div className="industrial-home space-y-7 lg:space-y-8 pb-16 text-left">
+    <div className="industrial-home space-y-5 lg:space-y-6 pb-12 text-left">
       
       {/* ── 1. PREMIUM SOFT LIGHT HERO SECTION ── */}
-      <section className="bg-gradient-to-br from-[#171f28] via-[#10161d] to-[#0d1218] border border-[#35404b] rounded-xl p-5 sm:p-7 lg:p-9 shadow-[0_18px_55px_rgba(0,0,0,0.28)] relative overflow-hidden">
+      <section className="bg-gradient-to-r from-[#171f28] via-[#10161d] to-[#0d1218] border border-[#35404b] rounded-xl p-4 sm:p-5 lg:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.20)] relative overflow-hidden">
         {/* Glow Accent */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/100/[0.02] rounded-full blur-3xl pointer-events-none" />
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center relative z-10">
+        <div className="relative z-10">
           {/* Left Hero Column */}
-          <div className="lg:col-span-8 space-y-5">
+          <div className="max-w-4xl space-y-3">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-500/10 border border-orange-500/20 text-[10px] font-bold uppercase tracking-wider text-orange-500 rounded-lg">
               <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-              <span>{lang === 'ru' ? 'Светлый Дизайн v2.0' : 'Soft Light Layout v2.0'}</span>
+              <span>{lang === 'ru' ? 'RUSTY.LUB · SURVIVAL TOOLS' : 'RUSTY.LUB · SURVIVAL TOOLS'}</span>
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#eef2f7] leading-[1.1]">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-[#eef2f7] leading-[1.1]">
                 Win the wipe. <br className="hidden sm:inline" />
                 <span className="text-orange-500">Without the chaos.</span>
               </h1>
-              <p className="text-sm sm:text-base text-[#aab4c5] font-normal leading-relaxed max-w-xl">
+              <p className="text-sm text-[#aab4c5] font-normal leading-relaxed max-w-2xl">
                 {lang === 'ru'
                   ? 'Высокоточный набор утилит выживания для игроков Rust. Посчитайте оптимальный боезапас рейда, автоматизируйте внутриигровые бинды, настройте электронику и повысьте FPS в один клик.'
                   : 'Precision-engineered survival tools for professional Rust players. Calculate explosive costs, configure complex macro binds, design electrical grids, and optimize frames.'}
@@ -171,10 +171,10 @@ export default function HomeTab({
             </div>
 
             {/* CTAs */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2.5">
               <button
                 onClick={() => onNavigate('raid')}
-                className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-orange-500/10 cursor-pointer flex items-center gap-1.5"
+                className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-all shadow-md shadow-orange-500/10 cursor-pointer flex items-center gap-1.5"
               >
                 <span>{lang === 'ru' ? 'Начать бесплатно' : 'Start free'}</span>
                 <ArrowRight size={13} />
@@ -182,47 +182,33 @@ export default function HomeTab({
 
               <button
                 onClick={() => onNavigate('tools')}
-                className="px-6 py-3 bg-[#171d27] hover:bg-[#202938] text-[#eef2f7] border border-[#1e2633] font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                className="px-4 py-2.5 bg-[#171d27] hover:bg-[#202938] text-[#eef2f7] border border-[#1e2633] font-bold text-xs uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
               >
                 <span>{lang === 'ru' ? 'Все инструменты' : 'See tools'}</span>
               </button>
             </div>
           </div>
 
-          {/* Right Hero Column: Authentic C4 Display item slot */}
-          <div className="lg:col-span-4 flex justify-center lg:justify-end">
-            <div className="relative p-6 bg-[#0d1016] border border-[#1e2633] rounded-2xl flex flex-col items-center text-center max-w-[240px] w-full shadow-sm">
-              <div className="w-24 h-24 rounded-2xl bg-zinc-900 border-2 border-[#2e394b] flex items-center justify-center shadow-inner relative overflow-hidden group mb-3">
-                <ItemImageOrFallback id="timed_explosive" lang={lang} size={76} />
-                <div className="absolute bottom-1 right-1.5 text-[8px] font-mono text-[#8b95a8] font-black">C4</div>
-              </div>
-              <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-[#8b95a8]">
-                TIMED EXPLOSIVE
-              </span>
-              <h3 className="text-xs font-bold text-[#eef2f7] mt-1">
-                {lang === 'ru' ? 'Калькулятор Рейдов' : 'Raid Calculator'}
-              </h3>
-            </div>
-          </div>
+
         </div>
       </section>
 
-      {/* ── REAL-TIME APP INSTALLATIONS & REGISTERED USERS STATS COUNTER ── */}
-      <AppStatsCounterWidget lang={lang} appTheme={appTheme} />
-
       {/* ── 2. FEATURED TOOLS BOXES (RAID, BINDS, FPS) ── */}
-      <section className="space-y-4">
-        <h2 className="text-xs font-black text-[#8b95a8] uppercase tracking-wider font-mono">
+      <section className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-xs font-black text-[#8b95a8] uppercase tracking-wider font-mono">
           {lang === 'ru' ? '🔥 ПОПУЛЯРНЫЕ РАЗДЕЛЫ' : '🔥 FEATURED PROTOCOLS'}
-        </h2>
+          </h2>
+          <button onClick={() => onNavigate('tools')} className="text-[11px] font-bold text-orange-500 hover:text-orange-400 inline-flex items-center gap-1">{lang === 'ru' ? 'Все инструменты' : 'All tools'} <ArrowRight size={12} /></button>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
           {/* Featured 1: Raid Calculator */}
           <div 
             onClick={() => onNavigate('raid')}
             className="bg-[#111820] border border-[#293541] p-4 lg:p-5 rounded-xl shadow-[0_10px_24px_rgba(0,0,0,0.16)] hover:border-orange-500/70 hover:-translate-y-0.5 transition-all cursor-pointer flex items-start gap-4 group"
           >
-            <div className="w-14 h-14 shrink-0 rounded-xl bg-zinc-900 border border-[#2e394b] flex items-center justify-center shadow-inner overflow-hidden">
+            <div className="w-11 h-11 shrink-0 rounded-lg bg-zinc-900 border border-[#2e394b] flex items-center justify-center shadow-inner overflow-hidden">
               <ItemImageOrFallback id="timed_explosive" lang={lang} size={46} />
             </div>
             <div className="space-y-1">
@@ -238,7 +224,7 @@ export default function HomeTab({
           {/* Featured 2: Keybinds Generator */}
           <div 
             onClick={() => onNavigate('binds')}
-            className="bg-[#12161e] border border-[#1e2633] p-5 rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.01)] hover:border-orange-500 transition-all cursor-pointer flex items-start gap-4 group"
+            className="bg-[#12161e] border border-[#1e2633] p-3.5 rounded-xl shadow-sm hover:border-orange-500 transition-all cursor-pointer flex items-start gap-3 group"
           >
             <div className="w-14 h-14 shrink-0 rounded-xl bg-zinc-900 border border-[#2e394b] flex items-center justify-center shadow-inner overflow-hidden">
               <ItemImageOrFallback id="keycard_red" lang={lang} size={46} />
@@ -271,6 +257,11 @@ export default function HomeTab({
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Compact project metrics follow the primary tools, keeping the first screen focused. */}
+      <section className="rounded-xl border border-[#1e2633] bg-[#0d1016] p-3 sm:p-4">
+        <AppStatsCounterWidget lang={lang} appTheme={appTheme} />
       </section>
 
       {/* ── 3. SPECIAL ACCESS SECTIONS (ONLY VISIBLE IF AUTHORIZED WITH SPECIAL ACCESS) ── */}
