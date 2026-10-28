@@ -5,7 +5,8 @@ import { FileText, Settings2, Shield, History, Plus, Save, RefreshCw, Eye, EyeOf
 type Lang = 'ru' | 'en';
 type CmsPage = { id: string; slug: string; title: Record<Lang, string>; description: Record<Lang, string>; body: Record<Lang, string>; visible: boolean; order: number; updatedAt?: string };
 type AuditEntry = { id: string; actorEmail?: string; actorUid?: string; action?: string; target?: string; createdAt?: string; details?: string };
-type CmsRole = { uid: string; email?: string; role: 'owner' | 'admin' | 'editor' | 'viewer'; createdAt?: string };\ntype CmsAccess = { uid: string; email?: string; role: CmsRole['role'] };
+type CmsRole = { uid: string; email?: string; role: 'owner' | 'admin' | 'editor' | 'viewer'; createdAt?: string };
+type CmsAccess = { uid: string; email?: string; role: CmsRole['role'] };
 
 interface Props { lang: Lang; onToast: (message: string, type: 'success' | 'error' | 'info') => void }
 
@@ -24,7 +25,11 @@ export default function AdminCmsPanel({ lang, onToast }: Props) {
   const [roleUid, setRoleUid] = useState('');
   const [roleEmail, setRoleEmail] = useState('');
   const [roleValue, setRoleValue] = useState<CmsRole['role']>('editor');
-  const [busy, setBusy] = useState(false);\n  const [access, setAccess] = useState<CmsAccess | null>(null);\n  const canAdminister = access?.role === 'owner' || access?.role === 'admin';\n  const canEdit = canAdminister || access?.role === 'editor';\n  const isOwner = access?.role === 'owner';
+  const [busy, setBusy] = useState(false);
+  const [access, setAccess] = useState<CmsAccess | null>(null);
+  const canAdminister = access?.role === 'owner' || access?.role === 'admin';
+  const canEdit = canAdminister || access?.role === 'editor';
+  const isOwner = access?.role === 'owner';
 
   const request = useCallback(async (path: string, init: RequestInit = {}) => {
     const user = auth.currentUser;
@@ -125,7 +130,9 @@ export default function AdminCmsPanel({ lang, onToast }: Props) {
     </div>
     <div className="flex flex-wrap gap-2">{tabs.map(tab => { const Icon = tab.icon; return <button key={tab.id} onClick={() => setSection(tab.id)} className={`${button} ${section === tab.id ? 'border-orange-500 bg-orange-500/10 text-orange-300' : ''}`}><Icon size={14}/>{tab.label}</button>; })}</div>
 
-    {!canEdit && access && <div className={panel + ' text-sm text-zinc-400'}>{ru ? 'У вас есть доступ только для просмотра.' : 'Your access is read-only.'}</div>}\n\n    {section === 'pages' && <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
+    {!canEdit && access && <div className={panel + ' text-sm text-zinc-400'}>{ru ? 'У вас есть доступ только для просмотра.' : 'Your access is read-only.'}</div>}
+
+    {section === 'pages' && <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
       <div className={panel}><div className="mb-3 flex items-center justify-between"><strong>{ru ? 'Страницы' : 'Pages'}</strong><button className={button} onClick={newPage} disabled={!canEdit}><Plus size={13}/>{ru ? 'Добавить' : 'Add'}</button></div>
         <div className="space-y-2">{pages.map(page => <button key={page.id} onClick={() => setSelected({ ...page })} className={`w-full rounded border p-3 text-left ${selected?.id === page.id ? 'border-orange-500 bg-orange-500/10' : 'border-zinc-800 hover:border-zinc-600'}`}><div className="flex items-center justify-between gap-2 text-sm font-bold"><span className="truncate">{page.title?.[lang] || page.slug}</span>{page.visible ? <Eye size={13}/> : <EyeOff size={13}/>}</div><div className="mt-1 text-[11px] text-zinc-500">/{page.slug}</div></button>)}
         {pages.length === 0 && <p className="text-xs text-zinc-500">{ru ? 'Пока нет CMS-страниц.' : 'No CMS pages yet.'}</p>}</div>
