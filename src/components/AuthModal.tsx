@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, User, Lock, Crosshair, Sparkles, Mars, Venus, Github } from 'lucide-react';
+import { X, User, Lock, Crosshair, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
 import { 
   doc, 
   getDoc, 
@@ -173,54 +173,63 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div className="fixed inset-0 z-[60] overflow-y-auto bg-[#090b0f] text-white">
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="w-full max-w-md bg-[#14171e] border-2 border-[#2a2f3b] p-6 relative overflow-hidden shadow-2xl rust-metal-pattern"
+        className="relative mx-auto flex min-h-screen w-full max-w-6xl items-stretch overflow-hidden bg-[#0d1016] shadow-2xl lg:my-5 lg:min-h-[calc(100vh-2.5rem)] lg:border lg:border-white/10"
       >
-        {/* Tactical Corner Brackets */}
-        <div className="rust-bracket-tl" />
-        <div className="rust-bracket-tr" />
-        <div className="rust-bracket-bl" />
-        <div className="rust-bracket-br" />
-
-        {/* Top Hazard Diagonal Stripe */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 rust-hazard" />
+        <aside className="relative hidden w-[42%] flex-col justify-between overflow-hidden border-r border-white/10 bg-[#11151c] p-10 lg:flex">
+          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+          <div className="absolute -left-24 top-1/3 h-72 w-72 rounded-full bg-orange-500/10 blur-3xl" />
+          <div className="relative">
+            <div className="mb-8 flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center border border-orange-500/40 bg-orange-500/10 text-orange-400"><ShieldCheck size={23} /></div>
+              <div><div className="font-mono text-xs tracking-[.28em] text-orange-400">RUSTY.LUB</div><div className="mt-1 text-[10px] tracking-[.18em] text-zinc-500">SURVIVAL KNOWLEDGE BASE</div></div>
+            </div>
+            <div className="mb-4 font-mono text-[10px] tracking-[.3em] text-zinc-500">ИНСТРУМЕНТЫ • БАЗА ЗНАНИЙ • СООБЩЕСТВО</div>
+            <h2 className="max-w-md text-5xl font-black leading-[.98] tracking-tight">Твой следующий вайп.<br/><span className="text-orange-400">Под твоим контролем.</span></h2>
+            <p className="mt-6 max-w-sm text-sm leading-7 text-zinc-400">Сохраняй расчёты рейдов, собирай полезные материалы и возвращайся к своим инструментам с одного аккаунта.</p>
+          </div>
+          <div className="relative border-t border-white/10 pt-5 font-mono text-[10px] tracking-widest text-zinc-500">ACCOUNT ACCESS / RUSTY.LUB</div>
+        </aside>
+        <section className="relative flex min-w-0 flex-1 flex-col justify-center px-5 py-10 sm:px-10 lg:px-16">
+          <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400/40 to-transparent" />
 
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors cursor-pointer z-10"
+          aria-label={lang === 'ru' ? 'Закрыть' : 'Close'}
+          className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center border border-white/10 text-zinc-400 transition-colors hover:border-orange-500/50 hover:text-white"
         >
           <X size={20} />
         </button>
 
-        <div className="space-y-6">
-          <div className="text-center space-y-1">
-            <h3 className="text-2xl font-bold text-white tracking-wider font-teko uppercase">
+        <div className="mx-auto w-full max-w-md space-y-7">
+          <div className="space-y-2 pr-12 text-left">
+            <h3 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
               {authMode === 'login' 
-                ? (lang === 'ru' ? 'ВХОД В АККАУНТ' : 'SURVIVOR LOGIN') 
-                : (lang === 'ru' ? 'РЕГИСТРАЦИЯ' : 'SURVIVOR REGISTRATION')}
+                ? (lang === 'ru' ? 'Вход в аккаунт' : 'Sign in') 
+                : (lang === 'ru' ? 'Создать аккаунт' : 'Create account')}
             </h3>
-            <p className="text-xs text-gray-500 font-mono">
+            <p className="max-w-sm text-sm leading-6 text-zinc-400">
               {authMode === 'login' 
-                ? (lang === 'ru' ? 'С возвращением на станцию связи' : 'Authenticate with your survivor ID') 
-                : (lang === 'ru' ? 'Создайте позывной для выхода в эфир' : 'Establish your radio frequency credentials')}
+                ? (lang === 'ru' ? 'Войдите, чтобы продолжить работу с вашими инструментами' : 'Sign in to continue using your tools') 
+                : (lang === 'ru' ? 'Создайте аккаунт, чтобы сохранять расчёты и настройки' : 'Create an account to save your calculations and settings')}
             </p>
           </div>
 
           {/* Mode Switcher */}
-          <div className="flex bg-[#0c0d10] p-1 border border-[#2a2f3b]">
+          <div className="flex border-b border-white/10">
             <button
               type="button"
               onClick={() => setAuthMode('login')}
-              className={`flex-1 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`flex-1 border-b-2 py-3 text-sm font-semibold transition-all cursor-pointer ${
                 authMode === 'login' 
-                  ? 'bg-[#cd412b] text-white font-black' 
-                  : 'text-gray-500 hover:text-white'
+                  ? 'border-orange-400 text-orange-300 font-bold' 
+                  : 'border-transparent text-zinc-500 hover:text-white'
               }`}
             >
               {lang === 'ru' ? 'Вход' : 'Login'}
@@ -228,10 +237,10 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
             <button
               type="button"
               onClick={() => setAuthMode('register')}
-              className={`flex-1 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                authMode === 'register' 
-                  ? 'bg-[#cd412b] text-white font-black' 
-                  : 'text-gray-500 hover:text-white'
+              className={`flex-1 border-b-2 py-3 text-sm font-semibold transition-all cursor-pointer ${
+                authMode === 'register'
+                  ? 'border-orange-400 text-orange-300 font-bold'
+                  : 'border-transparent text-zinc-500 hover:text-white'
               }`}
             >
               {lang === 'ru' ? 'Регистрация' : 'Register'}
@@ -241,8 +250,8 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
           <form onSubmit={handleAuthSubmit} className="space-y-4">
             {/* Username */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block font-mono">
-                {lang === 'ru' ? 'ЛОГИН' : 'LOGIN ID'} <span className="text-[#cd412b]">*</span>
+              <label className="mb-2 block text-xs font-semibold tracking-wide text-zinc-300">
+                {lang === 'ru' ? 'Логин' : 'Username'} <span className="text-[#cd412b]">*</span>
               </label>
               <div className="relative">
                 <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -251,7 +260,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                   required
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value)}
-                  placeholder={lang === 'ru' ? 'Ваш уникальный логин' : 'Enter unique login id'}
+                  placeholder={lang === 'ru' ? 'Придумайте логин' : 'Choose a username'}
                   className="w-full bg-[#0c0d10] border border-[#2a2f3b] focus:border-[#cd412b]/60 text-white placeholder-gray-600 pl-9 pr-4 py-2 text-xs font-mono outline-none transition-all"
                 />
               </div>
@@ -260,7 +269,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
             {/* Password */}
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block font-mono">
-                {lang === 'ru' ? 'ПАРОЛЬ' : 'PASSWORD'} <span className="text-[#cd412b]">*</span>
+                {lang === 'ru' ? 'Пароль' : 'Password'} <span className="text-[#cd412b]">*</span>
               </label>
               <div className="relative">
                 <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -279,7 +288,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
             {authMode === 'register' && (
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block font-mono">
-                  {lang === 'ru' ? 'ИГРОВОЙ ПОЗЫВНОЙ (НИКНЕЙМ)' : 'CALLSIGN / NICKNAME'} <span className="text-[#cd412b]">*</span>
+                  {lang === 'ru' ? 'Никнейм' : 'Nickname'} <span className="text-[#cd412b]">*</span>
                 </label>
                 <div className="relative">
                   <Crosshair size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -288,89 +297,9 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                     required
                     value={displayNameInput}
                     onChange={(e) => setDisplayNameInput(e.target.value)}
-                    placeholder={lang === 'ru' ? 'Например: TV_Cheater' : 'e.g. Survivor_X'}
+                    placeholder={lang === 'ru' ? 'Введите свой никнейм' : 'Enter your nickname'}
                     className="w-full bg-[#0c0d10] border border-[#2a2f3b] focus:border-[#cd412b]/60 text-white placeholder-gray-600 pl-9 pr-4 py-2 text-xs font-mono outline-none transition-all"
                   />
-                </div>
-              </div>
-            )}
-
-            {/* Survivor Class Selector (if registering) */}
-            {authMode === 'register' && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block font-mono">
-                    {lang === 'ru' ? 'ПОЛ' : 'GENDER'} <span className="text-[#cd412b]">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setGender('male')}
-                      className={`flex-1 py-3 flex flex-col items-center justify-center gap-1 transition-all cursor-pointer border rounded-sm ${
-                        gender === 'male'
-                          ? 'bg-[#cd412b]/15 text-[#cd412b] border-[#cd412b]'
-                          : 'bg-[#0c0d10] text-gray-500 border-[#2a2f3b] hover:border-gray-700'
-                      }`}
-                      title={lang === 'ru' ? 'Мужской' : 'Man'}
-                    >
-                      <Mars className="w-5 h-5" />
-                      <span className="text-[9px] font-bold font-mono tracking-wider uppercase">
-                        {lang === 'ru' ? 'МУЖ' : 'MAN'}
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setGender('female')}
-                      className={`flex-1 py-3 flex flex-col items-center justify-center gap-1 transition-all cursor-pointer border rounded-sm ${
-                        gender === 'female'
-                          ? 'bg-[#cd412b]/15 text-[#cd412b] border-[#cd412b]'
-                          : 'bg-[#0c0d10] text-gray-500 border-[#2a2f3b] hover:border-gray-700'
-                      }`}
-                      title={lang === 'ru' ? 'Женский' : 'Girl'}
-                    >
-                      <Venus className="w-5 h-5" />
-                      <span className="text-[9px] font-bold font-mono tracking-wider uppercase">
-                        {lang === 'ru' ? 'ЖЕН' : 'GIRL'}
-                      </span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block font-mono">
-                    {lang === 'ru' ? 'КЛАСС ВЫЖИВШЕГО' : 'SURVIVOR CLASS'}
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
-                    {CUSTOM_AVATARS.map((avatar) => {
-                      const isSelected = selectedAvatar === avatar.id;
-                      return (
-                        <button
-                          key={avatar.id}
-                          type="button"
-                          onClick={() => setSelectedAvatar(avatar.id)}
-                          className={`p-2 border text-left flex items-center gap-2.5 cursor-pointer transition-all ${
-                            isSelected 
-                              ? 'border-[#cd412b] bg-[#cd412b]/10' 
-                              : 'border-[#2a2f3b] bg-[#0c0d10] hover:border-gray-500'
-                          }`}
-                        >
-                          <img referrerPolicy="no-referrer" 
-                            src={avatar.url} 
-                            alt={avatar.name[lang]} 
-                            className="w-6 h-6 rounded-full object-cover bg-zinc-950"
-                          />
-                          <div className="min-w-0">
-                            <span className="text-[9px] font-bold text-white block truncate leading-tight">
-                              {avatar.name[lang]}
-                            </span>
-                            <span className="text-[7px] text-gray-500 block truncate leading-none mt-0.5 font-mono">
-                              {avatar.role[lang]}
-                            </span>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
                 </div>
               </div>
             )}
@@ -384,7 +313,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                   </div>
                 </div>
                 <div className="flex-1 text-[10px] font-mono leading-tight">
-                  <span className="text-gray-500">{lang === 'ru' ? 'Я принимаю ' : 'I accept the '}</span>
+                  <span className="text-gray-500">{lang === 'ru' ? 'Я ознакомился и принимаю ' : 'I have read and accept the '}</span>
                   <button
                     type="button"
                     onClick={(e) => {
@@ -393,9 +322,9 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                     }}
                     className="text-[#cd412b] hover:underline font-bold"
                   >
-                    {lang === 'ru' ? 'пользовательское соглашение' : 'Terms of Service'}
+                    {lang === 'ru' ? 'условия использования Rusty.Lub' : 'Rusty.Lub Terms of Use'}
                   </button>
-                  <span className="text-gray-500"> {lang === 'ru' ? 'и политику конфиденциальности.' : 'and Privacy Policy.'}</span>
+                  <span className="text-gray-500"> {lang === 'ru' ? ' и правила работы с аккаунтом.' : ' and account rules.'}</span>
                 </div>
               </div>
             )}
@@ -403,16 +332,23 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
             <button
               type="submit"
               disabled={authLoading}
-              className="w-full py-2.5 bg-[#cd412b] hover:bg-[#b03825] text-white font-black text-xs uppercase tracking-widest font-mono cursor-pointer disabled:opacity-50 transition-colors"
+              className="flex w-full items-center justify-center gap-2 bg-orange-500 px-5 py-4 text-sm font-bold text-black transition-colors hover:bg-orange-400 disabled:cursor-wait disabled:opacity-50"
             >
               {authLoading 
-                ? (lang === 'ru' ? 'ПОДКЛЮЧЕНИЕ...' : 'CONNECTING...') 
+                ? (lang === 'ru' ? 'Выполняется вход...' : 'Signing in...') 
                 : authMode === 'login' 
-                  ? (lang === 'ru' ? 'ВОЙТИ В ЭФИР' : 'ENTER BROADCAST') 
-                  : (lang === 'ru' ? 'ЗАРЕГИСТРИРОВАТЬСЯ' : 'ESTABLISH LINK')}
+                  ? (lang === 'ru' ? 'Войти в аккаунт' : 'Sign in') 
+                  : (lang === 'ru' ? 'Создать аккаунт' : 'Create account')}
+              {!authLoading && <ArrowRight size={17} />}
             </button>
           </form>
+          <p className="text-center text-xs leading-5 text-zinc-500">
+            {authMode === 'login'
+              ? (lang === 'ru' ? 'Нет аккаунта? Переключитесь на регистрацию выше.' : 'New here? Choose Register above.')
+              : (lang === 'ru' ? 'Уже зарегистрированы? Переключитесь на вход выше.' : 'Already registered? Choose Login above.')}
+          </p>
         </div>
+        </section>
       </motion.div>
 
       <AnimatePresence>
