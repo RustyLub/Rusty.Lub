@@ -1303,7 +1303,7 @@ export default function App() {
           ? 'bg-white/95 border-neutral-200/90 shadow-[0_2px_15px_rgba(0,0,0,0.04)]'
           : 'bg-[#08090c]/95 border-[#1e2633] shadow-[0_4px_25px_rgba(0,0,0,0.8)]'
       }`}>
-        <div className="w-full max-w-[1560px] mx-auto px-3 sm:px-5 lg:px-8 overflow-hidden">
+        <div className="w-full max-w-[1560px] mx-auto px-3 sm:px-5 lg:px-8 overflow-visible">
           <div className="flex items-center justify-between h-14 sm:h-16 gap-1.5 sm:gap-3 w-full min-w-0">
             {/* Left: Brand Logo + Primary Nav */}
             <div className="flex items-center gap-2 sm:gap-4 min-w-0 shrink">
@@ -1421,28 +1421,7 @@ export default function App() {
 
             {/* Right: Actions, Search, Theme, Quick Raid, Cabinet & Lang */}
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-              {/* HUD Overlay Quick Trigger */}
-              <button
-                onClick={() => setQuickOverlayOpen(prev => !prev)}
-                className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 text-xs font-mono transition-all cursor-pointer rounded-md shadow-xs group shrink-0 ${
-                  quickOverlayOpen
-                    ? 'bg-red-600 text-white border border-red-500 shadow-sm shadow-red-600/30'
-                    : appTheme === 'light'
-                      ? 'bg-neutral-100 hover:bg-neutral-200 border border-neutral-300/80 text-neutral-700'
-                      : 'bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
-                }`}
-                title={lang === 'ru' ? 'HUD Оверлей поверх игры (Alt + O)' : 'In-Game HUD Overlay (Alt + O)'}
-              >
-                <Target size={14} className={quickOverlayOpen ? 'text-white' : 'text-red-500 group-hover:scale-110 transition-transform shrink-0'} />
-                <span className="hidden xl:inline text-[11px] font-semibold">HUD</span>
-                <span className={`hidden 2xl:inline text-[9px] px-1 py-0.5 font-mono rounded ${
-                  quickOverlayOpen
-                    ? 'bg-black/30 text-white'
-                    : appTheme === 'light' ? 'bg-white text-neutral-500 border border-neutral-200' : 'bg-white/5 border border-white/10 text-[#8b95a8]'
-                }`}>
-                  Alt+O
-                </span>
-              </button>
+              {/* HUD is available only in the desktop launcher, not on the web site. */}
 
               {/* Search Trigger */}
               <button
@@ -2702,8 +2681,6 @@ export default function App() {
           onOpenCabinet={() => (currentUser ? setCabinetModalOpen(true) : setAuthModalOpen(true))}
           onOpenDonation={() => setCabinetModalOpen(true)}
           onOpenTerms={() => setShowTermsModal(true)}
-          isWindowsApp={isWindowsApp}
-          onToggleLauncherMode={handleToggleLauncherPreview}
         />
       </Suspense>
 
