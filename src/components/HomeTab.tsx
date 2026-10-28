@@ -211,7 +211,7 @@ export default function HomeTab({
               <ItemImageOrFallback id="timed_explosive" lang={lang} size={46} />
             </div>
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-neutral-950 uppercase group-hover:text-orange-500 transition-colors">
+              <h3 className="text-sm font-bold text-[#eef2f7] uppercase group-hover:text-orange-500 transition-colors">
                 {lang === 'ru' ? 'Калькулятор Рейда' : 'Raid Calculator'}
               </h3>
               <p className="text-xs text-[#8b95a8] leading-relaxed">
@@ -229,7 +229,7 @@ export default function HomeTab({
               <ItemImageOrFallback id="keycard_red" lang={lang} size={46} />
             </div>
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-neutral-950 uppercase group-hover:text-orange-500 transition-colors">
+              <h3 className="text-sm font-bold text-[#eef2f7] uppercase group-hover:text-orange-500 transition-colors">
                 {lang === 'ru' ? 'Генератор Биндов' : 'Binds & Macros'}
               </h3>
               <p className="text-xs text-[#8b95a8] leading-relaxed">
