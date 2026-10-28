@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Russo+One&family=Roboto+Mono:ital,wght@0,300..700;1,300..700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Caveat:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&family=Roboto+Mono:ital,wght@0,300..700;1,300..700&family=Russo+One&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -781,15 +781,38 @@ body.light-theme .industrial-home > section:nth-of-type(2) > div > div p {
 }
 
 
-/* Typography correction: keep the signature handwritten look on the home hero only.
-   All other page headings use a highly legible display/UI sans with real hierarchy. */
+/* RUSTY.LUB TYPE SYSTEM — Tactical Stencil × Black Label.
+   Barlow Condensed gives headings a compact, squared industrial silhouette;
+   Rajdhani handles technical labels; Inter remains the readable UI body. */
+:root {
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-technical: "Rajdhani", "Roboto Mono", monospace;
+}
+@theme {
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-technical: "Rajdhani", "Roboto Mono", monospace;
+}
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
-  font-weight: 750;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.08;
   text-wrap: balance;
 }
+h1 { font-weight: 900; letter-spacing: -0.025em; }
+h2, h3 { letter-spacing: 0.005em; }
+button, input, select, textarea {
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+code, pre, kbd, samp, .font-mono {
+  font-family: "JetBrains Mono", "Roboto Mono", monospace;
+}
+nav a, nav button, [role="tab"], .technical-label, .eyebrow {
+  font-family: var(--font-technical);
+  font-weight: 700;
+  letter-spacing: 0.055em;
+}
+/* Keep the original handwritten signature only on the homepage hero. */
 .industrial-home > section:first-child h1 {
   font-family: "Caveat", cursive;
   font-weight: 700;
@@ -797,15 +820,11 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 0.98;
   font-size: clamp(3.2rem, 6vw, 6rem);
 }
-.industrial-home > section:first-child h1 span {
-  font-family: inherit;
-}
-.industrial-home h2 {
-  font-size: clamp(1.05rem, 1.35vw, 1.25rem);
-}
+.industrial-home > section:first-child h1 span { font-family: inherit; }
+.industrial-home h2 { font-size: clamp(1.15rem, 1.5vw, 1.45rem); }
 .industrial-home h3 {
-  font-size: clamp(.92rem, 1.1vw, 1.05rem);
-  letter-spacing: -0.01em;
+  font-size: clamp(1rem, 1.15vw, 1.15rem);
+  letter-spacing: 0;
 }
 @media (max-width: 560px) {
   .industrial-home > section:first-child h1 {
