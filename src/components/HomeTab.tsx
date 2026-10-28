@@ -19,7 +19,6 @@ import {
 } from 'lucide-react';
 import { ItemImageOrFallback } from './IconUtils';
 import { CustomUser } from '../types';
-import AppStatsCounterWidget from './AppStatsCounterWidget';
 import logoFull from '../../logo-full.png';
 
 interface HomeTabProps {
@@ -149,7 +148,7 @@ export default function HomeTab({
       {/* ── 1. PREMIUM SOFT LIGHT HERO SECTION ── */}
       <section className="bg-gradient-to-br from-[#171f28] via-[#10161d] to-[#0d1218] border border-[#35404b] rounded-xl p-4 sm:p-6 lg:p-7 shadow-[0_18px_55px_rgba(0,0,0,0.28)] relative overflow-hidden">
         {/* Glow Accent */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/100/[0.02] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="grid grid-cols-1 gap-5 items-center relative z-10">
           {/* Left Hero Column */}
@@ -188,6 +187,17 @@ export default function HomeTab({
               >
                 <span>{lang === 'ru' ? 'Все инструменты' : 'See tools'}</span>
               </button>
+
+              <a
+                href="https://discord.gg/R2TyKZ9xvZ"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-3 bg-transparent hover:bg-orange-500/10 text-orange-300 hover:text-orange-200 border border-orange-500/30 hover:border-orange-500/60 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-1.5"
+              >
+                <Send size={13} />
+                <span>{lang === 'ru' ? 'Наш Discord' : 'Join Discord'}</span>
+                <ExternalLink size={11} />
+              </a>
             </div>
           </div>
 
@@ -257,10 +267,6 @@ export default function HomeTab({
           </div>
         </div>
       </section>
-
-      {/* Compact project statistics follow the primary tools */}
-      <AppStatsCounterWidget lang={lang} appTheme={appTheme} />
-
       {/* ── 3. SPECIAL ACCESS SECTIONS (ONLY VISIBLE IF AUTHORIZED WITH SPECIAL ACCESS) ── */}
       {hasSpecialAccess && visibleSpecialCards.length > 0 && (
         <section className="space-y-4">
@@ -310,187 +316,6 @@ export default function HomeTab({
           </div>
         </section>
       )}
-
-      {/* ── 4. SERVER MONITOR ── */}
-      <details className="group rounded-xl border border-[#26313d] bg-[#0d1218]">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-4 sm:px-5 [&::-webkit-details-marker]:hidden">
-          <span>
-            <span className="block font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#f28a24]">{lang === 'ru' ? 'СЕРВЕРЫ / МОНИТОРИНГ' : 'SERVERS / MONITOR'}</span>
-            <span className="mt-1 block text-sm font-semibold text-[#e5eaf0]">{lang === 'ru' ? 'Онлайн, очереди и состояние серверов' : 'Player counts, queues and server status'}</span>
-          </span>
-          <span className="shrink-0 rounded-md border border-white/10 px-3 py-1.5 text-xs text-zinc-400 group-open:text-orange-300">{lang === 'ru' ? 'Развернуть' : 'Expand'} <span className="ml-1 inline-block transition-transform group-open:rotate-180">⌄</span></span>
-        </summary>
-        <section className="border-t border-white/10 bg-[#12161e] p-4 sm:p-5 space-y-4 text-left">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-100 pb-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
-              </span>
-              <h3 className="text-lg font-bold text-[#eef2f7]">
-                {selectedProject === 'rustymoose'
-                  ? (lang === 'ru' ? 'Мониторинг серверов Rusty Moose' : 'Rusty Moose Server Monitor')
-                  : (lang === 'ru' ? 'Мониторинг серверов Rustoria' : 'Rustoria Server Monitor')}
-              </h3>
-            </div>
-            <p className="text-xs text-[#8b95a8]">
-              {lang === 'ru' 
-                ? 'Онлайн, очереди и показатели серверов в реальном времени.' 
-                : 'Real-time online counts, queues, and ping stats.'}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Project Switcher */}
-            <div className="flex bg-[#171d27] p-0.5 border border-[#1e2633] rounded-lg text-xs font-mono">
-              <button
-                onClick={() => {
-                  onSelectProject('rustoria');
-                  onRefreshServers('rustoria');
-                }}
-                className={`px-3 py-1 font-bold rounded-md cursor-pointer transition-all ${
-                  selectedProject === 'rustoria'
-                    ? 'bg-orange-500 text-white shadow-sm'
-                    : 'text-[#8b95a8] hover:text-[#eef2f7]'
-                }`}
-              >
-                RUSTORIA
-              </button>
-              <button
-                onClick={() => {
-                  onSelectProject('rustymoose');
-                  onRefreshServers('rustymoose');
-                }}
-                className={`px-3 py-1 font-bold rounded-md cursor-pointer transition-all ${
-                  selectedProject === 'rustymoose'
-                    ? 'bg-orange-500 text-white shadow-sm'
-                    : 'text-[#8b95a8] hover:text-[#eef2f7]'
-                }`}
-              >
-                RUSTY MOOSE
-              </button>
-            </div>
-
-            {/* Region Filter */}
-            <div className="flex bg-[#171d27] p-0.5 border border-[#1e2633] rounded-lg text-xs font-mono">
-              {(['ALL', 'US', 'EU', 'SEA'] as const).map((reg, i) => (
-                <button
-                  key={`${reg}-${i}`}
-                  onClick={() => onSetRegionFilter(reg)}
-                  className={`px-2.5 py-1 font-bold rounded-md cursor-pointer transition-all ${
-                    regionFilter === reg
-                      ? 'bg-orange-500 text-white shadow-sm'
-                      : 'text-[#8b95a8] hover:text-[#eef2f7]'
-                  }`}
-                >
-                  {reg}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() => onRefreshServers(selectedProject)}
-              disabled={loadingServers}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#eef2f7] bg-[#12161e] border border-[#1e2633] hover:border-red-600 transition-all cursor-pointer disabled:opacity-50"
-            >
-              <RefreshCw size={12} className={loadingServers ? 'animate-spin text-orange-500' : ''} />
-              <span>{lang === 'ru' ? 'Обновить' : 'Refresh'}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Search */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8b95a8]" size={14} />
-          <input
-            type="text"
-            value={serverSearch}
-            onChange={(e) => onSetServerSearch(e.target.value)}
-            placeholder={lang === 'en' ? 'Search by server name, map, or IP...' : 'Поиск по названию, карте или IP...'}
-            className="w-full bg-[#0d1016] border border-[#1e2633] focus:border-red-600 text-[#eef2f7] placeholder-neutral-400 pl-9 pr-4 py-2 rounded-lg outline-none transition-all text-xs font-mono"
-          />
-        </div>
-
-        {/* Server List */}
-        <div className="space-y-2">
-          {rustoriaServers.length === 0 && loadingServers ? (
-            <div className="py-8 text-center space-y-2">
-              <RefreshCw size={20} className="animate-spin text-orange-500 mx-auto" />
-              <p className="text-xs text-[#8b95a8] font-mono">{lang === 'ru' ? 'Загрузка серверов...' : 'Loading servers...'}</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-2">
-              {rustoriaServers
-                .filter((server) => {
-                  const matchesRegion = regionFilter === 'ALL' || 
-                    server.name?.toLowerCase().includes(`-${regionFilter.toLowerCase()}`) || 
-                    server.name?.toLowerCase().includes(` ${regionFilter.toLowerCase()} `) ||
-                    server.id?.toLowerCase().includes(`-${regionFilter.toLowerCase()}`);
-                  const matchesSearch = serverSearch === '' || 
-                    server.name?.toLowerCase().includes(serverSearch.toLowerCase()) ||
-                    server.ip?.toLowerCase().includes(serverSearch.toLowerCase());
-                  return matchesRegion && matchesSearch;
-                })
-                .slice(0, 6)
-                .map((server) => {
-                  const connectCmd = `connect ${server.ip}:${server.port}`;
-                  const isCopied = copiedServerId === server.id;
-
-                  return (
-                    <div
-                      key={server.id}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-[#0d1016] border border-[#1e2633] hover:border-red-600/60 transition-all gap-3"
-                    >
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-sm text-[#eef2f7] truncate">
-                            {server.name}
-                          </span>
-                          {server.wipeCycle && (
-                            <span className="px-1.5 py-0.5 bg-orange-500/10 text-orange-500 text-[10px] font-mono font-bold rounded">
-                              {server.wipeCycle}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 text-xs text-[#8b95a8] font-mono">
-                          <span>IP: {server.ip}:{server.port}</span>
-                          {server.map && <span>• {server.map}</span>}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4 shrink-0">
-                        <div className="text-right font-mono">
-                          <div className="text-xs font-bold text-[#eef2f7]">
-                            {server.players} / {server.maxPlayers}
-                          </div>
-                          {server.queued > 0 && (
-                            <div className="text-[10px] text-orange-400">
-                              +{server.queued} queue
-                            </div>
-                          )}
-                        </div>
-
-                        <button
-                          onClick={() => onCopyServer(connectCmd, server.id)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                            isCopied
-                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                              : 'bg-[#12161e] text-[#aab4c5] hover:text-[#eef2f7] border border-[#1e2633] hover:border-red-600'
-                          }`}
-                        >
-                          {isCopied ? <Check size={12} /> : <Copy size={12} />}
-                          <span>{isCopied ? (lang === 'ru' ? 'Скопировано!' : 'Copied!') : 'connect'}</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          )}
-        </div>
-      </section>
-      </details>
 
       {/* ── 5. SUGGESTIONS AND CONTACT FEEDBACK ── */}
       <section className="bg-[#12161e] border border-[#1e2633] rounded-2xl p-6 shadow-sm">
