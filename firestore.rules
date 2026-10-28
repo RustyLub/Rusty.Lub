@@ -1,10 +1,20 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // These collections are written only by the trusted server. Keeping them
+    // outside the public catch-all prevents clients from forging verified emails.
+    match /email_verification/{document} {
+      allow read, write: if false;
+    }
+    match /chat_user_emails/{document} {
+      allow read, write: if false;
+    }
+
+    // Existing application collections retain their current access behavior.
+    // Tighten individual public collections separately to avoid breaking the app.
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if !document.matches('email_verification/.*')
+                         && !document.matches('chat_user_emails/.*');
     }
   }
 }
-
-
