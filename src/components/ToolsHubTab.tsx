@@ -164,20 +164,20 @@ export default function ToolsHubTab({
           {lang === 'ru' ? '⚡ Доступные калькуляторы' : '⚡ Public Utilities'}
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-0 border-y border-white/10 divide-y divide-white/10">
           {publicTools.map((tool) => (
             <div
               key={tool.id}
               onClick={() => onNavigate(tool.id)}
-              className={`border p-5 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.01)] hover:border-orange-500 hover:scale-105 hover:shadow-xl transition-all duration-300 ease-out cursor-pointer flex flex-col justify-between group h-full will-change-transform ${
+              className={`border-0 border-l-2 border-l-transparent px-4 py-4 sm:px-5 rounded-none shadow-none hover:border-l-orange-500 hover:scale-100 hover:shadow-none transition-all duration-200 ease-out cursor-pointer flex flex-row items-center justify-between gap-5 group h-full will-change-auto ${
                 appTheme === 'light'
-                  ? 'bg-[#12161e] border-[#1e2633] text-[#eef2f7]'
-                  : 'bg-[#14171e] border-[#2a2f3b] text-white'
+                  ? 'bg-transparent border-[#1e2633] text-[#eef2f7]'
+                  : 'bg-transparent border-[#2a2f3b] text-white'
               }`}
             >
               <div>
-                <div className="flex items-center justify-between mb-3.5">
-                  <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-neutral-800 flex items-center justify-center shadow-inner overflow-hidden group-hover:scale-105 transition-transform duration-200">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 shrink-0 rounded-md bg-[#111820] border border-white/10 flex items-center justify-center overflow-hidden">
                     <ItemImageOrFallback id={tool.iconId} lang={lang} size={36} />
                   </div>
                   {tool.tag && (
@@ -195,7 +195,7 @@ export default function ToolsHubTab({
                   {tool.desc}
                 </p>
               </div>
-              <div className={`mt-4 pt-3 border-t flex items-center justify-between text-xs font-semibold text-orange-500 transition-transform duration-200 group-hover:translate-x-0.5 ${appTheme === 'light' ? 'border-neutral-100' : 'border-[#2a2f3b]'}`}>
+              <div className={`shrink-0 ml-auto pl-3 flex items-center gap-2 text-xs font-semibold text-orange-500 transition-transform duration-200 group-hover:translate-x-0.5 ${appTheme === 'light' ? 'border-neutral-100' : 'border-[#2a2f3b]'}`}>
                 <span>{lang === 'ru' ? 'Открыть утилиту' : 'Open utility'}</span>
                 <ChevronRight size={14} />
               </div>
