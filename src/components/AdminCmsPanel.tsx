@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { auth } from '../firebase';
 import { FileText, Settings2, Shield, History, Plus, Save, RefreshCw, Eye, EyeOff, Trash2 } from 'lucide-react';
 
@@ -16,6 +16,9 @@ const button = 'inline-flex items-center gap-2 rounded border border-zinc-700 px
 
 export default function AdminCmsPanel({ lang, onToast }: Props) {
   const ru = lang === 'ru';
+  // Keep the latest toast handler without making refresh depend on a parent inline callback.
+  const onToastRef = useRef(onToast);
+  onToastRef.current = onToast;
   const [section, setSection] = useState<'pages' | 'settings' | 'roles' | 'audit'>('pages');
   const [pages, setPages] = useState<CmsPage[]>([]);
   const [settings, setSettings] = useState<Record<string, unknown>>({ siteTitle: 'Rusty.Lub', maintenanceMode: false, showNews: true, showCommunity: true });
@@ -67,11 +70,11 @@ export default function AdminCmsPanel({ lang, onToast }: Props) {
         setAudit([]);
       }
     } catch (error) {
-      onToast(error instanceof Error ? error.message : String(error), 'error');
+      onToastRef.current(error instanceof Error ? error.message : String(error), 'error');
     } finally {
       setBusy(false);
     }
-  }, [request, onToast]);
+  }, [request]);
 
   useEffect(() => { void refresh(); }, [refresh]);
 
