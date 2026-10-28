@@ -21,9 +21,11 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
-      - name: Install locked dependencies
+      - name: Refresh lockfile from package manifest
+        run: npm install --package-lock-only --ignore-scripts
+      - name: Install dependencies
         run: npm ci
       - name: TypeScript check
         run: npm run lint
