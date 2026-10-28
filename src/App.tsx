@@ -1311,7 +1311,7 @@ export default function App() {
       }`}>
         <div className="w-full max-w-[1560px] mx-auto px-3 sm:px-5 lg:px-8">
           <div className="flex min-h-14 sm:min-h-16 h-auto flex-wrap items-center justify-between gap-x-3 gap-y-2 py-2 w-full min-w-0">
-            {/* Left: Brand Logo + Primary Nav */}
+            {/* Brand and section catalog */}
             <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-4">
               {/* Logo */}
               <button 
@@ -1359,7 +1359,7 @@ export default function App() {
 
             </div>
 
-            {/* Right: Actions, Search, Theme, Quick Raid, Cabinet & Lang */}
+            {/* Search and account actions */}
             <div className="flex max-w-full flex-wrap items-center justify-end gap-1 sm:gap-2">
               {/* Search Trigger */}
               <button
@@ -1378,34 +1378,6 @@ export default function App() {
                 }`}>
                   Ctrl+K
                 </span>
-              </button>
-
-              {/* Chat Button (Visible on wide screens) */}
-              <button
-                onClick={() => handleTabChange('chat')}
-                className={`hidden 2xl:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold border rounded-md transition-all cursor-pointer shrink-0 ${
-                  activeTab === 'chat'
-                    ? appTheme === 'light'
-                      ? 'bg-red-50 text-red-600 border-red-200 shadow-xs'
-                      : 'bg-[#12161e] text-red-500 border-red-500/50 shadow-xs shadow-red-500/20'
-                    : appTheme === 'light'
-                      ? 'bg-white hover:bg-neutral-100 border-neutral-200 text-neutral-700'
-                      : 'bg-[#12161e] hover:bg-[#161c28] border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
-                }`}
-                title={lang === 'ru' ? 'Чат сообщества' : 'Community Chat'}
-              >
-                <MessageSquare size={13} className={activeTab === 'chat' ? 'text-red-600' : 'text-neutral-500'} />
-                <span>{lang === 'ru' ? 'Чат' : 'Chat'}</span>
-              </button>
-
-              {/* Quick Raid CTA button (Visible on extra-wide screens) */}
-              <button
-                onClick={() => handleTabChange('raid')}
-                className="hidden 2xl:flex items-center gap-1.5 px-3 py-1.5 text-xs font-black uppercase tracking-wider bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white rounded-md transition-all cursor-pointer shadow-sm shadow-red-600/30 hover:scale-[1.02] active:scale-[0.98] shrink-0"
-                title={lang === 'ru' ? 'Калькулятор рейдов' : 'Raid Calculator'}
-              >
-                <Flame size={13} className="fill-white/20 animate-pulse" />
-                <span>{lang === 'ru' ? 'Рейды' : 'Raid'}</span>
               </button>
 
               {/* Theme Toggle (Light / Dark) */}
