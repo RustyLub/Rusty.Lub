@@ -68,57 +68,62 @@ export async function sendWindowsNotification(
 }
 
 /**
- * Synthesizes a high-contrast tactical audio chime for Rust raid alarms and radar alerts
+ * Clean mobile-style notification tones for desktop and radar alerts.
+ * Sounds are synthesized locally; no external recordings are required.
  */
 export function playNotificationAudio(type: 'raid' | 'radar' | 'system' = 'raid') {
+  if (typeof window === 'undefined') return;
+
+  const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+  if (!AudioCtx) return;
+
+  let ctx: AudioContext | null = null;
   try {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContextClass) return;
+    ctx = new AudioCtx();
+    const audio = ctx;
+    const master = audio.createGain();
+    master.gain.value = 0.42;
+    master.connect(audio.destination);
 
-    const ctx = new AudioContextClass();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    const tone = (frequency: number, offset: number, duration: number, level = 0.2) => {
+      const oscillator = audio.createOscillator();
+      const envelope = audio.createGain();
+      const at = audio.currentTime + 0.025 + offset;
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(frequency, at);
+      envelope.gain.setValueAtTime(0.0001, at);
+      envelope.gain.exponentialRampToValueAtTime(level, at + 0.012);
+      envelope.gain.exponentialRampToValueAtTime(0.0001, at + duration);
+      oscillator.connect(envelope);
+      envelope.connect(master);
+      oscillator.start(at);
+      oscillator.stop(at + duration + 0.02);
+    };
 
     if (type === 'raid') {
-      // Alarm siren pattern (alternating 880Hz and 587Hz)
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.3);
-      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.35);
-      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.7);
-
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
-
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.85);
+      // Distinct paired alert, urgent without the abrasive synthetic siren.
+      [0, 0.22, 0.72, 0.94].forEach((offset, index) => {
+        tone(index % 2 === 0 ? 880 : 1174.66, offset, 0.18, 0.24);
+      });
     } else if (type === 'radar') {
-      // Submarine radar ping (high frequency pulse)
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(1200, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1600, ctx.currentTime + 0.15);
-
-      gain.gain.setValueAtTime(0.25, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.45);
+      // A subtle two-part ping with a short, clear decay.
+      tone(987.77, 0, 0.16, 0.18);
+      tone(1318.51, 0.11, 0.24, 0.16);
     } else {
-      // Gentle system ping
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(600, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
+      // Gentle double chime for general app events.
+      tone(880, 0, 0.19, 0.18);
+      tone(1174.66, 0.095, 0.28, 0.16);
+    }
 
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.3);
+    const delay = type === 'raid' ? 1300 : 550;
+    const closeContext = () => { void audio.close().catch(() => undefined); };
+    if (audio.state === 'suspended') {
+      void audio.resume().then(() => window.setTimeout(closeContext, delay)).catch(() => undefined);
+    } else {
+      window.setTimeout(closeContext, delay);
     }
   } catch (err) {
-    console.warn('Audio synthesis alert error:', err);
+    if (ctx && ctx.state !== 'closed') void ctx.close().catch(() => undefined);
+    console.warn('Audio notification playback error:', err);
   }
 }
