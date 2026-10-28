@@ -1940,6 +1940,7 @@ export default function App() {
           {activeTab === 'account' && (
             <motion.div
               key="account-page"
+              className="w-full space-y-5"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
@@ -1998,7 +1999,7 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2 }}
-              className="mx-auto w-full max-w-5xl space-y-6"
+              className="mx-auto w-full max-w-6xl space-y-8"
             >
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
@@ -2053,6 +2054,7 @@ export default function App() {
           {activeTab === 'terms' && (
             <motion.div
               key="terms-page"
+              className="w-full space-y-5"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
@@ -2119,6 +2121,7 @@ export default function App() {
           {activeTab === 'tools' && (
             <motion.div
               key="tools"
+              className="w-full min-w-0"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
@@ -2140,6 +2143,7 @@ export default function App() {
           {activeTab === 'guides' && (
             <motion.div
               key="guides"
+              className="w-full min-w-0"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
