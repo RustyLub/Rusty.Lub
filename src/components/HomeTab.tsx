@@ -490,8 +490,6 @@ export default function HomeTab({
           )}
         </div>
       </section>
-
-        </section>
       </details>
 
       {/* ── 5. SUGGESTIONS AND CONTACT FEEDBACK ── */}
