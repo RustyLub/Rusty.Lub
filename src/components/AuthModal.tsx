@@ -5,13 +5,7 @@ import {
   doc, 
   getDoc, 
   setDoc, 
-  query, 
-  collection, 
-  where, 
-  getDocs, 
-  deleteDoc,
-  db, 
-  auth
+  db
 } from '../firebase';
 import { CUSTOM_AVATARS } from '../customAvatars';
 import { CustomUser } from '../types';
