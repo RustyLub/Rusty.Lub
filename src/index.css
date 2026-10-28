@@ -516,9 +516,18 @@ body:not(.light-theme) main .grid { align-items: stretch; }
 
 html { scroll-behavior: smooth; }
 body {
-  background:
-    radial-gradient(ellipse at 50% -20%, rgba(242, 138, 36, .075), transparent 42%),
-    linear-gradient(180deg, #090b0e 0%, #0b0e12 55%, #080a0d 100%);
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  background-color: #08090c;
+  background-image:
+    linear-gradient(180deg, rgba(7, 10, 14, .68) 0%, rgba(7, 10, 14, .82) 55%, rgba(7, 10, 14, .91) 100%),
+    url("https://cdn.cloudflare.steamstatic.com/steam/apps/252490/library_hero.jpg"),
+    radial-gradient(ellipse at 50% -20%, rgba(242, 138, 36, .075), transparent 42%);
+  background-size: cover, cover, cover;
+  background-position: center top, center 15%, center top;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-attachment: fixed, fixed, fixed;
   color: var(--rl-text);
   font-feature-settings: "ss01" on, "cv11" on;
 }
@@ -528,12 +537,17 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: .17;
-  background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  opacity: .24;
+  background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
   background-size: 48px 48px;
-  mask-image: linear-gradient(to bottom, black, transparent 75%);
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
 }
+body.light-theme {
+  background: #f4f3f0 !important;
+  background-image: none !important;
+}
+body.light-theme::before { display: none; }
 ::selection { background: rgba(242, 138, 36, .32); color: #fff; }
 
 /* Global panels: less neon, stronger material, more consistent spacing. */
@@ -838,49 +852,39 @@ nav a, nav button, [role="tab"], .technical-label, .eyebrow {
 }
 
 
-/* RUSTY.LUB — atmospheric Rust backdrop (background only; UI behavior unchanged) */
+/* Live-site atmospheric background: keep the Rust artwork clearly visible behind the app UI. */
 body:not(.light-theme) {
-  background-color: #080b0e !important;
-  background-image:
-    /* Lighter overlay: let the Rust artwork remain clearly visible. */
-    linear-gradient(180deg, rgba(7, 10, 14, .38) 0%, rgba(7, 10, 14, .52) 42%, rgba(7, 10, 14, .72) 100%),
-    linear-gradient(90deg, rgba(5, 7, 10, .32) 0%, rgba(5, 7, 10, .06) 22%, rgba(5, 7, 10, .06) 78%, rgba(5, 7, 10, .32) 100%),
-    radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, .18), transparent 46rem),
-    url("https://cdn.cloudflare.steamstatic.com/steam/apps/252490/library_hero.jpg");
-  background-size: cover, cover, cover, cover;
-  background-position: center, center, center top, center top;
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
-  background-attachment: fixed, fixed, fixed, fixed;
+  background: #080b0e !important;
 }
-body:not(.light-theme) #root {
-  position: relative;
-  isolation: isolate;
-}
-body:not(.light-theme) main {
-  position: relative;
-  z-index: 0;
-}
-body:not(.light-theme) main::before {
+body:not(.light-theme)::before {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse at 8% 45%, rgba(242, 104, 24, .1), transparent 28rem),
-    radial-gradient(ellipse at 94% 62%, rgba(242, 104, 24, .09), transparent 30rem),
-    linear-gradient(180deg, transparent 0%, rgba(5, 8, 11, .12) 60%, rgba(5, 8, 11, .28) 100%);
+  background-image:
+    linear-gradient(180deg, rgba(7, 10, 14, .20) 0%, rgba(7, 10, 14, .38) 55%, rgba(7, 10, 14, .60) 100%),
+    linear-gradient(90deg, rgba(5, 7, 10, .22) 0%, rgba(5, 7, 10, .03) 30%, rgba(5, 7, 10, .03) 70%, rgba(5, 7, 10, .22) 100%),
+    radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, .20), transparent 46rem),
+    url("https://cdn.cloudflare.steamstatic.com/steam/apps/252490/library_hero.jpg");
+  background-size: cover, cover, cover, cover;
+  background-position: center, center, center top, center top;
+  background-repeat: no-repeat;
+}
+body:not(.light-theme) #root {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
 }
 @media (max-width: 768px) {
-  body:not(.light-theme) {
+  body:not(.light-theme)::before {
     background-image:
-      linear-gradient(180deg, rgba(7, 10, 14, .52) 0%, rgba(7, 10, 14, .66) 50%, rgba(7, 10, 14, .8) 100%),
-      radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, .14), transparent 30rem),
+      linear-gradient(180deg, rgba(7, 10, 14, .34) 0%, rgba(7, 10, 14, .52) 55%, rgba(7, 10, 14, .70) 100%),
+      radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, .16), transparent 30rem),
       url("https://cdn.cloudflare.steamstatic.com/steam/apps/252490/library_hero.jpg");
     background-position: center, center, center top;
-    background-attachment: scroll, scroll, scroll;
   }
 }
-body.light-theme {
-  background-image: none !important;
+body.light-theme::before {
+  content: none !important;
 }
