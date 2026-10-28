@@ -225,7 +225,7 @@ body.light-theme .page {
   border-radius: 0px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #ff2a4d;
+  background: #f97316;
 }
 
 body.light-theme ::-webkit-scrollbar-track {
@@ -235,7 +235,7 @@ body.light-theme ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
 }
 body.light-theme ::-webkit-scrollbar-thumb:hover {
-  background: #ff2a4d;
+  background: #ea580c;
 }
 
 .rust-hazard {
