@@ -494,3 +494,288 @@ body:not(.light-theme) main .grid { align-items: stretch; }
   body:not(.light-theme) main { padding-left: 12px !important; padding-right: 12px !important; }
   body:not(.light-theme) main section { border-radius: 14px; }
 }
+
+
+/* ============================================================
+   RUSTY.LUB — FULL INDUSTRIAL COMMAND REDESIGN
+   Layered on top of the existing UI so feature behavior remains intact.
+   ============================================================ */
+:root {
+  --rl-bg: #090b0e;
+  --rl-surface: #10151b;
+  --rl-surface-raised: #151c24;
+  --rl-surface-soft: #0d1116;
+  --rl-line: rgba(174, 190, 207, 0.14);
+  --rl-line-strong: rgba(174, 190, 207, 0.25);
+  --rl-orange: #f28a24;
+  --rl-orange-soft: rgba(242, 138, 36, 0.12);
+  --rl-text: #e9edf2;
+  --rl-muted: #8d99a7;
+  --rl-radius: 14px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background:
+    radial-gradient(ellipse at 50% -20%, rgba(242, 138, 36, .075), transparent 42%),
+    linear-gradient(180deg, #090b0e 0%, #0b0e12 55%, #080a0d 100%);
+  color: var(--rl-text);
+  font-feature-settings: "ss01" on, "cv11" on;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .17;
+  background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, black, transparent 75%);
+}
+::selection { background: rgba(242, 138, 36, .32); color: #fff; }
+
+/* Global panels: less neon, stronger material, more consistent spacing. */
+.tactical-card, .cyber-panel {
+  background: linear-gradient(145deg, rgba(22, 29, 37, .97), rgba(13, 17, 22, .98));
+  border-color: var(--rl-line);
+  border-radius: var(--rl-radius);
+  box-shadow: 0 12px 34px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.025);
+}
+.tactical-card:hover, .cyber-panel:hover {
+  border-color: rgba(242, 138, 36, .48);
+  box-shadow: 0 16px 38px rgba(0,0,0,.28), 0 0 0 1px rgba(242,138,36,.06);
+  transform: translateY(-2px);
+}
+.btn-orange, .cyber-button {
+  background: var(--rl-orange);
+  border: 1px solid rgba(255, 190, 120, .55);
+  border-radius: 8px;
+  box-shadow: 0 5px 18px rgba(242,138,36,.16);
+  letter-spacing: .035em;
+}
+.btn-orange:hover, .cyber-button:hover {
+  background: #ff9a38;
+  box-shadow: 0 8px 24px rgba(242,138,36,.23);
+}
+.btn-outline, .btn-ghost { border-radius: 8px; }
+.font-russo { letter-spacing: .025em; }
+
+/* Shared application shell and navigation. */
+header, nav {
+  scrollbar-width: thin;
+  scrollbar-color: #3a4652 transparent;
+}
+header {
+  backdrop-filter: blur(18px);
+}
+main {
+  isolation: isolate;
+}
+main > div, main > section, .page {
+  scroll-margin-top: 96px;
+}
+button, a, input, select, textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+button, a {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 160ms;
+}
+input, select, textarea {
+  border-radius: 8px;
+}
+:focus-visible {
+  outline: 2px solid rgba(242, 138, 36, .9);
+  outline-offset: 3px;
+}
+
+/* Home: new editorial command dashboard, with intentional content grouping. */
+.industrial-home {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, .85fr);
+  align-items: start;
+  gap: clamp(18px, 2vw, 28px);
+  padding-bottom: 48px;
+}
+.industrial-home > section:first-child {
+  grid-column: 1 / -1;
+  min-height: clamp(380px, 42vw, 560px);
+  border-radius: 18px;
+  border-color: rgba(180, 195, 210, .22);
+  box-shadow: 0 28px 70px rgba(0,0,0,.3);
+}
+.industrial-home > section:first-child > div:last-child {
+  padding: clamp(22px, 4vw, 58px);
+}
+.industrial-home > section:first-child h1 {
+  max-width: 920px;
+  font-size: clamp(2.8rem, 5.4vw, 5.5rem);
+  letter-spacing: -.035em;
+  line-height: .98;
+  text-wrap: balance;
+}
+.industrial-home > section:first-child h1 span {
+  color: #f5a14e;
+}
+.industrial-home > section:nth-of-type(2) {
+  grid-column: 1 / -1;
+  padding: clamp(18px, 2.2vw, 28px);
+  border: 1px solid var(--rl-line);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(17,22,28,.96), rgba(12,16,21,.94));
+}
+.industrial-home > section:nth-of-type(2) > h2,
+.industrial-home > section:nth-of-type(3) > h2,
+.industrial-home > section > h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  color: #a8b2bd;
+  font-size: 11px;
+  letter-spacing: .19em;
+}
+.industrial-home > section:nth-of-type(2) > h2::before,
+.industrial-home > section:nth-of-type(3) > h2::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  flex: 0 0 auto;
+  background: var(--rl-orange);
+}
+.industrial-home > section:nth-of-type(2) > div {
+  gap: 12px;
+}
+.industrial-home > section:nth-of-type(2) > div > div {
+  min-height: 126px;
+  border-radius: 12px;
+  border-color: var(--rl-line);
+  background: linear-gradient(145deg, #161d25, #10151b);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}
+.industrial-home > section:nth-of-type(2) > div > div:hover {
+  border-color: rgba(242,138,36,.55);
+  background: linear-gradient(145deg, #1b242d, #11171d);
+}
+.industrial-home > section:nth-of-type(3) {
+  grid-column: 1 / -1;
+  border: 1px solid var(--rl-line);
+  border-radius: 16px;
+  padding: clamp(18px, 2.2vw, 28px);
+  background: rgba(13,17,22,.8);
+}
+.industrial-home > section:nth-of-type(4),
+.industrial-home > section:nth-of-type(5) {
+  min-width: 0;
+  height: 100%;
+  border-radius: 16px;
+  border-color: var(--rl-line);
+  background: linear-gradient(145deg, rgba(18,24,31,.98), rgba(12,16,21,.98));
+  box-shadow: 0 14px 36px rgba(0,0,0,.16);
+}
+.industrial-home > section:nth-of-type(6) {
+  grid-column: 1 / -1;
+  border-color: var(--rl-line);
+}
+.industrial-home > section:nth-of-type(7) {
+  grid-column: 1 / -1;
+  border-radius: 16px;
+  border-color: rgba(242,138,36,.28);
+  background: linear-gradient(145deg, rgba(19,25,33,.98), rgba(12,16,21,.98));
+}
+.industrial-home h2, .industrial-home h3 {
+  text-wrap: balance;
+}
+.industrial-home p {
+  text-wrap: pretty;
+}
+.industrial-home a, .industrial-home button {
+  cursor: pointer;
+}
+.industrial-home button:focus-visible, .industrial-home a:focus-visible {
+  outline-offset: 4px;
+}
+
+/* Cleaner card surfaces across tools, knowledge, account, and utility pages. */
+main .rounded-2xl.border, main .rounded-xl.border {
+  border-color: var(--rl-line);
+}
+main .bg-\[\#12161e\], main .bg-\[\#10161d\], main .bg-\[\#111820\] {
+  background-color: var(--rl-surface);
+}
+main .border-\[\#1e2633\], main .border-white\/10 {
+  border-color: var(--rl-line);
+}
+main .text-\[\#8b95a8\], main .text-zinc-400 {
+  color: #9aa5b1;
+}
+
+/* Keep the existing light theme usable instead of forcing the new dark palette on it. */
+body.light-theme {
+  background: #f1f2f3 !important;
+  color: #1a2026 !important;
+}
+body.light-theme::before { display: none; }
+body.light-theme .industrial-home > section:nth-of-type(2),
+body.light-theme .industrial-home > section:nth-of-type(3),
+body.light-theme .industrial-home > section:nth-of-type(4),
+body.light-theme .industrial-home > section:nth-of-type(5) {
+  background: #fff;
+  border-color: rgba(25,35,45,.12);
+  box-shadow: 0 12px 32px rgba(20,30,40,.06);
+}
+body.light-theme .industrial-home > section:nth-of-type(2) > div > div {
+  background: #f8f9fa;
+  border-color: rgba(25,35,45,.12);
+}
+body.light-theme .industrial-home > section:nth-of-type(2) > div > div h3 {
+  color: #20262d;
+}
+body.light-theme .industrial-home > section:nth-of-type(2) > div > div p {
+  color: #68737f;
+}
+
+@media (max-width: 900px) {
+  .industrial-home {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .industrial-home > section:first-child,
+  .industrial-home > section:nth-of-type(2),
+  .industrial-home > section:nth-of-type(3),
+  .industrial-home > section:nth-of-type(6),
+  .industrial-home > section:nth-of-type(7) {
+    grid-column: 1;
+  }
+  .industrial-home > section:first-child {
+    min-height: 420px;
+  }
+  .industrial-home > section:nth-of-type(4),
+  .industrial-home > section:nth-of-type(5) {
+    grid-column: 1;
+  }
+}
+@media (max-width: 560px) {
+  .industrial-home > section:first-child {
+    min-height: 480px;
+    border-radius: 12px;
+  }
+  .industrial-home > section:first-child h1 {
+    font-size: clamp(2.55rem, 12vw, 3.6rem);
+  }
+  .industrial-home > section:first-child > div:last-child {
+    padding: 22px 18px;
+  }
+  .industrial-home > section:nth-of-type(2) {
+    padding: 16px;
+  }
+  .industrial-home > section:nth-of-type(2) > div > div {
+    min-height: 110px;
+    padding: 14px;
+  }
+  .industrial-home > section:nth-of-type(2) > div > div h3 {
+    font-size: 12px;
+  }
+}
