@@ -99,8 +99,8 @@ export default function HomeTab({
         : 'Track enemy player online status and server histories.',
       tag: 'VIP',
       isLocked: false,
-      color: 'border-amber-200/80 hover:border-amber-500',
-      badgeClass: 'bg-amber-500 text-black font-extrabold',
+      color: 'border-orange-200/80 hover:border-orange-500',
+      badgeClass: 'bg-orange-500 text-black font-extrabold',
     }] : []),
     ...(currentUser && isOwner ? [{
       id: 'rustplus',
@@ -124,8 +124,8 @@ export default function HomeTab({
           : 'Site administration, user database management, and news publisher.',
         tag: 'ADMIN',
         isLocked: false,
-        color: 'border-purple-200/80 hover:border-purple-500',
-        badgeClass: 'bg-purple-600 text-white font-extrabold',
+        color: 'border-orange-200/80 hover:border-orange-500',
+        badgeClass: 'bg-orange-600 text-white font-extrabold',
       },
       {
         id: 'icons',
@@ -469,7 +469,7 @@ export default function HomeTab({
                             {server.players} / {server.maxPlayers}
                           </div>
                           {server.queued > 0 && (
-                            <div className="text-[10px] text-amber-600">
+                            <div className="text-[10px] text-orange-400">
                               +{server.queued} queue
                             </div>
                           )}
@@ -623,7 +623,7 @@ export default function HomeTab({
                     <span className="px-1.5 py-0.5 bg-orange-500/10 text-orange-500 text-[8px] font-bold rounded">
                       [EAC]
                     </span>
-                    <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 border border-amber-200/80 text-[8px] font-mono font-black rounded">
+                    <span className="px-1.5 py-0.5 bg-orange-950/30 text-orange-400 border border-orange-200/80 text-[8px] font-mono font-black rounded">
                       13 000+ {lang === 'ru' ? 'ЧАСОВ' : 'HOURS'}
                     </span>
                   </div>
@@ -645,7 +645,7 @@ export default function HomeTab({
                   className="flex-1 py-1.5 bg-neutral-900 hover:bg-black text-white text-[10px] font-bold uppercase text-center rounded-lg flex items-center justify-center gap-1 transition-all shadow-xs cursor-pointer"
                   title={lang === 'ru' ? 'Открыть профиль Steam' : 'Open Steam Profile'}
                 >
-                  <ExternalLink size={10} className="text-amber-400" />
+                  <ExternalLink size={10} className="text-orange-400" />
                   <span>Steam</span>
                 </a>
                 <a
@@ -734,10 +734,10 @@ export default function HomeTab({
           </div>
 
           {/* Widget 6: Twitch Pro-Tip */}
-          <div className="bg-[#12161e] border border-[#1e2633] rounded-2xl p-5 shadow-[0_2px_12px_rgba(0,0,0,0.01)] flex flex-col justify-between group hover:border-purple-500/40 transition-all">
+          <div className="bg-[#12161e] border border-[#1e2633] rounded-2xl p-5 shadow-[0_2px_12px_rgba(0,0,0,0.01)] flex flex-col justify-between group hover:border-orange-500/40 transition-all">
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="px-2 py-0.5 bg-purple-50 text-purple-600 text-[9px] font-bold uppercase tracking-wider rounded">
+                <span className="px-2 py-0.5 bg-orange-950/30 text-orange-600 text-[9px] font-bold uppercase tracking-wider rounded">
                   {lang === 'ru' ? 'СОВЕТ ИГРОКАМ' : 'PRO-TIP'}
                 </span>
                 <span className="text-[9px] font-mono text-[#8b95a8]">@tv_cheater</span>
@@ -756,7 +756,7 @@ export default function HomeTab({
                 href="https://www.twitch.tv/tv_cheater"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold uppercase tracking-widest text-center rounded-lg flex items-center justify-center gap-1.5"
+                className="w-full py-2 bg-orange-600 hover:bg-orange-700 text-white text-[10px] font-bold uppercase tracking-widest text-center rounded-lg flex items-center justify-center gap-1.5"
               >
                 <Twitch size={11} />
                 <span>{lang === 'ru' ? 'ОТКРЫТЬ TWITCH' : 'WATCH TWITCH'}</span>
@@ -769,8 +769,8 @@ export default function HomeTab({
 
       {/* ── 7. TWITCH LIVE EMBED IF ACTIVE ── */}
       {twitchSettings && (twitchSettings.isManualLive || twitchSettings.isLiveFromApi) && (
-        <section className="bg-[#12161e] border border-purple-200 rounded-2xl p-6 shadow-[0_4px_25px_rgba(145,70,255,0.04)] relative overflow-hidden text-left">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-purple-600" />
+        <section className="bg-[#12161e] border border-orange-200 rounded-2xl p-6 shadow-[0_4px_25px_rgba(145,70,255,0.04)] relative overflow-hidden text-left">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-orange-600" />
           <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
             <div className="space-y-3 flex-1">
               <div className="flex items-center gap-2">
@@ -782,7 +782,7 @@ export default function HomeTab({
                   {lang === 'ru' ? 'ПРЯМОЙ ЭФИР' : 'LIVE BROADCAST'}
                 </span>
                 <span className="text-neutral-300 font-mono text-[9px]">•</span>
-                <span className="text-[9px] font-bold uppercase tracking-widest text-purple-600 font-mono">
+                <span className="text-[9px] font-bold uppercase tracking-widest text-orange-600 font-mono">
                   TWITCH
                 </span>
               </div>
@@ -792,7 +792,7 @@ export default function HomeTab({
                   {twitchSettings.streamTitle || twitchSettings.apiTitle || (lang === 'ru' ? 'НАЧАЛСЯ СТРИМ!' : 'STREAM IS LIVE!')}
                 </h3>
                 <p className="text-xs text-[#aab4c5]">
-                  {lang === 'ru' ? 'Канал:' : 'Channel:'} <span className="text-purple-600 font-bold hover:underline cursor-pointer" onClick={() => window.open(`https://twitch.tv/${twitchSettings.channelName}`, '_blank')}>{twitchSettings.channelName}</span>
+                  {lang === 'ru' ? 'Канал:' : 'Channel:'} <span className="text-orange-600 font-bold hover:underline cursor-pointer" onClick={() => window.open(`https://twitch.tv/${twitchSettings.channelName}`, '_blank')}>{twitchSettings.channelName}</span>
                 </p>
               </div>
 
@@ -801,7 +801,7 @@ export default function HomeTab({
                   href={`https://twitch.tv/${twitchSettings.channelName}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all cursor-pointer items-center gap-1.5"
+                  className="inline-flex px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all cursor-pointer items-center gap-1.5"
                 >
                   <Twitch size={11} />
                   <span>{lang === 'ru' ? 'ПЕРЕЙТИ НА КАНАЛ' : 'OPEN TWITCH CHANNEL'}</span>
