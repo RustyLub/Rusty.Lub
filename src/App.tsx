@@ -1976,7 +1976,7 @@ export default function App() {
                   onToast={(msg, type) => {
                     const id = Math.random().toString(36).substring(2, 9);
                     setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : 'success' }]);
-                    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id), 3000);
+                    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
                   }}
                 />
               ) : (
