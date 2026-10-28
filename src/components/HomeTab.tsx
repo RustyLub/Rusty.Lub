@@ -160,10 +160,9 @@ export default function HomeTab({
 
         <div className="flex w-full items-center p-5 sm:p-8 lg:p-12 xl:p-16">
           <div className="max-w-4xl space-y-6 sm:space-y-8">
-            <div className="inline-flex max-w-full items-center gap-3 border-l-2 border-orange-500 bg-black/35 px-3 py-2 backdrop-blur-sm">
-              <img src={logoFull} alt="Rusty.Lub logo" className="h-8 w-auto max-w-[112px] object-contain" />
-              <span className="h-5 w-px bg-orange-500/50" />
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-orange-200 sm:text-xs">Rust community hub</span>
+            <div className="inline-flex max-w-full flex-col items-start gap-2 border-l-2 border-orange-500 bg-black/35 px-4 py-3 backdrop-blur-sm sm:gap-3 sm:px-5 sm:py-4">
+              <img src={logoFull} alt="Rusty.Lub logo" className="h-auto w-[220px] max-w-full object-contain object-left sm:w-[300px] lg:w-[340px]" />
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-orange-200 sm:text-xs">Rust community hub</span>
             </div>
 
             <div className="space-y-4">
