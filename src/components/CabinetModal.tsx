@@ -109,7 +109,8 @@ export default function CabinetModal({
   onAvatarChange, 
   onToast,
   onOpenTab,
-  onLoadRaidInCalc
+  onLoadRaidInCalc,
+  pageMode = false
 }: CabinetModalProps) {
   const [activeTab, setActiveTab] = useState<'profile' | 'history' | 'raids' | 'binds' | 'favorites' | 'applications' | 'friends' | 'admin_users' | 'admin_site' | 'vip' | 'feedback'>('profile');
 
@@ -962,13 +963,13 @@ export default function CabinetModal({
   const selectedTheme = PROFILE_THEMES.find(t => t.id === customTheme) || PROFILE_THEMES[0];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div className={pageMode ? "w-full flex justify-center py-2 sm:py-4" : "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"}>
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="w-full max-w-6xl bg-[#14171e] border-2 border-[#2a2f3b] rounded-none overflow-hidden shadow-2xl rust-metal-pattern flex flex-col md:flex-row h-[95vh] md:h-[760px] relative cabinet-modal-container"
+        className={`w-full max-w-6xl bg-[#14171e] border-2 border-[#2a2f3b] rounded-none overflow-hidden shadow-2xl rust-metal-pattern flex flex-col md:flex-row ${pageMode ? "min-h-[75vh]" : "h-[95vh] md:h-[760px]"} relative cabinet-modal-container`}
       >
         {/* Tactical Corner Brackets */}
         <div className="rust-bracket-tl" />
