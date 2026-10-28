@@ -19,27 +19,55 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 20
+          bun-version: latest
 
-      - name: Install dependencies
-        run: npm install --no-package-lock
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
 
       - name: Build website
-        run: npm run build
+        run: bun run build
         env:
           NODE_ENV: production
           VITE_BASE: "./"
 
-      - name: Deploy dist to REG.RU via FTP
+      - name: Verify build output
+        run: test -s dist/index.html
+
+      - name: Upload build artifact for recovery
+        uses: actions/upload-artifact@v4
+        with:
+          name: rusty-lub-static-site
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Check deployment configuration
+        id: deploy-config
+        shell: bash
+        env:
+          FTP_SERVER: ${{ secrets.REG_RU_FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.REG_RU_FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.REG_RU_FTP_PASSWORD }}
+          REMOTE_DIR: ${{ secrets.REG_RU_REMOTE_DIR }}
+        run: |
+          if [[ -n "$FTP_SERVER" && -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" && -n "$REMOTE_DIR" ]]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "FTP deployment skipped: one or more required repository secrets are not configured. The build artifact is available."
+          fi
+
+      - name: Deploy dist to REG.RU
+        if: steps.deploy-config.outputs.configured == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.REG_RU_FTP_SERVER }}
           username: ${{ secrets.REG_RU_FTP_USERNAME }}
           password: ${{ secrets.REG_RU_FTP_PASSWORD }}
-          protocol: ftp
+          protocol: ftps
           port: 21
           local-dir: dist/
           server-dir: ${{ secrets.REG_RU_REMOTE_DIR }}
