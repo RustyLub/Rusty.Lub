@@ -1309,14 +1309,14 @@ export default function App() {
           ? 'bg-white/95 border-neutral-200/90 shadow-[0_2px_15px_rgba(0,0,0,0.04)]'
           : 'bg-[#08090c]/95 border-[#1e2633] shadow-[0_4px_25px_rgba(0,0,0,0.8)]'
       }`}>
-        <div className="w-full max-w-[1560px] mx-auto px-3 sm:px-5 lg:px-8 overflow-hidden">
-          <div className="flex items-center justify-between h-14 sm:h-16 gap-1.5 sm:gap-3 w-full min-w-0">
+        <div className="w-full max-w-[1560px] mx-auto px-3 sm:px-5 lg:px-8">
+          <div className="flex min-h-14 sm:min-h-16 h-auto flex-wrap items-center justify-between gap-x-3 gap-y-2 py-2 w-full min-w-0">
             {/* Left: Brand Logo + Primary Nav */}
-            <div className="flex items-center gap-2 sm:gap-4 min-w-0 shrink">
+            <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-4">
               {/* Logo */}
               <button 
                 onClick={() => handleTabChange('home')}
-                className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 group text-left cursor-pointer"
+                className="flex min-w-0 items-center gap-1.5 sm:gap-2.5 shrink-0 group text-left cursor-pointer"
                 title="Rusty.Lub - Home"
               >
                 <img
@@ -1358,7 +1358,7 @@ export default function App() {
               </button>
 
               {/* Desktop Nav Links - Extra Large Screens (>= 1536px) */}
-              <div className={`hidden 2xl:flex items-center gap-1 border-l pl-3 ${
+              <div className={`hidden 2xl:flex flex-wrap items-center gap-1 border-l pl-3 ${
                 appTheme === 'light' ? 'border-neutral-200' : 'border-[#1e2633]'
               }`}>
                 {[
@@ -1394,7 +1394,7 @@ export default function App() {
               </div>
 
               {/* Compact Nav Links - XL Screens (1280px - 1535px) */}
-              <div className={`hidden xl:flex 2xl:hidden items-center gap-1 border-l pl-2.5 ${
+              <div className={`hidden xl:flex 2xl:hidden flex-wrap items-center gap-1 border-l pl-2.5 ${
                 appTheme === 'light' ? 'border-neutral-200' : 'border-[#1e2633]'
               }`}>
                 {[
@@ -1426,7 +1426,7 @@ export default function App() {
             </div>
 
             {/* Right: Actions, Search, Theme, Quick Raid, Cabinet & Lang */}
-            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            <div className="flex max-w-full flex-wrap items-center justify-end gap-1 sm:gap-2">
               {/* HUD Overlay Quick Trigger */}
               <button
                 onClick={() => setQuickOverlayOpen(prev => !prev)}
