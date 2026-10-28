@@ -516,9 +516,18 @@ body:not(.light-theme) main .grid { align-items: stretch; }
 
 html { scroll-behavior: smooth; }
 body {
-  background:
-    radial-gradient(ellipse at 50% -20%, rgba(242, 138, 36, .075), transparent 42%),
-    linear-gradient(180deg, #090b0e 0%, #0b0e12 55%, #080a0d 100%);
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  background-color: #08090c;
+  background-image:
+    linear-gradient(180deg, rgba(7, 10, 14, .68) 0%, rgba(7, 10, 14, .82) 55%, rgba(7, 10, 14, .91) 100%),
+    url("https://cdn.cloudflare.steamstatic.com/steam/apps/252490/library_hero.jpg"),
+    radial-gradient(ellipse at 50% -20%, rgba(242, 138, 36, .075), transparent 42%);
+  background-size: cover, cover, cover;
+  background-position: center top, center 15%, center top;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-attachment: fixed, fixed, fixed;
   color: var(--rl-text);
   font-feature-settings: "ss01" on, "cv11" on;
 }
@@ -528,12 +537,17 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: .17;
-  background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  opacity: .24;
+  background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
   background-size: 48px 48px;
-  mask-image: linear-gradient(to bottom, black, transparent 75%);
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
 }
+body.light-theme {
+  background: #f4f3f0 !important;
+  background-image: none !important;
+}
+body.light-theme::before { display: none; }
 ::selection { background: rgba(242, 138, 36, .32); color: #fff; }
 
 /* Global panels: less neon, stronger material, more consistent spacing. */
