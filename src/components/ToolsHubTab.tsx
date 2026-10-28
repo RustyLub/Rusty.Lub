@@ -97,8 +97,8 @@ export default function ToolsHubTab({
         : 'Track enemy player online status and server histories.',
       tag: 'VIP',
       isLocked: false,
-      badgeColor: 'bg-amber-500 text-black font-extrabold',
-      borderClass: 'border-amber-200/80 hover:border-amber-500'
+      badgeColor: 'bg-orange-500 text-black font-extrabold',
+      borderClass: 'border-orange-200/80 hover:border-orange-500'
     }] : []),
     ...(currentUser && isOwner ? [{
       id: 'rustplus',
@@ -109,8 +109,8 @@ export default function ToolsHubTab({
         : 'Control smart devices, automatic sam sites, and raid sirens.',
       tag: 'OWNER',
       isLocked: false,
-      badgeColor: 'bg-red-600 text-white font-extrabold',
-      borderClass: 'border-red-200/80 hover:border-red-500'
+      badgeColor: 'bg-orange-500 text-white font-extrabold',
+      borderClass: 'border-orange-500/30 hover:border-orange-500'
     }] : []),
     ...(currentUser && isAdmin ? [
       {
@@ -122,8 +122,8 @@ export default function ToolsHubTab({
           : 'Site administration, user database management, and news publisher.',
         tag: 'ADMIN',
         isLocked: false,
-        badgeColor: 'bg-purple-600 text-white font-extrabold',
-        borderClass: 'border-purple-200/80 hover:border-purple-500'
+        badgeColor: 'bg-orange-600 text-white font-extrabold',
+        borderClass: 'border-orange-200/80 hover:border-orange-500'
       },
       {
         id: 'icons',
@@ -144,14 +144,14 @@ export default function ToolsHubTab({
     <div className="space-y-8 text-left pb-16">
       {/* Page Header */}
       <div className="space-y-1">
-        <div className="text-xs font-bold uppercase tracking-wider text-red-600 font-mono flex items-center gap-1.5">
+        <div className="text-xs font-bold uppercase tracking-wider text-orange-500 font-mono flex items-center gap-1.5">
           <Sparkles size={12} className="animate-pulse" />
           <span>{lang === 'ru' ? 'ПОРТАЛ ИНСТРУМЕНТОВ' : 'TACTICAL TOOLS PORTAL'}</span>
         </div>
-        <h1 className={`text-3xl sm:text-4xl font-black uppercase ${appTheme === 'light' ? 'text-neutral-900' : 'text-white'}`}>
+        <h1 className={`text-3xl sm:text-4xl font-black uppercase ${appTheme === 'light' ? 'text-[#eef2f7]' : 'text-white'}`}>
           {lang === 'ru' ? 'Калькуляторы и утилиты' : 'Calculators & Utilities'}
         </h1>
-        <p className={`text-sm max-w-xl font-medium ${appTheme === 'light' ? 'text-neutral-500' : 'text-zinc-400'}`}>
+        <p className={`text-sm max-w-xl font-medium ${appTheme === 'light' ? 'text-[#8b95a8]' : 'text-zinc-400'}`}>
           {lang === 'ru' 
             ? 'Полный набор тактических инструментов для оптимизации вайпа и экономии времени.' 
             : 'Complete set of tactical utilities and calculators updated for the current patch.'}
@@ -160,7 +160,7 @@ export default function ToolsHubTab({
 
       {/* SECTION 1: PUBLIC CALCULATORS */}
       <div className="space-y-4">
-        <h2 className={`text-xs font-black uppercase tracking-widest font-mono border-b pb-2 ${appTheme === 'light' ? 'text-neutral-400 border-neutral-200' : 'text-zinc-400 border-[#2a2f3b]'}`}>
+        <h2 className={`text-xs font-black uppercase tracking-widest font-mono border-b pb-2 ${appTheme === 'light' ? 'text-[#8b95a8] border-[#1e2633]' : 'text-zinc-400 border-[#2a2f3b]'}`}>
           {lang === 'ru' ? '⚡ Доступные калькуляторы' : '⚡ Public Utilities'}
         </h2>
 
@@ -169,9 +169,9 @@ export default function ToolsHubTab({
             <div
               key={tool.id}
               onClick={() => onNavigate(tool.id)}
-              className={`border p-5 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.01)] hover:border-red-500 hover:scale-105 hover:shadow-xl transition-all duration-300 ease-out cursor-pointer flex flex-col justify-between group h-full will-change-transform ${
+              className={`border p-5 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.01)] hover:border-orange-500 hover:scale-105 hover:shadow-xl transition-all duration-300 ease-out cursor-pointer flex flex-col justify-between group h-full will-change-transform ${
                 appTheme === 'light'
-                  ? 'bg-white border-neutral-200 text-neutral-900'
+                  ? 'bg-[#12161e] border-[#1e2633] text-[#eef2f7]'
                   : 'bg-[#14171e] border-[#2a2f3b] text-white'
               }`}
             >
@@ -182,20 +182,20 @@ export default function ToolsHubTab({
                   </div>
                   {tool.tag && (
                     <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide ${
-                      tool.tag === 'Hot' ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'
+                      tool.tag === 'Hot' ? 'bg-orange-500 text-white' : 'bg-blue-600 text-white'
                     }`}>
                       {tool.tag}
                     </span>
                   )}
                 </div>
-                <h3 className={`text-base font-bold transition-colors mb-1.5 ${appTheme === 'light' ? 'text-neutral-900 group-hover:text-red-600' : 'text-white group-hover:text-red-500'}`}>
+                <h3 className={`text-base font-bold transition-colors mb-1.5 ${appTheme === 'light' ? 'text-[#eef2f7] group-hover:text-orange-500' : 'text-white group-hover:text-red-500'}`}>
                   {tool.title}
                 </h3>
-                <p className={`text-xs leading-relaxed ${appTheme === 'light' ? 'text-neutral-500' : 'text-zinc-400'}`}>
+                <p className={`text-xs leading-relaxed ${appTheme === 'light' ? 'text-[#8b95a8]' : 'text-zinc-400'}`}>
                   {tool.desc}
                 </p>
               </div>
-              <div className={`mt-4 pt-3 border-t flex items-center justify-between text-xs font-semibold text-red-600 transition-transform duration-200 group-hover:translate-x-0.5 ${appTheme === 'light' ? 'border-neutral-100' : 'border-[#2a2f3b]'}`}>
+              <div className={`mt-4 pt-3 border-t flex items-center justify-between text-xs font-semibold text-orange-500 transition-transform duration-200 group-hover:translate-x-0.5 ${appTheme === 'light' ? 'border-neutral-100' : 'border-[#2a2f3b]'}`}>
                 <span>{lang === 'ru' ? 'Открыть утилиту' : 'Open utility'}</span>
                 <ChevronRight size={14} />
               </div>
@@ -207,7 +207,7 @@ export default function ToolsHubTab({
       {/* SECTION 2: SPECIAL ACCESS (ONLY VISIBLE IF AUTHORIZED WITH SPECIAL ACCESS) */}
       {hasSpecialAccess && visibleSpecialTools.length > 0 && (
         <div className="space-y-4 pt-4">
-          <h2 className={`text-xs font-black uppercase tracking-widest font-mono border-b pb-2 flex items-center gap-1.5 ${appTheme === 'light' ? 'text-neutral-400 border-neutral-200' : 'text-zinc-400 border-[#2a2f3b]'}`}>
+          <h2 className={`text-xs font-black uppercase tracking-widest font-mono border-b pb-2 flex items-center gap-1.5 ${appTheme === 'light' ? 'text-[#8b95a8] border-[#1e2633]' : 'text-zinc-400 border-[#2a2f3b]'}`}>
             <Lock size={12} className="text-red-500" />
             <span>{lang === 'ru' ? '🔒 Особый Доступ' : '🔒 Special Access Gated'}</span>
           </h2>
@@ -218,7 +218,7 @@ export default function ToolsHubTab({
                 key={tool.id}
                 onClick={() => onNavigate(tool.id)}
                 className={`border p-5 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.01)] hover:shadow-xl cursor-pointer group flex flex-col justify-between transition-all duration-300 ease-out hover:scale-105 will-change-transform ${tool.borderClass} ${
-                  appTheme === 'light' ? 'bg-white text-neutral-900' : 'bg-[#14171e] text-white'
+                  appTheme === 'light' ? 'bg-[#12161e] text-[#eef2f7]' : 'bg-[#14171e] text-white'
                 }`}
               >
                 <div>
@@ -234,16 +234,16 @@ export default function ToolsHubTab({
                     </div>
                   </div>
                   
-                  <h3 className={`text-base font-bold transition-colors mb-1.5 ${appTheme === 'light' ? 'text-neutral-900 group-hover:text-red-600' : 'text-white group-hover:text-red-500'}`}>
+                  <h3 className={`text-base font-bold transition-colors mb-1.5 ${appTheme === 'light' ? 'text-[#eef2f7] group-hover:text-orange-500' : 'text-white group-hover:text-red-500'}`}>
                     {tool.title}
                   </h3>
                   
-                  <p className={`text-xs leading-relaxed ${appTheme === 'light' ? 'text-neutral-500' : 'text-zinc-400'}`}>
+                  <p className={`text-xs leading-relaxed ${appTheme === 'light' ? 'text-[#8b95a8]' : 'text-zinc-400'}`}>
                     {tool.desc}
                   </p>
                 </div>
                 
-                <div className={`mt-4 pt-3 border-t flex items-center justify-between text-xs font-semibold text-red-600 transition-transform duration-200 group-hover:translate-x-0.5 ${appTheme === 'light' ? 'border-neutral-100' : 'border-[#2a2f3b]'}`}>
+                <div className={`mt-4 pt-3 border-t flex items-center justify-between text-xs font-semibold text-orange-500 transition-transform duration-200 group-hover:translate-x-0.5 ${appTheme === 'light' ? 'border-neutral-100' : 'border-[#2a2f3b]'}`}>
                   <span>{lang === 'ru' ? 'Открыть утилиту' : 'Open utility'}</span>
                   <ChevronRight size={14} />
                 </div>

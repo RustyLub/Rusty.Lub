@@ -108,9 +108,9 @@ export const SURVIVOR_AVATARS = [
     tagClass: 'bg-[#4f5e71]/20 border-[#4f5e71]/40 text-[#a0aec0]'
   },
   ...CUSTOM_AVATARS.map((avatar) => {
-    let color = '#cd412b';
-    let borderClass = 'border-[#cd412b]/40 bg-[#cd412b]/10 text-red-100';
-    let tagClass = 'bg-[#cd412b]/20 border-[#cd412b]/40 text-[#cd412b]';
+    let color = '#f97316';
+    let borderClass = 'border-[#f97316]/40 bg-[#f97316]/10 text-red-100';
+    let tagClass = 'bg-[#f97316]/20 border-[#f97316]/40 text-[#f97316]';
 
     if (avatar.id === 'builder') {
       color = '#eab308';
@@ -154,8 +154,8 @@ export const SURVIVOR_AVATARS = [
       tagClass = 'bg-slate-500/20 border-slate-500/40 text-slate-400';
     } else if (avatar.id === 'santa_girl') {
       color = '#ef4444';
-      borderClass = 'border-red-500/40 bg-red-500/10 text-red-100';
-      tagClass = 'bg-red-500/20 border-red-500/40 text-red-400';
+      borderClass = 'border-orange-500/40 bg-orange-500/10 text-red-100';
+      tagClass = 'bg-orange-500/20 border-orange-500/40 text-orange-400';
     } else if (avatar.id === 'putin_rust') {
       color = '#eab308';
       borderClass = 'border-yellow-500/40 bg-yellow-500/10 text-yellow-100';
@@ -171,7 +171,7 @@ export const SURVIVOR_AVATARS = [
     } else if (avatar.id === 'rust_logo_avatar') {
       color = '#dc2626';
       borderClass = 'border-red-600/40 bg-red-600/10 text-red-100';
-      tagClass = 'bg-red-600/20 border-red-600/40 text-red-500';
+      tagClass = 'bg-red-600/20 border-red-600/40 text-orange-500';
     } else if (avatar.id === 'wolf_sunset') {
       color = '#f97316';
       borderClass = 'border-amber-600/40 bg-amber-600/10 text-amber-100';
@@ -939,7 +939,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
           {/* Guild Header */}
           <div className="h-12 border-b border-[#1f2023] flex items-center justify-between px-4 font-bold text-white shadow-sm bg-[#2b2d31] hover:bg-zinc-700/20 cursor-pointer transition-colors">
             <span className="text-xs tracking-wider flex items-center gap-1.5 font-sans font-black">
-              <span className="text-red-500">☢</span> RUST SURVIVORS
+              <span className="text-orange-500">☢</span> RUST SURVIVORS
             </span>
             <ChevronDown size={14} className="text-zinc-400" />
           </div>
@@ -966,7 +966,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                     <Hash size={15} className={activeChannel === 'rust-russian' ? 'text-zinc-200' : 'text-zinc-400'} />
                     <span>rust-russian</span>
                   </span>
-                  <span className="text-[9px] text-red-400 font-bold tracking-wider font-mono bg-red-500/10 px-1 rounded">RU</span>
+                  <span className="text-[9px] text-orange-400 font-bold tracking-wider font-mono bg-orange-500/10 px-1 rounded">RU</span>
                 </button>
 
                 {/* English Channel */}
@@ -1112,7 +1112,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
 
               <button
                 onClick={leaveVoiceChannel}
-                className="p-1.5 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors rounded cursor-pointer"
+                className="p-1.5 hover:bg-orange-500/20 text-orange-400 hover:text-red-300 transition-colors rounded cursor-pointer"
                 title={lang === 'ru' ? 'Отключиться' : 'Disconnect'}
               >
                 <PhoneOff size={14} />
@@ -1175,7 +1175,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                 ) : (
                   <button
                     onClick={handleLogout}
-                    className="p-1 hover:bg-red-500/10 hover:text-red-400 transition-all rounded cursor-pointer"
+                    className="p-1 hover:bg-orange-500/10 hover:text-orange-400 transition-all rounded cursor-pointer"
                     title={t.logoutBtn[lang]}
                   >
                     <LogOut size={14} />
@@ -1232,7 +1232,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
               {user && (
                 <button
                   onClick={handleLogout}
-                  className="sm:hidden p-1 bg-zinc-800 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition-all rounded cursor-pointer"
+                  className="sm:hidden p-1 bg-zinc-800 hover:bg-orange-500/20 text-zinc-400 hover:text-orange-400 transition-all rounded cursor-pointer"
                   title={t.logoutBtn[lang]}
                 >
                   <LogOut size={13} />
@@ -1254,7 +1254,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
             >
               <Hash size={13} className={activeChannel === 'rust-russian' ? 'text-zinc-200' : 'text-zinc-400'} />
               <span>rust-russian</span>
-              <span className="text-[8px] text-red-400 font-extrabold bg-red-500/10 px-0.5 rounded ml-0.5 font-mono">RU</span>
+              <span className="text-[8px] text-orange-400 font-extrabold bg-orange-500/10 px-0.5 rounded ml-0.5 font-mono">RU</span>
             </button>
 
             {/* English Channel Button */}
@@ -1462,13 +1462,13 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                             className="text-[13px] font-bold cursor-pointer hover:underline flex items-center gap-1"
                           >
                             {usersMap[msg.uid]?.clanTag && (
-                              <span className="text-[#cd412b] font-black font-mono">
+                              <span className="text-[#f97316] font-black font-mono">
                                 [{usersMap[msg.uid].clanTag}]
                               </span>
                             )}
                             <span className={
                               isMsgScamActive
-                                ? 'text-red-500 line-through decoration-red-700 decoration-2'
+                                ? 'text-orange-500 line-through decoration-red-700 decoration-2'
                                 : isMsgFounder 
                                   ? 'text-[#f87171]' 
                                   : isMsgVipSub 
@@ -1483,7 +1483,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                           
                           {/* Role tag badge - Discord style */}
                           {isMsgScamActive ? (
-                            <span className="px-1.5 py-0.2 bg-red-600/20 border border-red-500/40 text-red-500 text-[8px] font-black tracking-wide uppercase rounded-md flex items-center gap-0.5 animate-pulse">
+                            <span className="px-1.5 py-0.2 bg-red-600/20 border border-orange-500/40 text-orange-500 text-[8px] font-black tracking-wide uppercase rounded-md flex items-center gap-0.5 animate-pulse">
                               <Ban size={10} /> SCAM / МОШЕННИК
                             </span>
                           ) : isMsgFounder ? (
@@ -1536,7 +1536,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                             <>
                               <button
                                 onClick={() => handleDeleteMessage(msg.id)}
-                                className="p-1 hover:bg-red-500/10 text-zinc-400 hover:text-red-400 transition-colors cursor-pointer rounded"
+                                className="p-1 hover:bg-orange-500/10 text-zinc-400 hover:text-orange-400 transition-colors cursor-pointer rounded"
                                 title={lang === 'ru' ? 'Удалить сообщение' : 'Delete Message'}
                               >
                                 <Trash2 size={13} />
@@ -1547,7 +1547,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                                   onClick={() => handleToggleBlockUser(msg.uid, !!usersMap[msg.uid]?.isBlocked)}
                                   className={`p-1 transition-colors cursor-pointer rounded ${
                                     usersMap[msg.uid]?.isBlocked 
-                                      ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
+                                      ? 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30' 
                                       : 'hover:bg-amber-500/10 text-zinc-400 hover:text-amber-400'
                                   }`}
                                   title={usersMap[msg.uid]?.isBlocked ? (lang === 'ru' ? 'Разбанить автора' : 'Unban Author') : (lang === 'ru' ? 'Забанить автора' : 'Ban Author')}
@@ -1727,12 +1727,12 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                     <img referrerPolicy="no-referrer" 
                       src="https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=150&auto=format&fit=crop&q=80" 
                       alt="serustqs" 
-                      className="w-7 h-7 rounded-full object-cover bg-zinc-950 border border-red-500/30"
+                      className="w-7 h-7 rounded-full object-cover bg-zinc-950 border border-orange-500/30"
                     />
                     <span className="absolute bottom-0 right-0 w-2 h-2 bg-red-500 border border-[#2b2d31] rounded-full" />
                   </div>
                   <div className="text-left min-w-0 flex-1">
-                    <span className="text-xs font-bold text-red-400 block truncate">
+                    <span className="text-xs font-bold text-orange-400 block truncate">
                       serustqs
                     </span>
                     <span className="text-[8px] text-red-300 font-semibold block uppercase font-mono tracking-tight leading-none mt-0.5">
@@ -1777,11 +1777,11 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                             </div>
                             <div className="text-left min-w-0">
                               <span className={`text-xs font-bold block truncate ${
-                                isScamActive ? 'text-red-500 line-through' : isChatVip ? 'text-blue-400' : 'text-zinc-300'
+                                isScamActive ? 'text-orange-500 line-through' : isChatVip ? 'text-blue-400' : 'text-zinc-300'
                               }`}>
                                 {u.displayName}
                               </span>
-                              <span className={`text-[8px] block truncate font-mono leading-none ${isScamActive ? 'text-red-400 font-bold' : 'text-zinc-500'}`}>
+                              <span className={`text-[8px] block truncate font-mono leading-none ${isScamActive ? 'text-orange-400 font-bold' : 'text-zinc-500'}`}>
                                 {isScamActive ? '🚫 SCAMMER' : isChatVip ? '⭐ VIP SURVIVOR' : userAvatar.name[lang]}
                               </span>
                             </div>
@@ -1796,7 +1796,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                                 className={`p-1 border rounded text-[8px] font-black uppercase transition-colors cursor-pointer ${
                                   u.isScam 
                                     ? 'bg-amber-600/30 border-amber-500/50 text-amber-400' 
-                                    : 'bg-zinc-800 border-zinc-700 text-gray-400 hover:text-red-400'
+                                    : 'bg-zinc-800 border-zinc-700 text-gray-400 hover:text-orange-400'
                                 }`}
                                 title={u.isScam ? (lang === 'ru' ? 'Снять SCAM' : 'Remove SCAM') : (lang === 'ru' ? 'Выдать SCAM' : 'Issue SCAM')}
                               >
@@ -1807,7 +1807,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                                 disabled={adminActionLoading}
                                 className={`p-1 border rounded text-[8px] font-black uppercase transition-colors cursor-pointer ${
                                   u.clanTag === 'EAC' 
-                                    ? 'bg-red-600/30 border-red-500/50 text-red-400' 
+                                    ? 'bg-red-600/30 border-orange-500/50 text-orange-400' 
                                     : 'bg-zinc-800 border-zinc-700 text-gray-400 hover:text-white'
                                 }`}
                                 title={u.clanTag === 'EAC' ? (lang === 'ru' ? 'Забрать [EAC]' : 'Revoke [EAC]') : (lang === 'ru' ? 'Выдать [EAC]' : 'Grant [EAC]')}
@@ -1831,7 +1831,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                                 disabled={adminActionLoading}
                                 className={`p-1 border rounded text-[8px] font-black uppercase transition-colors cursor-pointer ${
                                   u.isBlocked 
-                                    ? 'bg-red-600/20 border-red-500/40 text-red-400' 
+                                    ? 'bg-red-600/20 border-orange-500/40 text-orange-400' 
                                     : 'bg-zinc-800 border-zinc-700 text-amber-500 hover:text-white'
                                 }`}
                                 title={u.isBlocked ? t.unblockUserBtn[lang] : t.blockUserBtn[lang]}

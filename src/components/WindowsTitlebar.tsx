@@ -119,10 +119,10 @@ export const WindowsTitlebar: React.FC<WindowsTitlebarProps> = ({
           <div className="w-4 h-4 rounded bg-red-600 flex items-center justify-center font-black text-[9px] text-white shadow-xs">
             RL
           </div>
-          <span className="font-bold tracking-wider text-[11px] text-red-500 font-teko uppercase">
+          <span className="font-bold tracking-wider text-[11px] text-orange-500 font-teko uppercase">
             {appName}
           </span>
-          <span className="text-[9px] px-1 py-0.2 rounded font-bold bg-red-500/10 text-red-600 border border-red-500/20">
+          <span className="text-[9px] px-1 py-0.2 rounded font-bold bg-orange-500/10 text-red-600 border border-orange-500/20">
             v{appVersion}
           </span>
         </div>
@@ -175,7 +175,7 @@ export const WindowsTitlebar: React.FC<WindowsTitlebarProps> = ({
           }`}
           title={lang === 'ru' ? 'Проверить автообновления Rust' : 'Check for Tauri App Updates'}
         >
-          <RefreshCw size={10} className={`text-red-500 ${isCheckingUpdate ? 'animate-spin' : ''}`} />
+          <RefreshCw size={10} className={`text-orange-500 ${isCheckingUpdate ? 'animate-spin' : ''}`} />
           <span className="hidden lg:inline">{isCheckingUpdate ? (lang === 'ru' ? 'Проверка...' : 'Checking...') : (lang === 'ru' ? 'Автообновление' : 'Auto-Update')}</span>
         </button>
 

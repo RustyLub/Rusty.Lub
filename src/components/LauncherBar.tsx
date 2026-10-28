@@ -102,7 +102,7 @@ export const LauncherBar: React.FC<LauncherBarProps> = ({
     <div 
       className={`w-full border-b select-none font-mono transition-colors relative z-40 ${
         isLight
-          ? 'bg-neutral-100/95 border-neutral-300 text-neutral-900 shadow-sm'
+          ? 'bg-[#171d27]/95 border-neutral-300 text-[#eef2f7] shadow-sm'
           : 'bg-[#080b12]/98 border-red-950/60 text-[#eef2f7] shadow-[0_4px_20px_rgba(0,0,0,0.6)]'
       }`}
     >
@@ -120,7 +120,7 @@ export const LauncherBar: React.FC<LauncherBarProps> = ({
             }`}
             title={lang === 'ru' ? 'Запустить клиент игры Rust через Steam' : 'Launch Rust client via Steam'}
           >
-            <div className={`w-3 h-3 rounded-full shrink-0 ${isPlaying ? 'bg-emerald-300 animate-ping' : 'bg-white/80 group-hover:scale-110'}`} />
+            <div className={`w-3 h-3 rounded-full shrink-0 ${isPlaying ? 'bg-emerald-300 animate-ping' : 'bg-[#12161e]/80 group-hover:scale-110'}`} />
             <Play size={16} className={`shrink-0 fill-current ${isPlaying ? 'animate-pulse' : ''}`} />
             
             <div className="text-left">
@@ -141,7 +141,7 @@ export const LauncherBar: React.FC<LauncherBarProps> = ({
               onClick={() => setServerDropdownOpen(!serverDropdownOpen)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs transition-all cursor-pointer ${
                 isLight 
-                  ? 'bg-white hover:bg-neutral-50 border-neutral-300 text-neutral-800' 
+                  ? 'bg-[#12161e] hover:bg-[#0d1016] border-neutral-300 text-[#eef2f7]' 
                   : 'bg-[#121622] hover:bg-[#181e2e] border-[#222a3d] text-neutral-200'
               }`}
             >
@@ -150,7 +150,7 @@ export const LauncherBar: React.FC<LauncherBarProps> = ({
                 <span className="font-bold text-[11px] block truncate">
                   {selectedServer ? selectedServer.name : (lang === 'ru' ? 'Выбрать сервер...' : 'Pick Server...')}
                 </span>
-                <span className="text-[9px] text-neutral-400 block font-mono">
+                <span className="text-[9px] text-[#8b95a8] block font-mono">
                   {selectedServer ? `${selectedServer.ip}:${selectedServer.port}` : 'Steam Connect'}
                 </span>
               </div>
@@ -166,10 +166,10 @@ export const LauncherBar: React.FC<LauncherBarProps> = ({
                 />
                 <div className={`absolute left-0 top-full mt-1.5 w-72 rounded-xl border shadow-xl z-40 overflow-hidden font-mono ${
                   isLight 
-                    ? 'bg-white border-neutral-300 text-neutral-800' 
+                    ? 'bg-[#12161e] border-neutral-300 text-[#eef2f7]' 
                     : 'bg-[#0e121c] border-[#252f44] text-[#eef2f7]'
                 }`}>
-                  <div className="p-2 border-b border-neutral-700/20 text-[10px] font-bold uppercase text-neutral-400 flex items-center justify-between">
+                  <div className="p-2 border-b border-neutral-700/20 text-[10px] font-bold uppercase text-[#8b95a8] flex items-center justify-between">
                     <span>{lang === 'ru' ? 'ИЗБРАННЫЕ СЕРВЕРЫ' : 'FAVORITE SERVERS'}</span>
                     <button 
                       onClick={() => { setServerDropdownOpen(false); onOpenSettings(); }}
@@ -187,8 +187,8 @@ export const LauncherBar: React.FC<LauncherBarProps> = ({
                           onClick={() => handleSelectServer(srv)}
                           className={`p-2 rounded-lg text-xs cursor-pointer flex items-center justify-between transition-colors ${
                             active
-                              ? 'bg-red-600 text-white font-bold'
-                              : isLight ? 'hover:bg-neutral-100' : 'hover:bg-[#182030] text-neutral-300'
+                              ? 'bg-orange-500 text-white font-bold'
+                              : isLight ? 'hover:bg-[#171d27]' : 'hover:bg-[#182030] text-neutral-300'
                           }`}
                         >
                           <div className="min-w-0 pr-2">
@@ -214,9 +214,9 @@ export const LauncherBar: React.FC<LauncherBarProps> = ({
             onClick={onToggleHud}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer shadow-xs ${
               isHudOpen
-                ? 'bg-red-600 text-white border-red-500 shadow-red-600/30 font-black'
+                ? 'bg-orange-500 text-white border-red-500 shadow-red-600/30 font-black'
                 : isLight
-                  ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-700'
+                  ? 'bg-[#12161e] hover:bg-[#171d27] border-neutral-300 text-neutral-700'
                   : 'bg-[#121622] hover:bg-[#181e2e] border-[#222a3d] text-neutral-300'
             }`}
             title={lang === 'ru' ? 'Открыть тактический оверлей поверх игры (Alt + O)' : 'Toggle In-game HUD Overlay (Alt + O)'}
@@ -224,7 +224,7 @@ export const LauncherBar: React.FC<LauncherBarProps> = ({
             <Target size={14} className={isHudOpen ? 'text-white' : 'text-red-500 shrink-0'} />
             <span className="text-[11px] font-teko text-sm uppercase">HUD OVERLAY</span>
             <span className={`text-[9px] px-1 py-0.2 rounded font-mono ${
-              isHudOpen ? 'bg-black/40 text-amber-300' : 'bg-neutral-800 text-neutral-400'
+              isHudOpen ? 'bg-black/40 text-amber-300' : 'bg-neutral-800 text-[#8b95a8]'
             }`}>
               {settings.hudHotkey}
             </span>
@@ -235,7 +235,7 @@ export const LauncherBar: React.FC<LauncherBarProps> = ({
             onClick={onOpenSettings}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
               isLight
-                ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-700'
+                ? 'bg-[#12161e] hover:bg-[#171d27] border-neutral-300 text-neutral-700'
                 : 'bg-[#121622] hover:bg-[#181e2e] border-[#222a3d] text-neutral-300 hover:text-white'
             }`}
             title={lang === 'ru' ? 'Открыть настройки лаунчера и игры' : 'Open launcher & client settings'}
@@ -253,7 +253,7 @@ export const LauncherBar: React.FC<LauncherBarProps> = ({
           </div>
 
           {/* Launcher Version Pill */}
-          <div className="hidden xl:flex items-center gap-1 px-2 py-1 rounded-lg bg-black/40 border border-white/10 text-neutral-400 text-[10px] font-mono shrink-0">
+          <div className="hidden xl:flex items-center gap-1 px-2 py-1 rounded-lg bg-black/40 border border-white/10 text-[#8b95a8] text-[10px] font-mono shrink-0">
             <span>TAURI v{settings.appVersion}</span>
           </div>
         </div>

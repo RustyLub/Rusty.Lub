@@ -172,10 +172,10 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
       case 'critical':
         return {
           label: lang === 'en' ? 'CRITICAL CRASH' : 'КРИТИЧЕСКИЙ ВЫЛЕТ',
-          color: 'text-red-500',
-          badgeBg: 'bg-red-500/10 text-red-400 border-red-500/30',
+          color: 'text-orange-500',
+          badgeBg: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
           borderAccent: 'border-l-red-600',
-          icon: <AlertTriangle size={13} className="text-red-500 shrink-0" />
+          icon: <AlertTriangle size={13} className="text-orange-500 shrink-0" />
         };
       case 'network':
         return {
@@ -227,7 +227,7 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={lang === 'en' ? "Search errors, EAC codes, crash logs, or commands..." : "Поиск по ошибкам, кодам EAC, вылетам или консольным командам..."}
-              className="w-full bg-[#090b10] border border-[#2a3447] focus:border-[#cd412b] text-neutral-100 placeholder-neutral-500 pl-10 pr-8 py-2.5 rounded-lg text-xs font-mono outline-none transition-all shadow-inner"
+              className="w-full bg-[#090b10] border border-[#2a3447] focus:border-[#f97316] text-neutral-100 placeholder-neutral-500 pl-10 pr-8 py-2.5 rounded-lg text-xs font-mono outline-none transition-all shadow-inner"
             />
             {searchQuery && (
               <button
@@ -283,11 +283,11 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
       {/* AI Diagnostic Panel (Rust Tactical Console) */}
       <div className="bg-[#121620] border border-[#2a3447] p-3.5 sm:p-4 relative overflow-hidden shadow-lg rust-metal-pattern rounded-xl w-full max-w-full">
         <div className="flex items-center justify-between gap-2 mb-2.5">
-          <div className="flex items-center gap-2 text-xs font-mono font-black text-red-500 uppercase tracking-widest min-w-0 truncate">
-            <Sparkles size={15} className="text-[#cd412b] shrink-0" />
+          <div className="flex items-center gap-2 text-xs font-mono font-black text-orange-500 uppercase tracking-widest min-w-0 truncate">
+            <Sparkles size={15} className="text-[#f97316] shrink-0" />
             <span className="truncate">{lang === 'en' ? 'AI ERROR DIAGNOSTIC' : 'ИИ-ДИАГНОСТ ОШИБОК'}</span>
           </div>
-          <span className="text-[10px] font-mono px-2 py-0.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded shrink-0">
+          <span className="text-[10px] font-mono px-2 py-0.5 bg-orange-500/10 border border-orange-500/20 text-orange-400 rounded shrink-0">
             v2.6
           </span>
         </div>
@@ -301,14 +301,14 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
               onChange={(e) => setAiQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAiSolve(aiQuery)}
               placeholder={lang === 'en' ? "Paste error code, crash log line, or dialog..." : "Вставьте код ошибки или строку вылета из консоли..."}
-              className="w-full bg-[#090b10] border border-[#2a3447] focus:border-[#cd412b] text-neutral-100 placeholder-neutral-500 pl-10 pr-3 py-2 rounded-lg text-xs font-mono outline-none"
+              className="w-full bg-[#090b10] border border-[#2a3447] focus:border-[#f97316] text-neutral-100 placeholder-neutral-500 pl-10 pr-3 py-2 rounded-lg text-xs font-mono outline-none"
               disabled={aiLoading}
             />
           </div>
           <button
             onClick={() => handleAiSolve(aiQuery)}
             disabled={aiLoading || !aiQuery.trim()}
-            className="px-3.5 py-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white text-xs font-black uppercase tracking-wider rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all flex items-center justify-center gap-1.5 shrink-0"
+            className="px-3.5 py-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-orange-500 hover:to-orange-500 text-white text-xs font-black uppercase tracking-wider rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all flex items-center justify-center gap-1.5 shrink-0"
           >
             {aiLoading ? <Loader2 size={13} className="animate-spin" /> : <Wrench size={13} />}
             <span>{aiLoading ? (lang === 'en' ? 'Analyzing...' : 'Диагностика...') : (lang === 'en' ? 'Diagnose' : 'Найти фикс')}</span>
@@ -317,13 +317,13 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
 
         {aiLoading && (
           <div className="mt-2.5 p-2.5 bg-[#090b10] border border-[#2a3447] rounded-lg flex items-center gap-2 text-xs font-mono text-cyan-400 min-w-0">
-            <Loader2 size={13} className="animate-spin text-red-500 shrink-0" />
+            <Loader2 size={13} className="animate-spin text-orange-500 shrink-0" />
             <span className="truncate">{loadingStep}</span>
           </div>
         )}
 
         {aiError && (
-          <div className="mt-2.5 p-2.5 bg-red-950/30 border border-red-500/30 rounded-lg text-xs font-mono text-red-400 flex items-center gap-2 min-w-0">
+          <div className="mt-2.5 p-2.5 bg-red-950/30 border border-orange-500/30 rounded-lg text-xs font-mono text-orange-400 flex items-center gap-2 min-w-0">
             <AlertTriangle size={13} className="shrink-0" />
             <span className="break-words">{aiError}</span>
           </div>
@@ -335,7 +335,7 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
               <span>{lang === 'en' ? 'AI Diagnostic Solution' : 'Результат диагностики'}</span>
               <button
                 onClick={() => handleCopyText(aiResult, 'ai-diag')}
-                className="flex items-center gap-1 text-red-400 hover:text-white cursor-pointer"
+                className="flex items-center gap-1 text-orange-400 hover:text-white cursor-pointer"
               >
                 {copiedId === 'ai-diag' ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
                 <span>{copiedId === 'ai-diag' ? (lang === 'en' ? 'Copied' : 'Скопировано') : (lang === 'en' ? 'Copy Fix' : 'Скопировать')}</span>
@@ -384,8 +384,8 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
                 key={error.title}
                 className={`relative bg-[#10141d] border transition-all duration-200 group flex flex-col justify-between rounded-xl overflow-hidden min-w-0 max-w-full w-full ${
                   isExpanded
-                    ? 'border-[#cd412b] shadow-[0_6px_25px_rgba(205,65,43,0.22)] ring-1 ring-[#cd412b]/50'
-                    : 'border-[#222938] hover:border-[#cd412b]/90 hover:shadow-[0_4px_20px_rgba(205,65,43,0.16)]'
+                    ? 'border-[#f97316] shadow-[0_6px_25px_rgba(205,65,43,0.22)] ring-1 ring-[#f97316]/50'
+                    : 'border-[#222938] hover:border-[#f97316]/90 hover:shadow-[0_4px_20px_rgba(205,65,43,0.16)]'
                 }`}
               >
                 {/* Tactical Corner Brackets */}
@@ -420,7 +420,7 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
 
                   {/* Title & Description */}
                   <div className="space-y-1 flex-1 min-w-0">
-                    <h3 className="text-sm font-black text-neutral-100 group-hover:text-red-400 transition-colors uppercase tracking-wide leading-snug break-words">
+                    <h3 className="text-sm font-black text-neutral-100 group-hover:text-orange-400 transition-colors uppercase tracking-wide leading-snug break-words">
                       {trans.title}
                     </h3>
                     {trans.desc && (
@@ -432,10 +432,10 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
 
                   {/* Console Command / Launch Option Box (if detected in solutions) */}
                   {detectedCmd && (
-                    <div className="bg-[#07090e] border border-[#1d2535] group-hover:border-[#cd412b]/40 p-2 sm:p-2.5 rounded-lg flex items-center justify-between gap-2 font-mono transition-colors min-w-0 max-w-full overflow-hidden">
+                    <div className="bg-[#07090e] border border-[#1d2535] group-hover:border-[#f97316]/40 p-2 sm:p-2.5 rounded-lg flex items-center justify-between gap-2 font-mono transition-colors min-w-0 max-w-full overflow-hidden">
                       <div className="flex items-center gap-1.5 text-xs min-w-0 overflow-hidden flex-1">
-                        <Terminal size={12} className="text-red-500 shrink-0" />
-                        <span className="text-red-500 font-black select-none shrink-0">&gt;</span>
+                        <Terminal size={12} className="text-orange-500 shrink-0" />
+                        <span className="text-orange-500 font-black select-none shrink-0">&gt;</span>
                         <span className="text-emerald-400 font-bold truncate break-all selection:bg-emerald-500/30 selection:text-white">
                           {detectedCmd.command}
                         </span>
@@ -448,7 +448,7 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
                         className={`px-2 py-1 text-[10px] font-mono font-bold uppercase rounded transition-all cursor-pointer flex items-center gap-1 shrink-0 border ${
                           copiedId === `cmd-${error.title}`
                             ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50'
-                            : 'bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white border-red-500/30 hover:border-red-600'
+                            : 'bg-orange-500/10 hover:bg-red-600 text-orange-400 hover:text-white border-orange-500/30 hover:border-red-600'
                         }`}
                         title={lang === 'en' ? 'Copy command to clipboard' : 'Скопировать команду в буфер'}
                       >
@@ -470,7 +470,7 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
                   {/* Primary Solution Preview (First Step) */}
                   {!isExpanded && (
                     <div className="bg-[#151a24]/70 border border-[#222938] p-2.5 rounded-lg text-xs text-neutral-300 font-mono flex items-start gap-2 min-w-0 max-w-full overflow-hidden">
-                      <span className="text-red-500 font-bold shrink-0">01.</span>
+                      <span className="text-orange-500 font-bold shrink-0">01.</span>
                       <p className="line-clamp-2 leading-relaxed text-neutral-300 break-words flex-1 min-w-0">
                         {primarySolutionText}
                       </p>
@@ -487,7 +487,7 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
                         className="space-y-2 pt-2 border-t border-[#1c2230] min-w-0 max-w-full overflow-hidden"
                       >
                         <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5">
-                          <Layers size={11} className="text-red-500 shrink-0" />
+                          <Layers size={11} className="text-orange-500 shrink-0" />
                           <span>{lang === 'en' ? 'VERIFIED FIX STEPS:' : 'ПОШАГОВОЕ РЕШЕНИЕ:'}</span>
                         </div>
 
@@ -501,7 +501,7 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
                             >
                               <div className="flex items-start justify-between gap-2 min-w-0">
                                 <div className="flex items-start gap-1.5 min-w-0 flex-1">
-                                  <span className="text-red-500 font-bold shrink-0">
+                                  <span className="text-orange-500 font-bold shrink-0">
                                     {String(stepIdx + 1).padStart(2, '0')}.
                                   </span>
                                   <span className="text-neutral-200 leading-relaxed font-sans text-xs break-words min-w-0 flex-1">
@@ -529,7 +529,7 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
                                       e.stopPropagation();
                                       handleCopyText(stepCmd.command, `step-cmd-${stepIdx}`);
                                     }}
-                                    className="text-[10px] text-red-400 hover:text-white uppercase font-bold shrink-0 flex items-center gap-1 cursor-pointer"
+                                    className="text-[10px] text-orange-400 hover:text-white uppercase font-bold shrink-0 flex items-center gap-1 cursor-pointer"
                                   >
                                     {copiedId === `step-cmd-${stepIdx}` ? <Check size={10} className="text-emerald-400" /> : <Copy size={10} />}
                                     <span>{copiedId === `step-cmd-${stepIdx}` ? (lang === 'en' ? 'COPIED' : 'ОК') : (lang === 'en' ? 'COPY' : 'КОПИЯ')}</span>
@@ -552,7 +552,7 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
                     className={`flex-1 min-w-0 py-2 px-2.5 sm:px-3 text-xs font-mono font-bold uppercase rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 border truncate ${
                       copiedId === `full-${error.title}`
                         ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-xs'
-                        : 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white border-red-500/40 shadow-sm shadow-red-600/25 active:scale-[0.98]'
+                        : 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-orange-500 hover:to-orange-500 text-white border-orange-500/40 shadow-sm shadow-red-600/25 active:scale-[0.98]'
                     }`}
                     title={lang === 'en' ? 'Copy all solution steps to clipboard' : 'Скопировать полное решение в буфер обмена'}
                   >

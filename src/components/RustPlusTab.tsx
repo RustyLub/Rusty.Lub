@@ -351,7 +351,7 @@ export default function RustPlusTab({ lang, currentUser, isAdmin, onToast, onOpe
         <div className="hud-corner-bl" />
         <div className="hud-corner-br" />
 
-        <div className="w-16 h-16 bg-red-500/10 border-2 border-red-500 rounded-full flex items-center justify-center mx-auto text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)] animate-pulse">
+        <div className="w-16 h-16 bg-orange-500/10 border-2 border-red-500 rounded-full flex items-center justify-center mx-auto text-orange-500 shadow-[0_0_30px_rgba(239,68,68,0.3)] animate-pulse">
           <Lock size={32} />
         </div>
 
@@ -367,7 +367,7 @@ export default function RustPlusTab({ lang, currentUser, isAdmin, onToast, onOpe
         </div>
 
         <div className="p-4 bg-black/40 border border-zinc-800 rounded-sm font-mono text-[10px] text-zinc-500 max-w-sm mx-auto">
-          AUTHENTICATION STATUS: <span className="text-red-400 font-bold">LIMITED USER</span>
+          AUTHENTICATION STATUS: <span className="text-orange-400 font-bold">LIMITED USER</span>
         </div>
       </div>
     );
@@ -417,7 +417,7 @@ export default function RustPlusTab({ lang, currentUser, isAdmin, onToast, onOpe
               <button
                 onClick={handleDisconnect}
                 disabled={loading}
-                className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/40 border border-red-500 text-red-400 font-mono text-xs font-bold uppercase transition flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/40 border border-red-500 text-orange-400 font-mono text-xs font-bold uppercase transition flex items-center gap-1.5 cursor-pointer"
               >
                 <Power size={14} />
                 <span>{lang === 'ru' ? 'Отключить' : 'Disconnect'}</span>
@@ -477,7 +477,7 @@ export default function RustPlusTab({ lang, currentUser, isAdmin, onToast, onOpe
             onClick={() => setSubTab(tab.id as any)}
             className={`px-3 py-2 text-xs font-mono font-bold uppercase transition flex items-center gap-1.5 cursor-pointer rounded-sm ${
               subTab === tab.id
-                ? 'bg-[#cd412b] text-white border border-[#ff2a4d] shadow-[0_0_10px_rgba(205,65,43,0.3)]'
+                ? 'bg-[#f97316] text-white border border-[#ff2a4d] shadow-[0_0_10px_rgba(205,65,43,0.3)]'
                 : 'bg-black/30 text-zinc-400 hover:text-white hover:bg-white/5 border border-zinc-800'
             }`}
           >
@@ -635,7 +635,7 @@ export default function RustPlusTab({ lang, currentUser, isAdmin, onToast, onOpe
                       await handleToggleSwitch(sw.entityId, false);
                     }
                   }}
-                  className="px-3 py-1 bg-red-600/20 border border-red-500/40 text-red-400 font-mono text-xs font-bold uppercase hover:bg-red-600/40 cursor-pointer"
+                  className="px-3 py-1 bg-red-600/20 border border-orange-500/40 text-orange-400 font-mono text-xs font-bold uppercase hover:bg-red-600/40 cursor-pointer"
                 >
                   🚨 Panic OFF All
                 </button>
@@ -884,7 +884,7 @@ export default function RustPlusTab({ lang, currentUser, isAdmin, onToast, onOpe
                     </div>
 
                     <div className="text-right font-mono text-xs">
-                      <span className={member.isAlive ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
+                      <span className={member.isAlive ? 'text-emerald-400 font-bold' : 'text-orange-400 font-bold'}>
                         {member.isAlive ? 'ALIVE' : 'DEAD'}
                       </span>
                     </div>
@@ -902,16 +902,16 @@ export default function RustPlusTab({ lang, currentUser, isAdmin, onToast, onOpe
           <div className="cyber-panel p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
               <h3 className="text-base font-bold font-mono text-white uppercase flex items-center gap-2">
-                <Bell size={18} className="text-red-400" />
+                <Bell size={18} className="text-orange-400" />
                 <span>{lang === 'ru' ? 'Настройка Сигнализации Рейда и Discord / Web Push' : 'Raid Alarms & Discord / Web Push'}</span>
               </h3>
 
               {onOpenNotifications && (
                 <button
                   onClick={onOpenNotifications}
-                  className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-white font-mono text-xs font-bold uppercase transition flex items-center gap-1.5 cursor-pointer shadow-md"
+                  className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 border border-orange-500/50 text-white font-mono text-xs font-bold uppercase transition flex items-center gap-1.5 cursor-pointer shadow-md"
                 >
-                  <BellRing size={13} className="text-red-400 animate-bounce" />
+                  <BellRing size={13} className="text-orange-400 animate-bounce" />
                   <span>{lang === 'ru' ? 'Web Push Настройки' : 'Web Push Settings'}</span>
                 </button>
               )}
@@ -950,7 +950,7 @@ export default function RustPlusTab({ lang, currentUser, isAdmin, onToast, onOpe
                       <span className="text-white font-bold">{al.name}</span>
                       <span className="text-zinc-500 text-[10px] ml-2">ID #{al.entityId}</span>
                     </div>
-                    <span className="px-2 py-0.5 text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 rounded-sm uppercase">
+                    <span className="px-2 py-0.5 text-[9px] bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-sm uppercase">
                       ACTIVE MONITORING
                     </span>
                   </div>
@@ -986,7 +986,7 @@ export default function RustPlusTab({ lang, currentUser, isAdmin, onToast, onOpe
                   <span
                     className={
                       log.type === 'error'
-                        ? 'text-red-400 font-bold'
+                        ? 'text-orange-400 font-bold'
                         : log.type === 'success'
                         ? 'text-emerald-400 font-bold'
                         : log.type === 'chat'

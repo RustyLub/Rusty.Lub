@@ -393,8 +393,8 @@ const GarageDoorSVG = ({ size = 24 }: { size?: number }) => (
     <rect x="19" y="66" width="62" height="12" fill="#9ca3af" stroke="#4b5563" strokeWidth="1.5" />
     <rect x="19" y="78" width="62" height="12" fill="#475569" stroke="#4b5563" strokeWidth="1.5" />
     {/* Gears/Industrial logo spray painted in center */}
-    <circle cx="50" cy="48" r="8" stroke="#cd412b" strokeWidth="2" strokeDasharray="3 3" fill="none" opacity="0.75" />
-    <circle cx="50" cy="48" r="4" fill="#cd412b" opacity="0.8" />
+    <circle cx="50" cy="48" r="8" stroke="#f97316" strokeWidth="2" strokeDasharray="3 3" fill="none" opacity="0.75" />
+    <circle cx="50" cy="48" r="4" fill="#f97316" opacity="0.8" />
     {/* Handles on bottom slat */}
     <rect x="30" y="80" width="10" height="3" fill="#111827" />
     <rect x="60" y="80" width="10" height="3" fill="#111827" />
@@ -717,7 +717,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                 onClick={() => setSelectedWeaponId(weapon.id)}
                 className={`w-full flex items-center gap-3 p-3 border text-left transition-all ${
                   isSelected
-                    ? 'bg-[#cd412b] border-[#cd412b] text-white'
+                    ? 'bg-[#f97316] border-[#f97316] text-white'
                     : 'bg-[#1b1e26] border-[#2a2f3b] text-gray-400 hover:text-white hover:border-gray-600'
                 }`}
               >
@@ -752,7 +752,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                 onClick={() => setActiveCategory(cat.id as any)}
                 className={`flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-bold uppercase transition-all ${
                   activeCategory === cat.id
-                    ? 'bg-[#cd412b] text-white'
+                    ? 'bg-[#f97316] text-white'
                     : 'text-gray-400 hover:text-white bg-[#14171e]'
                 }`}
               >
@@ -833,7 +833,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                     key={wall.id}
                     whileHover={{ scale: 1.02, y: -2 }}
                     className={`border p-4 flex flex-col justify-between relative overflow-hidden transition-all ${
-                      qty > 0 ? 'border-[#cd412b] bg-[#cd412b]/5 shadow-lg shadow-[#cd412b]/5' : wall.bgColor
+                      qty > 0 ? 'border-[#f97316] bg-[#f97316]/5 shadow-lg shadow-[#f97316]/5' : wall.bgColor
                     }`}
                   >
                     {/* Visual corner indicators */}
@@ -880,7 +880,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                         </span>
                         <div className="flex items-center justify-center gap-1.5 mt-1 text-xs font-black">
                           <WeaponIcon id={selectedWeaponId} size={14} />
-                          <span className="text-[#cd412b]">{singleTargetWeaponNeed}</span>
+                          <span className="text-[#f97316]">{singleTargetWeaponNeed}</span>
                           <span className="text-gray-500 text-[10px]">x</span>
                           <span className="text-gray-300">{qty || 1}</span>
                           {qty > 0 && (
@@ -898,7 +898,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                       <motion.button
                         whileTap={{ scale: 0.8 }}
                         onClick={() => updateQuantity(wall.id, -1)}
-                        className="w-8 h-8 rounded-none bg-[#1b1e26] hover:bg-[#cd412b] text-gray-400 hover:text-white border border-[#2a2f3b] flex items-center justify-center transition-colors cursor-pointer"
+                        className="w-8 h-8 rounded-none bg-[#1b1e26] hover:bg-[#f97316] text-gray-400 hover:text-white border border-[#2a2f3b] flex items-center justify-center transition-colors cursor-pointer"
                       >
                         <Minus size={12} />
                       </motion.button>
@@ -908,7 +908,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                       <motion.button
                         whileTap={{ scale: 0.8 }}
                         onClick={() => updateQuantity(wall.id, 1)}
-                        className="w-8 h-8 rounded-none bg-[#1b1e26] hover:bg-[#cd412b] text-gray-400 hover:text-white border border-[#2a2f3b] flex items-center justify-center transition-colors cursor-pointer"
+                        className="w-8 h-8 rounded-none bg-[#1b1e26] hover:bg-[#f97316] text-gray-400 hover:text-white border border-[#2a2f3b] flex items-center justify-center transition-colors cursor-pointer"
                       >
                         <Plus size={12} />
                       </motion.button>
@@ -940,7 +940,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                     transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                     className={`group bg-[#14171e]/90 p-4 rounded-none border flex flex-col justify-between relative overflow-hidden ${
                       qty > 0
-                        ? 'border-[#cd412b] bg-[#14171e]/90 shadow-md shadow-[#cd412b]/5'
+                        ? 'border-[#f97316] bg-[#14171e]/90 shadow-md shadow-[#f97316]/5'
                         : 'border-[#2a2f3b] hover:border-gray-700'
                     }`}
                   >
@@ -961,9 +961,9 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                         </h4>
                         <span className="inline-block text-[10px] text-gray-500 font-sans mt-1">
                           {lang === 'en' ? (
-                            <>HP: {target.hp} | Need: <strong className="text-[#cd412b] font-mono font-bold text-xs">{singleTargetWeaponNeed}</strong> pcs.</>
+                            <>HP: {target.hp} | Need: <strong className="text-[#f97316] font-mono font-bold text-xs">{singleTargetWeaponNeed}</strong> pcs.</>
                           ) : (
-                            <>HP: {target.hp} | Надо: <strong className="text-[#cd412b] font-mono font-bold text-xs">{singleTargetWeaponNeed}</strong> шт.</>
+                            <>HP: {target.hp} | Надо: <strong className="text-[#f97316] font-mono font-bold text-xs">{singleTargetWeaponNeed}</strong> шт.</>
                           )}
                         </span>
                       </div>
@@ -974,7 +974,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                       <motion.button
                         whileTap={{ scale: 0.8 }}
                         onClick={() => updateQuantity(target.id, -1)}
-                        className="w-8 h-8 rounded-none bg-[#1b1e26] hover:bg-[#cd412b] text-gray-400 hover:text-white border border-[#2a2f3b] flex items-center justify-center transition-colors cursor-pointer"
+                        className="w-8 h-8 rounded-none bg-[#1b1e26] hover:bg-[#f97316] text-gray-400 hover:text-white border border-[#2a2f3b] flex items-center justify-center transition-colors cursor-pointer"
                       >
                         <Minus size={12} />
                       </motion.button>
@@ -984,7 +984,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                       <motion.button
                         whileTap={{ scale: 0.8 }}
                         onClick={() => updateQuantity(target.id, 1)}
-                        className="w-8 h-8 rounded-none bg-[#1b1e26] hover:bg-[#cd412b] text-gray-400 hover:text-white border border-[#2a2f3b] flex items-center justify-center transition-colors cursor-pointer"
+                        className="w-8 h-8 rounded-none bg-[#1b1e26] hover:bg-[#f97316] text-gray-400 hover:text-white border border-[#2a2f3b] flex items-center justify-center transition-colors cursor-pointer"
                       >
                         <Plus size={12} />
                       </motion.button>
@@ -1018,7 +1018,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                     >
                       <span className="flex items-center justify-center"><TargetIcon id={target.id} size={14} /></span>
                       <span>{targetName}</span>
-                      <strong className="text-[#cd412b] font-bold">×{qty}</strong>
+                      <strong className="text-[#f97316] font-bold">×{qty}</strong>
                       <span className="text-[10px] text-gray-500 font-mono font-bold lowercase">
                         {lang === 'en' ? `(requires ${weaponsNeededForTarget} pcs.)` : `(требует ${weaponsNeededForTarget} шт.)`}
                       </span>
@@ -1049,12 +1049,12 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                 <div className="flex items-center justify-between flex-wrap gap-3">
                   <div className="text-sm font-bold text-white flex items-center gap-2 font-sans font-medium uppercase">
                     <span>{lang === 'en' ? 'Required for raid:' : 'Потребуется для взрыва:'}</span>
-                    <span className="inline-flex items-center gap-1.5 bg-[#cd412b]/10 text-[#cd412b] px-3 py-1 rounded-none border border-[#cd412b]/20 font-mono">
+                    <span className="inline-flex items-center gap-1.5 bg-[#f97316]/10 text-[#f97316] px-3 py-1 rounded-none border border-[#f97316]/20 font-mono">
                       <span className="flex items-center justify-center"><WeaponIcon id={selectedWeapon.id} size={14} /></span>
                       <span>{weaponTranslationMap[selectedWeapon.id]?.[lang] || selectedWeapon.name}</span>
                     </span>
                   </div>
-                  <div className="text-2xl font-black text-[#cd412b] font-mono">
+                  <div className="text-2xl font-black text-[#f97316] font-mono">
                     {totalWeaponsNeeded} <span className="text-xs text-gray-400 font-sans font-bold uppercase">{lang === 'en' ? 'pcs.' : 'шт.'}</span>
                   </div>
                 </div>
@@ -1195,7 +1195,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                 {/* Info block */}
                 <div className="bg-[#1b1e26]/50 p-3 rounded-none border border-[#2a2f3b] flex gap-2 items-start text-[10px] text-gray-500 font-sans leading-relaxed font-medium relative">
                   <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-gray-600/50" />
-                  <Info size={14} className="text-[#cd412b] flex-shrink-0 mt-0.5" />
+                  <Info size={14} className="text-[#f97316] flex-shrink-0 mt-0.5" />
                   <span>
                     {lang === 'en' 
                       ? 'All calculations are based on the official Rust Wiki for 2026. Data includes raw crafting costs only, excluding workbenches and blueprints.'
