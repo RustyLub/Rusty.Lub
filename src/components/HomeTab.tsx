@@ -264,6 +264,11 @@ export default function HomeTab({
         <AppStatsCounterWidget lang={lang} appTheme={appTheme} />
       </section>
 
+      {/* Compact metrics stay secondary to the primary tools. */}
+      <section className="rounded-xl border border-[#1e2633] bg-[#0d1016] p-3 sm:p-4">
+        <AppStatsCounterWidget lang={lang} appTheme={appTheme} />
+      </section>
+
       {/* ── 3. SPECIAL ACCESS SECTIONS (ONLY VISIBLE IF AUTHORIZED WITH SPECIAL ACCESS) ── */}
       {hasSpecialAccess && visibleSpecialCards.length > 0 && (
         <section className="space-y-4">
