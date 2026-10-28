@@ -792,7 +792,9 @@ body.light-theme .industrial-home > section:nth-of-type(2) > div > div p {
   --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
   --font-technical: "Rajdhani", "Roboto Mono", monospace;
 }
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6,
+h1.font-russo, h2.font-russo, h3.font-russo,
+h4.font-russo, h5.font-russo, h6.font-russo {
   font-family: var(--font-display);
   font-weight: 800;
   letter-spacing: -0.015em;
