@@ -303,6 +303,25 @@ async function startServer() {
     }
   });
 
+  app.delete('/api/cms/pages/:id', verifyCmsIdentity, requireCmsRole('owner', 'admin', 'editor'), async (req: any, res: any) => {
+    try {
+      const id = String(req.params.id || '').trim();
+      if (!id || id.length > 140 || !/^[a-zA-Z0-9_-]+$/.test(id)) {
+        return res.status(400).json({ message: 'Invalid page ID.' });
+      }
+      const ref = adminDb.collection('cms_pages').doc(id);
+      const page = await ref.get();
+      if (!page.exists) return res.status(404).json({ message: 'CMS page not found.' });
+      const slug = String(page.data()?.slug || '');
+      await ref.delete();
+      await cmsAudit(req.cmsActor, 'page.delete', id, slug);
+      return res.json({ success: true, id });
+    } catch (error) {
+      console.error('CMS page delete failed:', error);
+      return res.status(500).json({ message: 'Unable to delete CMS page.' });
+    }
+  });
+
   app.get('/api/cms/settings', verifyCmsIdentity, requireCmsRole('owner', 'admin', 'editor', 'viewer'), async (_req: any, res: any) => {
     try {
       const snap = await adminDb.collection('cms_settings').doc('global').get();
