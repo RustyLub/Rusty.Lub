@@ -70,12 +70,12 @@ export default function GuidesHubTab({ lang, onNavigate }: GuidesHubTabProps) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+      <div className="grid grid-cols-1 gap-0 border-y border-white/10 divide-y divide-white/10 pt-2">
         {guides.map((guide) => (
           <div
             key={guide.id}
             onClick={() => onNavigate(guide.id)}
-            className="p-5 rounded-2xl bg-[#12161e] border border-[#1e2633] hover:border-[#f97316] transition-all duration-200 hover:-translate-y-1 hover:shadow-xl cursor-pointer group flex flex-col justify-between"
+            className="p-4 sm:px-5 rounded-none bg-transparent border-0 border-l-2 border-l-transparent hover:border-l-orange-500 border-[#1e2633] hover:border-[#f97316] transition-all duration-200 hover:-translate-y-1 hover:shadow-xl cursor-pointer group flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center justify-between mb-3">
