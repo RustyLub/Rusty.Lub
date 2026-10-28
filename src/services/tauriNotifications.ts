@@ -26,10 +26,8 @@ export async function sendWindowsNotification(
 
   const isTauri = '__TAURI_INTERNALS__' in window || '__TAURI__' in window;
 
-  // 1. Play audio alarm if it's a raid alarm or radar alert
-  if (type === 'raid' || type === 'radar') {
-    playNotificationAudio(type);
-  }
+  // 1. Play a distinct sound for every notification category.
+  playNotificationAudio(type);
 
   // 2. Try Tauri 2 Notification plugin if available
   if (isTauri) {
@@ -71,7 +69,7 @@ export async function sendWindowsNotification(
  * Clean mobile-style notification tones for desktop and radar alerts.
  * Sounds are synthesized locally; no external recordings are required.
  */
-export function playNotificationAudio(type: 'raid' | 'radar' | 'system' = 'raid') {
+export function playNotificationAudio(type: 'raid' | 'radar' | 'system' | 'update' = 'system') {
   if (typeof window === 'undefined') return;
 
   const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
@@ -109,13 +107,18 @@ export function playNotificationAudio(type: 'raid' | 'radar' | 'system' = 'raid'
       // A subtle two-part ping with a short, clear decay.
       tone(987.77, 0, 0.16, 0.18);
       tone(1318.51, 0.11, 0.24, 0.16);
+    } else if (type === 'update') {
+      // Light ascending three-note cue, distinct from ordinary notifications.
+      tone(783.99, 0, 0.16, 0.17);
+      tone(987.77, 0.12, 0.16, 0.17);
+      tone(1174.66, 0.24, 0.25, 0.16);
     } else {
       // Gentle double chime for general app events.
       tone(880, 0, 0.19, 0.18);
       tone(1174.66, 0.095, 0.28, 0.16);
     }
 
-    const delay = type === 'raid' ? 1300 : 550;
+    const delay = type === 'raid' ? 1300 : type === 'update' ? 750 : 550;
     const closeContext = () => { void audio.close().catch(() => undefined); };
     if (audio.state === 'suspended') {
       void audio.resume().then(() => window.setTimeout(closeContext, delay)).catch(() => undefined);
