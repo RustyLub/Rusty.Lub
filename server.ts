@@ -26,6 +26,7 @@ import { adminAuth, adminDb } from "./src/lib/firebase-admin";
 import { RadarService } from "./src/services/radarService";
 import { rustPlusManager } from "./src/services/rustplusManager";
 import { FieldValue } from "firebase-admin/firestore";
+import { registerEmailAuthRoutes } from './src/server/emailAuth';
 
 dotenv.config();
 
@@ -190,6 +191,7 @@ async function startServer() {
 
 
   app.use(express.json());
+  registerEmailAuthRoutes(app);
 
   // CMS endpoints use verified Firebase ID tokens and server-side role records.
   // The legacy verifyToken middleware accepts caller-supplied UID headers; do not use it here.
