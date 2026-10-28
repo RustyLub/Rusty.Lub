@@ -155,9 +155,9 @@ export default function SectionsDrawer({
           titleEn: 'All Tools Hub',
           descRu: 'Главная панель калькуляторов и утилит выживания',
           descEn: 'Master dashboard for all raid & survival utilities',
-          lucideIcon: <LayoutGrid size={20} className="text-red-600" />,
+          lucideIcon: <LayoutGrid size={20} className="text-orange-500" />,
           badge: 'HUB',
-          badgeColor: 'bg-red-500/10 text-red-600 border-red-500/20'
+          badgeColor: 'bg-orange-500/100/10 text-orange-500 border-red-500/20'
         },
         {
           id: 'raid',
@@ -317,7 +317,7 @@ export default function SectionsDrawer({
           titleEn: 'Home Overview',
           descRu: 'Обзор платформы, быстрый доступ к инструментам и мониторинг',
           descEn: 'Platform overview, quick launcher and live status widgets',
-          lucideIcon: <Home size={20} className="text-red-600" />
+          lucideIcon: <Home size={20} className="text-orange-500" />
         },
         {
           id: 'news',
@@ -397,7 +397,7 @@ export default function SectionsDrawer({
             descEn: 'User roles, VIP grants, system announcements & server analytics',
             iconId: 'lock.code',
             badge: 'ADMIN',
-            badgeColor: 'bg-red-500/10 text-red-600 border-red-500/20',
+            badgeColor: 'bg-orange-500/100/10 text-orange-500 border-red-500/20',
             isSpecial: true,
             requiredRole: 'admin' as const
           }
@@ -480,15 +480,15 @@ export default function SectionsDrawer({
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
             className={`relative w-full max-w-xl sm:max-w-2xl h-full shadow-2xl flex flex-col z-10 overflow-hidden ${
-              isLight ? 'bg-[#f4f3f0] text-neutral-900 border-r border-neutral-300' : 'bg-[#0b0e14] text-[#eef2f7] border-r border-[#1e2633]'
+              isLight ? 'bg-[#f4f3f0] text-[#eef2f7] border-r border-neutral-300' : 'bg-[#0b0e14] text-[#eef2f7] border-r border-[#1e2633]'
             }`}
           >
             {/* Drawer Header */}
             <div className={`p-4 sm:p-5 border-b shrink-0 flex items-center justify-between ${
-              isLight ? 'bg-white border-neutral-200 shadow-xs' : 'bg-[#10141d] border-[#1e2633]'
+              isLight ? 'bg-[#12161e] border-[#1e2633] shadow-xs' : 'bg-[#10141d] border-[#1e2633]'
             }`}>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-red-600 flex items-center justify-center text-white font-black font-mono shadow-sm">
+                <div className="w-9 h-9 rounded-lg bg-orange-500 flex items-center justify-center text-white font-black font-mono shadow-sm">
                   RL
                 </div>
                 <div>
@@ -496,11 +496,11 @@ export default function SectionsDrawer({
                     <h2 className="text-base sm:text-lg font-black font-teko tracking-wide uppercase leading-tight">
                       {lang === 'ru' ? 'КАТАЛОГ ВСЕХ РАЗДЕЛОВ' : 'ALL SECTIONS DIRECTORY'}
                     </h2>
-                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-red-500/10 text-red-600 border border-red-500/20">
+                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-orange-500/100/10 text-orange-500 border border-red-500/20">
                       {categories.reduce((sum, c) => sum + c.items.length, 0)} {lang === 'ru' ? 'РАЗДЕЛОВ' : 'TABS'}
                     </span>
                   </div>
-                  <p className={`text-xs ${isLight ? 'text-neutral-500' : 'text-[#8b95a8]'}`}>
+                  <p className={`text-xs ${isLight ? 'text-[#8b95a8]' : 'text-[#8b95a8]'}`}>
                     {lang === 'ru' 
                       ? 'Полный перечень калькуляторов, баз знаний, гайдов и сервисов' 
                       : 'Complete roster of raid calculators, knowledge hubs & VIP tools'}
@@ -511,7 +511,7 @@ export default function SectionsDrawer({
               <button
                 onClick={onClose}
                 className={`p-2 rounded-lg transition-colors cursor-pointer ${
-                  isLight ? 'hover:bg-neutral-100 text-neutral-600' : 'hover:bg-white/10 text-[#8b95a8] hover:text-white'
+                  isLight ? 'hover:bg-[#171d27] text-[#aab4c5]' : 'hover:bg-[#12161e]/10 text-[#8b95a8] hover:text-white'
                 }`}
                 title={lang === 'ru' ? 'Закрыть (Esc)' : 'Close (Esc)'}
               >
@@ -521,11 +521,11 @@ export default function SectionsDrawer({
 
             {/* Search and Category Filter Toolbar */}
             <div className={`p-4 border-b shrink-0 space-y-3 ${
-              isLight ? 'bg-white/80 border-neutral-200' : 'bg-[#0e121a] border-[#1e2633]'
+              isLight ? 'bg-[#12161e]/80 border-[#1e2633]' : 'bg-[#0e121a] border-[#1e2633]'
             }`}>
               {/* Search input */}
               <div className="relative">
-                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8b95a8] pointer-events-none" />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -534,14 +534,14 @@ export default function SectionsDrawer({
                   placeholder={lang === 'ru' ? 'Быстрый поиск раздела (например: рейд, гниение, бинды, fps)...' : 'Quick search section (e.g. raid, decay, binds, fps)...'}
                   className={`w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm rounded-lg border outline-none font-medium transition-all ${
                     isLight 
-                      ? 'bg-neutral-50 border-neutral-200 text-neutral-900 focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-500/10' 
+                      ? 'bg-[#0d1016] border-[#1e2633] text-[#eef2f7] focus:bg-[#12161e] focus:border-red-500 focus:ring-2 focus:ring-red-500/10' 
                       : 'bg-[#141923] border-[#222b3b] text-[#eef2f7] focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
                   }`}
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b95a8] hover:text-[#aab4c5] p-1"
                   >
                     <X size={14} />
                   </button>
@@ -566,9 +566,9 @@ export default function SectionsDrawer({
                       onClick={() => setSelectedCategory(tab.id)}
                       className={`px-3 py-1.5 rounded-md font-bold whitespace-nowrap transition-all cursor-pointer text-xs ${
                         isCurrent
-                          ? 'bg-red-600 text-white shadow-xs'
+                          ? 'bg-orange-500 text-white shadow-xs'
                           : isLight
-                            ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
+                            ? 'bg-[#171d27] hover:bg-[#202938] text-neutral-700'
                             : 'bg-[#161c28] hover:bg-[#1e2637] text-[#8b95a8] hover:text-[#eef2f7]'
                       }`}
                     >
@@ -583,20 +583,20 @@ export default function SectionsDrawer({
             <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6 custom-scrollbar">
               {totalMatchingItems === 0 ? (
                 <div className={`text-center py-12 px-4 rounded-xl border border-dashed ${
-                  isLight ? 'bg-white border-neutral-300' : 'bg-[#121620] border-[#1e2633]'
+                  isLight ? 'bg-[#12161e] border-neutral-300' : 'bg-[#121620] border-[#1e2633]'
                 }`}>
-                  <Search size={36} className="mx-auto text-neutral-400 mb-2 opacity-60" />
+                  <Search size={36} className="mx-auto text-[#8b95a8] mb-2 opacity-60" />
                   <div className="text-sm font-bold">
                     {lang === 'ru' ? 'Разделы не найдены' : 'No sections matched'}
                   </div>
-                  <p className={`text-xs mt-1 ${isLight ? 'text-neutral-500' : 'text-[#8b95a8]'}`}>
+                  <p className={`text-xs mt-1 ${isLight ? 'text-[#8b95a8]' : 'text-[#8b95a8]'}`}>
                     {lang === 'ru' 
                       ? `По запросу «${searchQuery}» ничего не найдено. Попробуйте другой запрос.` 
                       : `Nothing found for "${searchQuery}". Try different keywords.`}
                   </p>
                   <button
                     onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
-                    className="mt-3 px-3 py-1.5 bg-red-600 text-white text-xs font-bold rounded-md cursor-pointer hover:bg-red-700"
+                    className="mt-3 px-3 py-1.5 bg-orange-500 text-white text-xs font-bold rounded-md cursor-pointer hover:bg-orange-600"
                   >
                     {lang === 'ru' ? 'Сбросить фильтр' : 'Reset filter'}
                   </button>
@@ -607,7 +607,7 @@ export default function SectionsDrawer({
                     {/* Category Title */}
                     <div className="flex items-center justify-between px-1">
                       <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-3.5 bg-red-600 rounded-full" />
+                        <span className="w-1.5 h-3.5 bg-orange-500 rounded-full" />
                         <h3 className={`text-xs font-black tracking-wider uppercase font-mono ${
                           isLight ? 'text-neutral-700' : 'text-neutral-300'
                         }`}>
@@ -615,7 +615,7 @@ export default function SectionsDrawer({
                         </h3>
                       </div>
                       <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
-                        isLight ? 'bg-neutral-200/80 text-neutral-600' : 'bg-white/5 text-[#8b95a8]'
+                        isLight ? 'bg-neutral-200/80 text-[#aab4c5]' : 'bg-[#12161e]/5 text-[#8b95a8]'
                       }`}>
                         {lang === 'ru' ? category.badgeRu : category.badgeEn}
                       </span>
@@ -636,25 +636,25 @@ export default function SectionsDrawer({
                             className={`group relative flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer text-left ${
                               isActive
                                 ? isLight
-                                  ? 'bg-red-500/5 border-red-500 shadow-sm ring-1 ring-red-500/20'
-                                  : 'bg-red-500/10 border-red-500/60 shadow-sm'
+                                  ? 'bg-orange-500/100/5 border-red-500 shadow-sm ring-1 ring-red-500/20'
+                                  : 'bg-orange-500/100/10 border-red-500/60 shadow-sm'
                                 : isLight
-                                  ? 'bg-white hover:bg-neutral-50/90 border-neutral-200/80 hover:border-neutral-300 shadow-xs hover:shadow-md hover:-translate-y-0.5'
+                                  ? 'bg-[#12161e] hover:bg-[#0d1016]/90 border-[#1e2633]/80 hover:border-neutral-300 shadow-xs hover:shadow-md hover:-translate-y-0.5'
                                   : 'bg-[#121620] hover:bg-[#161c28] border-[#1e2633] hover:border-[#2e3b4f] hover:-translate-y-0.5'
                             } ${isLocked ? 'opacity-75 hover:opacity-100' : ''}`}
                           >
                             {/* Icon container */}
                             <div className={`w-10 h-10 rounded-lg shrink-0 flex items-center justify-center p-1 border transition-transform group-hover:scale-105 ${
                               isActive
-                                ? 'bg-red-500/10 border-red-500/30'
+                                ? 'bg-orange-500/100/10 border-red-500/30'
                                 : isLight
-                                  ? 'bg-neutral-100 border-neutral-200'
+                                  ? 'bg-[#171d27] border-[#1e2633]'
                                   : 'bg-black/40 border-white/5'
                             }`}>
                               {item.iconId ? (
                                 <ItemImageOrFallback id={item.iconId} lang={lang} size={28} />
                               ) : (
-                                item.lucideIcon || <LayoutGrid size={20} className="text-neutral-500" />
+                                item.lucideIcon || <LayoutGrid size={20} className="text-[#8b95a8]" />
                               )}
                             </div>
 
@@ -663,9 +663,9 @@ export default function SectionsDrawer({
                               <div className="flex items-center gap-1.5">
                                 <span className={`text-xs font-bold truncate leading-tight ${
                                   isActive
-                                    ? 'text-red-600'
+                                    ? 'text-orange-500'
                                     : isLight
-                                      ? 'text-neutral-900 group-hover:text-red-600'
+                                      ? 'text-[#eef2f7] group-hover:text-orange-500'
                                       : 'text-[#eef2f7] group-hover:text-red-400'
                                 }`}>
                                   {lang === 'ru' ? item.titleRu : item.titleEn}
@@ -686,7 +686,7 @@ export default function SectionsDrawer({
                               </div>
 
                               <p className={`text-[11px] line-clamp-2 mt-0.5 leading-snug ${
-                                isLight ? 'text-neutral-500' : 'text-[#8b95a8]'
+                                isLight ? 'text-[#8b95a8]' : 'text-[#8b95a8]'
                               }`}>
                                 {lang === 'ru' ? item.descRu : item.descEn}
                               </p>
@@ -695,8 +695,8 @@ export default function SectionsDrawer({
                             {/* Chevron */}
                             <ChevronRight 
                               size={14} 
-                              className={`shrink-0 self-center text-neutral-400 group-hover:translate-x-0.5 transition-transform ${
-                                isActive ? 'text-red-600' : ''
+                              className={`shrink-0 self-center text-[#8b95a8] group-hover:translate-x-0.5 transition-transform ${
+                                isActive ? 'text-orange-500' : ''
                               }`} 
                             />
                           </div>
@@ -710,7 +710,7 @@ export default function SectionsDrawer({
 
             {/* Footer summary bar */}
             <div className={`p-3 sm:p-4 border-t shrink-0 flex items-center justify-between text-xs font-mono ${
-              isLight ? 'bg-white border-neutral-200 text-neutral-600' : 'bg-[#0d1017] border-[#1e2633] text-[#8b95a8]'
+              isLight ? 'bg-[#12161e] border-[#1e2633] text-[#aab4c5]' : 'bg-[#0d1017] border-[#1e2633] text-[#8b95a8]'
             }`}>
               <div className="flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
@@ -727,7 +727,7 @@ export default function SectionsDrawer({
                 <button
                   onClick={onClose}
                   className={`px-3 py-1 rounded font-bold cursor-pointer transition-colors ${
-                    isLight ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800' : 'bg-white/10 hover:bg-white/20 text-white'
+                    isLight ? 'bg-[#171d27] hover:bg-[#202938] text-[#eef2f7]' : 'bg-[#12161e]/10 hover:bg-[#12161e]/20 text-white'
                   }`}
                 >
                   {lang === 'ru' ? 'Закрыть' : 'Close'}
