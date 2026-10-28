@@ -264,7 +264,6 @@ const VALID_TABS: Record<string, TabType> = {
   account: 'account',
   cabinet: 'account',
   support: 'support',
-  vip: 'support',
   terms: 'terms',
   agreement: 'terms',
   legal: 'terms',
