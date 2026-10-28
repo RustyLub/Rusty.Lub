@@ -146,20 +146,20 @@ export default function HomeTab({
     <div className="industrial-home space-y-7 lg:space-y-8 pb-16 text-left">
       
       {/* ── 1. PREMIUM SOFT LIGHT HERO SECTION ── */}
-      <section className="bg-gradient-to-br from-[#171f28] via-[#10161d] to-[#0d1218] border border-[#35404b] rounded-xl p-5 sm:p-7 lg:p-9 shadow-[0_18px_55px_rgba(0,0,0,0.28)] relative overflow-hidden">
+      <section className="bg-gradient-to-br from-[#171f28] via-[#10161d] to-[#0d1218] border border-[#35404b] rounded-xl p-4 sm:p-6 lg:p-7 shadow-[0_18px_55px_rgba(0,0,0,0.28)] relative overflow-hidden">
         {/* Glow Accent */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/100/[0.02] rounded-full blur-3xl pointer-events-none" />
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center relative z-10">
+        <div className="grid grid-cols-1 gap-5 items-center relative z-10">
           {/* Left Hero Column */}
-          <div className="lg:col-span-8 space-y-5">
+          <div className="space-y-4">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-500/10 border border-orange-500/20 text-[10px] font-bold uppercase tracking-wider text-orange-500 rounded-lg">
               <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-              <span>{lang === 'ru' ? 'Светлый Дизайн v2.0' : 'Soft Light Layout v2.0'}</span>
+              <span>RUSTY.LUB · SURVIVAL TOOLS</span>
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#eef2f7] leading-[1.1]">
+              <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-black tracking-tight text-[#eef2f7] leading-[1.1]">
                 Win the wipe. <br className="hidden sm:inline" />
                 <span className="text-orange-500">Without the chaos.</span>
               </h1>
@@ -189,26 +189,9 @@ export default function HomeTab({
             </div>
           </div>
 
-          {/* Right Hero Column: Authentic C4 Display item slot */}
-          <div className="lg:col-span-4 flex justify-center lg:justify-end">
-            <div className="relative p-6 bg-[#0d1016] border border-[#1e2633] rounded-2xl flex flex-col items-center text-center max-w-[240px] w-full shadow-sm">
-              <div className="w-24 h-24 rounded-2xl bg-zinc-900 border-2 border-[#2e394b] flex items-center justify-center shadow-inner relative overflow-hidden group mb-3">
-                <ItemImageOrFallback id="timed_explosive" lang={lang} size={76} />
-                <div className="absolute bottom-1 right-1.5 text-[8px] font-mono text-[#8b95a8] font-black">C4</div>
-              </div>
-              <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-[#8b95a8]">
-                TIMED EXPLOSIVE
-              </span>
-              <h3 className="text-xs font-bold text-[#eef2f7] mt-1">
-                {lang === 'ru' ? 'Калькулятор Рейдов' : 'Raid Calculator'}
-              </h3>
-            </div>
-          </div>
+
         </div>
       </section>
-
-      {/* ── REAL-TIME APP INSTALLATIONS & REGISTERED USERS STATS COUNTER ── */}
-      <AppStatsCounterWidget lang={lang} appTheme={appTheme} />
 
       {/* ── 2. FEATURED TOOLS BOXES (RAID, BINDS, FPS) ── */}
       <section className="space-y-4">
@@ -272,6 +255,9 @@ export default function HomeTab({
           </div>
         </div>
       </section>
+
+      {/* Compact project statistics follow the primary tools */}
+      <AppStatsCounterWidget lang={lang} appTheme={appTheme} />
 
       {/* ── 3. SPECIAL ACCESS SECTIONS (ONLY VISIBLE IF AUTHORIZED WITH SPECIAL ACCESS) ── */}
       {hasSpecialAccess && visibleSpecialCards.length > 0 && (
