@@ -283,6 +283,11 @@ async function startServer() {
       if (!id) return res.status(400).json({ message: 'Invalid page ID.' });
       const ref = adminDb.collection('cms_pages').doc(id);
       const previous = await ref.get();
+      const duplicateSlug = await adminDb.collection('cms_pages').where('slug', '==', slug).limit(10).get();
+      const conflictingPage = duplicateSlug.docs.find((doc: any) => doc.id !== id);
+      if (conflictingPage) {
+        return res.status(409).json({ message: 'A CMS page with this slug already exists.' });
+      }
       const data = {
         slug,
         title: { ru: title.ru.trim(), en: title.en.trim() },
