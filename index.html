@@ -163,6 +163,37 @@
           }
         }
       }, 4000); */
+
+      // Fail visibly instead of leaving the initial loader on screen forever.
+      // If this fires, the application entry bundle did not replace #init-loader.
+      window.setTimeout(function() {
+        var loader = document.getElementById('init-loader');
+        if (!loader || !loader.isConnected) return;
+
+        var status = document.getElementById('init-status');
+        if (status) {
+          status.textContent = 'ЗАПУСК НЕ УДАЛСЯ: СКРИПТЫ ПРИЛОЖЕНИЯ НЕ ЗАГРУЗИЛИСЬ';
+          status.style.color = '#ff6b5c';
+          status.style.maxWidth = '520px';
+          status.style.lineHeight = '1.7';
+          status.style.whiteSpace = 'normal';
+        }
+
+        var details = document.createElement('p');
+        details.textContent = 'Обновите страницу. Если сообщение повторяется, откройте F12 → Console и Network: проверьте ошибки загрузки файлов JavaScript.';
+        details.style.cssText = 'max-width:520px;font-size:12px;line-height:1.7;color:#94a3b8;margin:12px 0 16px';
+        loader.appendChild(details);
+
+        var retry = document.createElement('button');
+        retry.type = 'button';
+        retry.textContent = 'ПОВТОРИТЬ ЗАГРУЗКУ';
+        retry.style.cssText = 'border:1px solid #cd412b;background:#cd412b;color:#fff;padding:10px 16px;border-radius:4px;font:700 12px monospace;cursor:pointer';
+        retry.addEventListener('click', function() { window.location.reload(); });
+        loader.appendChild(retry);
+
+        var spinner = loader.querySelector('div[style*="border-radius: 50%"]');
+        if (spinner) spinner.style.display = 'none';
+      }, 20000);
     </script>
   </head>
   <body style="background-color: #0c0d10; color: #f8fafc; margin: 0; min-height: 100vh;" class="bg-[#0c0d10] text-[#f8fafc]">
