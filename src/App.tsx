@@ -2088,26 +2088,6 @@ export default function App() {
                 lang={lang}
                 onNavigate={(tab) => handleTabChange(tab)}
                 onOpenDonation={() => handleTabChange('support')}
-                selectedProject={selectedProject}
-                onSelectProject={(proj) => setSelectedProject(proj)}
-                rustoriaServers={rustoriaServers}
-                loadingServers={loadingServers}
-                onRefreshServers={(proj) => fetchRustoriaServers(proj)}
-                copiedServerId={copiedServerId}
-                onCopyServer={(cmd, id) => {
-                  navigator.clipboard.writeText(cmd);
-                  setCopiedServerId(id);
-                  const toastId = Math.random().toString(36).substring(2, 9);
-                  setToasts(prev => [...prev, { id: toastId, message: lang === 'ru' ? 'IP скопирован в буфер!' : 'Connect command copied!', type: 'success' }]);
-                  setTimeout(() => {
-                    setToasts(prev => prev.filter(t => t.id !== toastId));
-                    setCopiedServerId(null);
-                  }, 2500);
-                }}
-                regionFilter={regionFilter}
-                onSetRegionFilter={(reg) => setRegionFilter(reg)}
-                serverSearch={serverSearch}
-                onSetServerSearch={(search) => setServerSearch(search)}
                 twitchSettings={twitchSettings}
                 showJungleFeverSpoiler={showJungleFeverSpoiler}
                 onGenerateWallpaper={generateWallpaper}
