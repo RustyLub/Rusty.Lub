@@ -350,7 +350,7 @@ export default function App() {
   const [lang, setLang] = useState<'ru' | 'en'>('en');
   const [appTheme, setAppTheme] = useState<'dark' | 'light'>(() => {
     try {
-      return (localStorage.getItem('rust_app_theme') as 'dark' | 'light') || 'light';
+      return (localStorage.getItem('rust_app_theme') as 'dark' | 'light') || 'dark';
     } catch {
       return 'light';
     }
