@@ -836,3 +836,41 @@ nav a, nav button, [role="tab"], .technical-label, .eyebrow {
     max-width: 11ch;
   }
 }
+
+
+/* Live-site atmospheric background: keep it in a dedicated layer behind the app UI. */
+body:not(.light-theme) {
+  background: #080b0e !important;
+}
+body:not(.light-theme)::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(180deg, rgba(7, 10, 14, .48) 0%, rgba(7, 10, 14, .68) 55%, rgba(7, 10, 14, .82) 100%),
+    linear-gradient(90deg, rgba(5, 7, 10, .42) 0%, rgba(5, 7, 10, .08) 30%, rgba(5, 7, 10, .08) 70%, rgba(5, 7, 10, .42) 100%),
+    radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, .18), transparent 46rem),
+    url("https://cdn.cloudflare.steamstatic.com/steam/apps/252490/library_hero.jpg");
+  background-size: cover, cover, cover, cover;
+  background-position: center, center, center top, center top;
+  background-repeat: no-repeat;
+}
+body:not(.light-theme) #root {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+}
+@media (max-width: 768px) {
+  body:not(.light-theme)::before {
+    background-image:
+      linear-gradient(180deg, rgba(7, 10, 14, .62) 0%, rgba(7, 10, 14, .80) 55%, rgba(7, 10, 14, .90) 100%),
+      radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, .13), transparent 30rem),
+      url("https://cdn.cloudflare.steamstatic.com/steam/apps/252490/library_hero.jpg");
+    background-position: center, center, center top;
+  }
+}
+body.light-theme::before {
+  content: none !important;
+}
