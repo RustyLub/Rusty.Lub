@@ -46,58 +46,26 @@ async function startServer() {
   const radarService = new RadarService(io);
   radarService.start();
 
-  // Middleware for ID Token verification
+  // Verify Firebase ID tokens on the server. Never trust a caller-supplied UID header:
+  // X-User-Uid / X-User-Id are user-controlled and must not establish identity or privileges.
   const verifyToken = async (req: any, res: any, next: any) => {
-    const authHeader = req.headers.authorization;
-    const customUid = req.headers['x-user-uid'] || req.headers['x-user-id'];
-
-    if (customUid) {
-      try {
-        const uidStr = String(customUid);
-        const userDoc = await clientGetDoc(clientDoc(clientDb, 'chat_users', uidStr));
-        if (userDoc && userDoc.exists && userDoc.exists()) {
-          const userData = userDoc.data();
-          req.user = { uid: uidStr, email: userData?.email || '', role: userData?.role || 'user', ...userData };
-          return next();
-        } else if (uidStr === 'serustqs' || uidStr === 'admin' || uidStr === 'misterzet556@gmail.com') {
-          req.user = { uid: uidStr, role: 'admin', email: 'misterzet556@gmail.com' };
-          return next();
-        }
-      } catch (err) {
-        if (customUid === 'serustqs' || customUid === 'admin' || customUid === 'misterzet556@gmail.com') {
-          req.user = { uid: String(customUid), role: 'admin', email: 'misterzet556@gmail.com' };
-          return next();
-        }
-      }
-    }
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      if (customUid) {
-        req.user = { uid: String(customUid) };
-        return next();
-      }
+    const authHeader = String(req.headers.authorization || '');
+    if (!authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ success: false, message: 'Unauthorized: Missing token' });
     }
 
-    const idToken = authHeader.split('Bearer ')[1];
+    const idToken = authHeader.slice(7).trim();
     if (!idToken || idToken === 'undefined' || idToken === 'null') {
-      if (customUid) {
-        req.user = { uid: String(customUid) };
-        return next();
-      }
       return res.status(401).json({ success: false, message: 'Unauthorized: Invalid token' });
     }
 
     try {
-      const decodedToken = await adminAuth.verifyIdToken(idToken);
+      // Check revocation as well as token validity before trusting the identity.
+      const decodedToken = await adminAuth.verifyIdToken(idToken, true);
       req.user = decodedToken;
-      next();
+      return next();
     } catch (error: any) {
-      if (customUid) {
-        req.user = { uid: String(customUid) };
-        return next();
-      }
-      return res.status(401).json({ success: false, message: 'Unauthorized: Invalid token' });
+      return res.status(401).json({ success: false, message: 'Unauthorized: Invalid or revoked token' });
     }
   };
 
@@ -266,7 +234,7 @@ async function startServer() {
   app.post('/api/cms/pages', verifyCmsIdentity, requireCmsRole('owner', 'admin', 'editor'), async (req: any, res: any) => {
     try {
       const body = req.body || {};
-      const slug = String(body.slug || '').trim().toLowerCase().replace(/^\\/+|\\/+$/g, '');
+      const slug = String(body.slug || '').trim().toLowerCase().replace(/^\/+|\/+$/g, '');
       if (!slug || slug.length > 120 || !/^[a-z0-9]+(?:[/-][a-z0-9]+)*$/.test(slug)) {
         return res.status(400).json({ message: 'Slug must contain only lowercase letters, numbers, hyphens or path separators.' });
       }

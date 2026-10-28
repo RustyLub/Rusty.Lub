@@ -26,10 +26,8 @@ export async function sendWindowsNotification(
 
   const isTauri = '__TAURI_INTERNALS__' in window || '__TAURI__' in window;
 
-  // 1. Play audio alarm if it's a raid alarm or radar alert
-  if (type === 'raid' || type === 'radar') {
-    playNotificationAudio(type);
-  }
+  // 1. Play a distinct sound for every notification category.
+  playNotificationAudio(type);
 
   // 2. Try Tauri 2 Notification plugin if available
   if (isTauri) {
@@ -68,57 +66,27 @@ export async function sendWindowsNotification(
 }
 
 /**
- * Synthesizes a high-contrast tactical audio chime for Rust raid alarms and radar alerts
+ * Play bundled WAV assets for distinct desktop notification categories.
+ * Audio files are original tones created for Rusty.Lub, not copied iOS recordings.
  */
-export function playNotificationAudio(type: 'raid' | 'radar' | 'system' = 'raid') {
+export function playNotificationAudio(type: 'raid' | 'radar' | 'system' | 'update' = 'system') {
+  if (typeof window === 'undefined') return;
+
+  const files: Record<typeof type, string> = {
+    raid: '/sounds/raid.wav',
+    radar: '/sounds/radar.wav',
+    system: '/sounds/notification.wav',
+    update: '/sounds/update.wav',
+  };
+
   try {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContextClass) return;
-
-    const ctx = new AudioContextClass();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    if (type === 'raid') {
-      // Alarm siren pattern (alternating 880Hz and 587Hz)
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.3);
-      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.35);
-      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.7);
-
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
-
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.85);
-    } else if (type === 'radar') {
-      // Submarine radar ping (high frequency pulse)
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(1200, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1600, ctx.currentTime + 0.15);
-
-      gain.gain.setValueAtTime(0.25, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.45);
-    } else {
-      // Gentle system ping
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(600, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
-
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.3);
-    }
+    const audio = new Audio(files[type]);
+    audio.volume = 0.75;
+    audio.preload = 'auto';
+    void audio.play().catch((err: unknown) => {
+      console.warn('Desktop notification sound playback blocked:', err);
+    });
   } catch (err) {
-    console.warn('Audio synthesis alert error:', err);
+    console.warn('Desktop notification audio error:', err);
   }
 }

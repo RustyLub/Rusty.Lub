@@ -66,80 +66,24 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   }
 }
 
-// Sound Synthesis using Web Audio API for custom tones
+// Playback uses bundled original WAV assets with short, polished mobile-style alert tones.
 export function playNotificationSound(type: 'chime' | 'alarm' | 'wipe' | 'timer' = 'chime', volume = 0.8) {
+  if (typeof window === 'undefined') return;
+  const files: Record<typeof type, string> = {
+    chime: '/sounds/notification.wav',
+    alarm: '/sounds/raid.wav',
+    wipe: '/sounds/wipe.wav',
+    timer: '/sounds/timer.wav',
+  };
   try {
-    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
-
-    if (type === 'alarm') {
-      // 🚨 Rust+ Raid Alarm Siren (dual tone frequency sweep)
-      const now = ctx.currentTime;
-      for (let i = 0; i < 3; i++) {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(440, now + i * 0.4);
-        osc.frequency.exponentialRampToValueAtTime(880, now + i * 0.4 + 0.2);
-        osc.frequency.exponentialRampToValueAtTime(440, now + i * 0.4 + 0.38);
-
-        gain.gain.setValueAtTime(0.3 * volume, now + i * 0.4);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.4 + 0.39);
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now + i * 0.4);
-        osc.stop(now + i * 0.4 + 0.4);
-      }
-    } else if (type === 'wipe') {
-      // 🚀 Epic Wipe Horn Chime
-      const now = ctx.currentTime;
-      const notes = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
-      notes.forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.12);
-        gain.gain.setValueAtTime(0.25 * volume, now + idx * 0.12);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.6);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now + idx * 0.12);
-        osc.stop(now + idx * 0.12 + 0.65);
-      });
-    } else if (type === 'timer') {
-      // ⏰ Locked Crate / Event Timer completion beep
-      const now = ctx.currentTime;
-      [880, 880, 1174.66].forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.15);
-        gain.gain.setValueAtTime(0.25 * volume, now + idx * 0.15);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.15 + 0.12);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now + idx * 0.15);
-        osc.stop(now + idx * 0.15 + 0.13);
-      });
-    } else {
-      // Standard pleasant notification chime
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, now); // D5
-      osc.frequency.setValueAtTime(880, now + 0.08); // A5
-      gain.gain.setValueAtTime(0.2 * volume, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.36);
-    }
+    const audio = new Audio(files[type]);
+    audio.volume = Math.max(0, Math.min(1, volume));
+    audio.preload = 'auto';
+    void audio.play().catch((err: unknown) => {
+      console.warn('Notification sound playback blocked by browser:', err);
+    });
   } catch (err) {
-    console.warn('AudioContext playback error:', err);
+    console.warn('Audio notification playback error:', err);
   }
 }
 
