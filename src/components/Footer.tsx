@@ -61,9 +61,8 @@ export default function Footer({ lang, onNavigate, onOpenCabinet, onOpenDonation
             <h2 className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#f28a24]">{ru ? 'Документы' : 'Documents'}</h2>
             <nav className="flex flex-col items-start gap-2">
               <button className={linkClass} onClick={onOpenTerms}>{ru ? 'Пользовательское соглашение' : 'User agreement'}</button>
-              <button className={linkClass} onClick={onOpenTerms}>{ru ? 'Политика конфиденциальности' : 'Privacy policy'}</button>
-              <button className={linkClass} onClick={onOpenTerms}>{ru ? 'Условия платных услуг' : 'Paid services terms'}</button>
-              <button className={linkClass} onClick={onOpenTerms}>{ru ? 'Возврат средств' : 'Refund policy'}</button>
+              <a className={linkClass} href="mailto:rusty.lub_offers@bk.ru?subject=Privacy%20and%20personal%20data">{ru ? 'Вопросы по персональным данным' : 'Privacy and personal data'}</a>
+              <a className={linkClass} href="mailto:rusty.lub_offers@bk.ru?subject=Paid%20services%20and%20refunds">{ru ? 'Платные услуги и возвраты' : 'Paid services and refunds'}</a>
             </nav>
           </div>
         </div>
