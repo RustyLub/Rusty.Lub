@@ -965,28 +965,20 @@ export default function CabinetModal({
   return (
     <div className={pageMode ? "w-full flex justify-center py-2 sm:py-4" : "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"}>
       <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
+        initial={pageMode ? { opacity: 0 } : { scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
+        exit={pageMode ? { opacity: 0 } : { scale: 0.95, opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className={`w-full max-w-6xl bg-[#14171e] border-2 border-[#2a2f3b] rounded-none overflow-hidden shadow-2xl rust-metal-pattern flex flex-col md:flex-row ${pageMode ? "min-h-[75vh]" : "h-[95vh] md:h-[760px]"} relative cabinet-modal-container`}
+        className={`w-full ${pageMode ? "max-w-none min-h-[75vh] border-0 border-t border-[#2a2f3b] rounded-none shadow-none bg-transparent" : "max-w-6xl border-2 border-[#2a2f3b] shadow-2xl bg-[#14171e]"} overflow-hidden rust-metal-pattern flex flex-col md:flex-row ${pageMode ? "min-h-[75vh]" : "h-[95vh] md:h-[760px]"} relative cabinet-modal-container`}
       >
-        {/* Tactical Corner Brackets */}
-        <div className="rust-bracket-tl" />
-        <div className="rust-bracket-tr" />
-        <div className="rust-bracket-bl" />
-        <div className="rust-bracket-br" />
+        {/* Decorative modal brackets are intentionally omitted on the full account page */}
+        {!pageMode && <><div className="rust-bracket-tl" /><div className="rust-bracket-tr" /><div className="rust-bracket-bl" /><div className="rust-bracket-br" /></>}
 
         {/* Hazard header */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 rust-hazard z-10" />
+        {!pageMode && <div className="absolute top-0 left-0 right-0 h-1.5 rust-hazard z-10" />}
 
         {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors cursor-pointer z-50 bg-black/40 p-1.5 border border-[#2a2f3b]/60 hover:border-zinc-500"
-        >
-          <X size={18} />
-        </button>
+        {!pageMode && <button onClick={onClose} className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors cursor-pointer z-50 bg-black/40 p-1.5 border border-[#2a2f3b]/60 hover:border-zinc-500"><X size={18} /></button>}
 
         {/* CABINET SIDEBAR */}
         <div className="w-full md:w-56 border-b md:border-b-0 md:border-r border-[#2a2f3b] bg-[#0c0d10] p-4 pt-6 flex flex-col justify-between shrink-0">
