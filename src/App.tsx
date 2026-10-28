@@ -1230,11 +1230,11 @@ export default function App() {
       className={`min-h-screen font-sans relative selection:bg-[#ff2a4d]/30 selection:text-white pb-20 transition-colors duration-200 ${
         appTheme === 'light' 
           ? 'bg-[#f4f3f0] text-neutral-900' 
-          : 'bg-[#07090f] text-[#c8d0d8] scanlines bg-cover bg-center bg-no-repeat bg-fixed'
+          : 'bg-transparent text-[#c8d0d8] scanlines'
       }`}
-      style={appTheme === 'light' ? { backgroundColor: '#f4f3f0' } : {
-        backgroundImage: `linear-gradient(to bottom, rgba(7, 9, 15, 0.55), rgba(7, 9, 15, 0.72)), url(${customSwampBg})`
-      }}
+      style={appTheme === 'light'
+        ? { backgroundColor: '#f4f3f0', backgroundImage: 'none' }
+        : { backgroundColor: 'transparent', backgroundImage: 'none' }}
     >
 
 
