@@ -159,24 +159,25 @@ export default function HomeTab({
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_78%_42%,rgba(249,115,22,0.14),transparent_42%)]" />
 
         <div className="flex w-full items-center p-5 sm:p-8 lg:p-12 xl:p-16">
-          <div className="max-w-4xl space-y-6 sm:space-y-8">
-            <div className="inline-flex max-w-full flex-col items-start gap-2 border-l-2 border-orange-500 bg-black/35 px-4 py-3 backdrop-blur-sm sm:gap-3 sm:px-5 sm:py-4">
-              <img src={logoFull} alt="Rusty.Lub logo" className="h-auto w-[220px] max-w-full object-contain object-left sm:w-[300px] lg:w-[340px]" />
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-orange-200 sm:text-xs">Rust community hub</span>
-            </div>
+          <div className="w-full max-w-6xl space-y-6 sm:space-y-8">
+            <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:gap-7 lg:gap-10">
+              <div className="shrink-0 border-l-2 border-orange-500 bg-black/35 px-3 py-3 backdrop-blur-sm sm:px-4 sm:py-4">
+                <img src={logoFull} alt="Rusty.Lub logo" className="h-auto w-[150px] max-w-full object-contain object-left sm:w-[175px] md:w-[195px] lg:w-[220px]" />
+              </div>
 
-            <div className="space-y-4">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-orange-300 sm:text-xs">
-                {lang === 'ru' ? 'ИНСТРУМЕНТЫ • БАЗА ЗНАНИЙ • СООБЩЕСТВО' : 'TOOLS • KNOWLEDGE • COMMUNITY'}
-              </p>
-              <h1 className="max-w-4xl text-4xl font-black leading-[0.98] tracking-tight text-white drop-shadow-[0_3px_18px_rgba(0,0,0,0.6)] sm:text-5xl md:text-6xl lg:text-7xl">
-                {lang === 'ru' ? <>Твой следующий вайп.<br /><span className="text-orange-400">Под твоим контролем.</span></> : <>Your next wipe.<br /><span className="text-orange-400">On your terms.</span></>}
-              </h1>
-              <p className="max-w-2xl text-sm leading-7 text-[#e0e5eb] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] sm:text-base lg:text-lg">
-                {lang === 'ru'
-                  ? 'Калькулятор рейда, игровые инструменты и база знаний Rust — всё необходимое, чтобы подготовиться к вайпу и играть эффективнее.'
-                  : 'Raid calculations, practical game tools, and a Rust knowledge base — everything you need to prepare for wipe and play smarter.'}
-              </p>
+              <div className="min-w-0 space-y-4">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-orange-300 sm:text-xs">
+                  {lang === 'ru' ? 'ИНСТРУМЕНТЫ • БАЗА ЗНАНИЙ • СООБЩЕСТВО' : 'TOOLS • KNOWLEDGE • COMMUNITY'}
+                </p>
+                <h1 className="max-w-4xl text-4xl font-black leading-[0.98] tracking-tight text-white drop-shadow-[0_3px_18px_rgba(0,0,0,0.6)] sm:text-5xl md:text-6xl lg:text-7xl">
+                  {lang === 'ru' ? <>Твой следующий вайп.<br /><span className="text-orange-400">Под твоим контролем.</span></> : <>Your next wipe.<br /><span className="text-orange-400">On your terms.</span></>}
+                </h1>
+                <p className="max-w-2xl text-sm leading-7 text-[#e0e5eb] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] sm:text-base lg:text-lg">
+                  {lang === 'ru'
+                    ? 'Калькулятор рейда, игровые инструменты и база знаний Rust — всё необходимое, чтобы подготовиться к вайпу и играть эффективнее.'
+                    : 'Raid calculations, practical game tools, and a Rust knowledge base — everything you need to prepare for wipe and play smarter.'}
+                </p>
+              </div>
             </div>
 
             <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap">
