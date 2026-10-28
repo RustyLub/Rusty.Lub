@@ -345,6 +345,14 @@ export default function App() {
       window.removeEventListener('hashchange', handleUrlChange);
     };
   }, []);
+
+  // Keep privileged sections out of the address bar. This is not an access-control mechanism.
+  useEffect(() => {
+    const privateTabs: TabType[] = ['admin', 'icons', 'rustplus'];
+    if (privateTabs.includes(activeTab) && window.location.hash) {
+      window.history.replaceState({ tab: activeTab }, '', window.location.pathname + window.location.search);
+    }
+  }, [activeTab]);
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lang, setLang] = useState<'ru' | 'en'>('en');
@@ -805,10 +813,12 @@ export default function App() {
 
     setActiveTab(tabId);
     try {
-      const hash = tabId === 'home' ? '' : `#${tabId}`;
-      const newUrl = tabId === 'home' 
-        ? window.location.pathname + window.location.search 
-        : `${window.location.pathname}${window.location.search}#${tabId}`;
+      const privateTabs: TabType[] = ['admin', 'icons', 'rustplus'];
+      const hideTabFromUrl = privateTabs.includes(tabId);
+      const hash = tabId === 'home' || hideTabFromUrl ? '' : `#${tabId}`;
+      const newUrl = hash
+        ? `${window.location.pathname}${window.location.search}${hash}`
+        : window.location.pathname + window.location.search;
       
       if (window.location.hash !== hash) {
         history.pushState({ tab: tabId }, '', newUrl);
