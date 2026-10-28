@@ -186,16 +186,16 @@ export default function TermsModal({ isOpen, onClose, lang, pageMode = false }: 
 
   return (
     <AnimatePresence>
-      <div className={pageMode ? "w-full min-h-[65vh] flex justify-center px-0 py-2 sm:py-4" : "fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-md"}>
+      <div className={pageMode ? "w-full min-h-[65vh] px-0 py-2 sm:py-4" : "fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-md"}>
         <motion.div
           initial={{ scale: 0.96, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.96, opacity: 0, y: 15 }}
           transition={{ duration: 0.2 }}
-          className={`w-full max-w-4xl bg-[#0c1017] border border-[#2a344a] p-0 relative overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.25)] flex flex-col ${pageMode ? "min-h-[65vh]" : "max-h-[90vh]"}`}
+          className={`w-full ${pageMode ? "max-w-none border-0 border-t border-[#2a344a] bg-transparent shadow-none" : "max-w-4xl border bg-[#0c1017] shadow-[0_0_60px_rgba(0,0,0,0.25)]"} p-0 relative overflow-hidden flex flex-col ${pageMode ? "min-h-[65vh]" : "max-h-[90vh]"}`}
         >
           {/* Header */}
-          <div className="bg-[#111722] border-b border-[#2a344a] p-4 sm:p-5 flex items-center justify-between relative shrink-0">
+          <div className={`border-b border-[#2a344a] p-4 sm:p-5 flex items-center justify-between relative shrink-0 ${pageMode ? "bg-transparent" : "bg-[#111722]"}`}>
             <div className="flex items-center gap-3 min-w-0">
               <div className="p-2 bg-[#ff2a4d]/10 border border-[#ff2a4d]/30 text-[#ff2a4d] shrink-0">
                 <Scale size={20} />
@@ -214,16 +214,11 @@ export default function TermsModal({ isOpen, onClose, lang, pageMode = false }: 
                 </div>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-white/5 text-zinc-400 hover:text-white transition-all cursor-pointer border border-transparent hover:border-zinc-700 shrink-0 ml-3"
-            >
-              <X size={20} />
-            </button>
+            {!pageMode && <button onClick={onClose} className="p-2 hover:bg-white/5 text-zinc-400 hover:text-white transition-all cursor-pointer border border-transparent hover:border-zinc-700 shrink-0 ml-3"><X size={20} /></button>}
           </div>
 
           {/* Body Content */}
-          <div className="p-4 sm:p-6 space-y-5 overflow-y-auto custom-scrollbar flex-1 bg-[#090c12]">
+          <div className={`p-4 sm:p-6 space-y-5 overflow-y-auto custom-scrollbar flex-1 ${pageMode ? "bg-transparent" : "bg-[#090c12]"}`}>
             {/* Preamble / Intro Box */}
             <div className="bg-[#111722]/80 border-l-3 border-[#ff2a4d] p-4 text-xs text-zinc-300 leading-relaxed font-sans shadow-sm">
               <div className="flex items-start gap-2.5">
