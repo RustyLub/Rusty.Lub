@@ -81,7 +81,9 @@ export function getAvatarUrl(photoURL?: string | null, avatarClass?: string | nu
   }
   
   // If the user has a custom external URL (e.g., from Discord, Steam, or uploaded to a public host)
-  if (photoURL && (photoURL.startsWith('http://') || photoURL.startsWith('https://')) && !photoURL.includes('avatar_') && !photoURL.includes('assets/')) {
+  // Allow validated user-uploaded raster images stored as data URLs, as well as external image links.
+  const isUploadedRaster = !!photoURL && /^data:image\/(jpeg|png|webp);base64,/i.test(photoURL);
+  if (photoURL && (isUploadedRaster || ((photoURL.startsWith('http://') || photoURL.startsWith('https://')) && !photoURL.includes('avatar_') && !photoURL.includes('assets/')))) {
     return photoURL;
   }
   

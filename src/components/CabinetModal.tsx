@@ -492,7 +492,7 @@ export default function CabinetModal({
       const userRef = doc(db, 'chat_users', user.uid);
 
       if (!displayName.trim()) {
-        onToast(lang === 'ru' ? 'Имя (Позывной) не может быть пустым!' : 'Callsign (Display Name) cannot be empty!', 'warning');
+        onToast(lang === 'ru' ? 'Никнейм не может быть пустым!' : 'Nickname cannot be empty!', 'warning');
         setIsSavingProfile(false);
         return;
       }
@@ -1150,37 +1150,7 @@ export default function CabinetModal({
                 <span>{lang === 'ru' ? 'Связь' : 'Feedback'}</span>
               </button>
 
-              {isAdmin && (
-                <>
-                  <div className="pt-2 text-[8px] font-mono font-black text-zinc-500 uppercase tracking-widest pl-3">
-                    {lang === 'ru' ? 'АДМИН-ЦЕНТР' : 'ADMIN CONTROL'}
-                  </div>
-
-                  <button
-                    onClick={() => setActiveTab('admin_users')}
-                    className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
-                      activeTab === 'admin_users'
-                        ? 'bg-[#f97316]/15 border-[#f97316]/50 text-[#f97316] font-black'
-                        : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    <Settings size={13} />
-                    <span>{lang === 'ru' ? 'Пользователи' : 'Users Admin'}</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab('admin_site')}
-                    className={`w-full text-left px-3 py-2 text-xs font-bold uppercase tracking-wider font-mono cursor-pointer transition-all border flex items-center gap-2 ${
-                      activeTab === 'admin_site'
-                        ? 'bg-[#f97316]/15 border-[#f97316]/50 text-[#f97316] font-black'
-                        : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    <Layout size={13} />
-                    <span>{lang === 'ru' ? 'Опции Сайта' : 'Site Settings'}</span>
-                  </button>
-                </>
-              )}
+              {/* Admin controls remain available through the dedicated admin area, not the shared cabinet. */}
             </div>
           </div>
 
@@ -1222,7 +1192,7 @@ export default function CabinetModal({
                 <div className="flex justify-between items-start gap-4">
                   <div>
                     <h3 className="text-xl font-bold text-white tracking-wider font-teko uppercase">
-                      {lang === 'ru' ? 'ЛИЧНЫЙ КАБИНЕТ ВЫЖИВШЕГО' : 'SURVIVOR PERSONAL PROFILE'}
+                      {lang === 'ru' ? 'ЛИЧНЫЙ КАБИНЕТ' : 'PERSONAL CABINET'}
                     </h3>
                     <p className="text-xs text-gray-500 font-mono">
                       {lang === 'ru' ? 'Кастомизация вашей визитки и сбор нашивок на острове' : 'Customize your telemetry card and collect badges on the island'}
@@ -1303,7 +1273,7 @@ export default function CabinetModal({
                               {/* Callsign Display Name */}
                               <div className="space-y-1.5">
                                 <label className="text-[9px] text-zinc-500 font-mono uppercase block">
-                                  {lang === 'ru' ? 'Имя (Позывной выжившего)' : 'Callsign (Display Name)'}
+                                  {lang === 'ru' ? 'Никнейм' : 'Nickname'}
                                 </label>
                                 <div className="relative">
                                   <input 
@@ -1495,10 +1465,10 @@ export default function CabinetModal({
                           <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4">
                             <span className="text-[10px] font-mono text-[#cd412b] font-bold uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5 flex items-center gap-1.5">
                               <Sparkles size={12} />
-                              {lang === 'ru' ? 'ВЫБОР ТАКТИЧЕСКОГО КОСТЮМА (АВАТАР)' : 'CHOOSE TACTICAL SUIT (AVATAR)'}
+                              {lang === 'ru' ? 'АВАТАР ПРОФИЛЯ' : 'PROFILE AVATAR'}
                             </span>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[440px] overflow-y-auto pr-1">
                               {CUSTOM_AVATARS.map((avatar) => {
                                 const isCurrent = fullProfile && fullProfile.avatarClass === avatar.id;
                                 return (
@@ -1511,22 +1481,22 @@ export default function CabinetModal({
                                         setFullProfile({ ...fullProfile, avatarClass: avatar.id, photoURL: avatar.url });
                                       }
                                     }}
-                                    className={`p-2 border text-left flex items-center gap-2.5 cursor-pointer transition-all rounded-sm relative ${
-                                      isCurrent 
-                                        ? 'border-[#cd412b] bg-[#cd412b]/10' 
-                                        : 'border-[#2a2f3b] bg-[#14171e]/50 hover:border-zinc-600'
+                                    className={`group p-2.5 border text-left flex flex-col gap-2 cursor-pointer transition-colors rounded-md relative min-w-0 ${
+                                      isCurrent
+                                        ? 'border-[#f28a24] bg-[#f28a24]/10'
+                                        : 'border-[#2a2f3b] bg-[#11151b] hover:border-[#6b7280] hover:bg-[#171c23]'
                                     }`}
                                   >
                                     <img referrerPolicy="no-referrer" 
                                       src={avatar.url} 
                                       alt={avatar.name[lang]} 
-                                      className="w-9 h-9 border border-zinc-800 object-cover bg-black shrink-0"
+                                      className="w-full aspect-square max-h-36 rounded-sm border border-white/10 object-cover bg-black shrink-0 transition-[filter] group-hover:brightness-110"
                                     />
                                     <div className="min-w-0 flex-1">
-                                      <span className="block text-[8.5px] font-black text-white leading-tight truncate">
+                                      <span className="block text-xs font-bold text-zinc-100 leading-tight truncate">
                                         {avatar.name[lang]}
                                       </span>
-                                      <span className="block text-[6.5px] font-mono text-zinc-500 truncate">
+                                      <span className="block text-[10px] text-zinc-500 truncate">
                                         {avatar.role[lang]}
                                       </span>
                                     </div>
@@ -1539,7 +1509,7 @@ export default function CabinetModal({
                             {/* Custom Avatar URL */}
                             <div className="space-y-1.5 pt-2">
                               <label className="text-[8.5px] text-zinc-500 font-mono uppercase block">
-                                {lang === 'ru' ? 'Или своя тактическая аватарка по ссылке (URL фото)' : 'Or set custom avatar using image URL'}
+                                {lang === 'ru' ? 'СВОЁ ФОТО ПО ССЫЛКЕ (URL)' : 'CUSTOM PHOTO URL'}
                               </label>
                               <input 
                                 type="text" 
@@ -1548,6 +1518,64 @@ export default function CabinetModal({
                                 className="w-full bg-[#14171e] border border-zinc-800 focus:border-zinc-700 p-2.5 text-xs font-mono text-white outline-none"
                                 placeholder="https://example.com/avatar.png"
                               />
+                              <p className="text-[10px] leading-relaxed text-zinc-500">
+                                {lang === 'ru' ? 'Укажите прямую ссылку на изображение HTTPS. Подойдут JPG, PNG или WebP; после выбора проверьте предпросмотр.' : 'Use a direct HTTPS image link. JPG, PNG or WebP are recommended; check the preview after selecting.'}
+                              </p>
+
+                              <div className="rounded-md border border-dashed border-[#38404b] bg-[#11151b] p-3 space-y-2.5">
+                                <div className="flex items-center gap-2">
+                                  <Upload size={15} className="text-[#f28a24]" />
+                                  <div>
+                                    <p className="text-xs font-bold text-zinc-200">{lang === 'ru' ? 'Загрузить аватар с устройства' : 'Upload avatar from device'}</p>
+                                    <p className="text-[10px] text-zinc-500">{lang === 'ru' ? 'JPG, PNG или WebP · до 700 КБ · 64–2048 px' : 'JPG, PNG or WebP · up to 700 KB · 64–2048 px'}</p>
+                                  </div>
+                                </div>
+                                <label className="inline-flex items-center justify-center gap-2 rounded border border-[#f28a24]/40 bg-[#f28a24]/10 px-3 py-2 text-xs font-bold text-[#ffad5c] hover:bg-[#f28a24]/20 cursor-pointer">
+                                  <Upload size={13} />
+                                  {lang === 'ru' ? 'Выбрать файл' : 'Choose file'}
+                                  <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => {
+                                    const file = e.currentTarget.files?.[0];
+                                    e.currentTarget.value = '';
+                                    if (!file) return;
+                                    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                                      onToast(lang === 'ru' ? 'Поддерживаются только JPG, PNG и WebP.' : 'Only JPG, PNG and WebP are supported.', 'warning'); return;
+                                    }
+                                    if (file.size > 700 * 1024) {
+                                      onToast(lang === 'ru' ? 'Аватар должен быть не больше 700 КБ.' : 'Avatar must be 700 KB or smaller.', 'warning'); return;
+                                    }
+                                    const reader = new FileReader();
+                                    reader.onerror = () => onToast(lang === 'ru' ? 'Не удалось прочитать файл.' : 'Could not read file.', 'error');
+                                    reader.onload = () => {
+                                      const dataUrl = String(reader.result || '');
+                                      const image = new window.Image();
+                                      image.onload = () => {
+                                        if (image.width < 64 || image.height < 64 || image.width > 2048 || image.height > 2048) {
+                                          onToast(lang === 'ru' ? 'Размеры должны быть от 64×64 до 2048×2048 px.' : 'Dimensions must be between 64×64 and 2048×2048 px.', 'warning'); return;
+                                        }
+                                        const ratio = image.width / image.height;
+                                        if (ratio < 0.5 || ratio > 2) {
+                                          onToast(lang === 'ru' ? 'Соотношение сторон должно быть от 1:2 до 2:1.' : 'Aspect ratio must be between 1:2 and 2:1.', 'warning'); return;
+                                        }
+                                        setCustomAvatarUrl(dataUrl);
+                                        setFullProfile(prev => prev ? { ...prev, avatarClass: 'custom_upload', photoURL: dataUrl } : prev);
+                                        onToast(lang === 'ru' ? 'Аватар проверен. Нажмите «Сохранить профиль», чтобы применить его.' : 'Avatar validated. Click “Save profile” to apply it.', 'success');
+                                      };
+                                      image.onerror = () => onToast(lang === 'ru' ? 'Файл не является корректным изображением.' : 'Invalid image file.', 'warning');
+                                      image.src = dataUrl;
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }} />
+                                </label>
+                                {customAvatarUrl && (
+                                  <div className="flex items-center gap-3 border-t border-white/5 pt-3">
+                                    <img src={customAvatarUrl} alt={lang === 'ru' ? 'Предпросмотр аватара' : 'Avatar preview'} className="h-14 w-14 rounded-md border border-[#f28a24]/40 bg-black object-cover" />
+                                    <div className="min-w-0">
+                                      <p className="text-xs font-semibold text-zinc-200">{lang === 'ru' ? 'Предпросмотр' : 'Preview'}</p>
+                                      <p className="text-[10px] text-zinc-500">{lang === 'ru' ? 'Изображение будет сохранено вместе с профилем.' : 'Image will be saved with your profile.'}</p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
 
