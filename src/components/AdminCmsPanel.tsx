@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { auth } from '../firebase';
-import { FileText, Settings2, Shield, History, Plus, Save, RefreshCw, Eye, EyeOff } from 'lucide-react';
+import { FileText, Settings2, Shield, History, Plus, Save, RefreshCw, Eye, EyeOff, Trash2 } from 'lucide-react';
 
 type Lang = 'ru' | 'en';
 type CmsPage = { id: string; slug: string; title: Record<Lang, string>; description: Record<Lang, string>; body: Record<Lang, string>; visible: boolean; order: number; updatedAt?: string };
@@ -88,6 +88,21 @@ export default function AdminCmsPanel({ lang, onToast }: Props) {
     } finally { setBusy(false); }
   };
 
+  const deletePage = async () => {
+    if (!selected?.id) return;
+    const confirmed = window.confirm(ru ? `Удалить страницу «${selected.title?.[lang] || selected.slug}»? Это действие нельзя отменить.` : `Delete page "${selected.title?.[lang] || selected.slug}"? This cannot be undone.`);
+    if (!confirmed) return;
+    setBusy(true);
+    try {
+      await request(`/api/cms/pages/${encodeURIComponent(selected.id)}`, { method: 'DELETE' });
+      setSelected(null);
+      onToast(ru ? 'Страница удалена' : 'Page deleted', 'success');
+      await refresh();
+    } catch (error) {
+      onToast(error instanceof Error ? error.message : String(error), 'error');
+    } finally { setBusy(false); }
+  };
+
   const saveSettings = async () => {
     setBusy(true);
     try {
@@ -146,7 +161,7 @@ export default function AdminCmsPanel({ lang, onToast }: Props) {
           <label className="block space-y-1 text-xs text-zinc-400">{ru ? 'Содержимое (Markdown)' : 'Content (Markdown)'}<textarea className={field} rows={9} value={selected.body?.[locale] || ''} disabled={!canEdit} onChange={e => updateLocalized('body', locale, e.target.value)}/></label>
           <div className="rounded border border-zinc-800 bg-black/20 p-3"><div className="mb-2 text-[10px] uppercase text-zinc-500">{ru ? 'Предпросмотр' : 'Preview'}</div><h4 className="mb-2 text-base font-bold">{selected.title?.[locale] || 'Untitled'}</h4><p className="whitespace-pre-wrap text-xs text-zinc-400">{selected.body?.[locale] || (ru ? 'Текст появится здесь…' : 'Content preview…')}</p></div>
         </div>)}</div>
-        <div className="flex flex-wrap items-center gap-4"><label className="text-xs"><input type="checkbox" checked={selected.visible} disabled={!canEdit} onChange={e => updatePage({ visible: e.target.checked })} className="mr-2 accent-orange-500"/>{ru ? 'Опубликована' : 'Published'}</label><label className="flex items-center gap-2 text-xs">{ru ? 'Порядок' : 'Order'}<input type="number" className={field + ' w-24'} value={selected.order} disabled={!canEdit} onChange={e => updatePage({ order: Number(e.target.value) })}/></label><button className={button} disabled={!canEdit || busy || !selected.slug.trim() || !selected.title?.ru.trim() || !selected.title?.en.trim()} onClick={() => void savePage()}><Save size={14}/>{ru ? 'Сохранить страницу' : 'Save page'}</button></div>
+        <div className="flex flex-wrap items-center gap-4"><label className="text-xs"><input type="checkbox" checked={selected.visible} disabled={!canEdit} onChange={e => updatePage({ visible: e.target.checked })} className="mr-2 accent-orange-500"/>{ru ? 'Опубликована' : 'Published'}</label><label className="flex items-center gap-2 text-xs">{ru ? 'Порядок' : 'Order'}<input type="number" className={field + ' w-24'} value={selected.order} disabled={!canEdit} onChange={e => updatePage({ order: Number(e.target.value) })}/></label><button className={button} disabled={!canEdit || busy || !selected.slug.trim() || !selected.title?.ru.trim() || !selected.title?.en.trim()} onClick={() => void savePage()}><Save size={14}/>{ru ? 'Сохранить страницу' : 'Save page'}</button>{selected.id && <button className={button + ' border-red-900/70 text-red-300 hover:border-red-500 hover:text-red-200'} disabled={!canEdit || busy} onClick={() => void deletePage()}><Trash2 size={14}/>{ru ? 'Удалить страницу' : 'Delete page'}</button>}</div>
       </div> : <div className="flex min-h-60 items-center justify-center text-sm text-zinc-500">{ru ? 'Выберите страницу или создайте новую.' : 'Select a page or create one.'}</div>}</div>
     </div>}
 
