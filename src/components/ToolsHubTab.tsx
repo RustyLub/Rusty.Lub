@@ -97,8 +97,8 @@ export default function ToolsHubTab({
         : 'Track enemy player online status and server histories.',
       tag: 'VIP',
       isLocked: false,
-      badgeColor: 'bg-amber-500 text-black font-extrabold',
-      borderClass: 'border-amber-200/80 hover:border-amber-500'
+      badgeColor: 'bg-orange-500 text-black font-extrabold',
+      borderClass: 'border-orange-200/80 hover:border-orange-500'
     }] : []),
     ...(currentUser && isOwner ? [{
       id: 'rustplus',
@@ -122,8 +122,8 @@ export default function ToolsHubTab({
           : 'Site administration, user database management, and news publisher.',
         tag: 'ADMIN',
         isLocked: false,
-        badgeColor: 'bg-purple-600 text-white font-extrabold',
-        borderClass: 'border-purple-200/80 hover:border-purple-500'
+        badgeColor: 'bg-orange-600 text-white font-extrabold',
+        borderClass: 'border-orange-200/80 hover:border-orange-500'
       },
       {
         id: 'icons',
