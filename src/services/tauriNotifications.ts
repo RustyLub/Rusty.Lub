@@ -66,67 +66,27 @@ export async function sendWindowsNotification(
 }
 
 /**
- * Clean mobile-style notification tones for desktop and radar alerts.
- * Sounds are synthesized locally; no external recordings are required.
+ * Play bundled WAV assets for distinct desktop notification categories.
+ * Audio files are original tones created for Rusty.Lub, not copied iOS recordings.
  */
 export function playNotificationAudio(type: 'raid' | 'radar' | 'system' | 'update' = 'system') {
   if (typeof window === 'undefined') return;
 
-  const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-  if (!AudioCtx) return;
+  const files: Record<typeof type, string> = {
+    raid: '/sounds/raid.wav',
+    radar: '/sounds/radar.wav',
+    system: '/sounds/notification.wav',
+    update: '/sounds/update.wav',
+  };
 
-  let ctx: AudioContext | null = null;
   try {
-    ctx = new AudioCtx();
-    const audio = ctx;
-    const master = audio.createGain();
-    master.gain.value = 0.42;
-    master.connect(audio.destination);
-
-    const tone = (frequency: number, offset: number, duration: number, level = 0.2) => {
-      const oscillator = audio.createOscillator();
-      const envelope = audio.createGain();
-      const at = audio.currentTime + 0.025 + offset;
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(frequency, at);
-      envelope.gain.setValueAtTime(0.0001, at);
-      envelope.gain.exponentialRampToValueAtTime(level, at + 0.012);
-      envelope.gain.exponentialRampToValueAtTime(0.0001, at + duration);
-      oscillator.connect(envelope);
-      envelope.connect(master);
-      oscillator.start(at);
-      oscillator.stop(at + duration + 0.02);
-    };
-
-    if (type === 'raid') {
-      // Distinct paired alert, urgent without the abrasive synthetic siren.
-      [0, 0.22, 0.72, 0.94].forEach((offset, index) => {
-        tone(index % 2 === 0 ? 880 : 1174.66, offset, 0.18, 0.24);
-      });
-    } else if (type === 'radar') {
-      // A subtle two-part ping with a short, clear decay.
-      tone(987.77, 0, 0.16, 0.18);
-      tone(1318.51, 0.11, 0.24, 0.16);
-    } else if (type === 'update') {
-      // Light ascending three-note cue, distinct from ordinary notifications.
-      tone(783.99, 0, 0.16, 0.17);
-      tone(987.77, 0.12, 0.16, 0.17);
-      tone(1174.66, 0.24, 0.25, 0.16);
-    } else {
-      // Gentle double chime for general app events.
-      tone(880, 0, 0.19, 0.18);
-      tone(1174.66, 0.095, 0.28, 0.16);
-    }
-
-    const delay = type === 'raid' ? 1300 : type === 'update' ? 750 : 550;
-    const closeContext = () => { void audio.close().catch(() => undefined); };
-    if (audio.state === 'suspended') {
-      void audio.resume().then(() => window.setTimeout(closeContext, delay)).catch(() => undefined);
-    } else {
-      window.setTimeout(closeContext, delay);
-    }
+    const audio = new Audio(files[type]);
+    audio.volume = 0.75;
+    audio.preload = 'auto';
+    void audio.play().catch((err: unknown) => {
+      console.warn('Desktop notification sound playback blocked:', err);
+    });
   } catch (err) {
-    if (ctx && ctx.state !== 'closed') void ctx.close().catch(() => undefined);
-    console.warn('Audio notification playback error:', err);
+    console.warn('Desktop notification audio error:', err);
   }
 }
