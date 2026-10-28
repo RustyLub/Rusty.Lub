@@ -701,7 +701,7 @@ function NewsImage({ src, alt, className }: { src: string; alt: string; classNam
     <div className={`relative bg-[#0c0d10] border border-[#2a2f3b] overflow-hidden ${className}`}>
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#171a22] animate-pulse">
-          <div className="text-[9px] font-mono text-[#cd412b]/60 uppercase tracking-widest animate-pulse">
+          <div className="text-[9px] font-mono text-[#f97316]/60 uppercase tracking-widest animate-pulse">
             SYS_RETRIEVING_ASSET...
           </div>
         </div>
@@ -881,7 +881,7 @@ export default function NewsTab({ lang, onOpenNotifications }: NewsTabProps) {
         <div className="rust-bracket-tl" />
         <div className="rust-bracket-br" />
         <div className="flex items-center gap-2">
-          <Calendar size={13} className="text-[#cd412b]" />
+          <Calendar size={13} className="text-[#f97316]" />
           <span className="text-[10px] font-mono font-bold uppercase text-zinc-400 tracking-wider">
             {lang === 'ru' ? 'ФИЛЬТР ПО МЕСЯЦАМ (2026):' : 'MONTH FILTER (2026):'}
           </span>
@@ -895,7 +895,7 @@ export default function NewsTab({ lang, onOpenNotifications }: NewsTabProps) {
                 onClick={() => handleMonthChange(m.id as any)}
                 className={`px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider rounded-sm transition-all cursor-pointer border ${
                   isSelected
-                    ? 'bg-[#cd412b] border-[#cd412b] text-white shadow-md shadow-[#cd412b]/25'
+                    ? 'bg-[#f97316] border-[#f97316] text-white shadow-md shadow-[#f97316]/25'
                     : 'bg-[#1b1e26] border-[#2a2f3b] text-zinc-400 hover:text-white hover:border-zinc-500'
                 }`}
               >
