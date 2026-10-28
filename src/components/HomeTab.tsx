@@ -312,7 +312,15 @@ export default function HomeTab({
       )}
 
       {/* ── 4. SERVER MONITOR ── */}
-      <section className="bg-[#12161e] border border-[#1e2633] rounded-2xl p-5 sm:p-6 space-y-4 text-left shadow-[0_4px_25px_rgba(0,0,0,0.01)]">
+      <details className="group rounded-xl border border-[#26313d] bg-[#0d1218]">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-4 sm:px-5 [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="block font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#f28a24]">{lang === 'ru' ? 'СЕРВЕРЫ / МОНИТОРИНГ' : 'SERVERS / MONITOR'}</span>
+            <span className="mt-1 block text-sm font-semibold text-[#e5eaf0]">{lang === 'ru' ? 'Онлайн, очереди и состояние серверов' : 'Player counts, queues and server status'}</span>
+          </span>
+          <span className="shrink-0 rounded-md border border-white/10 px-3 py-1.5 text-xs text-zinc-400 group-open:text-orange-300">{lang === 'ru' ? 'Развернуть' : 'Expand'} <span className="ml-1 inline-block transition-transform group-open:rotate-180">⌄</span></span>
+        </summary>
+        <section className="border-t border-white/10 bg-[#12161e] p-4 sm:p-5 space-y-4 text-left">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-100 pb-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -483,6 +491,9 @@ export default function HomeTab({
         </div>
       </section>
 
+        </section>
+      </details>
+
       {/* ── 5. SUGGESTIONS AND CONTACT FEEDBACK ── */}
       <section className="bg-[#12161e] border border-[#1e2633] rounded-2xl p-6 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
@@ -519,6 +530,16 @@ export default function HomeTab({
       </section>
 
       {/* ── 6. UNIFIED SOCIAL WIDGETS SECTION (BOTTOM OF HOME) ── */}
+      <details className="group rounded-xl border border-[#26313d] bg-[#0d1218]">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-4 sm:px-5 [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="block font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#f28a24]">{lang === 'ru' ? 'СООБЩЕСТВО / МЕДИА' : 'COMMUNITY / MEDIA'}</span>
+            <span className="mt-1 block text-sm font-semibold text-[#e5eaf0]">{lang === 'ru' ? 'Новости, видео и социальные виджеты' : 'News, videos and social widgets'}</span>
+          </span>
+          <span className="shrink-0 rounded-md border border-white/10 px-3 py-1.5 text-xs text-zinc-400 group-open:text-orange-300">{lang === 'ru' ? 'Развернуть' : 'Expand'} <span className="ml-1 inline-block transition-transform group-open:rotate-180">⌄</span></span>
+        </summary>
+        <div className="space-y-4 border-t border-white/10 p-4 sm:p-5">
+
       <section className="space-y-4 pt-4 border-t border-[#1e2633]">
         <h2 className="text-xs font-black text-[#8b95a8] uppercase tracking-wider font-mono">
           {lang === 'ru' ? '📰 СОЦИАЛЬНАЯ АКТИВНОСТЬ И ВИДЖЕТЫ' : '📰 MEDIA & SOCIAL HUB'}
@@ -754,6 +775,9 @@ export default function HomeTab({
 
         </div>
       </section>
+
+        </div>
+      </details>
 
       {/* ── 7. TWITCH LIVE EMBED IF ACTIVE ── */}
       {twitchSettings && (twitchSettings.isManualLive || twitchSettings.isLiveFromApi) && (
