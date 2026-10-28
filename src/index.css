@@ -439,12 +439,26 @@ body:not(.light-theme) nav.sticky {
   backdrop-filter: blur(18px) saturate(130%);
 }
 body:not(.light-theme) main {
-  max-width: 1560px !important;
+  max-width: 1720px !important;
   padding-left: clamp(16px, 2.4vw, 38px) !important;
   padding-right: clamp(16px, 2.4vw, 38px) !important;
-  margin-top: clamp(18px, 2.4vw, 34px) !important;
+  margin-top: clamp(22px, 3vw, 44px) !important;
 }
 body:not(.light-theme) main > * { min-width: 0; }
+/* Page content should read as an open workspace, not a stack of floating widgets. */
+body:not(.light-theme) main > section,
+body:not(.light-theme) main > div > section {
+  min-width: 0;
+}
+body:not(.light-theme) main > div > [data-page-shell="true"] {
+  width: 100%;
+  max-width: none;
+}
+body:not(.light-theme) main > div > [data-page-shell="true"] > header {
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--steel-line);
+}
 body:not(.light-theme) main section {
   border-color: var(--steel-line);
 }
