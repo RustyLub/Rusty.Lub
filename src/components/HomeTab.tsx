@@ -145,63 +145,57 @@ export default function HomeTab({
   return (
     <div className="industrial-home space-y-7 lg:space-y-8 pb-16 text-left">
       
-      {/* ── 1. PREMIUM SOFT LIGHT HERO SECTION ── */}
-      <section className="bg-gradient-to-br from-[#171f28] via-[#10161d] to-[#0d1218] border border-[#35404b] rounded-xl p-4 sm:p-6 lg:p-7 shadow-[0_18px_55px_rgba(0,0,0,0.28)] relative overflow-hidden">
-        {/* Glow Accent */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="grid grid-cols-1 gap-5 items-center relative z-10">
-          {/* Left Hero Column */}
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2.5 px-2.5 py-1.5 bg-orange-500/10 border border-orange-500/20 text-[10px] font-bold uppercase tracking-wider text-orange-400 rounded-lg">
-              <img src={logoFull} alt="Rusty.Lub logo" className="h-7 w-auto max-w-[110px] object-contain" />
-              <span className="h-4 w-px bg-orange-500/30" />
-              <span>RUSTY.LUB · SURVIVAL TOOLS</span>
+      {/* ── 1. CINEMATIC RUST HERO ── */}
+      <section className="relative isolate flex min-h-[480px] overflow-hidden rounded-2xl border border-[#3a4654] bg-[#090d12] shadow-[0_28px_80px_rgba(0,0,0,0.5)] sm:min-h-[540px] lg:min-h-[590px]">
+        <img
+          src="https://images.squarespace-cdn.com/content/v1/5420d068e4b09194f76b2af6/9d28c2b3-0cdd-4cb8-893b-a792929b264b/20250325155147_1-Edit.jpg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+          fetchPriority="high"
+        />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#080b10]/95 via-[#080b10]/75 to-[#080b10]/25" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#080b10]/85 via-transparent to-[#080b10]/20" />
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_78%_42%,rgba(249,115,22,0.14),transparent_42%)]" />
+
+        <div className="flex w-full items-center p-5 sm:p-8 lg:p-12 xl:p-16">
+          <div className="max-w-4xl space-y-6 sm:space-y-8">
+            <div className="inline-flex max-w-full items-center gap-3 border-l-2 border-orange-500 bg-black/35 px-3 py-2 backdrop-blur-sm">
+              <img src={logoFull} alt="Rusty.Lub logo" className="h-8 w-auto max-w-[112px] object-contain" />
+              <span className="h-5 w-px bg-orange-500/50" />
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-orange-200 sm:text-xs">Rust community hub</span>
             </div>
 
-            <div className="space-y-3">
-              <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-black tracking-tight text-[#eef2f7] leading-[1.1]">
-                Win the wipe. <br className="hidden sm:inline" />
-                <span className="text-orange-500">Without the chaos.</span>
+            <div className="space-y-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-orange-300 sm:text-xs">
+                {lang === 'ru' ? 'ИНСТРУМЕНТЫ • БАЗА ЗНАНИЙ • СООБЩЕСТВО' : 'TOOLS • KNOWLEDGE • COMMUNITY'}
+              </p>
+              <h1 className="max-w-4xl text-4xl font-black leading-[0.98] tracking-tight text-white drop-shadow-[0_3px_18px_rgba(0,0,0,0.6)] sm:text-5xl md:text-6xl lg:text-7xl">
+                {lang === 'ru' ? <>Твой следующий вайп.<br /><span className="text-orange-400">Под твоим контролем.</span></> : <>Your next wipe.<br /><span className="text-orange-400">On your terms.</span></>}
               </h1>
-              <p className="text-sm sm:text-base text-[#aab4c5] font-normal leading-relaxed max-w-xl">
+              <p className="max-w-2xl text-sm leading-7 text-[#e0e5eb] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] sm:text-base lg:text-lg">
                 {lang === 'ru'
-                  ? 'Высокоточный набор утилит выживания для игроков Rust. Посчитайте оптимальный боезапас рейда, автоматизируйте внутриигровые бинды, настройте электронику и повысьте FPS в один клик.'
-                  : 'Precision-engineered survival tools for professional Rust players. Calculate explosive costs, configure complex macro binds, design electrical grids, and optimize frames.'}
+                  ? 'Калькулятор рейда, игровые инструменты и база знаний Rust — всё необходимое, чтобы подготовиться к вайпу и играть эффективнее.'
+                  : 'Raid calculations, practical game tools, and a Rust knowledge base — everything you need to prepare for wipe and play smarter.'}
               </p>
             </div>
 
-            {/* CTAs */}
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={() => onNavigate('raid')}
-                className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-orange-500/10 cursor-pointer flex items-center gap-1.5"
-              >
-                <span>{lang === 'ru' ? 'Начать бесплатно' : 'Start free'}</span>
-                <ArrowRight size={13} />
+            <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap">
+              <button onClick={() => onNavigate('raid')} className="inline-flex min-h-12 items-center justify-center gap-2 border border-orange-300 bg-orange-500 px-6 py-3 text-xs font-extrabold uppercase tracking-wider text-[#101318] shadow-[0_8px_30px_rgba(249,115,22,0.28)] transition hover:bg-orange-400 cursor-pointer">
+                {lang === 'ru' ? 'Калькулятор рейда' : 'Raid calculator'} <ArrowRight size={15} />
               </button>
-
-              <button
-                onClick={() => onNavigate('tools')}
-                className="px-6 py-3 bg-[#171d27] hover:bg-[#202938] text-[#eef2f7] border border-[#1e2633] font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <span>{lang === 'ru' ? 'Все инструменты' : 'See tools'}</span>
+              <button onClick={() => onNavigate('tools')} className="inline-flex min-h-12 items-center justify-center gap-2 border border-white/35 bg-black/40 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm transition hover:border-orange-400/70 hover:bg-black/60 cursor-pointer">
+                {lang === 'ru' ? 'Все инструменты' : 'All tools'}
               </button>
-
-              <a
-                href="https://discord.gg/R2TyKZ9xvZ"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3 bg-transparent hover:bg-orange-500/10 text-orange-300 hover:text-orange-200 border border-orange-500/30 hover:border-orange-500/60 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-1.5"
-              >
-                <Send size={13} />
-                <span>{lang === 'ru' ? 'Наш Discord' : 'Join Discord'}</span>
-                <ExternalLink size={11} />
+              <a href="https://discord.gg/R2TyKZ9xvZ" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 border border-orange-400/60 bg-[#0b1016]/55 px-6 py-3 text-xs font-bold uppercase tracking-wider text-orange-200 backdrop-blur-sm transition hover:border-orange-300 hover:bg-orange-500/15">
+                <Send size={14} /> Discord <ExternalLink size={11} />
               </a>
             </div>
+
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-white/15 pt-4 font-mono text-[9px] uppercase tracking-[0.16em] text-white/65 sm:text-[10px]">
+              <span>Raid tools</span><span className="text-orange-400">/</span><span>FPS & binds</span><span className="text-orange-400">/</span><span>Rust community</span>
+            </div>
           </div>
-
-
         </div>
       </section>
 
@@ -316,6 +310,22 @@ export default function HomeTab({
           </div>
         </section>
       )}
+
+      {/* ── PARTNERSHIP FEATURE ── */}
+      <section className="relative overflow-hidden rounded-2xl border border-orange-500/35 bg-[#10161e] p-5 sm:p-7">
+        <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-orange-500/10 blur-3xl" />
+        <div className="relative grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
+          <div className="space-y-3">
+            <span className="inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-orange-300"><span className="h-1.5 w-1.5 rounded-full bg-orange-400" /> {lang === 'ru' ? 'ПАРТНЁРСТВО И СОТРУДНИЧЕСТВО' : 'PARTNERSHIPS & COLLABORATION'}</span>
+            <h2 className="text-2xl font-black tracking-tight text-white sm:text-3xl">{lang === 'ru' ? 'Есть идея для Rusty.Lub?' : 'Have an idea for Rusty.Lub?'}</h2>
+            <p className="max-w-2xl text-sm leading-6 text-[#aab7c6]">{lang === 'ru' ? 'Обсудим интеграции, полезные сервисы для игроков Rust и совместные проекты. Напиши нам — рассмотрим каждое предложение.' : 'Let’s discuss integrations, useful Rust player services, and joint projects. Reach out and tell us what you have in mind.'}</p>
+          </div>
+          <div className="flex flex-wrap gap-3 md:justify-end">
+            <button onClick={() => onNavigate('support')} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-orange-500 px-5 py-3 text-xs font-extrabold uppercase tracking-wider text-[#101318] transition hover:bg-orange-400 cursor-pointer">{lang === 'ru' ? 'Предложить сотрудничество' : 'Work with us'} <ArrowRight size={14} /></button>
+            <button onClick={handleCopyEmail} className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#3b4858] bg-[#151d27] px-4 py-3 text-xs font-bold text-[#dce4ed] transition hover:border-orange-500/50 cursor-pointer">{copiedEmail ? (lang === 'ru' ? 'Email скопирован' : 'Email copied') : (lang === 'ru' ? 'Скопировать email' : 'Copy email')}</button>
+          </div>
+        </div>
+      </section>
 
       {/* ── 5. SUGGESTIONS AND CONTACT FEEDBACK ── */}
       <section className="bg-[#12161e] border border-[#1e2633] rounded-2xl p-6 shadow-sm">
