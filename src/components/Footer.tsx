@@ -1,5 +1,4 @@
 import React from 'react';
-import { Monitor } from 'lucide-react';
 
 interface FooterProps {
   lang: 'ru' | 'en';
@@ -7,156 +6,72 @@ interface FooterProps {
   onOpenCabinet?: () => void;
   onOpenDonation?: () => void;
   onOpenTerms?: () => void;
-  isWindowsApp?: boolean;
-  onToggleLauncherMode?: () => void;
 }
 
-export default function Footer({
-  lang,
-  onNavigate,
-  onOpenCabinet,
-  onOpenDonation,
-  onOpenTerms,
-  isWindowsApp,
-  onToggleLauncherMode
-}: FooterProps) {
+const linkClass = 'text-left text-sm text-[#9aa5b5] hover:text-[#f28a24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f28a24] transition-colors';
+
+export default function Footer({ lang, onNavigate, onOpenCabinet, onOpenDonation, onOpenTerms }: FooterProps) {
+  const ru = lang === 'ru';
   return (
-    <footer className="w-full border-t border-[#1e2633] bg-[#0d1016] mt-16 pt-12 pb-8 px-4 sm:px-6 lg:px-8 text-left">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pb-10">
-          {/* Brand Col */}
-          <div className="space-y-3">
-            <div 
-              onClick={() => onNavigate('home')}
-              className="flex items-center gap-2.5 cursor-pointer group w-fit"
-            >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#f97316] to-[#ef4444] flex items-center justify-center font-black text-xs text-white shadow-[0_0_15px_rgba(249,115,22,0.35)]">
-                RL
-              </div>
-              <div className="font-extrabold text-base tracking-wider text-[#eef2f7]">
-                RUSTY<span className="text-[#f97316]">.LUB</span>
-              </div>
-            </div>
-            <p className="text-xs text-[#8b95a8] leading-relaxed max-w-xs">
-              {lang === 'ru'
-                ? 'Тактический портал для игроков Rust. Гайды, калькуляторы, бинды и сообщество.'
-                : 'Tactical portal for Rust players. Guides, calculators, keybinds and community hub.'}
+    <footer className="w-full mt-16 border-t border-white/10 bg-[#090c10]/95 px-4 pb-8 pt-10 text-left sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid grid-cols-1 gap-8 border-b border-white/10 pb-8 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="space-y-3 lg:col-span-1">
+            <button type="button" onClick={() => onNavigate('home')} className="flex w-fit items-center gap-2.5 rounded-sm text-left">
+              <span className="flex h-9 w-9 items-center justify-center rounded-md border border-orange-400/40 bg-gradient-to-br from-[#f28a24] to-[#b94e13] text-xs font-black text-white shadow-lg shadow-orange-950/30">RL</span>
+              <span className="font-black tracking-wider text-[#eef2f7]">RUSTY<span className="text-[#f28a24]">.LUB</span></span>
+            </button>
+            <p className="max-w-xs text-sm leading-relaxed text-[#8793a4]">
+              {ru ? 'Инструменты, справочники и материалы для игроков Rust.' : 'Tools, references and resources for Rust players.'}
             </p>
+            <a className={linkClass} href="mailto:rusty.lub_offers@bk.ru">rusty.lub_offers@bk.ru</a>
           </div>
 
-          {/* Tools Col */}
           <div className="space-y-3">
-            <h5 className="text-[11px] font-bold tracking-widest text-[#5a6578] uppercase font-mono">
-              {lang === 'ru' ? 'Инструменты' : 'Tools'}
-            </h5>
-            <div className="flex flex-col space-y-2 text-xs text-[#8b95a8]">
-              <button onClick={() => onNavigate('raid')} className="hover:text-[#f97316] transition-colors text-left cursor-pointer">
-                Raid Calculator
-              </button>
-              <button onClick={() => onNavigate('binds')} className="hover:text-[#f97316] transition-colors text-left cursor-pointer">
-                Macro Binds
-              </button>
-              <button onClick={() => onNavigate('fps')} className="hover:text-[#f97316] transition-colors text-left cursor-pointer">
-                FPS Optimization
-              </button>
-              <button onClick={() => onNavigate('decay')} className="hover:text-[#f97316] transition-colors text-left cursor-pointer">
-                Decay Timer
-              </button>
-              <button onClick={() => onNavigate('electrical')} className="hover:text-[#f97316] transition-colors text-left cursor-pointer">
-                Electricity Simulator
-              </button>
-            </div>
+            <h2 className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#f28a24]">{ru ? 'Инструменты' : 'Tools'}</h2>
+            <nav className="flex flex-col items-start gap-2">
+              <button className={linkClass} onClick={() => onNavigate('tools')}>{ru ? 'Все инструменты' : 'All tools'}</button>
+              <button className={linkClass} onClick={() => onNavigate('raid')}>Raid Calculator</button>
+              <button className={linkClass} onClick={() => onNavigate('binds')}>Macro Binds</button>
+              <button className={linkClass} onClick={() => onNavigate('fps')}>FPS Optimization</button>
+              <button className={linkClass} onClick={() => onNavigate('electrical')}>{ru ? 'Симулятор электрики' : 'Electrical Simulator'}</button>
+            </nav>
           </div>
 
-          {/* Community Col */}
           <div className="space-y-3">
-            <h5 className="text-[11px] font-bold tracking-widest text-[#5a6578] uppercase font-mono">
-              {lang === 'ru' ? 'Сообщество' : 'Community'}
-            </h5>
-            <div className="flex flex-col space-y-2 text-xs text-[#8b95a8]">
-              <button onClick={() => onNavigate('clan')} className="hover:text-[#f97316] transition-colors text-left cursor-pointer">
-                {lang === 'ru' ? 'Поиск Клана (Clan Board)' : 'Clan Board & LFG'}
-              </button>
-              <button onClick={() => onNavigate('chat')} className="hover:text-[#f97316] transition-colors text-left cursor-pointer">
-                {lang === 'ru' ? 'Чат Сообщества' : 'Community Chat'}
-              </button>
-              <button onClick={() => onNavigate('news')} className="hover:text-[#f97316] transition-colors text-left cursor-pointer">
-                {lang === 'ru' ? 'Новости' : 'News & Updates'}
-              </button>
-              <button onClick={() => onNavigate('faq')} className="hover:text-[#f97316] transition-colors text-left cursor-pointer">
-                {lang === 'ru' ? 'Частые вопросы (FAQ)' : 'FAQ & Beginner Guide'}
-              </button>
-              <a 
-                href="https://discord.gg/R2TyKZ9xvZ" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="hover:text-[#f97316] transition-colors text-left"
-              >
-                Discord Server
-              </a>
-            </div>
+            <h2 className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#f28a24]">{ru ? 'Сообщество' : 'Community'}</h2>
+            <nav className="flex flex-col items-start gap-2">
+              <button className={linkClass} onClick={() => onNavigate('clan')}>Clan Board</button>
+              <button className={linkClass} onClick={() => onNavigate('chat')}>{ru ? 'Чат сообщества' : 'Community chat'}</button>
+              <button className={linkClass} onClick={() => onNavigate('news')}>{ru ? 'Новости и обновления' : 'News & updates'}</button>
+              <button className={linkClass} onClick={() => onNavigate('faq')}>FAQ</button>
+              <a className={linkClass} href="https://discord.gg/R2TyKZ9xvZ" target="_blank" rel="noopener noreferrer">Discord</a>
+            </nav>
           </div>
 
-          {/* Account Col */}
           <div className="space-y-3">
-            <h5 className="text-[11px] font-bold tracking-widest text-[#5a6578] uppercase font-mono">
-              {lang === 'ru' ? 'Аккаунт & Инфо' : 'Account & Legal'}
-            </h5>
-            <div className="flex flex-col space-y-2 text-xs text-[#8b95a8]">
-              <button 
-                onClick={onOpenCabinet} 
-                className="hover:text-[#f97316] transition-colors text-left cursor-pointer"
-              >
-                {lang === 'ru' ? 'Личный кабинет' : 'User Cabinet'}
-              </button>
-              <button 
-                onClick={onOpenDonation} 
-                className="hover:text-[#f97316] transition-colors text-left cursor-pointer"
-              >
-                {lang === 'ru' ? 'Поддержать проект / VIP' : 'Support / VIP'}
-              </button>
-              <button 
-                onClick={onOpenTerms} 
-                className="hover:text-[#f97316] transition-colors text-left cursor-pointer"
-              >
-                {lang === 'ru' ? 'Пользовательское соглашение' : 'Terms & Privacy'}
-              </button>
-              <a 
-                href="https://t.me/S1mreyReserve" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="hover:text-[#f97316] transition-colors text-left"
-              >
-                Telegram: @S1mreyReserve
-              </a>
-            </div>
+            <h2 className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#f28a24]">{ru ? 'Аккаунт' : 'Account'}</h2>
+            <nav className="flex flex-col items-start gap-2">
+              <button className={linkClass} onClick={onOpenCabinet}>{ru ? 'Личный кабинет' : 'User cabinet'}</button>
+              <button className={linkClass} onClick={onOpenDonation}>{ru ? 'Поддержка / VIP' : 'Support / VIP'}</button>
+            </nav>
+          </div>
+
+          <div className="space-y-3">
+            <h2 className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#f28a24]">{ru ? 'Документы' : 'Documents'}</h2>
+            <nav className="flex flex-col items-start gap-2">
+              <button className={linkClass} onClick={onOpenTerms}>{ru ? 'Пользовательское соглашение' : 'User agreement'}</button>
+              <button className={linkClass} onClick={onOpenTerms}>{ru ? 'Политика конфиденциальности' : 'Privacy policy'}</button>
+              <button className={linkClass} onClick={onOpenTerms}>{ru ? 'Условия платных услуг' : 'Paid services terms'}</button>
+              <button className={linkClass} onClick={onOpenTerms}>{ru ? 'Возврат средств' : 'Refund policy'}</button>
+            </nav>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="pt-6 border-t border-[#1e2633] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#5a6578]">
-          <span>© 2026 Rusty.Lub · {lang === 'ru' ? 'Не аффилирован с Facepunch Studios' : 'Not affiliated with Facepunch Studios'}</span>
-
-          {onToggleLauncherMode && (
-            <button
-              onClick={onToggleLauncherMode}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border font-mono text-[11px] font-bold transition-all cursor-pointer ${
-                isWindowsApp
-                  ? 'border-red-500/60 bg-red-600/20 text-red-400 shadow-xs'
-                  : 'border-white/10 bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white'
-              }`}
-              title={lang === 'ru' ? 'Включить или выключить режим Windows Лаунчера' : 'Toggle Windows Launcher Client Mode'}
-            >
-              <Monitor size={12} className={isWindowsApp ? 'text-red-400 animate-pulse' : 'text-neutral-400'} />
-              <span>
-                {isWindowsApp 
-                  ? (lang === 'ru' ? 'Режим Windows Лаунчера (Активен)' : 'Windows Launcher Mode (Active)') 
-                  : (lang === 'ru' ? 'Режим Windows Лаунчера (Превью)' : 'Windows Launcher Mode (Preview)')}
-              </span>
-            </button>
-          )}
-
-          <span className="font-mono">Tactical Command × Orange Blaze · v2.6.4</span>
+        <div className="flex flex-col gap-3 pt-6 text-xs text-[#778294] sm:flex-row sm:items-center sm:justify-between">
+          <span>© 2026 Rusty.Lub</span>
+          <span>{ru ? 'Связь по вопросам проекта:' : 'Project contact:'} <a className="text-[#aeb8c5] hover:text-[#f28a24]" href="mailto:rusty.lub_offers@bk.ru">rusty.lub_offers@bk.ru</a></span>
+          <span className="font-mono">INDUSTRIAL STEEL · R.L.</span>
         </div>
       </div>
     </footer>
