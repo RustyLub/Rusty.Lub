@@ -2702,8 +2702,6 @@ export default function App() {
           onOpenCabinet={() => (currentUser ? setCabinetModalOpen(true) : setAuthModalOpen(true))}
           onOpenDonation={() => setCabinetModalOpen(true)}
           onOpenTerms={() => setShowTermsModal(true)}
-          isWindowsApp={isWindowsApp}
-          onToggleLauncherMode={handleToggleLauncherPreview}
         />
       </Suspense>
 
