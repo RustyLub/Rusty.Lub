@@ -301,7 +301,7 @@ const VALID_TABS: Record<string, TabType> = {
   icons: 'icons',
   admin: 'admin',
   special: 'special',
-  vip: 'special'
+  vip: 'support'
 };
 
 const getTabFromUrl = (): TabType => {
