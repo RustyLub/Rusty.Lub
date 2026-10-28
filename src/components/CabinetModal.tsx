@@ -969,7 +969,7 @@ export default function CabinetModal({
         animate={{ scale: 1, opacity: 1 }}
         exit={pageMode ? { opacity: 0 } : { scale: 0.95, opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className={`w-full ${pageMode ? "max-w-none min-h-[75vh] border-0 border-t border-[#2a2f3b] rounded-none shadow-none bg-transparent" : "max-w-6xl border-2 border-[#2a2f3b] shadow-2xl bg-[#14171e]"} overflow-hidden rust-metal-pattern flex flex-col md:flex-row ${pageMode ? "min-h-[75vh]" : "h-[95vh] md:h-[760px]"} relative cabinet-modal-container`}
+        className={`w-full ${pageMode ? "max-w-none min-h-[75vh] border-0 border-t border-[#2a2f3b] rounded-none shadow-none bg-transparent" : "max-w-6xl border-2 border-[#2a2f3b] shadow-2xl bg-[#14171e]"} overflow-hidden flex flex-col md:flex-row ${pageMode ? "min-h-[75vh]" : "h-[95vh] md:h-[760px]"} ${pageMode ? "" : "rust-metal-pattern"} relative cabinet-modal-container`}
       >
         {/* Decorative modal brackets are intentionally omitted on the full account page */}
         {!pageMode && <><div className="rust-bracket-tl" /><div className="rust-bracket-tr" /><div className="rust-bracket-bl" /><div className="rust-bracket-br" /></>}
