@@ -5,6 +5,7 @@ import { ShieldCheck, Send, Search, Crown, Star, Ban, Trash2, Users, Settings, M
 import { CustomUser, NewsItem, VipApplication, APP_VERSION } from '../types';
 import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 import UserProfileModal from './UserProfileModal';
+import AdminCmsPanel from './AdminCmsPanel';
 import { subscribeToActivityLogs, clearAllActivityLogs, clearAllSecurityLogs, UserActivityLog } from '../services/activityLogger';
 
 interface AdminTabProps {
@@ -313,7 +314,7 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
   };
 
   const [vipManagerUserId, setVipManagerUserId] = useState<string | null>(null);
-  const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'vip' | 'feedback' | 'news' | 'survivors' | 'activity_logs' | 'security_audit'>('dashboard');
+  const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'vip' | 'feedback' | 'news' | 'survivors' | 'activity_logs' | 'security_audit' | 'cms'>('dashboard');
   
   const [activityLogs, setActivityLogs] = useState<UserActivityLog[]>([]);
   const [activitySearch, setActivitySearch] = useState('');
@@ -684,6 +685,7 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
       <div className="flex flex-wrap gap-1 bg-[#14171e]/60 p-1.5 rounded-sm border border-[#2a2f3b] overflow-x-auto custom-scrollbar relative z-10">
         {[
           { id: 'dashboard', label_ru: 'Панель', label_en: 'Dashboard', icon: BarChart3 },
+          { id: 'cms', label_ru: 'CMS сайта', label_en: 'Site CMS', icon: Settings },
           { 
             id: 'security_audit', 
             label_ru: 'Аудит доступа', 
@@ -729,6 +731,10 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
           );
         })}
       </div>
+
+      {activeSubTab === 'cms' && (
+        <AdminCmsPanel lang={lang} onToast={onToast} />
+      )}
 
       {activeSubTab === 'dashboard' && (
         <div className="space-y-8 animate-in fade-in duration-300">
