@@ -237,10 +237,10 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
             <button
               type="button"
               onClick={() => setAuthMode('register')}
-              className={`flex-1 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                authMode === 'register' 
-                  ? 'bg-[#cd412b] text-white font-black' 
-                  : 'text-gray-500 hover:text-white'
+              className={`flex-1 border-b-2 py-3 text-sm font-semibold transition-all cursor-pointer ${
+                authMode === 'register'
+                  ? 'border-orange-400 text-orange-300 font-bold'
+                  : 'border-transparent text-zinc-500 hover:text-white'
               }`}
             >
               {lang === 'ru' ? 'Регистрация' : 'Register'}
@@ -250,7 +250,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
           <form onSubmit={handleAuthSubmit} className="space-y-4">
             {/* Username */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block font-mono">
+              <label className="mb-2 block text-xs font-semibold tracking-wide text-zinc-300">
                 {lang === 'ru' ? 'Логин' : 'Username'} <span className="text-[#cd412b]">*</span>
               </label>
               <div className="relative">
