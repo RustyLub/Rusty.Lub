@@ -649,13 +649,13 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
         <div className="rust-bracket-br" />
 
         <div className="flex items-center gap-3">
-          <span className="p-2.5 bg-[#cd412b]/10 border border-[#cd412b]/30">
-            <Clock size={20} className="text-[#cd412b] animate-pulse" />
+          <span className="p-2.5 bg-[#f97316]/10 border border-[#f97316]/30">
+            <Clock size={20} className="text-[#f97316] animate-pulse" />
           </span>
           <div>
             <h2 className="text-sm font-black text-white uppercase tracking-wider font-mono flex items-center gap-2">
               <span>{lang === 'ru' ? 'КАЛЬКУЛЯТОР И ТАЙМЕР ГНИЕНИЯ' : 'DECAY TIME & ALARM TIMERS'}</span>
-              <span className="text-[9px] bg-red-600/20 text-red-400 border border-red-500/30 px-1.5 py-0.5 font-mono">
+              <span className="text-[9px] bg-red-600/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 font-mono">
                 TAURI + BROWSER
               </span>
             </h2>
@@ -694,7 +694,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
             <div className="rust-bracket-bl" />
             <div className="rust-bracket-br" />
 
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#cd412b]" />
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#f97316]" />
 
             {/* Material Selector Row */}
             <div className="space-y-3">
@@ -711,12 +711,12 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                       onClick={() => handleMaterialChange(mat)}
                       className={`p-3 border flex flex-col items-center justify-center gap-2 transition-all relative group cursor-pointer ${
                         isSelected
-                          ? 'bg-[#cd412b]/10 border-[#cd412b] text-white shadow-[inset_0_0_15px_rgba(205,65,43,0.15)]'
+                          ? 'bg-[#f97316]/10 border-[#f97316] text-white shadow-[inset_0_0_15px_rgba(205,65,43,0.15)]'
                           : 'bg-[#1b1e26] border-[#2a2f3b] hover:border-zinc-500 text-zinc-400 hover:text-white'
                       }`}
                     >
                       <span className={`p-1.5 border transition-all ${
-                        isSelected ? 'bg-black/40 border-[#cd412b]/50' : 'bg-black/20 border-zinc-800'
+                        isSelected ? 'bg-black/40 border-[#f97316]/50' : 'bg-black/20 border-zinc-800'
                       }`}>
                         {mat.icon}
                       </span>
@@ -751,7 +751,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                     max={selectedMaterial.maxHp}
                     value={currentHp}
                     onChange={(e) => handleHpInputChange(parseInt(e.target.value) || 0)}
-                    className="w-24 bg-[#0c0d10] border border-[#2a2f3b] py-1.5 px-2.5 font-mono text-xs text-white outline-none focus:border-[#cd412b]/50 text-center"
+                    className="w-24 bg-[#0c0d10] border border-[#2a2f3b] py-1.5 px-2.5 font-mono text-xs text-white outline-none focus:border-[#f97316]/50 text-center"
                   />
                   <span className="text-xs font-bold font-mono text-zinc-500 uppercase">
                     / {selectedMaterial.maxHp} HP
@@ -768,7 +768,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                     max="100"
                     value={currentPercent}
                     onChange={(e) => handleSliderChange(parseInt(e.target.value) || 0)}
-                    className="w-full h-1.5 bg-[#0c0d10] border border-zinc-800 appearance-none cursor-pointer accent-[#cd412b]"
+                    className="w-full h-1.5 bg-[#0c0d10] border border-zinc-800 appearance-none cursor-pointer accent-[#f97316]"
                   />
                 </div>
 
@@ -814,10 +814,10 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
             <div className="rust-bracket-bl" />
             <div className="rust-bracket-br" />
 
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#cd412b]" />
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#f97316]" />
 
             <h3 className="text-xs font-bold text-white uppercase tracking-widest border-b border-[#2a2f3b] pb-2 flex items-center gap-1.5 font-mono">
-              <ShieldAlert size={14} className="text-[#cd412b] animate-pulse" />
+              <ShieldAlert size={14} className="text-[#f97316] animate-pulse" />
               <span>{lang === 'ru' ? 'ДИАГНОСТИКА РАЗРУШЕНИЯ' : 'DECAY LIFETIME ESTIMATE'}</span>
             </h3>
 
@@ -828,9 +828,9 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
               </div>
               <div className={`text-3xl font-black font-mono mt-2 tracking-tight ${
                 currentHp === 0 
-                  ? 'text-red-500' 
+                  ? 'text-orange-500' 
                   : remainingHours <= (selectedMaterial.decayTime * 0.2)
-                    ? 'text-red-500 animate-pulse'
+                    ? 'text-orange-500 animate-pulse'
                     : remainingHours <= (selectedMaterial.decayTime * 0.5)
                       ? 'text-amber-500'
                       : 'text-emerald-400'
@@ -862,7 +862,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
               {currentHp > 0 && (
                 <button
                   onClick={handleOpenTimerFromCalc}
-                  className="mt-4 w-full py-2.5 px-4 bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 hover:from-red-500 hover:to-orange-500 text-white font-mono text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-red-600/30 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                  className="mt-4 w-full py-2.5 px-4 bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 hover:from-orange-500 hover:to-orange-500 text-white font-mono text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-red-600/30 transition-all hover:scale-[1.01] active:scale-[0.99]"
                 >
                   <Bell size={14} className="animate-pulse" />
                   <span>{lang === 'ru' ? 'ПОСТАВИТЬ ТАЙМЕР ОПОВЕЩЕНИЯ' : 'SET DECAY ALARM TIMER'}</span>
@@ -873,7 +873,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
             {/* Detailed Stats Block */}
             <div className="space-y-3.5 pt-1">
               <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block border-b border-zinc-800/60 pb-1 flex items-center gap-1">
-                <Info size={11} className="text-[#cd412b]" />
+                <Info size={11} className="text-[#f97316]" />
                 <span>{lang === 'ru' ? 'ХАРАКТЕРИСТИКИ ГНИЕНИЯ' : 'DECAY RATE PARAMETERS'}</span>
               </div>
 
@@ -915,12 +915,12 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#2a2f3b] pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <Clock size={18} className="text-[#cd412b]" />
+              <Clock size={18} className="text-[#f97316]" />
               <h3 className="text-sm font-black text-white uppercase tracking-wider font-mono">
                 {lang === 'ru' ? 'АКТИВНЫЕ ТАЙМЕРЫ ГНИЕНИЯ' : 'ACTIVE DECAY TIMERS & ALARMS'}
               </h3>
               {timers.length > 0 && (
-                <span className="bg-[#cd412b]/20 text-[#cd412b] border border-[#cd412b]/40 text-[10px] px-2 py-0.5 font-mono font-bold">
+                <span className="bg-[#f97316]/20 text-[#f97316] border border-[#f97316]/40 text-[10px] px-2 py-0.5 font-mono font-bold">
                   {timers.length}
                 </span>
               )}
@@ -941,7 +941,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                 setTimerNotes('');
                 setIsModalOpen(true);
               }}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 bg-[#cd412b] hover:bg-[#e04832] text-white font-mono text-xs font-bold uppercase tracking-wider cursor-pointer transition-all shadow-md shadow-[#cd412b]/25"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 bg-[#f97316] hover:bg-[#e04832] text-white font-mono text-xs font-bold uppercase tracking-wider cursor-pointer transition-all shadow-md shadow-[#f97316]/25"
             >
               <Plus size={14} />
               <span>{lang === 'ru' ? 'Новый таймер' : 'New Timer'}</span>
@@ -1082,11 +1082,11 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                   <div className="my-3 text-center py-2 bg-black/50 border border-zinc-800">
                     <div className={`font-mono text-2xl sm:text-3xl font-black tracking-widest ${
                       isExpired 
-                        ? 'text-red-500 animate-pulse' 
+                        ? 'text-orange-500 animate-pulse' 
                         : isPaused 
                           ? 'text-zinc-500' 
                           : percentRemaining <= 20 
-                            ? 'text-red-400' 
+                            ? 'text-orange-400' 
                             : 'text-zinc-100'
                     }`}>
                       {formatSecondsToClock(timer.remainingSeconds)}
@@ -1170,7 +1170,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
 
                     <button
                       onClick={() => handleDeleteTimer(timer.id)}
-                      className="p-1.5 bg-red-950/30 hover:bg-red-900/60 text-red-400 border border-red-900/40 cursor-pointer transition-all"
+                      className="p-1.5 bg-red-950/30 hover:bg-red-900/60 text-orange-400 border border-red-900/40 cursor-pointer transition-all"
                       title={lang === 'ru' ? 'Удалить таймер' : 'Delete timer'}
                     >
                       <Trash2 size={12} />
@@ -1200,12 +1200,12 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
               <div className="rust-bracket-bl" />
               <div className="rust-bracket-br" />
 
-              <div className="absolute top-0 left-0 right-0 h-1 bg-[#cd412b]" />
+              <div className="absolute top-0 left-0 right-0 h-1 bg-[#f97316]" />
 
               {/* Modal Header */}
               <div className="p-4 sm:p-5 border-b border-[#2a2f3b] flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Clock size={16} className="text-[#cd412b]" />
+                  <Clock size={16} className="text-[#f97316]" />
                   <h3 className="text-sm font-black text-white uppercase tracking-wider font-mono">
                     {lang === 'ru' ? 'УСТАНОВКА ТАЙМЕРА ГНИЕНИЯ' : 'SET DECAY ALARM TIMER'}
                   </h3>
@@ -1230,7 +1230,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                     value={timerName}
                     onChange={(e) => setTimerName(e.target.value)}
                     placeholder={lang === 'ru' ? 'Например: Мейн база (2 этаж, шкаф)' : 'e.g. Main Base (2nd floor TC)'}
-                    className="w-full bg-[#0c0d10] border border-[#2a2f3b] px-3 py-2 text-xs font-mono text-white outline-none focus:border-[#cd412b]/60"
+                    className="w-full bg-[#0c0d10] border border-[#2a2f3b] px-3 py-2 text-xs font-mono text-white outline-none focus:border-[#f97316]/60"
                   />
                 </div>
 
@@ -1252,7 +1252,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                           }}
                           className={`p-2 border text-left cursor-pointer transition-all flex items-center gap-2 ${
                             isSelected
-                              ? 'bg-[#cd412b]/15 border-[#cd412b] text-white'
+                              ? 'bg-[#f97316]/15 border-[#f97316] text-white'
                               : 'bg-[#1b1e26] border-[#2a2f3b] text-zinc-400 hover:text-white'
                           }`}
                         >
@@ -1290,7 +1290,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                         max={modalMaterial.maxHp}
                         value={modalHp}
                         onChange={(e) => handleModalHpChange(parseInt(e.target.value) || 0)}
-                        className="w-24 bg-[#0c0d10] border border-[#2a2f3b] py-1.5 px-2.5 font-mono text-xs text-white outline-none focus:border-[#cd412b]/60 text-center"
+                        className="w-24 bg-[#0c0d10] border border-[#2a2f3b] py-1.5 px-2.5 font-mono text-xs text-white outline-none focus:border-[#f97316]/60 text-center"
                       />
                       <span className="text-xs font-bold font-mono text-zinc-500 uppercase">
                         / {modalMaterial.maxHp} HP
@@ -1307,7 +1307,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                         max="100"
                         value={modalPercent}
                         onChange={(e) => handleModalSliderChange(parseInt(e.target.value) || 0)}
-                        className="w-full h-1.5 bg-[#0c0d10] border border-zinc-800 appearance-none cursor-pointer accent-[#cd412b]"
+                        className="w-full h-1.5 bg-[#0c0d10] border border-zinc-800 appearance-none cursor-pointer accent-[#f97316]"
                       />
                     </div>
 
@@ -1329,7 +1329,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                           onClick={() => handleModalPreset(preset)}
                           className={`px-2 py-0.5 font-mono text-[9px] border transition-colors cursor-pointer ${
                             modalPercent === preset
-                              ? 'bg-[#cd412b]/20 border-[#cd412b] text-white font-bold'
+                              ? 'bg-[#f97316]/20 border-[#f97316] text-white font-bold'
                               : 'bg-black/30 border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200'
                           }`}
                         >
@@ -1343,7 +1343,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                   <div className="p-3 bg-gradient-to-r from-black/60 to-[#1b1e26] border border-[#2a2f3b] flex items-center justify-between">
                     <div className="space-y-0.5">
                       <div className="text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
-                        <Clock size={11} className="text-[#cd412b]" />
+                        <Clock size={11} className="text-[#f97316]" />
                         <span>{lang === 'ru' ? 'РАССЧИТАННОЕ ВРЕМЯ ДО ОБРУШЕНИЯ:' : 'CALCULATED DECAY COUNTDOWN:'}</span>
                       </div>
                       <div className="text-sm font-black font-mono text-emerald-400">
@@ -1374,7 +1374,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                       type="checkbox"
                       checked={notifyTauri}
                       onChange={(e) => setNotifyTauri(e.target.checked)}
-                      className="accent-[#cd412b]"
+                      className="accent-[#f97316]"
                     />
                     <span>{lang === 'ru' ? 'Приложение Windows (Tauri Desktop)' : 'Windows App (Tauri Desktop)'}</span>
                   </label>
@@ -1384,7 +1384,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                       type="checkbox"
                       checked={notifyBrowser}
                       onChange={(e) => setNotifyBrowser(e.target.checked)}
-                      className="accent-[#cd412b]"
+                      className="accent-[#f97316]"
                     />
                     <span>{lang === 'ru' ? 'Браузерное системное уведомление (Web Notification)' : 'Browser Desktop Notification'}</span>
                   </label>
@@ -1394,7 +1394,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                       type="checkbox"
                       checked={soundAlert}
                       onChange={(e) => setSoundAlert(e.target.checked)}
-                      className="accent-[#cd412b]"
+                      className="accent-[#f97316]"
                     />
                     <span>{lang === 'ru' ? 'Звуковая сирена тревоги Rust (Web Audio Chime)' : 'Rust Tactical Audio Alarm Siren'}</span>
                   </label>
@@ -1410,7 +1410,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                     value={timerNotes}
                     onChange={(e) => setTimerNotes(e.target.value)}
                     placeholder={lang === 'ru' ? 'Например: закинуть 500 камня и 300 металла' : 'e.g. deposit 500 stone and 300 metal'}
-                    className="w-full bg-[#0c0d10] border border-[#2a2f3b] px-3 py-1.5 text-xs font-mono text-white outline-none focus:border-[#cd412b]/60"
+                    className="w-full bg-[#0c0d10] border border-[#2a2f3b] px-3 py-1.5 text-xs font-mono text-white outline-none focus:border-[#f97316]/60"
                   />
                 </div>
 
@@ -1425,7 +1425,7 @@ export default function DecayCalculator({ lang, user, onToast, onOpenProfile }: 
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 bg-[#cd412b] hover:bg-[#e04832] text-white font-mono text-xs font-bold uppercase tracking-wider cursor-pointer shadow-lg shadow-[#cd412b]/30 flex items-center gap-1.5"
+                    className="px-5 py-2 bg-[#f97316] hover:bg-[#e04832] text-white font-mono text-xs font-bold uppercase tracking-wider cursor-pointer shadow-lg shadow-[#f97316]/30 flex items-center gap-1.5"
                   >
                     <Bell size={13} />
                     <span>{lang === 'ru' ? 'Запустить таймер' : 'Start Timer'}</span>
