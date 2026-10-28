@@ -820,7 +820,9 @@ nav a, nav button, [role="tab"], .technical-label, .eyebrow {
   font-weight: 700;
   letter-spacing: 0.005em;
   line-height: 0.98;
-  font-size: clamp(3.2rem, 6vw, 6rem);
+  /* Keep the two-line signature visually balanced with the logo block. */
+  font-size: clamp(2.65rem, 4.25vw, 4.35rem);
+  max-width: 12ch;
 }
 .industrial-home > section:first-child h1 span { font-family: inherit; }
 .industrial-home h2 { font-size: clamp(1.15rem, 1.5vw, 1.45rem); }
@@ -830,6 +832,7 @@ nav a, nav button, [role="tab"], .technical-label, .eyebrow {
 }
 @media (max-width: 560px) {
   .industrial-home > section:first-child h1 {
-    font-size: clamp(2.8rem, 12vw, 4rem);
+    font-size: clamp(2.35rem, 9vw, 3.25rem);
+    max-width: 11ch;
   }
 }
