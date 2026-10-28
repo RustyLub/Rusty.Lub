@@ -1357,99 +1357,10 @@ export default function App() {
                 </span>
               </button>
 
-              {/* Desktop Nav Links - Extra Large Screens (>= 1536px) */}
-              <div className={`hidden 2xl:flex flex-wrap items-center gap-1 border-l pl-3 ${
-                appTheme === 'light' ? 'border-neutral-200' : 'border-[#1e2633]'
-              }`}>
-                {[
-                  { id: 'home', label: lang === 'ru' ? 'Главная' : 'Home' },
-                  { id: 'tools', label: lang === 'ru' ? 'Калькуляторы' : 'Tools' },
-                  { id: 'raid', label: lang === 'ru' ? 'Рейд' : 'Raid', isHot: true },
-                  { id: 'guides', label: lang === 'ru' ? 'Гайды' : 'Guides' },
-                  { id: 'clan', label: lang === 'ru' ? 'Кланы' : 'Clans' },
-                  { id: 'chat', label: lang === 'ru' ? 'Чат' : 'Chat' },
-                  { id: 'news', label: lang === 'ru' ? 'Новости' : 'News' },
-                  { id: 'faq', label: lang === 'ru' ? 'FAQ' : 'FAQ' }
-                ].map((item) => {
-                  const isActive = activeTab === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => handleTabChange(item.id as any)}
-                      className={`px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
-                        isActive
-                          ? appTheme === 'light'
-                            ? 'text-red-600 bg-red-500/10 font-black shadow-xs'
-                            : 'text-white bg-gradient-to-r from-red-600/25 to-transparent border-l-2 border-red-600 font-black'
-                          : appTheme === 'light'
-                            ? 'text-neutral-700 hover:text-black hover:bg-neutral-100'
-                            : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e]'
-                      }`}
-                    >
-                      {item.isHot && <Flame size={12} className={isActive ? 'text-red-500 fill-red-500/20' : 'text-orange-500'} />}
-                      <span>{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Compact Nav Links - XL Screens (1280px - 1535px) */}
-              <div className={`hidden xl:flex 2xl:hidden flex-wrap items-center gap-1 border-l pl-2.5 ${
-                appTheme === 'light' ? 'border-neutral-200' : 'border-[#1e2633]'
-              }`}>
-                {[
-                  { id: 'home', label: lang === 'ru' ? 'Главная' : 'Home' },
-                  { id: 'tools', label: lang === 'ru' ? 'Калькуляторы' : 'Tools' },
-                  { id: 'raid', label: lang === 'ru' ? 'Рейд' : 'Raid', isHot: true }
-                ].map((item) => {
-                  const isActive = activeTab === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => handleTabChange(item.id as any)}
-                      className={`px-2 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
-                        isActive
-                          ? appTheme === 'light'
-                            ? 'text-red-600 bg-red-500/10 font-black'
-                            : 'text-white bg-red-600/20 border-l-2 border-red-600 font-black'
-                          : appTheme === 'light'
-                            ? 'text-neutral-700 hover:text-black hover:bg-neutral-100'
-                            : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e]'
-                      }`}
-                    >
-                      {item.isHot && <Flame size={12} className="text-orange-500" />}
-                      <span>{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
             </div>
 
             {/* Right: Actions, Search, Theme, Quick Raid, Cabinet & Lang */}
             <div className="flex max-w-full flex-wrap items-center justify-end gap-1 sm:gap-2">
-              {/* HUD Overlay Quick Trigger */}
-              <button
-                onClick={() => setQuickOverlayOpen(prev => !prev)}
-                className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 text-xs font-mono transition-all cursor-pointer rounded-md shadow-xs group shrink-0 ${
-                  quickOverlayOpen
-                    ? 'bg-red-600 text-white border border-red-500 shadow-sm shadow-red-600/30'
-                    : appTheme === 'light'
-                      ? 'bg-neutral-100 hover:bg-neutral-200 border border-neutral-300/80 text-neutral-700'
-                      : 'bg-[#12161e] hover:bg-[#161c28] border border-[#1e2633] text-[#8b95a8] hover:text-[#eef2f7]'
-                }`}
-                title={lang === 'ru' ? 'HUD Оверлей поверх игры (Alt + O)' : 'In-Game HUD Overlay (Alt + O)'}
-              >
-                <Target size={14} className={quickOverlayOpen ? 'text-white' : 'text-red-500 group-hover:scale-110 transition-transform shrink-0'} />
-                <span className="hidden xl:inline text-[11px] font-semibold">HUD</span>
-                <span className={`hidden 2xl:inline text-[9px] px-1 py-0.5 font-mono rounded ${
-                  quickOverlayOpen
-                    ? 'bg-black/30 text-white'
-                    : appTheme === 'light' ? 'bg-white text-neutral-500 border border-neutral-200' : 'bg-white/5 border border-white/10 text-[#8b95a8]'
-                }`}>
-                  Alt+O
-                </span>
-              </button>
-
               {/* Search Trigger */}
               <button
                 onClick={() => setCommandPaletteOpen(true)}
@@ -1589,6 +1500,77 @@ export default function App() {
                 {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
               </button>
             </div>
+          </div>
+          <div className={`hidden xl:flex w-full items-center justify-center gap-4 border-t py-1.5 ${
+            appTheme === 'light' ? 'border-neutral-200/80' : 'border-[#1e2633]/80'
+          }`}>
+              {/* Desktop Nav Links - Extra Large Screens (>= 1536px) */}
+              <div className={`hidden 2xl:flex flex-wrap items-center gap-1.5 ${
+                appTheme === 'light' ? 'border-neutral-200' : 'border-[#1e2633]'
+              }`}>
+                {[
+                  { id: 'home', label: lang === 'ru' ? 'Главная' : 'Home' },
+                  { id: 'tools', label: lang === 'ru' ? 'Калькуляторы' : 'Tools' },
+                  { id: 'raid', label: lang === 'ru' ? 'Рейд' : 'Raid', isHot: true },
+                  { id: 'guides', label: lang === 'ru' ? 'Гайды' : 'Guides' },
+                  { id: 'clan', label: lang === 'ru' ? 'Кланы' : 'Clans' },
+                  { id: 'chat', label: lang === 'ru' ? 'Чат' : 'Chat' },
+                  { id: 'news', label: lang === 'ru' ? 'Новости' : 'News' },
+                  { id: 'faq', label: lang === 'ru' ? 'FAQ' : 'FAQ' }
+                ].map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleTabChange(item.id as any)}
+                      className={`px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                        isActive
+                          ? appTheme === 'light'
+                            ? 'text-red-600 bg-red-500/10 font-black shadow-xs'
+                            : 'text-white bg-gradient-to-r from-red-600/25 to-transparent border-l-2 border-red-600 font-black'
+                          : appTheme === 'light'
+                            ? 'text-neutral-700 hover:text-black hover:bg-neutral-100'
+                            : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e]'
+                      }`}
+                    >
+                      {item.isHot && <Flame size={12} className={isActive ? 'text-red-500 fill-red-500/20' : 'text-orange-500'} />}
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Compact Nav Links - XL Screens (1280px - 1535px) */}
+              <div className={`hidden xl:flex 2xl:hidden flex-wrap items-center gap-1.5 ${
+                appTheme === 'light' ? 'border-neutral-200' : 'border-[#1e2633]'
+              }`}>
+                {[
+                  { id: 'home', label: lang === 'ru' ? 'Главная' : 'Home' },
+                  { id: 'tools', label: lang === 'ru' ? 'Калькуляторы' : 'Tools' },
+                  { id: 'raid', label: lang === 'ru' ? 'Рейд' : 'Raid', isHot: true }
+                ].map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleTabChange(item.id as any)}
+                      className={`px-2 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                        isActive
+                          ? appTheme === 'light'
+                            ? 'text-red-600 bg-red-500/10 font-black'
+                            : 'text-white bg-red-600/20 border-l-2 border-red-600 font-black'
+                          : appTheme === 'light'
+                            ? 'text-neutral-700 hover:text-black hover:bg-neutral-100'
+                            : 'text-[#8b95a8] hover:text-[#eef2f7] hover:bg-[#12161e]'
+                      }`}
+                    >
+                      {item.isHot && <Flame size={12} className="text-orange-500" />}
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
           </div>
         </div>
 
