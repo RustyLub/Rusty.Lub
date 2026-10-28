@@ -842,9 +842,10 @@ nav a, nav button, [role="tab"], .technical-label, .eyebrow {
 body:not(.light-theme) {
   background-color: #080b0e !important;
   background-image:
-    linear-gradient(180deg, rgba(7, 10, 14, .72) 0%, rgba(7, 10, 14, .84) 42%, rgba(7, 10, 14, .94) 100%),
-    linear-gradient(90deg, rgba(5, 7, 10, .62) 0%, rgba(5, 7, 10, .18) 22%, rgba(5, 7, 10, .18) 78%, rgba(5, 7, 10, .62) 100%),
-    radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, .16), transparent 46rem),
+    /* Lighter overlay: let the Rust artwork remain clearly visible. */
+    linear-gradient(180deg, rgba(7, 10, 14, .38) 0%, rgba(7, 10, 14, .52) 42%, rgba(7, 10, 14, .72) 100%),
+    linear-gradient(90deg, rgba(5, 7, 10, .32) 0%, rgba(5, 7, 10, .06) 22%, rgba(5, 7, 10, .06) 78%, rgba(5, 7, 10, .32) 100%),
+    radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, .18), transparent 46rem),
     url("https://cdn.cloudflare.steamstatic.com/steam/apps/252490/library_hero.jpg");
   background-size: cover, cover, cover, cover;
   background-position: center, center, center top, center top;
@@ -866,15 +867,15 @@ body:not(.light-theme) main::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 8% 45%, rgba(242, 104, 24, .08), transparent 28rem),
-    radial-gradient(ellipse at 94% 62%, rgba(242, 104, 24, .07), transparent 30rem),
-    linear-gradient(180deg, transparent 0%, rgba(5, 8, 11, .2) 60%, rgba(5, 8, 11, .48) 100%);
+    radial-gradient(ellipse at 8% 45%, rgba(242, 104, 24, .1), transparent 28rem),
+    radial-gradient(ellipse at 94% 62%, rgba(242, 104, 24, .09), transparent 30rem),
+    linear-gradient(180deg, transparent 0%, rgba(5, 8, 11, .12) 60%, rgba(5, 8, 11, .28) 100%);
 }
 @media (max-width: 768px) {
   body:not(.light-theme) {
     background-image:
-      linear-gradient(180deg, rgba(7, 10, 14, .84) 0%, rgba(7, 10, 14, .93) 50%, rgba(7, 10, 14, .97) 100%),
-      radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, .1), transparent 30rem),
+      linear-gradient(180deg, rgba(7, 10, 14, .52) 0%, rgba(7, 10, 14, .66) 50%, rgba(7, 10, 14, .8) 100%),
+      radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, .14), transparent 30rem),
       url("https://cdn.cloudflare.steamstatic.com/steam/apps/252490/library_hero.jpg");
     background-position: center, center, center top;
     background-attachment: scroll, scroll, scroll;
