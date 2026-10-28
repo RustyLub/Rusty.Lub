@@ -29,7 +29,8 @@
 }
 
 /* Premium typography: handwritten display headings, clean UI, technical numerals. */
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6,
+h1.font-russo, h2.font-russo, h3.font-russo, h4.font-russo, h5.font-russo, h6.font-russo {
   font-family: "Caveat", cursive;
   font-weight: 700;
   letter-spacing: 0.015em;
