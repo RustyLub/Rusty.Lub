@@ -492,7 +492,7 @@ export default function CabinetModal({
       const userRef = doc(db, 'chat_users', user.uid);
 
       if (!displayName.trim()) {
-        onToast(lang === 'ru' ? 'Имя (Позывной) не может быть пустым!' : 'Callsign (Display Name) cannot be empty!', 'warning');
+        onToast(lang === 'ru' ? 'Никнейм не может быть пустым!' : 'Nickname cannot be empty!', 'warning');
         setIsSavingProfile(false);
         return;
       }
@@ -1518,6 +1518,9 @@ export default function CabinetModal({
                                 className="w-full bg-[#14171e] border border-zinc-800 focus:border-zinc-700 p-2.5 text-xs font-mono text-white outline-none"
                                 placeholder="https://example.com/avatar.png"
                               />
+                              <p className="text-[10px] leading-relaxed text-zinc-500">
+                                {lang === 'ru' ? 'Укажите прямую ссылку на изображение HTTPS. Подойдут JPG, PNG или WebP; после выбора проверьте предпросмотр.' : 'Use a direct HTTPS image link. JPG, PNG or WebP are recommended; check the preview after selecting.'}
+                              </p>
 
                               <div className="rounded-md border border-dashed border-[#38404b] bg-[#11151b] p-3 space-y-2.5">
                                 <div className="flex items-center gap-2">
