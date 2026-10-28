@@ -96,9 +96,9 @@ export default function FpsTab({ onCopy, lang, onOpenConfigExporter }: FpsTabPro
     <div className="space-y-4">
       {/* 1-Click Config Exporter Action Banner */}
       {onOpenConfigExporter && (
-        <div className="bg-gradient-to-r from-[#cd412b]/25 via-[#1a1f2b] to-[#12151d] border-2 border-[#cd412b]/60 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+        <div className="bg-gradient-to-r from-[#f97316]/25 via-[#1a1f2b] to-[#12151d] border-2 border-[#f97316]/60 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-[#cd412b]/30 text-[#cd412b] border border-[#cd412b]/50">
+            <div className="p-3 bg-[#f97316]/30 text-[#f97316] border border-[#f97316]/50">
               <Download size={22} className="animate-pulse" />
             </div>
             <div>
@@ -106,7 +106,7 @@ export default function FpsTab({ onCopy, lang, onOpenConfigExporter }: FpsTabPro
                 <h3 className="text-sm sm:text-base font-black uppercase text-white font-mono">
                   {lang === 'en' ? 'One-Click Config & FPS Export' : 'Экспорт оптимизированного CFG в 1 клик'}
                 </h3>
-                <span className="text-[9px] font-mono bg-[#cd412b] text-white px-2 py-0.5 font-bold uppercase">
+                <span className="text-[9px] font-mono bg-[#f97316] text-white px-2 py-0.5 font-bold uppercase">
                   autoexec.cfg
                 </span>
               </div>
@@ -119,7 +119,7 @@ export default function FpsTab({ onCopy, lang, onOpenConfigExporter }: FpsTabPro
           </div>
           <button
             onClick={onOpenConfigExporter}
-            className="w-full sm:w-auto px-5 py-2.5 bg-[#cd412b] hover:bg-[#b03522] text-white font-mono font-black text-xs uppercase transition-all shadow-[0_0_20px_rgba(205,65,43,0.5)] flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 bg-[#f97316] hover:bg-[#b03522] text-white font-mono font-black text-xs uppercase transition-all shadow-[0_0_20px_rgba(205,65,43,0.5)] flex items-center justify-center gap-2 shrink-0 cursor-pointer"
           >
             <FileCode size={15} />
             <span>{lang === 'en' ? 'Generate & Export CFG' : 'Сгенерировать и Скачать CFG'}</span>
@@ -129,7 +129,7 @@ export default function FpsTab({ onCopy, lang, onOpenConfigExporter }: FpsTabPro
 
       {/* Intro Header */}
       <div className="bg-[#14171e] p-4 border border-[#2a2f3b] flex items-center gap-4">
-        <Settings size={24} className="text-[#cd412b]" />
+        <Settings size={24} className="text-[#f97316]" />
         <div className="space-y-1">
           <h2 className="text-sm font-bold text-white uppercase tracking-wider">
             {fpsTranslationMap.title[lang]}
@@ -143,7 +143,7 @@ export default function FpsTab({ onCopy, lang, onOpenConfigExporter }: FpsTabPro
       {/* Launcher Parameters Generator */}
       <div className="bg-[#14171e] border border-[#2a2f3b] p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <Sliders className="text-[#cd412b]" size={16} />
+          <Sliders className="text-[#f97316]" size={16} />
           <h3 className="text-xs font-bold text-white uppercase">
             {fpsTranslationMap.generatorTitle[lang]}
           </h3>
@@ -161,7 +161,7 @@ export default function FpsTab({ onCopy, lang, onOpenConfigExporter }: FpsTabPro
               onClick={() => setRamSize(size)}
               className={`p-2 border text-center transition-all ${
                 ramSize === size
-                  ? 'bg-[#cd412b] border-[#cd412b] text-white'
+                  ? 'bg-[#f97316] border-[#f97316] text-white'
                   : 'bg-[#1b1e26] border-[#2a2f3b] text-gray-400 hover:text-white hover:border-gray-500'
               }`}
             >
@@ -180,13 +180,13 @@ export default function FpsTab({ onCopy, lang, onOpenConfigExporter }: FpsTabPro
             onClick={() => onCopy(generatedParams)}
             className="group relative bg-[#0c0d10] border border-[#2a2f3b] p-3 cursor-pointer flex items-center justify-between"
           >
-            <div className="font-mono text-xs text-[#cd412b] truncate pr-4">
+            <div className="font-mono text-xs text-[#f97316] truncate pr-4">
               {generatedParams}
             </div>
             <Copy size={14} className="text-gray-500" />
           </div>
           <div className="text-[10px] text-gray-500 flex items-center gap-2">
-            <Info size={12} className="text-[#cd412b]" />
+            <Info size={12} className="text-[#f97316]" />
             <span>
               <strong>{fpsTranslationMap.howToInsert[lang]}</strong> {fpsTranslationMap.howToInsertDesc[lang]}
             </span>
@@ -197,7 +197,7 @@ export default function FpsTab({ onCopy, lang, onOpenConfigExporter }: FpsTabPro
       {/* In-Game Console Commands */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <Cpu className="text-[#cd412b]" size={16} />
+          <Cpu className="text-[#f97316]" size={16} />
           <h3 className="text-xs font-bold text-white uppercase">
             {fpsTranslationMap.consoleCommandsTitle[lang]}
           </h3>
@@ -208,18 +208,18 @@ export default function FpsTab({ onCopy, lang, onOpenConfigExporter }: FpsTabPro
             <div
               key={item.cmd}
               onClick={() => onCopy(item.cmd)}
-              className="bg-[#14171e] border border-[#2a2f3b] hover:border-[#cd412b]/50 p-3 cursor-pointer flex flex-col justify-between transition-all"
+              className="bg-[#14171e] border border-[#2a2f3b] hover:border-[#f97316]/50 p-3 cursor-pointer flex flex-col justify-between transition-all"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-[#cd412b] uppercase">{item.desc}</span>
-                <span className="text-[9px] bg-[#cd412b]/10 text-[#cd412b] px-1.5 py-0.5 uppercase">
+                <span className="text-xs font-bold text-[#f97316] uppercase">{item.desc}</span>
+                <span className="text-[9px] bg-[#f97316]/10 text-[#f97316] px-1.5 py-0.5 uppercase">
                   {item.impact}
                 </span>
               </div>
               <p className="text-[10px] text-gray-400 mb-2 leading-relaxed">
                 {item.reason}
               </p>
-              <div className="bg-[#0c0d10] p-2 text-[10px] font-mono text-[#cd412b] truncate">
+              <div className="bg-[#0c0d10] p-2 text-[10px] font-mono text-[#f97316] truncate">
                 {item.cmd}
               </div>
             </div>
@@ -230,7 +230,7 @@ export default function FpsTab({ onCopy, lang, onOpenConfigExporter }: FpsTabPro
       {/* Windows & Hardware Tweaks */}
       <div className="bg-[#14171e] border border-[#2a2f3b] p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <Monitor className="text-[#cd412b]" size={16} />
+          <Monitor className="text-[#f97316]" size={16} />
           <h3 className="text-xs font-bold text-white uppercase">
             {fpsTranslationMap.windowsTitle[lang]}
           </h3>
@@ -239,7 +239,7 @@ export default function FpsTab({ onCopy, lang, onOpenConfigExporter }: FpsTabPro
         <div className="space-y-2">
           {windowsTweaks.map((tweak, i) => (
             <div key={i} className="flex gap-3 items-start bg-[#1b1e26] p-3 border border-[#2a2f3b]">
-              <div className="w-5 h-5 bg-[#cd412b]/10 text-[#cd412b] font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-5 h-5 bg-[#f97316]/10 text-[#f97316] font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                 {i + 1}
               </div>
               <div className="space-y-0.5">
