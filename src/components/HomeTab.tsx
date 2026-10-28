@@ -143,16 +143,16 @@ export default function HomeTab({
   ];
 
   return (
-    <div className="space-y-10 pb-16 text-left">
+    <div className="industrial-home space-y-7 lg:space-y-8 pb-16 text-left">
       
       {/* ── 1. PREMIUM SOFT LIGHT HERO SECTION ── */}
-      <section className="bg-[#12161e] border border-[#1e2633] rounded-2xl p-6 sm:p-8 md:p-10 shadow-[0_4px_30px_rgba(0,0,0,0.015)] relative overflow-hidden">
+      <section className="bg-gradient-to-br from-[#171f28] via-[#10161d] to-[#0d1218] border border-[#35404b] rounded-xl p-5 sm:p-7 lg:p-9 shadow-[0_18px_55px_rgba(0,0,0,0.28)] relative overflow-hidden">
         {/* Glow Accent */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/100/[0.02] rounded-full blur-3xl pointer-events-none" />
         
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center relative z-10">
           {/* Left Hero Column */}
-          <div className="md:col-span-8 space-y-6">
+          <div className="lg:col-span-8 space-y-5">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-500/10 border border-orange-500/20 text-[10px] font-bold uppercase tracking-wider text-orange-500 rounded-lg">
               <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
               <span>{lang === 'ru' ? 'Светлый Дизайн v2.0' : 'Soft Light Layout v2.0'}</span>
@@ -190,7 +190,7 @@ export default function HomeTab({
           </div>
 
           {/* Right Hero Column: Authentic C4 Display item slot */}
-          <div className="md:col-span-4 flex justify-center">
+          <div className="lg:col-span-4 flex justify-center lg:justify-end">
             <div className="relative p-6 bg-[#0d1016] border border-[#1e2633] rounded-2xl flex flex-col items-center text-center max-w-[240px] w-full shadow-sm">
               <div className="w-24 h-24 rounded-2xl bg-zinc-900 border-2 border-[#2e394b] flex items-center justify-center shadow-inner relative overflow-hidden group mb-3">
                 <ItemImageOrFallback id="timed_explosive" lang={lang} size={76} />
@@ -216,11 +216,11 @@ export default function HomeTab({
           {lang === 'ru' ? '🔥 ПОПУЛЯРНЫЕ РАЗДЕЛЫ' : '🔥 FEATURED PROTOCOLS'}
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
           {/* Featured 1: Raid Calculator */}
           <div 
             onClick={() => onNavigate('raid')}
-            className="bg-[#12161e] border border-[#1e2633] p-5 rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.01)] hover:border-orange-500 transition-all cursor-pointer flex items-start gap-4 group"
+            className="bg-[#111820] border border-[#293541] p-4 lg:p-5 rounded-xl shadow-[0_10px_24px_rgba(0,0,0,0.16)] hover:border-orange-500/70 hover:-translate-y-0.5 transition-all cursor-pointer flex items-start gap-4 group"
           >
             <div className="w-14 h-14 shrink-0 rounded-xl bg-zinc-900 border border-[#2e394b] flex items-center justify-center shadow-inner overflow-hidden">
               <ItemImageOrFallback id="timed_explosive" lang={lang} size={46} />
