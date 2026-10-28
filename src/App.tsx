@@ -2005,21 +2005,24 @@ export default function App() {
                 <div>
                   <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#f28a24]">R.L. / SUPPORT</p>
                   <h1 className="mt-1 text-3xl font-bold text-white">{lang === 'ru' ? 'Поддержка проекта и VIP' : 'Project support & VIP'}</h1>
-                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400">{lang === 'ru' ? 'Поддержите развитие Rusty.Lub или перейдите к покупке VIP. Это отдельные действия: добровольная поддержка не является покупкой VIP-доступа.' : 'Support Rusty.Lub or continue to VIP access. These are separate actions: voluntary donations do not purchase VIP access.'}</p>
+                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400">{lang === 'ru' ? 'Выберите VIP-доступ или поддержите развитие Rusty.Lub добровольным пожертвованием. Это разные действия.' : 'Choose VIP access or support Rusty.Lub with a voluntary donation. These are separate actions.'}</p>
                 </div>
                 <button type="button" onClick={() => handleTabChange('home')} className="rounded-md border border-white/10 px-3 py-2 text-sm text-zinc-300 hover:border-orange-400/40 hover:text-white">{lang === 'ru' ? 'На главную' : 'Back home'}</button>
               </div>
-              <section className="border-y border-white/10 py-6">
-                <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+              <section className="border-y border-white/10 py-7">
+                <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
                   <div>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#f28a24]">{lang === 'ru' ? '01 / VIP-ДОСТУП' : '01 / VIP ACCESS'}</p>
-                    <h2 className="mt-1 text-xl font-bold text-white">{lang === 'ru' ? 'Покупка VIP' : 'Purchase VIP'}</h2>
-                    <p className="mt-1 max-w-2xl text-sm text-zinc-400">{lang === 'ru' ? 'Перейдите в личный кабинет, чтобы проверить доступные варианты VIP и связанные с аккаунтом условия.' : 'Open your account to review available VIP options and account-specific terms.'}</p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#f28a24]">{lang === 'ru' ? '01 / VIP-ДОСТУП · 45 ДНЕЙ' : '01 / VIP ACCESS · 45 DAYS'}</p>
+                    <h2 className="mt-2 text-2xl font-bold text-white">Diamond VIP</h2>
+                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400">{lang === 'ru' ? 'Персонализация профиля, премиальные темы и аватары, значок VIP и доступ к дополнительным инструментам проекта.' : 'Profile personalization, premium themes and avatars, a VIP badge, and access to additional project tools.'}</p>
+                    <p className="mt-4 text-3xl font-black text-[#f28a24]">300 ₽ <span className="text-sm font-medium text-zinc-500">/ {lang === 'ru' ? '45 дней' : '45 days'}</span></p>
                   </div>
-                  <button type="button" onClick={() => currentUser ? handleTabChange('account') : setAuthModalOpen(true)} className="inline-flex items-center gap-2 bg-[#f28a24] px-5 py-3 text-sm font-bold text-[#111] transition hover:bg-orange-300">
-                    {lang === 'ru' ? (currentUser ? 'Перейти к VIP' : 'Войти для покупки VIP') : (currentUser ? 'Continue to VIP' : 'Sign in to purchase VIP')}
-                    <ExternalLink size={15} />
-                  </button>
+                  <div className="flex flex-col gap-3 md:min-w-56">
+                    <button type="button" onClick={() => setToasts(prev => [...prev, { id: Math.random().toString(36).slice(2, 9), message: lang === 'ru' ? 'Оплата временно недоступна. Платёжная система ещё не подключена.' : 'Payment is temporarily unavailable. The payment provider is not connected yet.', type: 'info' }])} className="inline-flex items-center justify-center gap-2 bg-[#f28a24] px-6 py-3 text-sm font-bold text-[#111] transition hover:bg-orange-300">
+                      {lang === 'ru' ? 'Купить за 300 ₽' : 'Buy for 300 RUB'} <ExternalLink size={15} />
+                    </button>
+                    <p className="text-xs leading-relaxed text-zinc-500">{lang === 'ru' ? 'Оплата пока не подключена. Нажатие кнопки не спишет деньги и не активирует VIP.' : 'Payments are not connected yet. Clicking will not charge you or activate VIP.'}</p>
+                  </div>
                 </div>
               </section>
               <section className="py-4">
@@ -2027,27 +2030,27 @@ export default function App() {
                   <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#f28a24]">{lang === 'ru' ? '02 / ДОБРОВОЛЬНАЯ ПОДДЕРЖКА' : '02 / VOLUNTARY SUPPORT'}</p>
                   <h2 className="mt-1 text-xl font-bold text-white">{lang === 'ru' ? 'Поддержать проект' : 'Support the project'}</h2>
                 </div>
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                <a href="https://www.donationalerts.com/r/tv_cheater" target="_blank" rel="noreferrer" className="group border border-white/10 bg-[#10161d] p-6 transition hover:border-orange-400/50">
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg border border-orange-400/30 bg-orange-500/10 text-orange-300"><Heart size={22}/></div>
-                  <h2 className="text-lg font-bold text-white">DonationAlerts <ExternalLink size={14} className="inline"/></h2>
-                  <p className="mt-2 text-sm text-zinc-400">{lang === 'ru' ? 'Перейти на страницу поддержки.' : 'Open the support page.'}</p>
-                </a>
-                <div className="border border-white/10 bg-[#10161d] p-6">
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg border border-amber-400/30 bg-amber-500/10 text-amber-300"><Coins size={22}/></div>
-                  <h2 className="text-lg font-bold text-white">Bitcoin (BTC)</h2>
-                  <p className="mt-3 break-all rounded-md border border-white/10 bg-black/20 p-3 font-mono text-xs text-zinc-300">bc1qllwnsda2xjrffjxtjet66cxgs0vt2rzt7ngtz9</p>
-                  <button type="button" onClick={() => handleCopy('bc1qllwnsda2xjrffjxtjet66cxgs0vt2rzt7ngtz9')} className="mt-3 rounded-md border border-white/10 px-3 py-2 text-sm text-zinc-300 hover:border-orange-400/40 hover:text-white">{lang === 'ru' ? 'Копировать адрес' : 'Copy address'}</button>
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                  <a href="https://www.donationalerts.com/r/tv_cheater" target="_blank" rel="noreferrer" className="group border border-white/10 bg-[#10161d] p-6 transition hover:border-orange-400/50">
+                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg border border-orange-400/30 bg-orange-500/10 text-orange-300"><Heart size={22}/></div>
+                    <h2 className="text-lg font-bold text-white">DonationAlerts <ExternalLink size={14} className="inline"/></h2>
+                    <p className="mt-2 text-sm text-zinc-400">{lang === 'ru' ? 'Перейти на страницу добровольной поддержки.' : 'Open the voluntary support page.'}</p>
+                  </a>
+                  <div className="border border-white/10 bg-[#10161d] p-6">
+                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg border border-amber-400/30 bg-amber-500/10 text-amber-300"><Coins size={22}/></div>
+                    <h2 className="text-lg font-bold text-white">Bitcoin (BTC)</h2>
+                    <p className="mt-3 break-all rounded-md border border-white/10 bg-black/20 p-3 font-mono text-xs text-zinc-300">bc1qllwnsda2xjrffjxtjet66cxgs0vt2rzt7ngtz9</p>
+                    <button type="button" onClick={() => handleCopy('bc1qllwnsda2xjrffjxtjet66cxgs0vt2rzt7ngtz9')} className="mt-3 rounded-md border border-white/10 px-3 py-2 text-sm text-zinc-300 hover:border-orange-400/40 hover:text-white">{lang === 'ru' ? 'Копировать адрес' : 'Copy address'}</button>
+                  </div>
+                  <div className="border border-white/10 bg-[#10161d] p-6">
+                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg border border-emerald-400/30 bg-emerald-500/10 text-emerald-300"><Coins size={22}/></div>
+                    <h2 className="text-lg font-bold text-white">USDT (TRC20)</h2>
+                    <p className="mt-3 break-all rounded-md border border-white/10 bg-black/20 p-3 font-mono text-xs text-zinc-300">TRAgQoGMAThBaSxkRaYvfzLtH92Fq89DSQ</p>
+                    <button type="button" onClick={() => handleCopy('TRAgQoGMAThBaSxkRaYvfzLtH92Fq89DSQ')} className="mt-3 rounded-md border border-white/10 px-3 py-2 text-sm text-zinc-300 hover:border-orange-400/40 hover:text-white">{lang === 'ru' ? 'Копировать адрес' : 'Copy address'}</button>
+                  </div>
                 </div>
-                <div className="border border-white/10 bg-[#10161d] p-6">
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg border border-emerald-400/30 bg-emerald-500/10 text-emerald-300"><Coins size={22}/></div>
-                  <h2 className="text-lg font-bold text-white">USDT (TRC20)</h2>
-                  <p className="mt-3 break-all rounded-md border border-white/10 bg-black/20 p-3 font-mono text-xs text-zinc-300">TRAgQoGMAThBaSxkRaYvfzLtH92Fq89DSQ</p>
-                  <button type="button" onClick={() => handleCopy('TRAgQoGMAThBaSxkRaYvfzLtH92Fq89DSQ')} className="mt-3 rounded-md border border-white/10 px-3 py-2 text-sm text-zinc-300 hover:border-orange-400/40 hover:text-white">{lang === 'ru' ? 'Копировать адрес' : 'Copy address'}</button>
-                </div>
-              </div>
               </section>
-              <p className="text-xs leading-relaxed text-zinc-500">{lang === 'ru' ? 'Поддержка добровольная. Перед переводом убедитесь, что адрес и сеть указаны верно. Переводы в блокчейне обычно необратимы. Донат не предоставляет VIP автоматически.' : 'Support is voluntary. Verify the address and network before sending; blockchain transfers are generally irreversible. Donations do not automatically grant VIP.'}</p>
+              <p className="text-xs leading-relaxed text-zinc-500">{lang === 'ru' ? 'Добровольный донат не предоставляет VIP автоматически. Оплата VIP будет доступна после подключения и проверки платёжной системы.' : 'Voluntary donations do not automatically grant VIP. VIP checkout will become available after the payment provider is connected and verified.'}</p>
             </motion.div>
           )}
 
