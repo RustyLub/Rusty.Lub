@@ -75,7 +75,7 @@ export default function TermsModal({ isOpen, onClose, lang, pageMode = false }: 
           },
           {
             ru: '2.3. Не используйте пароль от других сервисов. Не передавайте данные аккаунта третьим лицам и не пытайтесь входить в чужие аккаунты. Не указывайте в никнейме чужие персональные данные, оскорбления или имитацию официального представителя проекта.',
-            en: '2.3. Do not reuse passwords from other services, share account credentials, or access someone else's account. Nicknames must not expose another person's private information, contain abusive content, or impersonate project staff.'
+            en: '2.3. Do not reuse passwords from other services, share account credentials, or access someone else\'s account. Nicknames must not expose another person\'s private information, contain abusive content, or impersonate project staff.'
           }
         ]
       },
