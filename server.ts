@@ -234,7 +234,7 @@ async function startServer() {
   app.post('/api/cms/pages', verifyCmsIdentity, requireCmsRole('owner', 'admin', 'editor'), async (req: any, res: any) => {
     try {
       const body = req.body || {};
-      const slug = String(body.slug || '').trim().toLowerCase().replace(/^\\/+|\\/+$/g, '');
+      const slug = String(body.slug || '').trim().toLowerCase().replace(/^\/+|\/+$/g, '');
       if (!slug || slug.length > 120 || !/^[a-z0-9]+(?:[/-][a-z0-9]+)*$/.test(slug)) {
         return res.status(400).json({ message: 'Slug must contain only lowercase letters, numbers, hyphens or path separators.' });
       }
