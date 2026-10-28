@@ -147,8 +147,8 @@ export default function HomeTab({
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-orange-300 sm:text-xs">
                   {lang === 'ru' ? 'ИНСТРУМЕНТЫ • БАЗА ЗНАНИЙ • СООБЩЕСТВО' : 'TOOLS • KNOWLEDGE • COMMUNITY'}
                 </p>
-                <h1 className="max-w-4xl text-4xl font-black leading-[0.98] tracking-tight text-white drop-shadow-[0_3px_18px_rgba(0,0,0,0.6)] sm:text-5xl md:text-6xl lg:text-7xl">
-                  {lang === 'ru' ? <>Твой следующий вайп.<br /><span className="text-orange-400">Под твоим контролем.</span></> : <>Your next wipe.<br /><span className="text-orange-400">On your terms.</span></>}
+                <h1 className="w-full max-w-none text-[clamp(1.65rem,5.2vw,4.5rem)] font-black leading-[1.08] tracking-tight text-white drop-shadow-[0_3px_18px_rgba(0,0,0,0.6)]">
+                  {lang === 'ru' ? <><span className="block whitespace-nowrap">Твой следующий вайп.</span><span className="block whitespace-nowrap text-orange-400">Под твоим контролем.</span></> : <><span className="block whitespace-nowrap">Your next wipe.</span><span className="block whitespace-nowrap text-orange-400">On your terms.</span></>}
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-[#e0e5eb] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] sm:text-base lg:text-lg">
                   {lang === 'ru'
