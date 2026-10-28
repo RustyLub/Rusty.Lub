@@ -9,10 +9,11 @@ interface TermsModalProps {
   isOpen: boolean;
   onClose: () => void;
   lang: 'ru' | 'en';
+  pageMode?: boolean;
 }
 
-export default function TermsModal({ isOpen, onClose, lang }: TermsModalProps) {
-  if (!isOpen) return null;
+export default function TermsModal({ isOpen, onClose, lang, pageMode = false }: TermsModalProps) {
+  if (!isOpen && !pageMode) return null;
 
   const [activeSection, setActiveSection] = useState<number | null>(null);
 
@@ -185,13 +186,13 @@ export default function TermsModal({ isOpen, onClose, lang }: TermsModalProps) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-md">
+      <div className={pageMode ? "w-full min-h-[65vh] flex justify-center px-0 py-2 sm:py-4" : "fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-md"}>
         <motion.div
           initial={{ scale: 0.96, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.96, opacity: 0, y: 15 }}
           transition={{ duration: 0.2 }}
-          className="w-full max-w-4xl bg-[#0c1017] border border-[#2a344a] p-0 relative overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.9)] flex flex-col max-h-[90vh]"
+          className={`w-full max-w-4xl bg-[#0c1017] border border-[#2a344a] p-0 relative overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.25)] flex flex-col ${pageMode ? "min-h-[65vh]" : "max-h-[90vh]"}`}
         >
           {/* Header */}
           <div className="bg-[#111722] border-b border-[#2a344a] p-4 sm:p-5 flex items-center justify-between relative shrink-0">
