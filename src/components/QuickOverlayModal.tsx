@@ -546,12 +546,12 @@ export const QuickOverlayModal: React.FC<QuickOverlayModalProps> = ({
               <div className="p-4 rounded-xl bg-black/60 border border-neutral-800 space-y-3">
                 <div className="font-bold text-amber-400 flex items-center gap-2">
                   <ShieldAlert size={16} />
-                  <span>{lang === 'ru' ? 'Проверка Сирены Реда & Нативных Уведомлений' : 'Raid Alarm & Native Windows Alerts'}</span>
+                  <span>{lang === 'ru' ? 'Проверка звука тревоги и уведомлений' : 'Raid Alert Sound & Native Notifications'}</span>
                 </div>
                 <p className="text-[11px] text-neutral-400 leading-relaxed">
                   {lang === 'ru' 
-                    ? 'Тестирование громкого сигнала сирены рейда и всплывающих окон Windows через плагины Tauri 2.' 
-                    : 'Test native Windows desktop alerts and tactical sound sirens via Tauri 2 plugins.'}
+                    ? 'Проверка отдельного звука тревоги и системных уведомлений Windows через Tauri 2.' 
+                    : 'Test distinct raid alert sounds and native Windows notifications via Tauri 2.'}
                 </p>
 
                 <div className="grid grid-cols-2 gap-2 pt-2">
@@ -568,7 +568,7 @@ export const QuickOverlayModal: React.FC<QuickOverlayModalProps> = ({
                     className="py-2.5 px-3 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-xl transition-all cursor-pointer text-center text-xs flex items-center justify-center gap-1.5"
                   >
                     <Volume2 size={13} />
-                    <span>{lang === 'ru' ? 'Звук Сирены' : 'Test Raid Siren'}</span>
+                    <span>{lang === 'ru' ? 'Тест звука рейда' : 'Test Raid Sound'}</span>
                   </button>
                 </div>
               </div>
