@@ -414,3 +414,58 @@ body.light-theme [class*="hover:bg-white/10"]:not(.keep-dark):hover {
   border-right: 2px solid #f97316;
 }
 
+
+
+/* INDUSTRIAL STEEL 2.0 — application-wide layout system */
+:root {
+  --steel-950: #090c10;
+  --steel-900: #0e1319;
+  --steel-850: #141b23;
+  --steel-800: #1b2530;
+  --steel-line: rgba(148, 163, 184, .16);
+  --steel-orange: #f28a24;
+}
+html { scroll-behavior: smooth; }
+body {
+  background:
+    radial-gradient(ellipse at 82% 0%, rgba(242,138,36,.075), transparent 34rem),
+    linear-gradient(180deg, #090c10 0%, #0c1117 48%, #090c10 100%);
+}
+body:not(.light-theme) #root { min-height: 100vh; }
+body:not(.light-theme) nav.sticky {
+  background: rgba(10, 14, 19, .94) !important;
+  border-color: var(--steel-line) !important;
+  box-shadow: 0 1px 0 rgba(242,138,36,.08), 0 12px 32px rgba(0,0,0,.24) !important;
+  backdrop-filter: blur(18px) saturate(130%);
+}
+body:not(.light-theme) main {
+  max-width: 1560px !important;
+  padding-left: clamp(16px, 2.4vw, 38px) !important;
+  padding-right: clamp(16px, 2.4vw, 38px) !important;
+  margin-top: clamp(18px, 2.4vw, 34px) !important;
+}
+body:not(.light-theme) main > * { min-width: 0; }
+body:not(.light-theme) main section {
+  border-color: var(--steel-line);
+}
+body:not(.light-theme) main [class*="rounded-2xl"][class*="border"] {
+  box-shadow: 0 12px 34px rgba(0,0,0,.18);
+}
+body:not(.light-theme) main button,
+body:not(.light-theme) nav button { transition: background-color .18s ease, border-color .18s ease, transform .18s ease, color .18s ease; }
+body:not(.light-theme) main button:focus-visible,
+body:not(.light-theme) nav button:focus-visible {
+  outline: 2px solid var(--steel-orange);
+  outline-offset: 3px;
+}
+body:not(.light-theme) main h1,
+body:not(.light-theme) main h2,
+body:not(.light-theme) main h3 { letter-spacing: -.025em; }
+body:not(.light-theme) main .grid { align-items: stretch; }
+@media (min-width: 1280px) {
+  body:not(.light-theme) main { padding-bottom: 48px; }
+}
+@media (max-width: 640px) {
+  body:not(.light-theme) main { padding-left: 12px !important; padding-right: 12px !important; }
+  body:not(.light-theme) main section { border-radius: 14px; }
+}
