@@ -81,6 +81,7 @@ interface CabinetModalProps {
   onToast: (msg: string, type: 'success' | 'warning' | 'error') => void;
   onOpenTab?: (tab: string) => void;
   onLoadRaidInCalc?: (raid: SavedRaid) => void;
+  pageMode?: boolean;
 }
 
 interface RegisteredUser {
