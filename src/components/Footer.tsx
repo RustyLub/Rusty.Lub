@@ -1,5 +1,4 @@
 import React from 'react';
-import { Monitor } from 'lucide-react';
 
 interface FooterProps {
   lang: 'ru' | 'en';
@@ -7,8 +6,6 @@ interface FooterProps {
   onOpenCabinet?: () => void;
   onOpenDonation?: () => void;
   onOpenTerms?: () => void;
-  isWindowsApp?: boolean;
-  onToggleLauncherMode?: () => void;
 }
 
 export default function Footer({
@@ -17,8 +14,6 @@ export default function Footer({
   onOpenCabinet,
   onOpenDonation,
   onOpenTerms,
-  isWindowsApp,
-  onToggleLauncherMode
 }: FooterProps) {
   return (
     <footer className="w-full border-t border-[#1e2633] bg-[#0d1016] mt-16 pt-12 pb-8 px-4 sm:px-6 lg:px-8 text-left">
@@ -122,12 +117,12 @@ export default function Footer({
                 {lang === 'ru' ? 'Пользовательское соглашение' : 'Terms & Privacy'}
               </button>
               <a 
-                href="https://t.me/S1mreyReserve" 
+                href="mailto:rusty.lub_offers@bk.ru" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="hover:text-[#f97316] transition-colors text-left"
               >
-                Telegram: @S1mreyReserve
+                rusty.lub_offers@bk.ru
               </a>
             </div>
           </div>
@@ -135,7 +130,7 @@ export default function Footer({
 
         {/* Bottom bar */}
         <div className="pt-6 border-t border-[#1e2633] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#5a6578]">
-          <span>© 2026 Rusty.Lub · {lang === 'ru' ? 'Не аффилирован с Facepunch Studios' : 'Not affiliated with Facepunch Studios'}</span>
+          <span>© 2026 Rusty.Lub · {lang === 'ru' ? 'Независимый проект, не связанный с Facepunch Studios' : 'Independent project, not affiliated with Facepunch Studios'}</span>
 
           {onToggleLauncherMode && (
             <button
