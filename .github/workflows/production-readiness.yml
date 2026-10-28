@@ -3,6 +3,8 @@ name: Production readiness checks
 on:
   pull_request:
     branches: ["main"]
+  push:
+    branches: ["release/production-readiness"]
   workflow_dispatch:
 
 permissions:
