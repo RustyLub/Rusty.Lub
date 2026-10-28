@@ -27,12 +27,12 @@ export default function TermsModal({ isOpen, onClose, lang, pageMode = false }: 
       en: 'LEGAL TERMS AND CONDITIONS GOVERNING USE OF RUSTY.LUB'
     },
     version: {
-      ru: 'Редакция: 2.4 | Дата вступления в силу: 1 января 2025 г.',
-      en: 'Version: 2.4 | Effective Date: January 1, 2025'
+      ru: 'Редакция: 2.5 | Дата обновления: 28 октября 2026 г.',
+      en: 'Version: 2.5 | Updated: October 28, 2026'
     },
     intro: {
-      ru: 'Настоящее Пользовательское соглашение (далее — «Соглашение») регулирует отношения между администрацией информационно-аналитического веб-сервиса Rusty.Lub (далее — «Сервис», «Администрация») и физическим лицом (далее — «Пользователь»), использующим любые функциональные возможности, базы данных, калькуляторы и интерактивные сервисы сайта. Начиная использование Сервиса или регистрируя учетную запись, Пользователь подтверждает, что полностью ознакомлен, согласен и безоговорочно принимает все условия настоящего Соглашения.',
-      en: 'This User Agreement (hereinafter referred to as the "Agreement") governs the relationship between the administration of the Rusty.Lub informational and analytical web service (hereinafter "Service", "Administration") and any individual ("User") utilizing any tools, databases, calculators, or interactive services of the portal. By accessing the Service or registering an account, the User confirms that they have read, understood, and unconditionally agreed to all terms of this Agreement.'
+      ru: 'Настоящее соглашение регулирует использование Rusty.Lub — независимого справочника и набора инструментов для игроков Rust. Оно распространяется на калькуляторы рейдов и гниения, руководства, бинды, игровые справочные материалы, сохранённые расчёты, избранное, чат и функции сообщества. Регистрация означает согласие с этими условиями. Аккаунт нужен для персональных функций и не является игровым аккаунтом Rust или Facepunch.',
+      en: 'These terms govern the use of Rusty.Lub, an independent reference and toolkit for Rust players. They cover raid and decay calculators, guides, binds, game reference material, saved calculations, favorites, chat, and community features. Registering means accepting these terms. A Rusty.Lub account is for this service only and is not a Rust or Facepunch game account.'
     },
     sections: [
       {
@@ -66,16 +66,16 @@ export default function TermsModal({ isOpen, onClose, lang, pageMode = false }: 
         },
         paragraphs: [
           {
-            ru: '2.1. Для доступа к ряду функций (сохранение избранного, размещение анкет кланов, глобальный чат) Пользователю предлагается создать учетную запись, указав уникальный никнейм и пароль.',
-            en: '2.1. Access to certain features (favorites storage, clan recruitment listings, global chat) requires creating an account with a unique username and password.'
+            ru: '2.1. Для доступа к персональным функциям (сохранение расчётов и избранного, участие в чате и функциях сообщества) Пользователь создаёт аккаунт, указывая логин, пароль и отображаемый никнейм. Логин используется для входа; никнейм отображается другим пользователям там, где это предусмотрено интерфейсом.',
+            en: '2.1. Personal features (saved calculations and favorites, chat, and community tools) require an account with a login, password, and display nickname. The login is used to sign in; the nickname is shown to other users where the interface supports it.'
           },
           {
             ru: '2.2. Пользователь несет полную единоличную ответственность за сохранение конфиденциальности своих аутентификационных данных. Все действия, совершенные под учетной записью Пользователя, признаются совершенными им лично.',
             en: '2.2. The User bears sole responsibility for maintaining the confidentiality of their credentials. All actions performed under the User’s account are deemed to have been executed by the User personally.'
           },
           {
-            ru: '2.3. Администрация никогда не запрашивает пароли пользователей. Запрещается передавать данные учетной записи третьим лицам или использовать чужие учетные записи.',
-            en: '2.3. Administration will never solicit user passwords. Sharing account credentials or unauthorized access to third-party accounts is strictly prohibited.'
+            ru: '2.3. Не используйте пароль от других сервисов. Не передавайте данные аккаунта третьим лицам и не пытайтесь входить в чужие аккаунты. Не указывайте в никнейме чужие персональные данные, оскорбления или имитацию официального представителя проекта.',
+            en: '2.3. Do not reuse passwords from other services, share account credentials, or access someone else's account. Nicknames must not expose another person's private information, contain abusive content, or impersonate project staff.'
           }
         ]
       },
