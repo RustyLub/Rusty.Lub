@@ -1468,7 +1468,7 @@ export default function CabinetModal({
                               {lang === 'ru' ? 'АВАТАР ПРОФИЛЯ' : 'PROFILE AVATAR'}
                             </span>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[440px] overflow-y-auto pr-1">
                               {CUSTOM_AVATARS.map((avatar) => {
                                 const isCurrent = fullProfile && fullProfile.avatarClass === avatar.id;
                                 return (
@@ -1481,22 +1481,22 @@ export default function CabinetModal({
                                         setFullProfile({ ...fullProfile, avatarClass: avatar.id, photoURL: avatar.url });
                                       }
                                     }}
-                                    className={`p-2 border text-left flex items-center gap-2.5 cursor-pointer transition-all rounded-sm relative ${
-                                      isCurrent 
-                                        ? 'border-[#cd412b] bg-[#cd412b]/10' 
-                                        : 'border-[#2a2f3b] bg-[#14171e]/50 hover:border-zinc-600'
+                                    className={`group p-2.5 border text-left flex flex-col gap-2 cursor-pointer transition-colors rounded-md relative min-w-0 ${
+                                      isCurrent
+                                        ? 'border-[#f28a24] bg-[#f28a24]/10'
+                                        : 'border-[#2a2f3b] bg-[#11151b] hover:border-[#6b7280] hover:bg-[#171c23]'
                                     }`}
                                   >
                                     <img referrerPolicy="no-referrer" 
                                       src={avatar.url} 
                                       alt={avatar.name[lang]} 
-                                      className="w-9 h-9 border border-zinc-800 object-cover bg-black shrink-0"
+                                      className="w-full aspect-square max-h-36 rounded-sm border border-white/10 object-cover bg-black shrink-0 transition-[filter] group-hover:brightness-110"
                                     />
                                     <div className="min-w-0 flex-1">
-                                      <span className="block text-[8.5px] font-black text-white leading-tight truncate">
+                                      <span className="block text-xs font-bold text-zinc-100 leading-tight truncate">
                                         {avatar.name[lang]}
                                       </span>
-                                      <span className="block text-[6.5px] font-mono text-zinc-500 truncate">
+                                      <span className="block text-[10px] text-zinc-500 truncate">
                                         {avatar.role[lang]}
                                       </span>
                                     </div>
