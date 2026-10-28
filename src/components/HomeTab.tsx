@@ -20,6 +20,7 @@ import {
 import { ItemImageOrFallback } from './IconUtils';
 import { CustomUser } from '../types';
 import AppStatsCounterWidget from './AppStatsCounterWidget';
+import logoFull from '../../logo-full.png';
 
 interface HomeTabProps {
   lang: 'ru' | 'en';
@@ -153,8 +154,9 @@ export default function HomeTab({
         <div className="grid grid-cols-1 gap-5 items-center relative z-10">
           {/* Left Hero Column */}
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-500/10 border border-orange-500/20 text-[10px] font-bold uppercase tracking-wider text-orange-500 rounded-lg">
-              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+            <div className="inline-flex items-center gap-2.5 px-2.5 py-1.5 bg-orange-500/10 border border-orange-500/20 text-[10px] font-bold uppercase tracking-wider text-orange-400 rounded-lg">
+              <img src={logoFull} alt="Rusty.Lub logo" className="h-7 w-auto max-w-[110px] object-contain" />
+              <span className="h-4 w-px bg-orange-500/30" />
               <span>RUSTY.LUB · SURVIVAL TOOLS</span>
             </div>
 
