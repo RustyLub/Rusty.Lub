@@ -249,6 +249,10 @@ async function startServer() {
     return { id: doc.id, ...data, createdAt, updatedAt };
   };
 
+  app.get('/api/cms/me', verifyCmsIdentity, async (req: any, res: any) => {
+    return res.json({ uid: req.cmsActor.uid, email: req.cmsActor.email, role: req.cmsActor.role });
+  });
+
   app.get('/api/cms/pages', verifyCmsIdentity, requireCmsRole('owner', 'admin', 'editor', 'viewer'), async (_req: any, res: any) => {
     try {
       const snap = await adminDb.collection('cms_pages').orderBy('order', 'asc').limit(200).get();
