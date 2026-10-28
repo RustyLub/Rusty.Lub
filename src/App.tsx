@@ -257,12 +257,14 @@ const appTranslations = {
   }
 };
 
-type TabType = 'home' | 'account' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
+type TabType = 'home' | 'account' | 'support' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
 
 const VALID_TABS: Record<string, TabType> = {
   home: 'home',
   account: 'account',
   cabinet: 'account',
+  support: 'support',
+  vip: 'support',
   terms: 'terms',
   agreement: 'terms',
   legal: 'terms',
@@ -1874,7 +1876,7 @@ export default function App() {
 
                 <button
                   onClick={() => {
-                    setDonationOpen(true);
+                    handleTabChange('support');
                     setMobileMenuOpen(false);
                   }}
                   className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider text-amber-500 hover:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-lg transition-all cursor-pointer"
@@ -1990,6 +1992,46 @@ export default function App() {
             </motion.div>
           )}
 
+          {activeTab === 'support' && (
+            <motion.div
+              key="support-page"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.2 }}
+              className="mx-auto w-full max-w-5xl space-y-6"
+            >
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#f28a24]">R.L. / SUPPORT</p>
+                  <h1 className="mt-1 text-3xl font-bold text-white">{lang === 'ru' ? 'Поддержать проект' : 'Support the project'}</h1>
+                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400">{lang === 'ru' ? 'Поддержка помогает оплачивать инфраструктуру и развивать инструменты Rusty.Lub. Выбирайте удобный способ; проверяйте сеть перед отправкой криптовалюты.' : 'Your support helps fund infrastructure and improve Rusty.Lub tools. Choose a method that works for you; verify the network before sending cryptocurrency.'}</p>
+                </div>
+                <button type="button" onClick={() => handleTabChange('home')} className="rounded-md border border-white/10 px-3 py-2 text-sm text-zinc-300 hover:border-orange-400/40 hover:text-white">{lang === 'ru' ? 'На главную' : 'Back home'}</button>
+              </div>
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <a href="https://www.donationalerts.com/r/tv_cheater" target="_blank" rel="noreferrer" className="group rounded-xl border border-orange-400/30 bg-gradient-to-br from-[#21180f] to-[#10161d] p-6 transition hover:border-orange-300/70">
+                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg border border-orange-400/30 bg-orange-500/10 text-orange-300"><Heart size={22}/></div>
+                  <h2 className="text-lg font-bold text-white">DonationAlerts <ExternalLink size={14} className="inline"/></h2>
+                  <p className="mt-2 text-sm text-zinc-400">{lang === 'ru' ? 'Перейти на страницу поддержки.' : 'Open the support page.'}</p>
+                </a>
+                <div className="rounded-xl border border-white/10 bg-[#10161d] p-6">
+                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg border border-amber-400/30 bg-amber-500/10 text-amber-300"><Coins size={22}/></div>
+                  <h2 className="text-lg font-bold text-white">Bitcoin (BTC)</h2>
+                  <p className="mt-3 break-all rounded-md border border-white/10 bg-black/20 p-3 font-mono text-xs text-zinc-300">bc1qllwnsda2xjrffjxtjet66cxgs0vt2rzt7ngtz9</p>
+                  <button type="button" onClick={() => handleCopy('bc1qllwnsda2xjrffjxtjet66cxgs0vt2rzt7ngtz9')} className="mt-3 rounded-md border border-white/10 px-3 py-2 text-sm text-zinc-300 hover:border-orange-400/40 hover:text-white">{lang === 'ru' ? 'Копировать адрес' : 'Copy address'}</button>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-[#10161d] p-6">
+                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg border border-emerald-400/30 bg-emerald-500/10 text-emerald-300"><Coins size={22}/></div>
+                  <h2 className="text-lg font-bold text-white">USDT (TRC20)</h2>
+                  <p className="mt-3 break-all rounded-md border border-white/10 bg-black/20 p-3 font-mono text-xs text-zinc-300">TRAgQoGMAThBaSxkRaYvfzLtH92Fq89DSQ</p>
+                  <button type="button" onClick={() => handleCopy('TRAgQoGMAThBaSxkRaYvfzLtH92Fq89DSQ')} className="mt-3 rounded-md border border-white/10 px-3 py-2 text-sm text-zinc-300 hover:border-orange-400/40 hover:text-white">{lang === 'ru' ? 'Копировать адрес' : 'Copy address'}</button>
+                </div>
+              </div>
+              <p className="text-xs leading-relaxed text-zinc-500">{lang === 'ru' ? 'Поддержка добровольная. Перед переводом убедитесь, что адрес и сеть указаны верно. Переводы в блокчейне обычно необратимы.' : 'Support is voluntary. Verify the address and network before sending; blockchain transfers are generally irreversible.'}</p>
+            </motion.div>
+          )}
+
           {activeTab === 'terms' && (
             <motion.div
               key="terms-page"
@@ -2022,7 +2064,7 @@ export default function App() {
               <HomeTab
                 lang={lang}
                 onNavigate={(tab) => handleTabChange(tab)}
-                onOpenDonation={() => setDonationOpen(true)}
+                onOpenDonation={() => handleTabChange('support')}
                 selectedProject={selectedProject}
                 onSelectProject={(proj) => setSelectedProject(proj)}
                 rustoriaServers={rustoriaServers}
@@ -2780,7 +2822,7 @@ export default function App() {
           lang={lang}
           onNavigate={(tab) => handleTabChange(tab)}
           onOpenCabinet={() => handleTabChange('account')}
-          onOpenDonation={() => setCabinetModalOpen(true)}
+          onOpenDonation={() => handleTabChange('support')}
           onOpenTerms={() => handleTabChange('terms')}
         />
       </Suspense>
