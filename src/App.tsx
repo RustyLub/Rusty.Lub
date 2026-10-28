@@ -136,6 +136,7 @@ import rustWallpaperThree from './assets/images/rust_wallpaper_three_17828101451
 // @ts-ignore
 import customSwampBg from './assets/images/custom_swamp_bg.png';
 import { logUserActivity } from './services/activityLogger';
+import logoFull from '../logo-full.png';
 
 
 const wallpaperTitles = [
@@ -1312,27 +1313,20 @@ export default function App() {
                 className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 group text-left cursor-pointer"
                 title="Rusty.Lub - Home"
               >
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-red-600 via-red-600 to-amber-600 flex items-center justify-center font-black text-white shadow-[0_3px_12px_rgba(220,38,38,0.35)] relative overflow-hidden group-hover:scale-105 transition-transform shrink-0">
-                  <span className="font-mono text-xs font-black tracking-tight">RL</span>
-                </div>
-                <div className="flex flex-col justify-center">
-                  <span className={`font-black text-base sm:text-lg tracking-wider font-teko uppercase leading-none block ${
-                    appTheme === 'light' ? 'text-neutral-900' : 'text-[#eef2f7]'
-                  }`}>
-                    RUSTY<span className="text-red-600">.LUB</span>
-                  </span>
-                  <div className="hidden xs:flex items-center gap-1.5 mt-0.5">
-                    <span className="relative flex h-1.5 w-1.5 shrink-0">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                    </span>
-                    <span className={`text-[9px] font-mono font-bold uppercase leading-none truncate ${
-                      appTheme === 'light' ? 'text-neutral-500' : 'text-[#8b95a8]'
-                    }`}>
-                      {onlineCount} {lang === 'ru' ? 'ОНЛАЙН' : 'ONLINE'}
-                    </span>
-                  </div>
-                </div>
+                <img
+                  src={logoFull}
+                  alt="Rusty.Lub"
+                  className="h-8 sm:h-10 w-auto max-w-[132px] sm:max-w-[168px] object-contain shrink-0 transition-transform duration-200 group-hover:scale-[1.03]"
+                  fetchPriority="high"
+                />
+                <span className={`hidden md:inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-wide ${
+                  appTheme === 'light'
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                    : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
+                }`}>
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  {onlineCount} {lang === 'ru' ? 'ОНЛАЙН' : 'ONLINE'}
+                </span>
               </button>
 
               {/* All Sections Catalog Button (Visible on large screens) */}
