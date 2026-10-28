@@ -164,7 +164,7 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
       case 'ПРАВА':
         return <Settings size={12} className="text-yellow-400" />;
       case 'МОДЕРАЦИЯ':
-        return <Shield size={12} className="text-red-400" />;
+        return <Shield size={12} className="text-orange-400" />;
       case 'РЕЖИМЫ':
         return <Zap size={12} className="text-purple-400" />;
       case 'ТЕЛЕПОРТ':
@@ -202,7 +202,7 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
       case 'ПРАВА':
         return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
       case 'МОДЕРАЦИЯ':
-        return 'bg-red-500/10 text-red-400 border-red-500/20';
+        return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
       case 'РЕЖИМЫ':
         return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
       case 'ТЕЛЕПОРТ':
@@ -224,9 +224,9 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
     <div className="space-y-4">
       {/* Quick 1-Click Config Export Banner */}
       {onOpenConfigExporter && (
-        <div className="bg-gradient-to-r from-[#cd412b]/20 via-[#181c28] to-[#14171e] border border-[#cd412b]/50 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+        <div className="bg-gradient-to-r from-[#f97316]/20 via-[#181c28] to-[#14171e] border border-[#f97316]/50 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#cd412b]/30 text-[#cd412b] border border-[#cd412b]/50">
+            <div className="p-2.5 bg-[#f97316]/30 text-[#f97316] border border-[#f97316]/50">
               <FileCode size={20} />
             </div>
             <div>
@@ -243,7 +243,7 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
           </div>
           <button
             onClick={onOpenConfigExporter}
-            className="px-4 py-2 bg-[#cd412b] hover:bg-[#b03522] text-white font-mono font-bold text-xs uppercase transition-all shadow-[0_0_15px_rgba(205,65,43,0.4)] flex items-center gap-1.5 shrink-0 cursor-pointer"
+            className="px-4 py-2 bg-[#f97316] hover:bg-[#b03522] text-white font-mono font-bold text-xs uppercase transition-all shadow-[0_0_15px_rgba(205,65,43,0.4)] flex items-center gap-1.5 shrink-0 cursor-pointer"
           >
             <Download size={14} />
             <span>{lang === 'en' ? 'Export CFG' : 'Экспортировать CFG'}</span>
