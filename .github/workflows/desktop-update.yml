@@ -2,6 +2,8 @@ name: Build & Release Windows Tauri 2 App
 
 on:
   push:
+    branches:
+      - 'release/windows-desktop-v3'
     tags:
       - 'v*'
   workflow_dispatch:
