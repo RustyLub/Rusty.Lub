@@ -30,6 +30,8 @@ export default function RustyLubEmailAuthModal({ isOpen, onClose, lang, onUserLo
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [verificationPending, setVerificationPending] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [legacyPassword, setLegacyPassword] = useState('');
+  const [migrationComplete, setMigrationComplete] = useState(false);
 
   if (!isOpen) return null;
 
@@ -93,8 +95,7 @@ export default function RustyLubEmailAuthModal({ isOpen, onClose, lang, onUserLo
         isChatVip: Boolean(profile.isChatVip),
         vipUntil: profile.vipUntil
       } as CustomUser);
-      onToast(ru ? 'Вход выполнен.' : 'Signed in successfully.', 'success');
-      onClose();
+      onToast(ru ? 'Вход выполнен. При необходимости ниже можно перенести старый профиль.' : 'Signed in. You can migrate your legacy profile below if needed.', 'success');
     } catch (error: any) {
       const code = String(error?.code || '');
       const messages: Record<string, string> = {
@@ -106,6 +107,41 @@ export default function RustyLubEmailAuthModal({ isOpen, onClose, lang, onUserLo
         'auth/network-request-failed': ru ? 'Ошибка сети. Проверьте подключение.' : 'Network error. Check your connection.'
       };
       onToast(messages[code] || error?.message || (ru ? 'Не удалось выполнить операцию.' : 'The operation failed.'), 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+
+  const migrateLegacyProfile = async () => {
+    const user = rustylubAuth.currentUser;
+    if (!user || !user.emailVerified) {
+      onToast(ru ? 'Сначала войдите в новый аккаунт и подтвердите email.' : 'Sign in to the new account and verify your email first.', 'warning');
+      return;
+    }
+    if (user.email?.trim().toLowerCase() !== 'cheater.cooperation@inbox.ru') {
+      onToast(ru ? 'Перенос доступен только целевому аккаунту владельца.' : 'Migration is restricted to the designated owner account.', 'error');
+      return;
+    }
+    if (!legacyPassword) {
+      onToast(ru ? 'Введите пароль старого аккаунта serustqs.' : 'Enter the old serustqs account password.', 'warning');
+      return;
+    }
+    setBusy(true);
+    try {
+      const token = await user.getIdToken(true);
+      const response = await fetch('/api/rustylub-auth/migrate-legacy-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ legacyUsername: 'serustqs', legacyPassword })
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.message || 'Profile migration failed.');
+      setMigrationComplete(true);
+      setLegacyPassword('');
+      onToast(ru ? 'Старый профиль перенесён. Привилегии будут проверены отдельно.' : 'Legacy profile migrated. Privileges will be reviewed separately.', 'success');
+    } catch (error: any) {
+      onToast(error?.message || (ru ? 'Не удалось перенести профиль.' : 'Profile migration failed.'), 'error');
     } finally {
       setBusy(false);
     }
@@ -147,6 +183,17 @@ export default function RustyLubEmailAuthModal({ isOpen, onClose, lang, onUserLo
           {mode === 'register' && <label className="flex items-start gap-2 text-xs text-zinc-400"><input type="checkbox" checked={acceptedTerms} onChange={e => setAcceptedTerms(e.target.checked)} className="mt-0.5 accent-orange-500" />{ru ? 'Я принимаю условия использования Rusty.Lub.' : 'I accept the Rusty.Lub terms of use.'}</label>}
           <button disabled={busy} className="flex w-full items-center justify-center gap-2 bg-orange-500 px-5 py-4 text-sm font-bold text-black hover:bg-orange-400 disabled:opacity-50">{busy ? (ru ? 'Подождите...' : 'Please wait...') : mode === 'reset' ? (ru ? 'Отправить письмо' : 'Send email') : mode === 'register' ? (verificationPending ? (ru ? 'Я подтвердил email' : 'I verified my email') : (ru ? 'Зарегистрироваться и отправить письмо' : 'Register and send verification')) : (ru ? 'Войти' : 'Sign in')}</button>
         </form>
+
+        {mode === 'login' && rustylubAuth.currentUser?.emailVerified && rustylubAuth.currentUser.email?.toLowerCase() === 'cheater.cooperation@inbox.ru' && (
+          <section className="mt-6 border border-orange-500/20 bg-orange-500/5 p-4">
+            <div className="mb-2 text-sm font-semibold text-orange-300">{ru ? 'Перенос старого профиля' : 'Legacy profile migration'}</div>
+            <p className="mb-3 text-xs leading-5 text-zinc-400">{ru ? 'Подтвердите владение старым аккаунтом serustqs. Пароль проверяется сервером и не сохраняется в новом аккаунте.' : 'Prove ownership of the old serustqs account. The password is verified server-side and is not copied.'}</p>
+            {migrationComplete ? <p className="text-xs text-emerald-300">{ru ? 'Профиль перенесён.' : 'Profile migrated.'}</p> : <>
+              <input type="password" autoComplete="current-password" value={legacyPassword} onChange={e => setLegacyPassword(e.target.value)} placeholder={ru ? 'Пароль старого аккаунта' : 'Old account password'} className="mb-3 w-full border border-[#2a2f3b] bg-[#090b0f] px-3 py-3 text-sm text-white outline-none focus:border-orange-500" />
+              <button type="button" disabled={busy || !legacyPassword} onClick={migrateLegacyProfile} className="w-full border border-orange-500/50 px-4 py-3 text-xs font-bold text-orange-300 hover:bg-orange-500/10 disabled:opacity-50">{busy ? (ru ? 'Проверка...' : 'Verifying...') : (ru ? 'Проверить старый пароль и перенести профиль' : 'Verify old password and migrate profile')}</button>
+            </>}
+          </section>
+        )}
         {mode === 'login' && <button type="button" onClick={() => setMode('reset')} className="mt-4 text-left text-xs text-orange-300 hover:underline">{ru ? 'Забыли пароль?' : 'Forgot password?'}</button>}
         {verificationPending && <p className="mt-4 text-xs leading-5 text-amber-300">{ru ? 'Откройте письмо и подтвердите адрес. Затем нажмите «Я подтвердил email».' : 'Open the email and verify the address, then click “I verified my email”.'}</p>}
         <button type="button" onClick={onBackToLegacy} className="mt-8 flex items-center gap-2 border-t border-white/10 pt-5 text-xs text-zinc-500 hover:text-white"><ArrowLeft size={14} />{ru ? 'Вернуться к прежнему входу' : 'Back to existing sign in'}</button>
