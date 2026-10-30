@@ -60,7 +60,7 @@ import {
 } from 'lucide-react';
 import { ToastType, CustomUser, APP_VERSION } from './types';
 import { onAuthStateChanged as onEmailAuthStateChanged } from 'firebase/auth';
-import { getEmailAuthProfile, rustylubAuth } from './services/rustylubEmailAuth';
+import { getEmailAuthProfile, logoutFromRustyLub, rustylubAuth } from './services/rustylubEmailAuth';
 
 // Firebase & Auth Presence dependencies
 import { 
@@ -421,6 +421,7 @@ export default function App() {
   });
   const [onlineCount, setOnlineCount] = useState<number>(0);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [emailAuthReady, setEmailAuthReady] = useState(false);
   const isAdmin = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'admin');
   const isOwner = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'owner');
   const isVip = useMemo(() => {
@@ -578,7 +579,12 @@ export default function App() {
   // Restore sessions created by the isolated Firebase Email Auth project.
   useEffect(() => {
     const unsubscribe = onEmailAuthStateChanged(rustylubAuth, async (firebaseUser) => {
-      if (!firebaseUser) return;
+      setEmailAuthReady(true);
+      if (!firebaseUser) {
+        setCurrentUser(previous => previous?.authProvider === 'firebase-email' ? null : previous);
+        setIsAuthLoading(false);
+        return;
+      }
       try {
         const profile = await getEmailAuthProfile(firebaseUser);
         if (!profile) {
@@ -615,6 +621,7 @@ export default function App() {
   useEffect(() => {
     let unsubUserDoc: (() => void) | null = null;
     
+    if (!emailAuthReady) return () => {};
     const uid = currentUser?.uid;
     if (currentUser?.authProvider === 'firebase-email' || (uid && rustylubAuth.currentUser?.uid === uid)) {
       setIsAuthLoading(false);
@@ -667,7 +674,7 @@ export default function App() {
     return () => {
       if (unsubUserDoc) unsubUserDoc();
     };
-  }, [currentUser?.uid]);
+  }, [currentUser?.uid, emailAuthReady]);
 
   // Real-time Twitch stream settings subscription
   useEffect(() => {
