@@ -64,7 +64,7 @@ export default function HomeTab({
   ];
 
   return (
-    <div className={`industrial-home keep-dark -mx-3 -mt-5 w-full space-y-0 overflow-hidden pb-10 text-left sm:-mx-5 lg:-mx-8 ${appTheme === 'light' ? 'home-light-preview' : ''}`}>
+    <div className={`industrial-home keep-dark -mt-5 box-border w-full min-w-0 max-w-full space-y-0 overflow-x-clip overflow-y-hidden pb-10 text-left ${appTheme === 'light' ? 'home-light-preview' : ''}`}>
       {/* HERO */}
       <section className="relative isolate min-h-[430px] overflow-hidden border-b border-slate-700/70 bg-[#080d12] sm:min-h-[455px]">
         <img src={oilRigBg} alt="" aria-hidden="true" className="absolute inset-0 -z-20 h-full w-full object-cover object-center opacity-65" />
