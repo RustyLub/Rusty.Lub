@@ -15,6 +15,10 @@ jobs:
   release:
     name: Build and Publish Tauri 2 Windows Release
     runs-on: windows-latest
+    env:
+      # GitHub Pages uses /Rusty.Lub/, but Tauri loads bundled assets from its app origin.
+      VITE_BASE: './'
+      NODE_ENV: production
 
     steps:
       - name: Checkout repository
@@ -53,7 +57,7 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'Rusty.Lub v__VERSION__'
-          releaseBody: 'Rusty.Lub Windows Desktop v3.0.0. Industrial Steel desktop workspace, dedicated application settings centre, saved display preferences, notification and keyboard shortcut sections, version/about information, and preserved Rust/HUD launcher settings. Includes Windows x64 NSIS (.exe), MSI (.msi), and Tauri updater artifacts.'
+          releaseBody: 'Rusty.Lub Windows Desktop v3.0.1. Fixes relative asset paths for the Tauri WebView startup. Industrial Steel desktop workspace, dedicated application settings centre, saved display preferences, notification and keyboard shortcut sections, version/about information, and preserved Rust/HUD launcher settings. Includes Windows x64 NSIS (.exe), MSI (.msi), and Tauri updater artifacts.'
           releaseDraft: false
           prerelease: false
           args: --target x86_64-pc-windows-msvc
