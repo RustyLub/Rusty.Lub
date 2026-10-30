@@ -15,7 +15,7 @@ interface WindowsTitlebarProps {
 
 export const WindowsTitlebar: React.FC<WindowsTitlebarProps> = ({
   appName = 'RUSTY.LUB LAUNCHER',
-  appVersion = '3.0.1',
+  appVersion = '3.0.2',
   activeTabLabel,
   onlineCount = 1,
   appTheme,
@@ -96,7 +96,7 @@ export const WindowsTitlebar: React.FC<WindowsTitlebarProps> = ({
         if (onToast) onToast(lang === 'ru' ? 'Обновление загружено. Приложение перезапускается...' : 'Update downloaded. Restarting app...', 'success');
       } else {
         const failed = /ошиб|error|failed|не удалось/i.test(statusMsg);
-        if (onToast) onToast(statusMsg || (lang === 'ru' ? 'Установлена последняя версия v3.0.1!' : 'You have the latest version v3.0.1!'), failed ? 'error' : 'info');
+        if (onToast) onToast(statusMsg || (lang === 'ru' ? 'Установлена последняя версия v3.0.2!' : 'You have the latest version v3.0.2!'), failed ? 'error' : 'info');
       }
     } catch (e) {
       if (onToast) onToast(lang === 'ru' ? 'Проверка обновлений синхронизирована с GitHub.' : 'Update check synced with GitHub.', 'info');
