@@ -32,7 +32,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install Rust Toolchain
@@ -45,8 +45,10 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
+      # package-lock.json is currently out of sync with package.json and contains a stale tarball URL.
+      # Resolve directly from package.json until the lockfile is regenerated and validated.
       - name: Install frontend dependencies
-        run: npm ci || npm install
+        run: npm install --no-package-lock --no-audit --no-fund
 
       - name: Build Web Assets
         run: npm run build
