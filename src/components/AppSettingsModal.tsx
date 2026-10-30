@@ -52,7 +52,7 @@ const Toggle = ({ checked, onChange, label, description }: {
 );
 
 const SettingCard = ({ children }: { children: React.ReactNode }) => (
-  <div className="rounded-xl border border-white/10 bg-[#111720] p-4">{children}</div>
+  <div className="rounded-xl border border-white/10 bg-[#111720] p-4 text-slate-100">{children}</div>
 );
 
 export default function AppSettingsModal({
@@ -81,7 +81,8 @@ export default function AppSettingsModal({
           : (ru ? 'Проверка завершена.' : 'Check completed.');
       }
       setUpdateStatus(latestStatus);
-      onToast(latestStatus, installed ? 'success' : 'info');
+      const failed = /ошиб|error|failed|не удалось/i.test(latestStatus);
+      onToast(latestStatus, installed ? 'success' : failed ? 'error' : 'info');
     } catch (error: any) {
       const message = error?.message || (ru ? 'Не удалось проверить обновления.' : 'Unable to check for updates.');
       setUpdateStatus(message);
