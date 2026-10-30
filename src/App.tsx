@@ -2013,6 +2013,7 @@ export default function App() {
                   user={currentUser}
                   onOpenTab={(tab) => handleTabChange(tab as any)}
                   onUserLogout={() => {
+                    if (currentUser?.authProvider === 'firebase-email') void logoutFromRustyLub();
                     setCurrentUser(null);
                     localStorage.removeItem('rust_survivor_user');
                     handleTabChange('home');
@@ -2545,6 +2546,7 @@ export default function App() {
                   localStorage.setItem('rust_survivor_user', JSON.stringify(user));
                 }}
                 onUserLogout={() => {
+                  if (currentUser?.authProvider === 'firebase-email') void logoutFromRustyLub();
                   setCurrentUser(null);
                   localStorage.removeItem('rust_survivor_user');
                 }}
@@ -2922,6 +2924,7 @@ export default function App() {
             user={currentUser}
             onOpenTab={(tab) => handleTabChange(tab as any)}
             onUserLogout={() => {
+              if (currentUser?.authProvider === 'firebase-email') void logoutFromRustyLub();
               setCurrentUser(null);
               localStorage.removeItem('rust_survivor_user');
             }}
