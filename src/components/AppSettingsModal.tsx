@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   X, Settings2, Monitor, Languages, BellRing, Keyboard, RefreshCw, Info,
-  Moon, Sun, Check, ExternalLink, Gamepad2, RotateCcw, ShieldCheck,
-  Sparkles, Gauge, Keyboard as KeyboardIcon
+  Check, ExternalLink, Gamepad2, ShieldCheck, Sparkles
 } from 'lucide-react';
 import { checkForAppUpdates } from '../services/appUpdater';
 
