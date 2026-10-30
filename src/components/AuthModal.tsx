@@ -10,6 +10,7 @@ import {
 import { CUSTOM_AVATARS } from '../customAvatars';
 import { CustomUser } from '../types';
 import TermsModal from './TermsModal';
+import RustyLubEmailAuthModal from './RustyLubEmailAuthModal';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -30,9 +31,11 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
   const [authLoading, setAuthLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [useEmailAuth, setUseEmailAuth] = useState(false);
 
 
   if (!isOpen) return null;
+  if (useEmailAuth) return <RustyLubEmailAuthModal isOpen={isOpen} onClose={onClose} lang={lang} onUserLogin={onUserLogin} onToast={onToast} onBackToLegacy={() => setUseEmailAuth(false)} />;
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -337,6 +340,9 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
               ? (lang === 'ru' ? 'Нет аккаунта? Переключитесь на регистрацию выше.' : 'New here? Choose Register above.')
               : (lang === 'ru' ? 'Уже зарегистрированы? Переключитесь на вход выше.' : 'Already registered? Choose Login above.')}
           </p>
+          <button type="button" onClick={() => setUseEmailAuth(true)} className="w-full border border-orange-500/30 bg-orange-500/5 px-4 py-3 text-xs font-semibold text-orange-300 transition-colors hover:border-orange-400 hover:bg-orange-500/10">
+            {lang === 'ru' ? 'Перейти на новую авторизацию по email (тест)' : 'Try the new email authentication'}
+          </button>
         </div>
         </section>
       </motion.div>
