@@ -28,7 +28,7 @@ service cloud.firestore {
         && request.resource.data.isBlocked == false
         && request.resource.data.username is string
         && request.resource.data.username.matches('^[a-z0-9_-]{3,20}$')
-        && request.resource.data.username != 'serustqs'
+        && (request.resource.data.username != 'serustqs' || request.auth.token.email == 'cheater.cooperation@inbox.ru')
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() >= 2
         && request.resource.data.displayName.size() <= 40;
@@ -44,7 +44,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['uid', 'createdAt'])
         && request.resource.data.uid == request.auth.uid
         && username.matches('^[a-z0-9_-]{3,20}$')
-        && username != 'serustqs';
+        && (username != 'serustqs' || request.auth.token.email == 'cheater.cooperation@inbox.ru');
       allow update, delete: if false;
     }
 
