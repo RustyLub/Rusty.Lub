@@ -149,7 +149,7 @@ export const LauncherSettingsModal: React.FC<LauncherSettingsModalProps> = ({
       if (updated) {
         if (onToast) onToast(lang === 'ru' ? 'Обновление скачано и готово к установке!' : 'Update downloaded and ready to install!', 'success');
       } else {
-        if (!updateLog) setUpdateLog(lang === 'ru' ? 'Установлена последняя актуальная версия v2.6.4' : 'Latest version v2.6.4 is already installed');
+        if (!updateLog) setUpdateLog(lang === 'ru' ? 'Установлена последняя актуальная версия v3.0.0' : 'Latest version v3.0.0 is already installed');
       }
     } catch (err: any) {
       setUpdateLog(err?.message || (lang === 'ru' ? 'Ошибка проверки обновлений' : 'Update check failed'));
@@ -995,7 +995,7 @@ export const LauncherSettingsModal: React.FC<LauncherSettingsModalProps> = ({
                 {/* Changelog */}
                 <div className="space-y-1.5 pt-2">
                   <span className="text-xs font-bold uppercase tracking-wider text-neutral-300 block">
-                    {lang === 'ru' ? 'История изменений v2.6.4:' : 'Changelog v2.6.4:'}
+                    {lang === 'ru' ? 'История изменений v3.0.0:' : 'Changelog v3.0.0:'}
                   </span>
                   <div className={`p-3 rounded-xl border text-xs space-y-1 font-sans ${
                     isLight ? 'bg-neutral-100 border-neutral-200 text-neutral-700' : 'bg-[#10141e] border-[#1d2535] text-neutral-400'
