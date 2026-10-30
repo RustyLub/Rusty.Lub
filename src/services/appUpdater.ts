@@ -28,7 +28,7 @@ export async function checkForAppUpdates(onStatus?: (msg: string) => void): Prom
       await relaunch();
       return true;
     } else {
-      if (onStatus) onStatus('У вас установлена самая свежая версия v2.6.0!');
+      if (onStatus) onStatus('У вас установлена самая свежая версия v3.0.0!');
       return false;
     }
   } catch (err: any) {
@@ -44,7 +44,7 @@ export async function getDetailedUpdateInfo(): Promise<UpdateCheckResult> {
   if (!isTauri) {
     return {
       hasUpdate: false,
-      version: '2.6.0',
+      version: '3.0.0',
       body: 'Установлен актуальный билд Rusty.Lub Windows Desktop Edition. Поддержка Tauri 2 Updater с подписью ed25519.',
       date: new Date().toLocaleDateString()
     };
@@ -63,7 +63,7 @@ export async function getDetailedUpdateInfo(): Promise<UpdateCheckResult> {
     }
     return {
       hasUpdate: false,
-      version: '2.6.0',
+      version: '3.0.0',
       body: 'Все системы работают в штатном режиме'
     };
   } catch (e: any) {
