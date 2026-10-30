@@ -53,6 +53,18 @@ jobs:
         env:
           NODE_ENV: production
 
+      - name: Verify relative asset paths for Tauri
+        shell: pwsh
+        run: |
+          $html = Get-Content dist/index.html -Raw
+          if ($html -match '(src|href)="/(Rusty\.Lub/)?assets/') {
+            throw "Desktop build contains root-relative asset paths. VITE_BASE must be ./"
+          }
+          if ($html -notmatch '(src|href)="\./assets/') {
+            throw "Desktop build does not contain expected relative asset paths."
+          }
+          Write-Host "Verified: Tauri frontend assets use relative paths."
+
       - name: Build Tauri App & Publish Release
         uses: tauri-apps/tauri-action@v0
         env:
