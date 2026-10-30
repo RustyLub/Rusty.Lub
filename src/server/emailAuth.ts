@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import axios from 'axios';
 import type { Express } from 'express';
-import { adminDb } from '../lib/firebase-admin';
+import { adminAuth, adminDb } from '../lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 
 const digest = (value: string) => crypto.createHash('sha256').update(value).digest('hex');
@@ -17,6 +17,66 @@ const passwordMatches = (password: string, salt: string, hash: string) => {
 };
 
 export function registerEmailAuthRoutes(app: Express) {
+  // One-time, owner-only migration for active legacy accounts missing createdAt.
+  // Dry-run is the default; pass { apply: true } to write changes.
+  app.post('/api/admin/migrate-legacy-account-dates', async (req: any, res: any) => {
+    try {
+      const authHeader = String(req.headers.authorization || '');
+      if (!authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'A Firebase ID token is required.' });
+      }
+      const identity = await adminAuth.verifyIdToken(authHeader.slice(7), true);
+      const uid = String(identity.uid || '');
+      const email = String(identity.email || '').toLowerCase();
+      if (uid !== 'serustqs' && email !== 'misterzet556@gmail.com') {
+        return res.status(403).json({ message: 'Owner access required.' });
+      }
+
+      const apply = req.body?.apply === true;
+      const legacyCreatedAt = new Date();
+      legacyCreatedAt.setMonth(legacyCreatedAt.getMonth() - 7);
+      const legacyDate = legacyCreatedAt.toISOString();
+      const users = await adminDb.collection('chat_users').get();
+      const eligible = users.docs.filter((user: any) => {
+        const data = user.data() || {};
+        const hasCreatedAt = data.createdAt !== undefined && data.createdAt !== null && data.createdAt !== '';
+        return !hasCreatedAt && data.isBlocked !== true && data.deletionRequested !== true;
+      });
+
+      let updatedCount = 0;
+      if (apply) {
+        for (let offset = 0; offset < eligible.length; offset += 400) {
+          const batch = adminDb.batch();
+          const chunk = eligible.slice(offset, offset + 400);
+          chunk.forEach((user: any) => {
+            batch.update(user.ref, {
+              createdAt: legacyDate,
+              legacyAccount: true,
+              legacyAccountMigratedAt: FieldValue.serverTimestamp()
+            });
+          });
+          await batch.commit();
+          updatedCount += chunk.length;
+        }
+      }
+
+      return res.json({
+        success: true,
+        mode: apply ? 'applied' : 'dry-run',
+        scanned: users.size,
+        eligible: eligible.length,
+        updated: updatedCount,
+        assignedCreatedAt: legacyDate,
+        message: apply
+          ? 'Legacy account dates migrated.'
+          : 'Dry run only. Send { apply: true } to apply this migration.'
+      });
+    } catch (error: any) {
+      console.error('Legacy account migration failed:', error?.message || error);
+      return res.status(401).json({ message: 'Migration authorization or execution failed.' });
+    }
+  });
+
   app.post('/api/auth/email/send-code', async (req: any, res: any) => {
     try {
       const email = String(req.body?.email || '').trim().toLowerCase();
