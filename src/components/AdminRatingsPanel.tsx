@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { addDoc, collection, db, onSnapshot, orderBy, query, serverTimestamp, where, getDocs } from 'firebase/firestore';
+import { addDoc, collection, onSnapshot, orderBy, query, serverTimestamp, where, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 import { CustomUser } from '../types';
 import { Star, Trash2, Pencil, Send, Users, Clock } from 'lucide-react';
 
