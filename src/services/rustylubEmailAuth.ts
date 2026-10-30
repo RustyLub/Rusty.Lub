@@ -7,26 +7,47 @@ import {
   reload,
   type User
 } from 'firebase/auth';
+import {
+  doc,
+  getDoc,
+  runTransaction,
+  serverTimestamp,
+  type Firestore
+} from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import { rustylubAuth } from '../lib/rustylub-auth/firebase';
 
-const PROFILE_API = '/api/rustylub-auth/profile';
+const DATABASE_ID = 'ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59';
+const rustylubDb: Firestore = getFirestore(rustylubAuth.app, DATABASE_ID);
 
-async function profileRequest(user: User, method: 'GET' | 'POST', payload?: Record<string, string>) {
-  const token = await user.getIdToken(true);
-  const response = await fetch(PROFILE_API, {
-    method,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...(payload ? { 'Content-Type': 'application/json' } : {})
-    },
-    ...(payload ? { body: JSON.stringify(payload) } : {})
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.message || 'Не удалось получить профиль.');
-  return data;
+export interface RustyLubEmailProfile {
+  uid: string;
+  username: string;
+  displayName: string;
+  email: string;
+  role: 'user' | 'admin';
+  isBlocked: boolean;
+  photoURL?: string;
+  avatarClass?: string;
+  isVip?: boolean;
+  isChatVip?: boolean;
+  vipUntil?: string;
 }
 
-export async function registerWithEmail(email: string, password: string, username: string, displayName: string) {
+async function requireVerifiedUser(user: User) {
+  await reload(user);
+  if (!user.emailVerified) {
+    throw new Error('Сначала подтвердите адрес электронной почты по ссылке из письма.');
+  }
+  // Refresh the ID token so Firestore Rules can see email_verified=true.
+  await user.getIdToken(true);
+}
+
+function profileRef(uid: string) {
+  return doc(rustylubDb, 'auth_users', uid);
+}
+
+export async function registerWithEmail(email: string, password: string, _username: string, _displayName: string) {
   const credential = await createUserWithEmailAndPassword(rustylubAuth, email.trim().toLowerCase(), password);
   await sendEmailVerification(credential.user);
   return credential.user;
@@ -37,20 +58,59 @@ export async function resendVerification(user: User) {
 }
 
 export async function completeVerifiedRegistration(user: User, username: string, displayName: string) {
-  await reload(user);
-  if (!user.emailVerified) throw new Error('Сначала подтвердите адрес электронной почты по ссылке из письма.');
-  return profileRequest(user, 'POST', { username, displayName });
+  await requireVerifiedUser(user);
+  const cleanUsername = username.trim().toLowerCase();
+  const cleanDisplayName = displayName.trim();
+  if (!/^[a-z0-9_-]{3,20}$/.test(cleanUsername) || cleanUsername === 'serustqs') {
+    throw new Error('Логин должен содержать 3–20 символов. Этот логин зарезервирован.');
+  }
+  if (cleanDisplayName.length < 2 || cleanDisplayName.length > 40 || /[<>]/.test(cleanDisplayName)) {
+    throw new Error('Никнейм должен содержать 2–40 допустимых символов.');
+  }
+
+  const userRef = profileRef(user.uid);
+  const usernameRef = doc(rustylubDb, 'auth_usernames', cleanUsername);
+  await runTransaction(rustylubDb, async (transaction) => {
+    const [profileSnap, usernameSnap] = await Promise.all([
+      transaction.get(userRef),
+      transaction.get(usernameRef)
+    ]);
+    if (profileSnap.exists()) return;
+    if (usernameSnap.exists()) throw new Error('Этот логин уже занят.');
+    transaction.set(usernameRef, {
+      uid: user.uid,
+      createdAt: serverTimestamp()
+    });
+    transaction.set(userRef, {
+      uid: user.uid,
+      username: cleanUsername,
+      displayName: cleanDisplayName,
+      email: (user.email || '').trim().toLowerCase(),
+      role: 'user',
+      isBlocked: false,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+  });
+  const saved = await getDoc(userRef);
+  if (!saved.exists()) throw new Error('Не удалось сохранить профиль.');
+  return { profile: saved.data() as RustyLubEmailProfile };
 }
 
 export async function loginWithEmail(email: string, password: string) {
   const credential = await signInWithEmailAndPassword(rustylubAuth, email.trim().toLowerCase(), password);
-  await reload(credential.user);
-  if (!credential.user.emailVerified) {
+  await requireVerifiedUser(credential.user);
+  const snapshot = await getDoc(profileRef(credential.user.uid));
+  if (!snapshot.exists()) {
     await signOut(rustylubAuth);
-    throw new Error('Подтвердите email по ссылке из письма, затем войдите снова.');
+    throw new Error('Профиль не найден. Если вы только зарегистрировались, завершите регистрацию.');
   }
-  const result = await profileRequest(credential.user, 'GET');
-  return { firebaseUser: credential.user, profile: result.profile };
+  const profile = snapshot.data() as RustyLubEmailProfile;
+  if (profile.isBlocked === true) {
+    await signOut(rustylubAuth);
+    throw new Error('Аккаунт заблокирован.');
+  }
+  return { firebaseUser: credential.user, profile };
 }
 
 export async function requestPasswordReset(email: string) {
