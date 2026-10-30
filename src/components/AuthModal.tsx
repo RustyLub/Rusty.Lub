@@ -59,7 +59,11 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
       onToast(lang === 'ru' ? (authMode === 'register' ? 'Пароль должен содержать от 8 до 128 символов.' : 'Введите пароль.') : (authMode === 'register' ? 'Password must be 8–128 characters.' : 'Enter your password.'), 'warning');
       return;
     }
-    if (authMode === 'register' && (!/[A-Z]/.test(cleanPassword) || !/[a-z]/.test(cleanPassword) || !/[0-9]/.test(cleanPassword) || !/[^A-Za-z0-9]/.test(cleanPassword))) {\n      onToast(lang === 'ru' ? 'Пароль должен содержать заглавную и строчную буквы, цифру и специальный символ.' : 'Password must include an uppercase letter, a lowercase letter, a number, and a special character.', 'warning');\n      return;\n    }\n    if (authMode === 'register' && cleanPassword !== confirmPasswordInput) {
+    if (authMode === 'register' && (!/[A-Z]/.test(cleanPassword) || !/[a-z]/.test(cleanPassword) || !/[0-9]/.test(cleanPassword) || !/[^A-Za-z0-9]/.test(cleanPassword))) {
+      onToast(lang === 'ru' ? 'Пароль должен содержать заглавную и строчную буквы, цифру и специальный символ.' : 'Password must include an uppercase letter, a lowercase letter, a number, and a special character.', 'warning');
+      return;
+    }
+    if (authMode === 'register' && cleanPassword !== confirmPasswordInput) {
       onToast(lang === 'ru' ? 'Пароли не совпадают.' : 'Passwords do not match.', 'warning');
       return;
     }
