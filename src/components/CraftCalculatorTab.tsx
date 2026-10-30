@@ -71,8 +71,8 @@ export default function CraftCalculatorTab({ lang, onBackToRaid }: Props) {
     }
     const totalGunpowder = result.gunpowder || 0;
     if (totalGunpowder) {
-      add('sulfur', totalGunpowder * 2);
-      add('charcoal', totalGunpowder * 3);
+      add('sulfur', totalGunpowder);
+      add('charcoal', totalGunpowder * 2);
       delete result.gunpowder;
     }
     return result;
