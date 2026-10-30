@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { collection, db, doc, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from '../firebase';
+import { collection, db, doc, getDoc, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from '../firebase';
 import { CustomUser } from '../types';
 import { MessageSquare, Star, Clock3, Send, ShieldCheck, Pencil, Trash2, Check, X } from 'lucide-react';
 
@@ -32,7 +32,21 @@ export default function UserRatingsTab({ user, lang, onRequireAuth, onToast }: {
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [myRating, setMyRating] = useState<RatingRecord | null>(null);
+  const [verifiedCreatedAt, setVerifiedCreatedAt] = useState<string | null>(null);
   const ru = lang === 'ru';
+
+  useEffect(() => {
+    let active = true;
+    setVerifiedCreatedAt(user?.createdAt || null);
+    if (user?.uid) {
+      getDoc(doc(db, 'chat_users', user.uid)).then(snap => {
+        if (!active || !snap.exists()) return;
+        const value = dateValue(snap.data()?.createdAt);
+        if (value) setVerifiedCreatedAt(value.toISOString());
+      }).catch(() => {});
+    }
+    return () => { active = false; };
+  }, [user?.uid]);
 
   useEffect(() => {
     const q = query(collection(db, 'user_ratings'), orderBy('createdAt', 'desc'));
@@ -50,7 +64,7 @@ export default function UserRatingsTab({ user, lang, onRequireAuth, onToast }: {
       () => onToast(ru ? 'Не удалось загрузить запросы.' : 'Could not load requests.', 'error'));
   }, [user?.uid, ru]);
 
-  const createdAt = dateValue(user?.createdAt);
+  const createdAt = dateValue(verifiedCreatedAt);
   const eligibleAt = createdAt ? createdAt.getTime() + THREE_DAYS : null;
   const remaining = eligibleAt ? Math.max(0, eligibleAt - Date.now()) : null;
   const eligible = Boolean(user && eligibleAt && remaining === 0);
