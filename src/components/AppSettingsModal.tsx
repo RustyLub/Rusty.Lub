@@ -241,6 +241,7 @@ export default function AppSettingsModal({
                   <div><h3 className="text-lg font-bold">{ru ? 'Горячие клавиши' : 'Keyboard shortcuts'}</h3><p className="mt-1 text-sm text-slate-400">{ru ? 'Быстрые команды для навигации по Rusty.Lub Desktop.' : 'Quick commands for navigating Rusty.Lub Desktop.'}</p></div>
                   {[
                     { keys: 'Ctrl + K', label: ru ? 'Открыть быстрый поиск и команды' : 'Open quick search and commands' },
+                    { keys: 'Ctrl + ,', label: ru ? 'Открыть настройки приложения' : 'Open application settings' },
                     { keys: 'M', label: ru ? 'Открыть каталог разделов' : 'Open sections catalogue' },
                     { keys: '/', label: ru ? 'Вызвать поиск' : 'Open search' },
                     { keys: hudHotkey || 'Alt + O', label: ru ? 'Переключить HUD-оверлей' : 'Toggle HUD overlay' }
