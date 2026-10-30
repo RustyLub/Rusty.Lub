@@ -53,7 +53,7 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'Rusty.Lub v__VERSION__'
-          releaseBody: 'Official release of Rusty.Lub Windows Desktop Edition built with Tauri 2. Includes signed NSIS (.exe), MSI (.msi) installers, and latest.json update manifest for in-app Tauri 2 updater.'
+          releaseBody: 'Rusty.Lub Windows Desktop v3.0.0. Industrial Steel desktop workspace, dedicated application settings centre, saved display preferences, notification and keyboard shortcut sections, version/about information, and preserved Rust/HUD launcher settings. Includes Windows x64 NSIS (.exe), MSI (.msi), and Tauri updater artifacts.'
           releaseDraft: false
           prerelease: false
           args: --target x86_64-pc-windows-msvc
