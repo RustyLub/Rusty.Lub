@@ -943,3 +943,14 @@ body.light-theme::before {
   .industrial-home { gap: 14px; }
   .industrial-home > section:first-child > div:last-child { padding-inline: 18px; }
 }
+
+
+/* Let the main workspace breathe on large desktop displays. */
+@media (min-width: 1280px) {
+  body:not(.light-theme) main.industrial-workspace {
+    width: 100%;
+    max-width: min(100%, 1920px) !important;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
