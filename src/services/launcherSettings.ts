@@ -148,7 +148,7 @@ export const DEFAULT_LAUNCHER_SETTINGS: LauncherSettings = {
   hardwareAcceleration: true,
   companionMode: false,
 
-  appVersion: '3.0.0',
+  appVersion: '3.0.1',
   channel: 'stable',
   autoCheckUpdates: true,
   lastCheckDate: new Date().toLocaleDateString()
