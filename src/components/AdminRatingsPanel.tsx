@@ -24,8 +24,9 @@ export default function AdminRatingsPanel({ currentUser, lang, onToast }: { curr
     if (requestType === 'edit' && proposedComment.trim().length < 10) { onToast(ru ? 'Новый текст слишком короткий.' : 'Proposed review is too short.', 'error'); return; }
     setBusy(true);
     try {
-      const pending = await getDocs(query(collection(db, 'user_rating_requests'), where('ratingId', '==', selected.id), where('status', '==', 'pending')));
-      if (!pending.empty) { onToast(ru ? 'Для этой оценки уже есть ожидающий запрос.' : 'A pending request already exists for this rating.', 'info'); return; }
+      const existingRequests = await getDocs(query(collection(db, 'user_rating_requests'), where('ratingId', '==', selected.id)));
+      const pending = existingRequests.docs.some(item => item.data().status === 'pending');
+      if (pending) { onToast(ru ? 'Для этой оценки уже есть ожидающий запрос.' : 'A pending request already exists for this rating.', 'info'); return; }
       await addDoc(collection(db, 'user_rating_requests'), {
         ratingId: selected.id, authorUid: selected.authorUid, type: requestType,
         ...(requestType === 'edit' ? { proposedRating, proposedComment: proposedComment.trim() } : {}),
