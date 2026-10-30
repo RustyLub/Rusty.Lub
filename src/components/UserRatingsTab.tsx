@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { addDoc, collection, db, doc, onSnapshot, orderBy, query, serverTimestamp, updateDoc, where } from '../firebase';
+import { collection, db, doc, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from '../firebase';
 import { CustomUser } from '../types';
 import { MessageSquare, Star, Clock3, Send, ShieldCheck, Pencil, Trash2, Check, X } from 'lucide-react';
 
@@ -63,7 +63,7 @@ export default function UserRatingsTab({ user, lang, onRequireAuth, onToast }: {
     if (comment.trim().length < 10 || comment.trim().length > 1200) { onToast(ru ? 'Отзыв должен содержать от 10 до 1200 символов.' : 'Review must be 10–1200 characters.', 'error'); return; }
     setSubmitting(true);
     try {
-      await addDoc(collection(db, 'user_ratings'), {
+      await setDoc(doc(db, 'user_ratings', user.uid), {
         authorUid: user.uid, authorName: user.displayName, authorAvatar: user.photoURL || '',
         accountCreatedAt: createdAt!.toISOString(), rating: score, comment: comment.trim(),
         status: 'published', createdAt: serverTimestamp(), updatedAt: serverTimestamp()
