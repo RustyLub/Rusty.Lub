@@ -33,7 +33,7 @@ export async function checkForAppUpdates(onStatus?: (msg: string) => void): Prom
     }
   } catch (err: any) {
     console.warn('App updater log:', err);
-    if (onStatus) onStatus(`Синхронизация обновлений: ${err?.message || 'Репозиторий GitHub Releases готов'}`);
+    if (onStatus) onStatus(`Ошибка проверки обновлений: ${err?.message || 'Не удалось связаться с GitHub Releases'}`);
     return false;
   }
 }
