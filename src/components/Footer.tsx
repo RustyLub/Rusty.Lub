@@ -45,6 +45,7 @@ export default function Footer({ lang, onNavigate, onOpenCabinet, onOpenDonation
               <button className={linkClass} onClick={() => onNavigate('chat')}>{ru ? 'Чат сообщества' : 'Community chat'}</button>
               <button className={linkClass} onClick={() => onNavigate('news')}>{ru ? 'Новости и обновления' : 'News & updates'}</button>
               <button className={linkClass} onClick={() => onNavigate('faq')}>FAQ</button>
+              <button className={linkClass} onClick={() => onNavigate('ratings')}>{ru ? 'Оценки сообщества' : 'Community ratings'}</button>
               <a className={linkClass} href="https://discord.gg/R2TyKZ9xvZ" target="_blank" rel="noopener noreferrer">Discord</a>
             </nav>
           </div>
