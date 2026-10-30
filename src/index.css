@@ -1030,3 +1030,80 @@ body.light-theme::before {
     gap: 18px;
   }
 }
+
+
+/* Rusty.Lub Windows Desktop Edition — window-first layout */
+html.tauri-desktop,
+html.tauri-desktop body,
+html.tauri-desktop #root {
+  min-height: 100%;
+}
+
+html.tauri-desktop body {
+  min-width: 960px;
+  overflow-x: hidden;
+  background: #080c12;
+}
+
+html.tauri-desktop .tauri-desktop-shell {
+  min-height: 100vh;
+  padding-bottom: 24px !important;
+  background:
+    radial-gradient(ellipse at 50% -18%, rgba(249, 115, 22, .08), transparent 46%),
+    #080c12 !important;
+}
+
+html.tauri-desktop .tauri-desktop-shell > nav {
+  position: relative !important;
+  top: auto !important;
+  z-index: 35;
+  backdrop-filter: blur(18px);
+}
+
+html.tauri-desktop .tauri-desktop-shell main.industrial-workspace {
+  width: 100%;
+  max-width: min(100%, 1680px) !important;
+  min-height: calc(100vh - 220px);
+  margin: 18px auto 0;
+  padding-left: clamp(18px, 2.2vw, 36px);
+  padding-right: clamp(18px, 2.2vw, 36px);
+}
+
+html.tauri-desktop .tauri-desktop-shell .industrial-home > section:first-child {
+  min-height: clamp(340px, 38vh, 520px);
+}
+
+html.tauri-desktop .tauri-desktop-shell footer {
+  margin-top: 28px;
+}
+
+html.tauri-desktop.compact-ui .tauri-desktop-shell main.industrial-workspace {
+  margin-top: 10px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+html.tauri-desktop.compact-ui .tauri-desktop-shell .industrial-home {
+  gap: 12px;
+}
+
+html.tauri-desktop.compact-ui .tauri-desktop-shell .industrial-home > section {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+@media (max-width: 1100px) {
+  html.tauri-desktop .tauri-desktop-shell main.industrial-workspace {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
