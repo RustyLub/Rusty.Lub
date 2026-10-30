@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { weaponTranslationMap, targetTranslationMap } from '../translations';
+import CraftCalculatorTab from './CraftCalculatorTab';
 
 // Gorgeous custom wall SVGs for the Raid Calculator
 const WoodWallSVG = ({ size = 24 }: { size?: number }) => (
@@ -575,6 +576,7 @@ const targetSvgMap: Record<string, React.FC<{ size?: number }>> = {
 };
 
 export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }: RaidCalculatorTabProps) {
+  const [calculatorMode, setCalculatorMode] = useState<'raid' | 'craft'>('raid');
   const [selectedWeaponId, setSelectedWeaponId] = useState<RaidWeapon['id']>('c4');
   const [activeCategory, setActiveCategory] = useState<'walls' | 'doors' | 'deployables'>('walls');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -699,8 +701,30 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
   const totalGP = totalWeaponsNeeded * selectedWeapon.gpPer;
   const totalMetal = totalWeaponsNeeded * selectedWeapon.metalPer;
 
+  const modeSwitcher = (
+    <div className="flex gap-1 bg-[#0c0d10] p-1 border border-[#2a2f3b] w-fit">
+      <button onClick={() => setCalculatorMode('raid')} className={`px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-colors ${calculatorMode === 'raid' ? 'bg-[#f97316] text-white' : 'text-gray-400 hover:text-white'}`}>
+        {lang === 'en' ? 'Raid calculator' : 'Рейд-калькулятор'}
+      </button>
+      <button onClick={() => setCalculatorMode('craft')} className={`px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-colors ${calculatorMode === 'craft' ? 'bg-[#f97316] text-white' : 'text-gray-400 hover:text-white'}`}>
+        {lang === 'en' ? 'Craft calculator' : 'Крафт-калькулятор'}
+      </button>
+    </div>
+  );
+
+  if (calculatorMode === 'craft') {
+    return (
+      <div className="space-y-4">
+        {modeSwitcher}
+        <CraftCalculatorTab lang={lang} onBackToRaid={() => setCalculatorMode('raid')} />
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+    <div className="space-y-4">
+      {modeSwitcher}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
       {/* Weapon Selector */}
       <div className="xl:col-span-4 bg-[#14171e] p-4 border border-[#2a2f3b] space-y-3 h-fit">
         <h3 className="text-xs font-bold text-white uppercase flex items-center gap-2">
@@ -1207,6 +1231,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
             )}
           </AnimatePresence>
         </div>
+      </div>
       </div>
     </div>
   );
