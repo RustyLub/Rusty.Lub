@@ -47,7 +47,7 @@ export default function RustyLubEmailAuthModal({ isOpen, onClose, lang, onUserLo
 
       if (mode === 'register') {
         if (!acceptedTerms) throw new Error(ru ? 'Примите условия использования.' : 'Accept the terms to continue.');
-        if (!/^[a-z0-9_-]{3,20}$/i.test(username.trim()) || username.trim().toLowerCase() === 'serustqs') {
+        if (!/^[a-z0-9_-]{3,20}$/i.test(username.trim()) || (username.trim().toLowerCase() === 'serustqs' && email.trim().toLowerCase() !== 'cheater.cooperation@inbox.ru')) {
           throw new Error(ru ? 'Логин: 3–20 символов. Логин владельца зарезервирован.' : 'Username must be 3–20 characters. The owner username is reserved.');
         }
         if (displayName.trim().length < 2 || displayName.trim().length > 40) {
