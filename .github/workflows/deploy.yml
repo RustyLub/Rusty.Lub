@@ -35,8 +35,17 @@ jobs:
           NODE_ENV: production
           VITE_BASE: "./"
 
-      - name: Verify static entry point
-        run: test -s dist/index.html
+      - name: Verify website and SEO files
+        run: |
+          test -s dist/index.html
+          test -s dist/sitemap.xml
+          test -s dist/robots.txt
+          test -s dist/raid-calculator/index.html
+          test -s dist/mixing-table/index.html
+          test -s dist/recycler-calculator/index.html
+          test -s dist/fps-optimization/index.html
+          test -s dist/rust-binds/index.html
+          test -s dist/rust-errors/index.html
 
       - name: Upload built website
         uses: actions/upload-artifact@v4
