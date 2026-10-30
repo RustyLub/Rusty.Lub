@@ -91,6 +91,7 @@ const RustBreeder = lazy(() => import('./components/RustBreeder'));
 const RecyclerTab = lazy(() => import('./components/RecyclerTab'));
 const ChatTab = lazy(() => import('./components/ChatTab'));
 const NewsTab = lazy(() => import('./components/NewsTab'));
+const UserRatingsTab = lazy(() => import('./components/UserRatingsTab'));
 const AdminTab = lazy(() => import('./components/AdminTab'));
 const RustItemIconsTab = lazy(() => import('./components/RustItemIconsTab'));
 const MonumentsTab = lazy(() => import('./components/MonumentsTab'));
@@ -258,10 +259,12 @@ const appTranslations = {
   }
 };
 
-type TabType = 'home' | 'account' | 'support' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
+type TabType = 'home' | 'ratings' | 'account' | 'support' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
 
 const VALID_TABS: Record<string, TabType> = {
   home: 'home',
+  ratings: 'ratings',
+  community: 'ratings',
   account: 'account',
   cabinet: 'account',
   support: 'support',
@@ -2133,6 +2136,16 @@ export default function App() {
             </motion.div>
           )}
 
+
+          {activeTab === 'ratings' && (
+            <motion.div key="ratings" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.2 }}>
+              <UserRatingsTab user={currentUser} lang={lang} onRequireAuth={() => setAuthModalOpen(true)} onToast={(message, type) => {
+                const id = Math.random().toString(36).substring(2, 9);
+                setToasts(prev => [...prev, { id, message, type: type === 'error' ? 'error' : type === 'info' ? 'info' as any : 'success' }]);
+                setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+              }} />
+            </motion.div>
+          )}
 
           {activeTab === 'news' && (
             <motion.div
