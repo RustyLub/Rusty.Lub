@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rusty-lub.ru/sitemap.xml
+Sitemap: https://www.rusty-lub-com.online/sitemap.xml
