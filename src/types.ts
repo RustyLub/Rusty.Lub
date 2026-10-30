@@ -84,6 +84,7 @@ export interface ToastType {
 export interface CustomUser {
   uid: string;
   displayName: string;
+  createdAt?: string;
   email?: string;
   photoURL: string;
   avatarClass?: string;
