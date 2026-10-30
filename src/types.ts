@@ -215,7 +215,7 @@ export interface ClanApplicationItem {
   message?: string;
 }
 
-export const APP_VERSION = 'v3.0.0';
+export const APP_VERSION = 'v3.0.1';
 
 export interface DecayTimer {
   id: string;
