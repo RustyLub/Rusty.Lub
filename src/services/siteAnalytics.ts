@@ -50,3 +50,15 @@ export async function trackSiteEvent(
     console.debug('Site analytics unavailable:', error);
   }
 }
+
+export async function heartbeatSitePresence(page: string, uid = '') {
+  try {
+    const visitorId = getId(VISITOR_KEY);
+    const now = Date.now();
+    await setDoc(doc(db, 'site_analytics_presence', visitorId), {
+      visitorId, uid, page, lastSeenAt: serverTimestamp(), lastSeenAtMs: now
+    }, { merge: true });
+  } catch (error) {
+    console.debug('Site presence unavailable:', error);
+  }
+}
