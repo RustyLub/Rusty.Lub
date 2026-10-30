@@ -1188,7 +1188,7 @@ export default function App() {
 
   const tabs = [
     { id: 'home', label: appTranslations.tabs.home[lang], icon: <Home size={16} /> },
-    { id: 'ratings', label: lang === 'ru' ? 'Голос сообщества' : 'Community Voice', icon: <Star size={16} className="text-orange-400" /> },
+    { id: 'ratings', label: lang === 'ru' ? 'Голос сообщества' : 'Community Voice', icon: <MessageSquare size={16} className="text-orange-400" /> },
     { id: 'faq', label: lang === 'ru' ? 'Частые Вопросы (FAQ)' : 'FAQ & Beginner Guide', icon: <HelpCircle size={16} className="text-orange-400" /> },
     { id: 'news', label: appTranslations.tabs.news[lang], icon: <Compass size={16} /> },
     { id: 'clan', label: lang === 'ru' ? 'Поиск Клана & Тимейта' : 'Find Clan & Teammates', icon: <UserPlus size={16} className="text-blue-400" /> },
