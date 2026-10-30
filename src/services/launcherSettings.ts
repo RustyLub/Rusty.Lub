@@ -148,7 +148,7 @@ export const DEFAULT_LAUNCHER_SETTINGS: LauncherSettings = {
   hardwareAcceleration: true,
   companionMode: false,
 
-  appVersion: '2.6.4',
+  appVersion: '3.0.0',
   channel: 'stable',
   autoCheckUpdates: true,
   lastCheckDate: new Date().toLocaleDateString()
@@ -165,6 +165,8 @@ export function getLauncherSettings(): LauncherSettings {
     return {
       ...DEFAULT_LAUNCHER_SETTINGS,
       ...parsed,
+      // The app version is shipped with the build, not user-editable state.
+      appVersion: DEFAULT_LAUNCHER_SETTINGS.appVersion,
       favoriteServers: parsed.favoriteServers?.length ? parsed.favoriteServers : DEFAULT_FAVORITE_SERVERS
     };
   } catch {
