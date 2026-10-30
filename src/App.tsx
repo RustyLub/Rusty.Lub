@@ -321,11 +321,34 @@ const getTabFromUrl = (): TabType => {
     if (tabParam && VALID_TABS[tabParam]) {
       return VALID_TABS[tabParam];
     }
-    // 3. Check clean pathname (e.g. /raid)
-    const path = window.location.pathname.replace(/^\//, '').toLowerCase();
-    if (path && VALID_TABS[path]) {
-      return VALID_TABS[path];
-    }
+    // 3. Resolve clean hierarchical paths (e.g. /tools/raid/).
+    const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+    const pathToTab: Record<string, TabType> = {
+      'tools': 'tools',
+      'tools/raid': 'raid',
+      'tools/decay': 'decay',
+      'tools/ecoraid': 'ecoraid',
+      'tools/electrical': 'electrical',
+      'tools/recycler': 'recycler',
+      'tools/mixing': 'mixing',
+      'tools/fps': 'fps',
+      'tools/binds': 'binds',
+      'tools/errors': 'errors',
+      'tools/weapons': 'weapons',
+      'tools/monuments': 'monuments',
+      'tools/quarry': 'quarry',
+      'tools/wipe': 'wipe',
+      'guides': 'guides',
+      'faq': 'faq',
+      'news': 'news',
+      'clan': 'clan',
+      'chat': 'chat',
+      'ratings': 'ratings',
+      'support': 'support',
+      'terms': 'terms'
+    };
+    if (path && pathToTab[path]) return pathToTab[path];
+    if (path && VALID_TABS[path]) return VALID_TABS[path];
   } catch (e) {
     console.warn('URL tab parse error:', e);
   }
@@ -865,14 +888,35 @@ export default function App() {
 
     setActiveTab(tabId);
     try {
-      const privateTabs: TabType[] = ['admin', 'icons', 'rustplus'];
-      const hideTabFromUrl = privateTabs.includes(tabId);
-      const hash = tabId === 'home' || hideTabFromUrl ? '' : `#${tabId}`;
-      const newUrl = hash
-        ? `${window.location.pathname}${window.location.search}${hash}`
-        : window.location.pathname + window.location.search;
-      
-      if (window.location.hash !== hash) {
+      const privateTabs: TabType[] = ['admin', 'icons', 'rustplus', 'radar', 'account', 'special'];
+      const tabPaths: Partial<Record<TabType, string>> = {
+        home: '/',
+        tools: '/tools/',
+        raid: '/tools/raid/',
+        decay: '/tools/decay/',
+        ecoraid: '/tools/ecoraid/',
+        electrical: '/tools/electrical/',
+        recycler: '/tools/recycler/',
+        mixing: '/tools/mixing/',
+        fps: '/tools/fps/',
+        binds: '/tools/binds/',
+        errors: '/tools/errors/',
+        weapons: '/tools/weapons/',
+        monuments: '/tools/monuments/',
+        quarry: '/tools/quarry/',
+        wipe: '/tools/wipe/',
+        guides: '/guides/',
+        faq: '/faq/',
+        news: '/news/',
+        clan: '/clan/',
+        chat: '/chat/',
+        ratings: '/ratings/',
+        support: '/support/',
+        terms: '/terms/'
+      };
+      const newPath = privateTabs.includes(tabId) ? '/' : (tabPaths[tabId] || '/');
+      const newUrl = newPath + window.location.search;
+      if (window.location.pathname !== newPath || window.location.hash) {
         history.pushState({ tab: tabId }, '', newUrl);
       }
     } catch (e) {
