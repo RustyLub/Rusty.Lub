@@ -95,7 +95,8 @@ export const WindowsTitlebar: React.FC<WindowsTitlebarProps> = ({
       if (updated) {
         if (onToast) onToast(lang === 'ru' ? 'Обновление загружено. Приложение перезапускается...' : 'Update downloaded. Restarting app...', 'success');
       } else {
-        if (onToast) onToast(statusMsg || (lang === 'ru' ? 'Установлена последняя версия v3.0.0!' : 'You have the latest version v3.0.0!'), 'success');
+        const failed = /ошиб|error|failed|не удалось/i.test(statusMsg);
+        if (onToast) onToast(statusMsg || (lang === 'ru' ? 'Установлена последняя версия v3.0.0!' : 'You have the latest version v3.0.0!'), failed ? 'error' : 'info');
       }
     } catch (e) {
       if (onToast) onToast(lang === 'ru' ? 'Проверка обновлений синхронизирована с GitHub.' : 'Update check synced with GitHub.', 'info');
