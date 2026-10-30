@@ -495,6 +495,9 @@ export default function App() {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setCommandPaletteOpen(prev => !prev);
+      } else if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+        e.preventDefault();
+        setAppSettingsOpen(prev => !prev);
       } else if (isAltO || isCustomHud) {
         e.preventDefault();
         setQuickOverlayOpen(prev => !prev);
