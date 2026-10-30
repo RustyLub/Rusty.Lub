@@ -7,6 +7,7 @@ import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 import UserProfileModal from './UserProfileModal';
 import AdminCmsPanel from './AdminCmsPanel';
 import AdminRatingsPanel from './AdminRatingsPanel';
+import AdminAnalyticsPanel from './AdminAnalyticsPanel';
 import { subscribeToActivityLogs, clearAllActivityLogs, clearAllSecurityLogs, UserActivityLog } from '../services/activityLogger';
 
 interface AdminTabProps {
@@ -315,7 +316,7 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
   };
 
   const [vipManagerUserId, setVipManagerUserId] = useState<string | null>(null);
-  const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'vip' | 'feedback' | 'news' | 'survivors' | 'activity_logs' | 'security_audit' | 'cms' | 'ratings'>('dashboard');
+  const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'vip' | 'feedback' | 'news' | 'survivors' | 'activity_logs' | 'security_audit' | 'cms' | 'ratings' | 'analytics'>('dashboard');
   
   const [activityLogs, setActivityLogs] = useState<UserActivityLog[]>([]);
   const [activitySearch, setActivitySearch] = useState('');
@@ -687,6 +688,7 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
         {[
           { id: 'dashboard', label_ru: 'Панель', label_en: 'Dashboard', icon: BarChart3 },
           { id: 'ratings', label_ru: 'Оценки', label_en: 'User Ratings', icon: Star },
+          { id: 'analytics', label_ru: 'Аналитика сайта', label_en: 'Site Analytics', icon: Activity },
           { id: 'cms', label_ru: 'CMS сайта', label_en: 'Site CMS', icon: Settings },
           { 
             id: 'security_audit', 
@@ -735,6 +737,7 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
       </div>
 
       {activeSubTab === 'ratings' && <AdminRatingsPanel currentUser={currentUser} lang={lang} onToast={onToast} />}
+      {activeSubTab === 'analytics' && <AdminAnalyticsPanel lang={lang} />}
 
       {activeSubTab === 'cms' && (
         <AdminCmsPanel lang={lang} onToast={onToast} />
