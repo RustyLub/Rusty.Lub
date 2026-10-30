@@ -10,7 +10,7 @@ type ResourceMap = Record<string, number>;
 
 const recipes: Record<string, { yields: number; ingredients: ResourceMap }> = {
   c4: { yields: 1, ingredients: { explosives: 20, cloth: 5, techTrash: 2 } },
-  rocket: { yields: 1, ingredients: { explosives: 10, gunpowder: 150, pipes: 2 } },
+  rocket: { yields: 1, ingredients: { explosives: 10, gunpowder: 150, metal: 50, pipes: 2 } },
   satchel: { yields: 1, ingredients: { beancan: 4, stash: 1, rope: 1 } },
   explosive_ammo: { yields: 2, ingredients: { gunpowder: 10, sulfur: 5, metal: 10 } },
   beancan: { yields: 1, ingredients: { gunpowder: 60, sulfur: 10, metal: 20 } }
