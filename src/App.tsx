@@ -824,6 +824,10 @@ export default function App() {
   };
 
   const handleTabChange = (tabId: TabType) => {
+    // Close the account cabinet overlay when navigating to a standalone site section.
+    // This prevents the profile navigation (nickname, history, raids, binds, etc.)
+    // from remaining visible over unrelated pages such as Project Support / VIP.
+    setCabinetModalOpen(false);
     if (tabId === 'radar' && !isVip) {
       if (!currentUser) {
         setAuthModalOpen(true);
