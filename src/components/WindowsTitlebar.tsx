@@ -15,7 +15,7 @@ interface WindowsTitlebarProps {
 
 export const WindowsTitlebar: React.FC<WindowsTitlebarProps> = ({
   appName = 'RUSTY.LUB LAUNCHER',
-  appVersion = '2.6.4',
+  appVersion = '3.0.0',
   activeTabLabel,
   onlineCount = 1,
   appTheme,
@@ -157,7 +157,7 @@ export const WindowsTitlebar: React.FC<WindowsTitlebarProps> = ({
                 ? 'bg-neutral-100 hover:bg-white text-neutral-800 border-neutral-300'
                 : 'bg-[#121620] hover:bg-[#1a202c] text-amber-400 border-[#20293a]'
             }`}
-            title={lang === 'ru' ? 'Настройки лаунчера и игры' : 'Launcher & Game Settings'}
+            title={lang === 'ru' ? 'Настройки приложения' : 'Application settings'}
           >
             <Settings size={11} className="text-amber-400" />
             <span className="hidden xl:inline text-[9px] uppercase">{lang === 'ru' ? 'Настройки' : 'Settings'}</span>
@@ -173,7 +173,7 @@ export const WindowsTitlebar: React.FC<WindowsTitlebarProps> = ({
               ? 'bg-neutral-100 hover:bg-white text-neutral-800 border-neutral-300'
               : 'bg-[#121620] hover:bg-[#1a202c] text-[#c8d0d8] border-[#20293a]'
           }`}
-          title={lang === 'ru' ? 'Проверить автообновления Rust' : 'Check for Tauri App Updates'}
+          title={lang === 'ru' ? 'Проверить обновления приложения' : 'Check application updates'}
         >
           <RefreshCw size={10} className={`text-orange-500 ${isCheckingUpdate ? 'animate-spin' : ''}`} />
           <span className="hidden lg:inline">{isCheckingUpdate ? (lang === 'ru' ? 'Проверка...' : 'Checking...') : (lang === 'ru' ? 'Автообновление' : 'Auto-Update')}</span>
