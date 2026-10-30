@@ -64,13 +64,13 @@ export default function HomeTab({
   ];
 
   return (
-    <div className={`industrial-home keep-dark -mx-3 -mt-5 space-y-0 overflow-hidden pb-10 text-left sm:-mx-5 lg:-mx-8 ${appTheme === 'light' ? 'home-light-preview' : ''}`}>
+    <div className={`industrial-home keep-dark -mx-3 -mt-5 w-full space-y-0 overflow-hidden pb-10 text-left sm:-mx-5 lg:-mx-8 ${appTheme === 'light' ? 'home-light-preview' : ''}`}>
       {/* HERO */}
       <section className="relative isolate min-h-[430px] overflow-hidden border-b border-slate-700/70 bg-[#080d12] sm:min-h-[455px]">
         <img src={oilRigBg} alt="" aria-hidden="true" className="absolute inset-0 -z-20 h-full w-full object-cover object-center opacity-65" />
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(5,9,13,.98)_0%,rgba(5,9,13,.88)_34%,rgba(5,9,13,.28)_72%,rgba(5,9,13,.72)_100%),linear-gradient(0deg,rgba(5,9,13,.94),transparent_55%)]" />
-        <div className="mx-auto grid min-h-[430px] max-w-[1500px] items-center gap-8 px-5 py-10 sm:min-h-[455px] sm:px-8 lg:grid-cols-[1fr_265px] lg:gap-10 lg:px-10">
-          <div className="max-w-3xl">
+        <div className="mx-auto grid min-h-[430px] max-w-none items-center gap-8 px-5 py-10 sm:min-h-[455px] sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)] xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)] lg:gap-12 xl:gap-16 lg:px-12 xl:px-16">
+          <div className="max-w-5xl">
             <div className="mb-4 flex items-center gap-3">
               <img src={logoFull} alt="Rusty.Lub" className="h-9 w-9 object-contain" />
               <span className="font-mono text-[10px] font-bold uppercase tracking-[.22em] text-slate-300"><span className="text-orange-500">//</span> {ru ? 'СПРАВОЧНИК ДЛЯ ИГРОКОВ RUST' : 'RUST PLAYER KNOWLEDGE HUB'}</span>
@@ -98,10 +98,10 @@ export default function HomeTab({
       </section>
 
       {/* POPULAR TOOLS */}
-      <section className="mx-auto max-w-[1500px] border-b border-slate-700/70 px-5 py-8 sm:px-8 lg:px-10">
+      <section className="mx-auto max-w-none border-b border-slate-700/70 px-5 py-8 sm:px-8 lg:px-10">
         <div className="mb-4 flex items-end justify-between gap-4"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[.2em] text-slate-400"><span className="text-orange-500">///</span> {ru ? 'БЫСТРЫЙ ДОСТУП' : 'QUICK ACCESS'}</p><h2 className="mt-1 text-xl font-black uppercase text-white sm:text-2xl">{ru ? 'Популярные инструменты' : 'Popular tools'}</h2></div><button onClick={() => onNavigate('tools')} className="mb-1 inline-flex shrink-0 items-center gap-2 text-[11px] font-bold text-orange-500 hover:text-orange-300">{ru ? 'Все инструменты' : 'All tools'} <ArrowRight size={14} /></button></div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {popularTools.map((tool, i) => <button key={tool.title} onClick={() => onNavigate(tool.id)} className="group relative flex min-h-[145px] flex-col justify-end overflow-hidden border border-slate-600/60 bg-[linear-gradient(145deg,#17212b,#0b1016)] p-4 text-left transition hover:-translate-y-1 hover:border-orange-500/70">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:gap-5">
+          {popularTools.map((tool, i) => <button key={tool.title} onClick={() => onNavigate(tool.id)} className="group relative flex min-h-[170px] flex-col justify-end overflow-hidden border border-slate-600/60 bg-[linear-gradient(145deg,#17212b,#0b1016)] p-4 text-left transition hover:-translate-y-1 hover:border-orange-500/70">
             <div className="absolute inset-0 opacity-[.12] transition group-hover:opacity-25" style={{ backgroundImage: `url(${oilRigBg})`, backgroundSize: 'cover', backgroundPosition: `${i * 20}% center` }} />
             <span className="relative mb-3 flex h-12 w-12 items-center justify-center"><ItemImageOrFallback id={tool.icon} lang={lang} size={42} /></span>
             <span className="relative block text-xs font-black text-white">{tool.title}</span><span className="relative mt-1 block text-[10px] leading-4 text-slate-400">{tool.desc}</span><ArrowRight className="absolute bottom-4 right-4 text-orange-500 transition group-hover:translate-x-1" size={17} />
@@ -110,7 +110,7 @@ export default function HomeTab({
       </section>
 
       {/* ABOUT */}
-      <section className="mx-auto grid max-w-[1500px] gap-6 border-b border-slate-700/70 px-5 py-8 sm:px-8 lg:grid-cols-[.8fr_1.5fr] lg:items-center lg:px-10">
+      <section className="mx-auto grid max-w-none gap-6 border-b border-slate-700/70 px-5 py-8 sm:px-8 lg:grid-cols-[.8fr_1.5fr] lg:items-center lg:px-10">
         <div><p className="font-mono text-[10px] font-bold uppercase tracking-[.2em] text-slate-400"><span className="text-orange-500">///</span> {ru ? 'О ПРОЕКТЕ' : 'ABOUT THE PROJECT'}</p><h2 className="mt-1 text-2xl font-black uppercase text-white">{ru ? 'Больше, чем просто сайт' : 'More than just a website'}</h2><p className="mt-3 max-w-lg text-xs leading-5 text-slate-400">{ru ? 'Rusty.Lub — это полноценный справочник по игре Rust, созданный с целью сделать игру проще, удобнее и интереснее. Мы собираем лучшие инструменты, гайды и полезные материалы для всех, кто хочет развиваться, строить, рейдить и побеждать.' : 'Rusty.Lub is a complete Rust knowledge hub designed to make the game easier, more convenient and more enjoyable. We bring together tools, guides and useful resources for every kind of player.'}</p><button onClick={() => onNavigate('guides')} className="mt-4 inline-flex items-center gap-2 border border-orange-500/70 px-4 py-2 text-[10px] font-bold text-orange-400 transition hover:bg-orange-500 hover:text-black">{ru ? 'Узнать больше' : 'Learn more'} <ArrowRight size={13} /></button></div>
         <div className="relative grid min-h-[170px] grid-cols-2 gap-px overflow-hidden border border-slate-600/50 bg-slate-700/60 sm:grid-cols-4">
           <div className="absolute inset-0"><img src={oilRigBg} alt="" className="h-full w-full object-cover opacity-30" /><div className="absolute inset-0 bg-[#080d12]/55" /></div>
@@ -124,14 +124,14 @@ export default function HomeTab({
       </section>
 
       {/* NEWS & GUIDES */}
-      <section className="mx-auto max-w-[1500px] border-b border-slate-700/70 px-5 py-8 sm:px-8 lg:px-10">
-        <div className="mb-4 grid gap-4 sm:grid-cols-[.65fr_1.8fr] sm:items-end"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[.2em] text-slate-400"><span className="text-orange-500">///</span> {ru ? 'АКТУАЛЬНОЕ' : 'LATEST'}</p><h2 className="mt-1 text-xl font-black uppercase text-white sm:text-2xl">{ru ? 'Новости и гайды' : 'News and guides'}</h2><p className="mt-2 text-xs leading-5 text-slate-400">{ru ? 'Следи за обновлениями, читай полезные материалы и будь в курсе всего, что происходит в мире Rust.' : 'Follow updates, explore useful materials and stay informed about Rust.'}</p><button onClick={() => onNavigate('news')} className="mt-3 inline-flex items-center gap-2 border border-orange-500/70 px-4 py-2 text-[10px] font-bold text-orange-400 hover:bg-orange-500 hover:text-black">{ru ? 'Перейти к новостям' : 'View news'} <ArrowRight size={13} /></button></div>
+      <section className="mx-auto max-w-none border-b border-slate-700/70 px-5 py-8 sm:px-8 lg:px-10">
+        <div className="mb-4 grid gap-4 sm:grid-cols-[minmax(260px,.7fr)_minmax(0,2fr)] sm:items-end"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[.2em] text-slate-400"><span className="text-orange-500">///</span> {ru ? 'АКТУАЛЬНОЕ' : 'LATEST'}</p><h2 className="mt-1 text-xl font-black uppercase text-white sm:text-2xl">{ru ? 'Новости и гайды' : 'News and guides'}</h2><p className="mt-2 text-xs leading-5 text-slate-400">{ru ? 'Следи за обновлениями, читай полезные материалы и будь в курсе всего, что происходит в мире Rust.' : 'Follow updates, explore useful materials and stay informed about Rust.'}</p><button onClick={() => onNavigate('news')} className="mt-3 inline-flex items-center gap-2 border border-orange-500/70 px-4 py-2 text-[10px] font-bold text-orange-400 hover:bg-orange-500 hover:text-black">{ru ? 'Перейти к новостям' : 'View news'} <ArrowRight size={13} /></button></div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">{newsCards.map((card, i) => <button key={card.title} onClick={() => onNavigate('news')} className="group overflow-hidden border border-slate-600/60 bg-[#0d131a] text-left transition hover:border-orange-500/70"><div className="relative h-24 overflow-hidden"><img src={oilRigBg} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" style={{ objectPosition: card.imagePosition }} /><div className="absolute inset-0 bg-gradient-to-t from-[#080d12] to-transparent" /></div><div className="p-3"><span className="font-mono text-[9px] font-black text-orange-500">{card.category}</span><p className="mt-1 min-h-9 text-[11px] font-bold leading-4 text-white">{card.title}</p><span className="mt-2 flex justify-end text-orange-500"><ArrowRight size={13} /></span></div></button>)}</div>
         </div>
       </section>
 
       {/* COMMUNITY */}
-      <section className="mx-auto max-w-[1500px] px-5 py-7 sm:px-8 lg:px-10">
+      <section className="mx-auto max-w-none px-5 py-7 sm:px-8 lg:px-10">
         <div className="grid gap-5 border border-slate-600/60 bg-[linear-gradient(100deg,#101923,#0b1118)] p-5 sm:grid-cols-[1.4fr_1fr_auto] sm:items-center sm:px-7">
           <div className="flex items-center gap-4"><div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#5865f2]/15 text-[#a5adff]"><MessageCircle size={28} /></div><div><h2 className="text-xs font-black uppercase text-white">{ru ? 'Присоединяйся к нашему сообществу' : 'Join our community'}</h2><p className="mt-1 text-[10px] text-slate-400">{ru ? 'Общайся, получай помощь, участвуй в жизни проекта.' : 'Chat, get help and take part in the project.'}</p></div></div>
           <div className="flex flex-wrap gap-5 text-[10px] text-slate-300"><span className="flex items-center gap-2"><Users size={17} /> <b>Discord</b></span><span className="flex items-center gap-2"><MessageCircle size={17} /> <b>Community</b></span><span className="flex items-center gap-2"><ShieldCheck size={17} /> <b>Support</b></span></div>
@@ -140,12 +140,12 @@ export default function HomeTab({
       </section>
 
       {/* PARTNERSHIP / CONTACT */}
-      <section className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-4 border-t border-slate-700/60 px-5 pt-5 sm:px-8 lg:px-10">
+      <section className="mx-auto flex max-w-none flex-wrap items-center justify-between gap-4 border-t border-slate-700/60 px-5 pt-5 sm:px-8 lg:px-10">
         <div><p className="font-mono text-[10px] font-bold uppercase tracking-wider text-orange-500">{ru ? 'ПАРТНЁРСТВО И ПОДДЕРЖКА' : 'PARTNERSHIPS & SUPPORT'}</p><p className="mt-1 text-xs text-slate-400">{ru ? 'Есть идея или предложение для Rusty.Lub?' : 'Have an idea or suggestion for Rusty.Lub?'}</p></div>
         <div className="flex flex-wrap gap-2"><button onClick={() => onNavigate('support')} className="inline-flex items-center gap-2 border border-slate-600 px-4 py-2 text-[10px] font-bold text-slate-200 hover:border-orange-500">{ru ? 'Связаться с нами' : 'Contact us'} <ArrowRight size={13} /></button><button onClick={copyEmail} className="inline-flex items-center gap-2 border border-slate-600 px-4 py-2 text-[10px] font-bold text-slate-200 hover:border-orange-500">{copiedEmail ? <Check size={13} /> : <Copy size={13} />}{copiedEmail ? (ru ? 'Скопировано' : 'Copied') : 'rusty.lub_offers@bk.ru'}</button></div>
       </section>
 
-      {specialCards.length > 0 && <section className="mx-auto max-w-[1500px] px-5 pt-6 sm:px-8 lg:px-10"><p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-wider text-orange-400">{ru ? 'ОСОБЫЙ ДОСТУП' : 'SPECIAL ACCESS'}</p><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{specialCards.map(card => <button key={card.id} onClick={() => onNavigate(card.id)} className="flex items-center gap-3 border border-slate-700 bg-[#101820] p-3 text-left hover:border-orange-500"><ItemImageOrFallback id={card.icon} lang={lang} size={34} /><span className="min-w-0 flex-1"><b className="block text-xs text-white">{card.title}</b><small className="mt-1 block text-[10px] text-slate-400">{card.desc}</small></span><span className="font-mono text-[9px] text-orange-500">{card.tag}</span><ChevronRight size={14} className="text-slate-500" /></button>)}</div></section>}
+      {specialCards.length > 0 && <section className="mx-auto max-w-none px-5 pt-6 sm:px-8 lg:px-10"><p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-wider text-orange-400">{ru ? 'ОСОБЫЙ ДОСТУП' : 'SPECIAL ACCESS'}</p><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{specialCards.map(card => <button key={card.id} onClick={() => onNavigate(card.id)} className="flex items-center gap-3 border border-slate-700 bg-[#101820] p-3 text-left hover:border-orange-500"><ItemImageOrFallback id={card.icon} lang={lang} size={34} /><span className="min-w-0 flex-1"><b className="block text-xs text-white">{card.title}</b><small className="mt-1 block text-[10px] text-slate-400">{card.desc}</small></span><span className="font-mono text-[9px] text-orange-500">{card.tag}</span><ChevronRight size={14} className="text-slate-500" /></button>)}</div></section>}
     </div>
   );
 }
