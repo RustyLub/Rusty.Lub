@@ -43,6 +43,7 @@ export default function Footer({ lang, onNavigate, onOpenCabinet, onOpenDonation
             <nav className="flex flex-col items-start gap-2">
               <button className={linkClass} onClick={() => onNavigate('clan')}>Clan Board</button>
               <button className={linkClass} onClick={() => onNavigate('chat')}>{ru ? 'Чат сообщества' : 'Community chat'}</button>
+              <button className={linkClass} onClick={() => onNavigate('ratings')}>{ru ? 'Оценки сообщества' : 'Community ratings'}</button>
               <button className={linkClass} onClick={() => onNavigate('news')}>{ru ? 'Новости и обновления' : 'News & updates'}</button>
               <button className={linkClass} onClick={() => onNavigate('faq')}>FAQ</button>
               <a className={linkClass} href="https://discord.gg/R2TyKZ9xvZ" target="_blank" rel="noopener noreferrer">Discord</a>
