@@ -157,6 +157,16 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
         return res.status(409).json({ message: 'Новый профиль не соответствует целевой учётной записи.' });
       }
 
+      // A completed migration is immutable from this endpoint: retries are safe and
+      // cannot overwrite newer edits the owner made to the destination profile.
+      if (profile.legacyProfileMigrated === true) {
+        const existingProfile = Object.fromEntries([
+          'photoURL', 'avatarClass', 'gender', 'bio', 'clanTag', 'hoursPlayed',
+          'playstyle', 'favoriteWeapon', 'steamId', 'steamName', 'steamAvatar', 'customTheme'
+        ].filter((key) => profile[key] !== undefined).map((key) => [key, profile[key]]));
+        return res.json({ success: true, alreadyMigrated: true, profile: existingProfile });
+      }
+
       const migrated = {
         photoURL: typeof legacy.photoURL === 'string' ? legacy.photoURL.slice(0, 2048) : '',
         avatarClass: typeof legacy.avatarClass === 'string' ? legacy.avatarClass.slice(0, 80) : 'whiteout',
@@ -176,7 +186,15 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
       };
       // Privileged role, VIP flags, block/scam state and all credentials are intentionally excluded.
       await profileRef.update(migrated);
-      return res.json({ success: true, migratedFields: Object.keys(migrated).filter((key) => !key.endsWith('At')) });
+      const publicProfile = Object.fromEntries(
+        Object.entries(migrated).filter(([key]) => !key.endsWith('At') && key !== 'updatedAt')
+      );
+      return res.json({
+        success: true,
+        alreadyMigrated: false,
+        profile: publicProfile,
+        migratedFields: Object.keys(publicProfile)
+      });
     } catch (error) {
       console.error('[RustyLub auth] Legacy profile migration failed:', error instanceof Error ? error.message : 'unknown');
       return res.status(500).json({ message: 'Не удалось перенести профиль. Проверьте серверную конфигурацию Firebase.' });
