@@ -1,6 +1,7 @@
 import { initializeApp, getApps } from 'firebase/app';
 import {
   initializeAuth,
+  getAuth,
   indexedDBLocalPersistence,
   browserLocalPersistence
 } from 'firebase/auth';
@@ -19,27 +20,28 @@ const app = getApps().find((item) => item.name === 'rustylub-auth')
   || initializeApp(config, 'rustylub-auth');
 
 /**
- * This application only uses Firebase Email/Password authentication.
- * Do not install the popup/redirect resolver: its default browser
- * implementation loads Google's cross-origin iframe (gapi.iframes),
- * which can fail under strict tracking protection / third-party storage
- * restrictions and surface as auth/internal-error during startup.
+ * This application uses Firebase Email/Password authentication only.
+ * Omitting popupRedirectResolver prevents Firebase from loading the
+ * Google cross-origin iframe (gapi.iframes), which is unnecessary here
+ * and can fail under strict tracking protection / third-party storage
+ * restrictions, surfacing as auth/internal-error during startup.
  *
- * IndexedDB is preferred for durable sessions; localStorage is the
- * fallback for browsers where IndexedDB persistence is unavailable.
+ * IndexedDB is preferred for durable sessions; browser local storage
+ * is the fallback for browsers where IndexedDB persistence is unavailable.
  */
-export const rustylubAuth = (() => {
+function createEmailAuth() {
   try {
     return initializeAuth(app, {
       persistence: [indexedDBLocalPersistence, browserLocalPersistence]
     });
   } catch (error) {
-    // Vite HMR or another module may have initialized this named app's Auth.
-    // Reuse that instance rather than attempting a second initialization.
+    // Reuse an Auth instance if this module is evaluated again by Vite HMR.
     const message = error instanceof Error ? error.message : String(error);
-    if (message.includes('already been initialized') || message.includes('already exists')) {
-      throw error;
+    if (message.toLowerCase().includes('already initialized')) {
+      return getAuth(app);
     }
     throw error;
   }
-})();
+}
+
+export const rustylubAuth = createEmailAuth();
