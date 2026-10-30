@@ -61,7 +61,7 @@ export async function completeVerifiedRegistration(user: User, username: string,
   await requireVerifiedUser(user);
   const cleanUsername = username.trim().toLowerCase();
   const cleanDisplayName = displayName.trim();
-  if (!/^[a-z0-9_-]{3,20}$/.test(cleanUsername) || cleanUsername === 'serustqs') {
+  if (!/^[a-z0-9_-]{3,20}$/.test(cleanUsername) || (cleanUsername === 'serustqs' && (user.email || '').trim().toLowerCase() !== 'cheater.cooperation@inbox.ru')) {
     throw new Error('Логин должен содержать 3–20 символов. Этот логин зарезервирован.');
   }
   if (cleanDisplayName.length < 2 || cleanDisplayName.length > 40 || /[<>]/.test(cleanDisplayName)) {
