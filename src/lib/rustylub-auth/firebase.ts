@@ -1,5 +1,9 @@
 import { initializeApp, getApps } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import {
+  initializeAuth,
+  indexedDBLocalPersistence,
+  browserLocalPersistence
+} from 'firebase/auth';
 
 const config = {
   apiKey: 'AIzaSyAdWMYqPO1mgx2h2DO3Iw8XZxEyZJQitO0',
@@ -14,4 +18,28 @@ const config = {
 const app = getApps().find((item) => item.name === 'rustylub-auth')
   || initializeApp(config, 'rustylub-auth');
 
-export const rustylubAuth = getAuth(app);
+/**
+ * This application only uses Firebase Email/Password authentication.
+ * Do not install the popup/redirect resolver: its default browser
+ * implementation loads Google's cross-origin iframe (gapi.iframes),
+ * which can fail under strict tracking protection / third-party storage
+ * restrictions and surface as auth/internal-error during startup.
+ *
+ * IndexedDB is preferred for durable sessions; localStorage is the
+ * fallback for browsers where IndexedDB persistence is unavailable.
+ */
+export const rustylubAuth = (() => {
+  try {
+    return initializeAuth(app, {
+      persistence: [indexedDBLocalPersistence, browserLocalPersistence]
+    });
+  } catch (error) {
+    // Vite HMR or another module may have initialized this named app's Auth.
+    // Reuse that instance rather than attempting a second initialization.
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes('already been initialized') || message.includes('already exists')) {
+      throw error;
+    }
+    throw error;
+  }
+})();
