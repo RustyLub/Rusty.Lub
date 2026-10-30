@@ -83,6 +83,7 @@ export interface ToastType {
 
 export interface CustomUser {
   uid: string;
+  authProvider?: 'legacy' | 'firebase-email';
   displayName: string;
   email?: string;
   photoURL: string;
