@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { raidWeapons } from '../data';
-import { RaidWeapon } from '../types';
 import { ItemImageOrFallback } from './IconUtils';
 import { ArrowLeftRight, Minus, Plus, RotateCcw, Package } from 'lucide-react';
 import { weaponTranslationMap } from '../translations';
@@ -53,9 +52,16 @@ export default function CraftCalculatorTab({ lang, onBackToRaid }: Props) {
       if (!recipe || qty <= 0) return;
       Object.entries(recipe.ingredients).forEach(([key, amount]) => add(key, Math.ceil(qty / recipe.yields) * amount));
     });
+    // Satchels require four crafted beancan grenades each; expand those recipes too.
+    const beancans = result.beancan || 0;
+    if (beancans) {
+      add('gunpowder', beancans * 60);
+      add('sulfur', beancans * 10);
+      add('metal', beancans * 20);
+      delete result.beancan;
+    }
     // Convert intermediate explosives and gunpowder into their base ingredients.
     const explosives = result.explosives || 0;
-    const gunpowder = result.gunpowder || 0;
     if (explosives) {
       add('gunpowder', explosives * 50);
       add('lowgrade', explosives * 3);
