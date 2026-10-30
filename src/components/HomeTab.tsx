@@ -123,122 +123,88 @@ export default function HomeTab({
   return (
     <div className="industrial-home space-y-7 lg:space-y-8 pb-16 text-left">
       
-      {/* ── 1. CINEMATIC RUST HERO ── */}
-      <section className="relative isolate flex min-h-[480px] overflow-hidden rounded-2xl border border-[#3a4654] bg-[#090d12] shadow-[0_28px_80px_rgba(0,0,0,0.5)] sm:min-h-[540px] lg:min-h-[590px]">
-        <img
-          src="https://images.squarespace-cdn.com/content/v1/5420d068e4b09194f76b2af6/9d28c2b3-0cdd-4cb8-893b-a792929b264b/20250325155147_1-Edit.jpg"
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
-          fetchPriority="high"
-        />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#080b10]/95 via-[#080b10]/75 to-[#080b10]/25" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#080b10]/85 via-transparent to-[#080b10]/20" />
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_78%_42%,rgba(249,115,22,0.14),transparent_42%)]" />
+      {/* ── 1. FUNCTIONAL INDUSTRIAL DASHBOARD HERO ── */}
+      <section className="relative overflow-hidden rounded-2xl border border-[#35404c] bg-[linear-gradient(135deg,#111923_0%,#0b1016_58%,#17130f_100%)] shadow-[0_24px_70px_rgba(0,0,0,0.38)]">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-40">
+          <div className="absolute -right-24 -top-28 h-80 w-80 rounded-full border border-orange-500/20" />
+          <div className="absolute -right-10 -top-14 h-52 w-52 rounded-full border border-slate-400/10" />
+          <div className="absolute inset-y-0 left-0 w-1 bg-orange-500" />
+          <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_0%,rgba(148,163,184,0.035)_48%,transparent_49%)]" />
+        </div>
 
-        <div className="flex w-full items-center p-5 sm:p-8 lg:p-12 xl:p-16">
-          <div className="w-full max-w-6xl space-y-6 sm:space-y-8">
-            <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:gap-7 lg:gap-10">
-              <div className="shrink-0 border-l-2 border-orange-500 bg-black/35 px-3 py-3 backdrop-blur-sm sm:px-4 sm:py-4">
-                <img src={logoFull} alt="Rusty.Lub logo" className="h-auto w-[150px] max-w-full object-contain object-left sm:w-[175px] md:w-[195px] lg:w-[220px]" />
+        <div className="relative grid gap-7 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.05fr)_minmax(420px,0.95fr)] lg:gap-10 lg:p-10 xl:p-12">
+          <div className="flex min-w-0 flex-col justify-center">
+            <div className="mb-6 flex items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-orange-500/40 bg-black/45 p-2 sm:h-16 sm:w-16">
+                <img src={logoFull} alt="Rusty.Lub" className="max-h-full max-w-full object-contain" />
               </div>
-
-              <div className="min-w-0 space-y-4">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-orange-300 sm:text-xs">
-                  {lang === 'ru' ? 'ИНСТРУМЕНТЫ • БАЗА ЗНАНИЙ • СООБЩЕСТВО' : 'TOOLS • KNOWLEDGE • COMMUNITY'}
-                </p>
-                <h1 className="w-full max-w-none text-[clamp(1.65rem,5.2vw,4.5rem)] font-black leading-[1.08] tracking-tight text-white drop-shadow-[0_3px_18px_rgba(0,0,0,0.6)]">
-                  {lang === 'ru' ? <><span className="block whitespace-nowrap">Твой следующий вайп.</span><span className="block whitespace-nowrap text-orange-400">Под твоим контролем.</span></> : <><span className="block whitespace-nowrap">Your next wipe.</span><span className="block whitespace-nowrap text-orange-400">On your terms.</span></>}
-                </h1>
-                <p className="max-w-2xl text-sm leading-7 text-[#e0e5eb] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] sm:text-base lg:text-lg">
-                  {lang === 'ru'
-                    ? 'Калькулятор рейда, игровые инструменты и база знаний Rust — всё необходимое, чтобы подготовиться к вайпу и играть эффективнее.'
-                    : 'Raid calculations, practical game tools, and a Rust knowledge base — everything you need to prepare for wipe and play smarter.'}
-                </p>
+              <div>
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-orange-400">RUSTY.LUB / FIELD TOOLS</p>
+                <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-slate-500">{lang === 'ru' ? 'СПРАВОЧНИК И ИНСТРУМЕНТЫ RUST' : 'RUST KNOWLEDGE & UTILITIES'}</p>
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap">
-              <button onClick={() => onNavigate('raid')} className="inline-flex min-h-12 items-center justify-center gap-2 border border-orange-300 bg-orange-500 px-6 py-3 text-xs font-extrabold uppercase tracking-wider text-[#101318] shadow-[0_8px_30px_rgba(249,115,22,0.28)] transition hover:bg-orange-400 cursor-pointer">
-                {lang === 'ru' ? 'Калькулятор рейда' : 'Raid calculator'} <ArrowRight size={15} />
+            <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-orange-400 sm:text-xs">
+              {lang === 'ru' ? 'ИНСТРУМЕНТЫ • ЗНАНИЯ • СООБЩЕСТВО' : 'TOOLS • KNOWLEDGE • COMMUNITY'}
+            </p>
+            <h1 className="max-w-2xl text-3xl font-black leading-[1.06] tracking-tight text-white sm:text-4xl lg:text-5xl">
+              {lang === 'ru' ? <>Подготовься к вайпу.<br /><span className="text-orange-400">Держи всё под контролем.</span></> : <>Prepare for wipe.<br /><span className="text-orange-400">Stay in control.</span></>}
+            </h1>
+            <p className="mt-5 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
+              {lang === 'ru'
+                ? 'Практические инструменты, расчёты рейда и база знаний Rust — собраны в одном месте, чтобы быстрее принимать решения в игре.'
+                : 'Practical tools, raid calculations, and a Rust knowledge base — all in one place to help you make smarter in-game decisions.'}
+            </p>
+
+            <div className="mt-7 flex flex-wrap gap-3">
+              <button onClick={() => onNavigate('raid')} className="inline-flex min-h-11 items-center justify-center gap-2 border border-orange-400 bg-orange-500 px-5 py-3 text-xs font-black uppercase tracking-wider text-[#101318] shadow-[0_8px_28px_rgba(249,115,22,0.2)] transition hover:bg-orange-400">
+                {lang === 'ru' ? 'Начать с рейд-калькулятора' : 'Open raid calculator'} <ArrowRight size={15} />
               </button>
-              <button onClick={() => onNavigate('tools')} className="inline-flex min-h-12 items-center justify-center gap-2 border border-white/35 bg-black/40 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm transition hover:border-orange-400/70 hover:bg-black/60 cursor-pointer">
+              <button onClick={() => onNavigate('tools')} className="inline-flex min-h-11 items-center justify-center border border-slate-500/50 bg-slate-900/70 px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-100 transition hover:border-orange-400/70 hover:text-orange-300">
                 {lang === 'ru' ? 'Все инструменты' : 'All tools'}
               </button>
-              <a href="https://discord.gg/R2TyKZ9xvZ" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 border border-orange-400/60 bg-[#0b1016]/55 px-6 py-3 text-xs font-bold uppercase tracking-wider text-orange-200 backdrop-blur-sm transition hover:border-orange-300 hover:bg-orange-500/15">
-                <Send size={14} /> Discord <ExternalLink size={11} />
+              <a href="https://discord.gg/R2TyKZ9xvZ" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 border border-slate-600/70 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-300 transition hover:border-orange-400/60 hover:text-orange-300">
+                <Send size={13} /> Discord <ExternalLink size={11} />
               </a>
             </div>
+          </div>
 
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-white/15 pt-4 font-mono text-[9px] uppercase tracking-[0.16em] text-white/65 sm:text-[10px]">
-              <span>Raid tools</span><span className="text-orange-400">/</span><span>FPS & binds</span><span className="text-orange-400">/</span><span>Rust community</span>
+          <div className="flex min-w-0 flex-col justify-center">
+            <div className="mb-3 flex items-center justify-between border-b border-slate-700/70 pb-3">
+              <div>
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-orange-400">{lang === 'ru' ? 'БЫСТРЫЙ ДОСТУП' : 'QUICK ACCESS'}</p>
+                <p className="mt-1 text-xs text-slate-500">{lang === 'ru' ? 'Выбери инструмент и продолжай работу' : 'Choose a tool and get straight to work'}</p>
+              </div>
+              <span className="border border-slate-700 bg-black/30 px-2 py-1 font-mono text-[9px] text-slate-500">01 / 04</span>
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {[
+                { id: 'raid', icon: 'timed_explosive', title: lang === 'ru' ? 'Рейд-калькулятор' : 'Raid calculator', desc: lang === 'ru' ? 'Взрывчатка и стоимость рейда' : 'Explosives and raid costs', tag: '01' },
+                { id: 'binds', icon: 'keycard_red', title: lang === 'ru' ? 'Бинды и макросы' : 'Binds & macros', desc: lang === 'ru' ? 'Команды и быстрые настройки' : 'Commands and quick setups', tag: '02' },
+                { id: 'fps', icon: 'computerstation', title: lang === 'ru' ? 'Оптимизация FPS' : 'FPS optimizer', desc: lang === 'ru' ? 'Графика и производительность' : 'Graphics and performance', tag: '03' },
+                { id: 'guides', icon: 'paper', title: lang === 'ru' ? 'База знаний' : 'Knowledge base', desc: lang === 'ru' ? 'Гайды и игровые справочники' : 'Guides and game references', tag: '04' }
+              ].map((item) => (
+                <button key={item.id} onClick={() => onNavigate(item.id)} className="group flex min-h-[94px] min-w-0 items-center gap-3 border border-slate-700/80 bg-[#111923]/90 p-3 text-left transition hover:-translate-y-0.5 hover:border-orange-500/70 hover:bg-[#18212b]">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center border border-slate-700 bg-black/35">
+                    <ItemImageOrFallback id={item.icon} lang={lang} size={36} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-xs font-black uppercase tracking-wide text-slate-100 transition group-hover:text-orange-300">{item.title}</span>
+                    <span className="mt-1 block text-[10px] leading-4 text-slate-500">{item.desc}</span>
+                  </span>
+                  <span className="self-start font-mono text-[9px] text-slate-600 group-hover:text-orange-400">{item.tag}</span>
+                </button>
+              ))}
             </div>
           </div>
         </div>
-      </section>
-
-      {/* ── 2. FEATURED TOOLS BOXES (RAID, BINDS, FPS) ── */}
-      <section className="space-y-4">
-        <h2 className="text-xs font-black text-[#8b95a8] uppercase tracking-wider font-mono">
-          {lang === 'ru' ? '🔥 ПОПУЛЯРНЫЕ РАЗДЕЛЫ' : '🔥 FEATURED PROTOCOLS'}
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
-          {/* Featured 1: Raid Calculator */}
-          <div 
-            onClick={() => onNavigate('raid')}
-            className="bg-[#111820] border border-[#293541] p-4 lg:p-5 rounded-xl shadow-[0_10px_24px_rgba(0,0,0,0.16)] hover:border-orange-500/70 hover:-translate-y-0.5 transition-all cursor-pointer flex items-start gap-4 group"
-          >
-            <div className="w-14 h-14 shrink-0 rounded-xl bg-zinc-900 border border-[#2e394b] flex items-center justify-center shadow-inner overflow-hidden">
-              <ItemImageOrFallback id="timed_explosive" lang={lang} size={46} />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-[#eef2f7] uppercase group-hover:text-orange-500 transition-colors">
-                {lang === 'ru' ? 'Калькулятор Рейда' : 'Raid Calculator'}
-              </h3>
-              <p className="text-xs text-[#8b95a8] leading-relaxed">
-                {lang === 'ru' ? 'Расчёт C4, ракет и взрывчатки для штурма баз любой сложности.' : 'Calculate sulfur and raw resources needed for optimal base raiding.'}
-              </p>
-            </div>
-          </div>
-
-          {/* Featured 2: Keybinds Generator */}
-          <div 
-            onClick={() => onNavigate('binds')}
-            className="bg-[#12161e] border border-[#1e2633] p-5 rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.01)] hover:border-orange-500 transition-all cursor-pointer flex items-start gap-4 group"
-          >
-            <div className="w-14 h-14 shrink-0 rounded-xl bg-zinc-900 border border-[#2e394b] flex items-center justify-center shadow-inner overflow-hidden">
-              <ItemImageOrFallback id="keycard_red" lang={lang} size={46} />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-[#eef2f7] uppercase group-hover:text-orange-500 transition-colors">
-                {lang === 'ru' ? 'Генератор Биндов' : 'Binds & Macros'}
-              </h3>
-              <p className="text-xs text-[#8b95a8] leading-relaxed">
-                {lang === 'ru' ? 'Быстрый свап оружия, автоатака, бинды на двери и консольные фичи.' : 'Generate optimized F1 client console commands and macro binds.'}
-              </p>
-            </div>
-          </div>
-
-          {/* Featured 3: FPS Performance Optimizer */}
-          <div 
-            onClick={() => onNavigate('fps')}
-            className="bg-[#12161e] border border-[#1e2633] p-5 rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.01)] hover:border-orange-500 transition-all cursor-pointer flex items-start gap-4 group"
-          >
-            <div className="w-14 h-14 shrink-0 rounded-xl bg-zinc-900 border border-[#2e394b] flex items-center justify-center shadow-inner overflow-hidden">
-              <ItemImageOrFallback id="computerstation" lang={lang} size={46} />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-neutral-950 uppercase group-hover:text-orange-500 transition-colors">
-                {lang === 'ru' ? 'Оптимизация FPS' : 'FPS Booster Guide'}
-              </h3>
-              <p className="text-xs text-[#8b95a8] leading-relaxed">
-                {lang === 'ru' ? 'Гайды настроек графики, параметры запуска Steam и буст частоты кадров.' : 'Step-by-step performance optimization guidelines for maximum frame rate.'}
-              </p>
-            </div>
-          </div>
+        <div className="relative flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-slate-700/60 bg-black/20 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.18em] text-slate-500 sm:px-7 lg:px-10">
+          <span>{lang === 'ru' ? 'РАСЧЁТЫ РЕЙДА' : 'RAID PLANNING'}</span><span className="text-orange-500">/</span>
+          <span>{lang === 'ru' ? 'ИГРОВЫЕ ИНСТРУМЕНТЫ' : 'GAME UTILITIES'}</span><span className="text-orange-500">/</span>
+          <span>{lang === 'ru' ? 'СООБЩЕСТВО RUST' : 'RUST COMMUNITY'}</span>
         </div>
       </section>
+
       {/* ── 3. SPECIAL ACCESS SECTIONS (ONLY VISIBLE IF AUTHORIZED WITH SPECIAL ACCESS) ── */}
       {hasSpecialAccess && visibleSpecialCards.length > 0 && (
         <section className="space-y-4">
