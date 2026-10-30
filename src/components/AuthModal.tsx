@@ -10,6 +10,7 @@ import {
 import { CUSTOM_AVATARS } from '../customAvatars';
 import { CustomUser } from '../types';
 import TermsModal from './TermsModal';
+import { trackSiteEvent } from '../services/siteAnalytics';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -89,6 +90,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
           role: 'user', isBlocked: false, createdAt: new Date().toISOString()
         });
         onUserLogin({ uid: cleanUsername, displayName: cleanDisplayName, photoURL: matchedAvatar.url, avatarClass: selectedAvatar, gender, role: 'user' } as CustomUser);
+        void trackSiteEvent('registration', { uid: cleanUsername, page: '/account' });
         onToast(lang === 'ru' ? 'Аккаунт создан!' : 'Account created!', 'success');
       } else {
         if (!userSnap.exists()) {
@@ -122,6 +124,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
           onToast(lang === 'ru' ? 'Неверный логин или пароль.' : 'Incorrect username or password.', 'error');
           return;
         }
+        void trackSiteEvent('login', { uid: cleanUsername, page: '/account' });
         onUserLogin({
           uid: cleanUsername, displayName: data.displayName || cleanUsername,
           email: data.email || undefined, photoURL: data.photoURL || '',
