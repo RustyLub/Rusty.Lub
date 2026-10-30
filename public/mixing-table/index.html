@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Стол смешивания Rust — калькулятор чаёв и ягод | Rusty.Lub</title>
+<meta name="description" content="Подберите рецепт чая в Rust, посмотрите требования к ягодам и оцените уровень Basic, Advanced или Pure с калькулятором стола смешивания Rusty.Lub.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://rusty-lub.ru/mixing-table/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Rusty.Lub">
+<meta property="og:title" content="Стол смешивания Rust — калькулятор чаёв и ягод | Rusty.Lub">
+<meta property="og:description" content="Подберите рецепт чая в Rust, посмотрите требования к ягодам и оцените уровень Basic, Advanced или Pure с калькулятором стола смешивания Rusty.Lub.">
+<meta property="og:url" content="https://rusty-lub.ru/mixing-table/">
+<meta property="og:image" content="https://rusty-lub.ru/logo-full.png">
+<meta name="theme-color" content="#0b0d10">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Стол смешивания Rust — калькулятор чаёв и ягод | Rusty.Lub","description":"Подберите рецепт чая в Rust, посмотрите требования к ягодам и оцените уровень Basic, Advanced или Pure с калькулятором стола смешивания Rusty.Lub.","url":"https://rusty-lub.ru/mixing-table/","inLanguage":"ru-RU","isPartOf":{"@type":"WebSite","name":"Rusty.Lub","url":"https://rusty-lub.ru/"},"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Главная","item":"https://rusty-lub.ru/"},{"@type":"ListItem","position":2,"name":"Стол смешивания Rust и калькулятор чаёв","item":"https://rusty-lub.ru/mixing-table/"}]}}</script>
+<style>
+:root{color-scheme:dark;--bg:#0b0d10;--panel:#141820;--line:#303744;--orange:#f97316;--muted:#a5adba;--text:#eef2f7}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#2a1a12 0,transparent 42%),var(--bg);color:var(--text);font:16px/1.7 system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:#ff9a4b}a:hover{color:#ffc08b}.wrap{width:min(920px,calc(100% - 32px));margin:auto}
+header{border-bottom:1px solid var(--line);background:#0b0d10eF}.top{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font-weight:950;letter-spacing:.07em;color:#fff;text-decoration:none;font-size:20px}.brand b{color:var(--orange)}nav{display:flex;gap:16px;flex-wrap:wrap;font-size:13px}nav a{color:#c6ccd5;text-decoration:none}
+main{padding:36px 0 56px}.crumb{font-size:12px;color:var(--muted);margin-bottom:20px}.crumb a{color:#c6ccd5;text-decoration:none}
+.hero{border:1px solid #75401f;background:linear-gradient(120deg,#1b2029,#11151b 70%);padding:clamp(22px,5vw,42px);position:relative;overflow:hidden;box-shadow:0 18px 50px #0008}.hero:after{content:"";position:absolute;right:-70px;top:-90px;width:250px;height:250px;border:28px solid #f9731610;transform:rotate(30deg);pointer-events:none}
+.eyebrow{font:700 11px/1.4 ui-monospace,monospace;color:var(--orange);letter-spacing:.18em;text-transform:uppercase}h1{font-size:clamp(30px,5vw,48px);line-height:1.1;margin:12px 0 16px;text-transform:uppercase;letter-spacing:-.025em}.lead{max-width:720px;font-size:18px;color:#d1d7e0;margin:0 0 24px}
+.cta{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;background:var(--orange);color:#15100c;font-weight:900;text-decoration:none;text-transform:uppercase;letter-spacing:.04em;border:1px solid #ffb16e}.cta:hover{background:#ff9a4b;color:#15100c}.note{font-size:12px;color:#aab2bf;margin-top:14px}
+.content-section{padding:26px 0;border-bottom:1px solid var(--line)}h2{font-size:23px;line-height:1.25;margin:0 0 13px;color:#fff}p{margin:0 0 12px;color:#c5ccd6}p:last-child{margin-bottom:0}ol,ul{padding-left:22px;color:#c5ccd6;margin:10px 0}li{margin:7px 0}
+.faq{padding:28px 0}.faq h2{margin-bottom:16px}details{border:1px solid var(--line);background:#11151b;margin:9px 0;padding:13px 16px}summary{font-weight:750;cursor:pointer;color:#f4f6fa}details p{padding-top:10px}
+.related{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px}.related-card{border:1px solid var(--line);background:var(--panel);padding:15px;color:#fff;text-decoration:none;font-weight:750}.related-card small{display:block;color:var(--orange);font-size:11px;margin-top:7px}
+footer{border-top:1px solid var(--line);padding:24px 0;color:#8993a2;font-size:12px}footer a{color:#c5ccd6}
+@media(max-width:620px){.top{align-items:flex-start;flex-direction:column;padding:14px 0}nav{gap:10px}.lead{font-size:16px}}
+</style>
+</head>
+<body>
+<header><div class="wrap top"><a class="brand" href="/">RUSTY.<b>LUB</b></a><nav aria-label="Основная навигация"><a href="/">Главная</a><a href="/raid-calculator/">Рейд</a><a href="/mixing-table/">Чаи</a><a href="/recycler-calculator/">Переработчик</a><a href="/rust-errors/">Ошибки Rust</a></nav></div></header>
+<main class="wrap">
+<div class="crumb"><a href="/">Главная</a> / Стол смешивания Rust и калькулятор чаёв</div>
+<article>
+<div class="hero"><div class="eyebrow">Rusty.Lub · Справочник Rust</div><h1>Стол смешивания Rust и калькулятор чаёв</h1><p class="lead">Подбирайте чай под задачу и планируйте запас ягод. Раздел Rusty.Lub объединяет рецепты чаёв, их эффекты и симулятор ягод для оценки уровня результата.</p><a class="cta" href="/#mixing">Открыть стол смешивания <span aria-hidden="true">↗</span></a><div class="note">Инструмент откроется на основном сайте Rusty.Lub.</div></div>
+<section class="content-section"><h2>Какие чаи собраны в справочнике</h2><p>В калькуляторе представлены варианты чая на скрап, руду, дерево, максимальное здоровье, регенерацию и защиту от радиации. Выберите нужный рецепт, чтобы увидеть назначение напитка и отображаемые для него уровни.</p><p>Чай на скрап предназначен для увеличения получаемого скрапа из бочек, ящиков и мусорных куч. Чай на руду связан с добычей руды, чай на дерево — с заготовкой древесины. Другие варианты ориентированы на характеристики персонажа.</p></section>
+<section class="content-section"><h2>Уровни Basic, Advanced и Pure</h2><p>Интерфейс показывает три уровня результата: Basic, Advanced и Pure. В текущей логике симулятора ориентиры по количеству ягод составляют 1–4, 5–9 и 10 или более соответственно. Для отдельных рецептов учитываются соответствующие цвета ягод.</p><p>Симулятор помогает оценить запасы перед смешиванием. Проверяйте конкретный выбранный рецепт и отображаемый результат, а также учитывайте изменения игровых механик после обновлений Rust.</p></section>
+<section class="content-section"><h2>Как пользоваться симулятором ягод</h2><ol><li>Выберите тип чая в списке рецептов.</li><li>Введите количество ягод нужных цветов в симуляторе.</li><li>Посмотрите, какой уровень результата показывает интерфейс.</li><li>Скорректируйте количество ягод и спланируйте следующую партию.</li></ol><p>В справочнике также указано время одного цикла смешивания — 30 секунд. Используйте это значение как ориентир, сверяя механику с актуальной версией игры.</p></section>
+<section class="content-section"><h2>Планирование фермы</h2><p>Калькулятор удобен не только перед одним смешиванием. С его помощью можно прикинуть, каких ягод не хватает для выбранных рецептов, и заранее спланировать посадки. Для устойчивого запаса полезно вести отдельный учёт ягод под нужные типы чая.</p></section>
+<section class="faq"><h2>Частые вопросы</h2><details><summary>Какие рецепты доступны?</summary><p>Чай на скрап, руду, дерево, максимальное здоровье, регенерацию и защиту от радиации.</p></details>
+<details><summary>Что означает Pure?</summary><p>Это высший уровень, который симулятор связывает с 10 и более подходящими ягодами в слоте.</p></details>
+<details><summary>Сколько длится цикл смешивания?</summary><p>В справочнике указан ориентир 30 секунд на один цикл.</p></details></section>
+<section class="content-section"><h2>Другие инструменты Rusty.Lub</h2><p>Продолжайте работу со справочником: откройте связанные инструменты и материалы.</p><div class="related"><a class="related-card" href="/raid-calculator/"><span>Калькулятор рейда Rust</span><small>Открыть справочную страницу →</small></a>
+<a class="related-card" href="/recycler-calculator/"><span>Калькулятор переработчика Rust</span><small>Открыть справочную страницу →</small></a>
+<a class="related-card" href="/fps-optimization/"><span>Оптимизация FPS в Rust</span><small>Открыть справочную страницу →</small></a></div></section>
+</article>
+</main>
+<footer><div class="wrap">© 2026 Rusty.Lub · Независимый справочный проект для игроков Rust. <a href="/">На главную</a>. Rust является товарным знаком Facepunch Studios.</div></footer>
+</body>
+</html>
