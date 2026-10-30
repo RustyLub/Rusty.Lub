@@ -138,6 +138,7 @@ import rustWallpaperThree from './assets/images/rust_wallpaper_three_17828101451
 // @ts-ignore
 import customSwampBg from './assets/images/custom_swamp_bg.png';
 import { logUserActivity } from './services/activityLogger';
+import { trackSiteEvent, heartbeatSitePresence } from './services/siteAnalytics';
 import logoFull from '../logo-full.png';
 
 
@@ -417,6 +418,17 @@ export default function App() {
       return null;
     }
   });
+  // Privacy-light site traffic tracking: page views and 5-minute online presence.
+  useEffect(() => {
+    const page = activeTab === 'home' ? '/' : `/${activeTab}`;
+    void trackSiteEvent('page_view', { page, uid: currentUser?.uid || '' });
+    void heartbeatSitePresence(page, currentUser?.uid || '');
+    const heartbeat = window.setInterval(() => {
+      void heartbeatSitePresence(page, currentUser?.uid || '');
+    }, 60_000);
+    return () => window.clearInterval(heartbeat);
+  }, [activeTab, currentUser?.uid]);
+
   const [onlineCount, setOnlineCount] = useState<number>(0);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const isAdmin = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'admin');
