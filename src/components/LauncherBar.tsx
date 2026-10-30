@@ -238,11 +238,11 @@ export const LauncherBar: React.FC<LauncherBarProps> = ({
                 ? 'bg-[#12161e] hover:bg-[#171d27] border-neutral-300 text-neutral-700'
                 : 'bg-[#121622] hover:bg-[#181e2e] border-[#222a3d] text-neutral-300 hover:text-white'
             }`}
-            title={lang === 'ru' ? 'Открыть настройки лаунчера и игры' : 'Open launcher & client settings'}
+            title={lang === 'ru' ? 'Настройки Rust и HUD' : 'Rust & HUD settings'}
           >
             <Settings size={14} className="text-amber-400 shrink-0" />
             <span className="hidden sm:inline text-[11px] font-sans">
-              {lang === 'ru' ? 'Настройки' : 'Settings'}
+              {lang === 'ru' ? 'Rust / HUD' : 'Rust / HUD'}
             </span>
           </button>
 
