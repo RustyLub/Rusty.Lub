@@ -68,6 +68,7 @@ export default function RustyLubEmailAuthModal({ isOpen, onClose, lang, onUserLo
         const profile = result.profile;
         onUserLogin({
           uid: profile.uid,
+          authProvider: 'firebase-email',
           displayName: profile.displayName,
           email: profile.email,
           photoURL: '',
@@ -82,6 +83,7 @@ export default function RustyLubEmailAuthModal({ isOpen, onClose, lang, onUserLo
       const profile = result.profile;
       onUserLogin({
         uid: profile.uid,
+        authProvider: 'firebase-email',
         displayName: profile.displayName,
         email: profile.email,
         photoURL: profile.photoURL || '',

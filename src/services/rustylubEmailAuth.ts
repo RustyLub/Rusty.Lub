@@ -97,6 +97,19 @@ export async function completeVerifiedRegistration(user: User, username: string,
   return { profile: saved.data() as RustyLubEmailProfile };
 }
 
+export async function getEmailAuthProfile(user: User) {
+  await requireVerifiedUser(user);
+  const snapshot = await getDoc(profileRef(user.uid));
+  if (!snapshot.exists()) return null;
+
+  const profile = snapshot.data() as RustyLubEmailProfile;
+  if (profile.isBlocked === true) {
+    await signOut(rustylubAuth);
+    return null;
+  }
+  return profile;
+}
+
 export async function loginWithEmail(email: string, password: string) {
   const credential = await signInWithEmailAndPassword(rustylubAuth, email.trim().toLowerCase(), password);
   await requireVerifiedUser(credential.user);
