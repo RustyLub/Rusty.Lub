@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ошибки Rust и EAC — база решений вылетов и проблем подключения | Rusty.Lub</title>
+<meta name="description" content="Найдите решение ошибок Rust: вылеты Unity, зависания загрузки, ошибки EAC, проблемы сети и графики. Ищите по коду, изучайте шаги и используйте ИИ-диагностику Rusty.Lub.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://rusty-lub.ru/rust-errors/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Rusty.Lub">
+<meta property="og:title" content="Ошибки Rust и EAC — база решений вылетов и проблем подключения | Rusty.Lub">
+<meta property="og:description" content="Найдите решение ошибок Rust: вылеты Unity, зависания загрузки, ошибки EAC, проблемы сети и графики. Ищите по коду, изучайте шаги и используйте ИИ-диагностику Rusty.Lub.">
+<meta property="og:url" content="https://rusty-lub.ru/rust-errors/">
+<meta property="og:image" content="https://rusty-lub.ru/logo-full.png">
+<meta name="theme-color" content="#0b0d10">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Ошибки Rust и EAC — база решений вылетов и проблем подключения | Rusty.Lub","description":"Найдите решение ошибок Rust: вылеты Unity, зависания загрузки, ошибки EAC, проблемы сети и графики. Ищите по коду, изучайте шаги и используйте ИИ-диагностику Rusty.Lub.","url":"https://rusty-lub.ru/rust-errors/","inLanguage":"ru-RU","isPartOf":{"@type":"WebSite","name":"Rusty.Lub","url":"https://rusty-lub.ru/"},"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Главная","item":"https://rusty-lub.ru/"},{"@type":"ListItem","position":2,"name":"Ошибки Rust и решения проблем","item":"https://rusty-lub.ru/rust-errors/"}]}}</script>
+<style>
+:root{color-scheme:dark;--bg:#0b0d10;--panel:#141820;--line:#303744;--orange:#f97316;--muted:#a5adba;--text:#eef2f7}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#2a1a12 0,transparent 42%),var(--bg);color:var(--text);font:16px/1.7 system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:#ff9a4b}a:hover{color:#ffc08b}.wrap{width:min(920px,calc(100% - 32px));margin:auto}
+header{border-bottom:1px solid var(--line);background:#0b0d10eF}.top{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font-weight:950;letter-spacing:.07em;color:#fff;text-decoration:none;font-size:20px}.brand b{color:var(--orange)}nav{display:flex;gap:16px;flex-wrap:wrap;font-size:13px}nav a{color:#c6ccd5;text-decoration:none}
+main{padding:36px 0 56px}.crumb{font-size:12px;color:var(--muted);margin-bottom:20px}.crumb a{color:#c6ccd5;text-decoration:none}
+.hero{border:1px solid #75401f;background:linear-gradient(120deg,#1b2029,#11151b 70%);padding:clamp(22px,5vw,42px);position:relative;overflow:hidden;box-shadow:0 18px 50px #0008}.hero:after{content:"";position:absolute;right:-70px;top:-90px;width:250px;height:250px;border:28px solid #f9731610;transform:rotate(30deg);pointer-events:none}
+.eyebrow{font:700 11px/1.4 ui-monospace,monospace;color:var(--orange);letter-spacing:.18em;text-transform:uppercase}h1{font-size:clamp(30px,5vw,48px);line-height:1.1;margin:12px 0 16px;text-transform:uppercase;letter-spacing:-.025em}.lead{max-width:720px;font-size:18px;color:#d1d7e0;margin:0 0 24px}
+.cta{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;background:var(--orange);color:#15100c;font-weight:900;text-decoration:none;text-transform:uppercase;letter-spacing:.04em;border:1px solid #ffb16e}.cta:hover{background:#ff9a4b;color:#15100c}.note{font-size:12px;color:#aab2bf;margin-top:14px}
+.content-section{padding:26px 0;border-bottom:1px solid var(--line)}h2{font-size:23px;line-height:1.25;margin:0 0 13px;color:#fff}p{margin:0 0 12px;color:#c5ccd6}p:last-child{margin-bottom:0}ol,ul{padding-left:22px;color:#c5ccd6;margin:10px 0}li{margin:7px 0}
+.faq{padding:28px 0}.faq h2{margin-bottom:16px}details{border:1px solid var(--line);background:#11151b;margin:9px 0;padding:13px 16px}summary{font-weight:750;cursor:pointer;color:#f4f6fa}details p{padding-top:10px}
+.related{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px}.related-card{border:1px solid var(--line);background:var(--panel);padding:15px;color:#fff;text-decoration:none;font-weight:750}.related-card small{display:block;color:var(--orange);font-size:11px;margin-top:7px}
+footer{border-top:1px solid var(--line);padding:24px 0;color:#8993a2;font-size:12px}footer a{color:#c5ccd6}
+@media(max-width:620px){.top{align-items:flex-start;flex-direction:column;padding:14px 0}nav{gap:10px}.lead{font-size:16px}}
+</style>
+</head>
+<body>
+<header><div class="wrap top"><a class="brand" href="/">RUSTY.<b>LUB</b></a><nav aria-label="Основная навигация"><a href="/">Главная</a><a href="/raid-calculator/">Рейд</a><a href="/mixing-table/">Чаи</a><a href="/recycler-calculator/">Переработчик</a><a href="/rust-errors/">Ошибки Rust</a></nav></div></header>
+<main class="wrap">
+<div class="crumb"><a href="/">Главная</a> / Ошибки Rust и решения проблем</div>
+<article>
+<div class="hero"><div class="eyebrow">Rusty.Lub · Справочник Rust</div><h1>Ошибки Rust и решения проблем</h1><p class="lead">Разбирайтесь с вылетами, ошибками античита и проблемами подключения по коду или описанию. База Rusty.Lub объединяет поиск, категории, пошаговые решения и поле ИИ-диагностики.</p><a class="cta" href="/#errors">Открыть базу ошибок Rust <span aria-hidden="true">↗</span></a><div class="note">Инструмент откроется на основном сайте Rusty.Lub.</div></div>
+<section class="content-section"><h2>Поиск по коду и тексту ошибки</h2><p>Если Rust закрылся с ошибкой, завис на загрузке или отключил от сервера, начните с поиска по сообщению. Вставьте код ошибки, название окна, часть строки из лога или ключевые слова. Раздел позволяет фильтровать результаты по категориям.</p></section>
+<section class="content-section"><h2>Основные категории</h2><p>База разделяет проблемы на критические ошибки, EAC и античит, сетевые и авторизационные сбои, а также графические проблемы. Это помогает быстрее сузить круг причин: от повреждённых файлов и нестабильных драйверов до сетевых тайм-аутов и конфликтов программ.</p></section>
+<section class="content-section"><h2>Пошаговые решения и команды</h2><p>Карточки ошибок содержат описание и последовательность возможных действий. Если в решении есть команда или фрагмент конфигурации, его можно скопировать из интерфейса. Перед системными изменениями создайте точку восстановления или резервную копию конфигов.</p><p>Не выполняйте все рекомендации подряд. Меняйте по одному параметру, проверяйте результат и возвращайте исходное значение, если проблема усилилась.</p></section>
+<section class="content-section"><h2>ИИ-диагностика</h2><p>В разделе также есть поле для вставки кода ошибки, строки лога или текста диалогового окна. Сервис отправляет запрос на серверную диагностику и показывает предложенное объяснение. Результат ИИ стоит воспринимать как подсказку, а не как гарантированный диагноз: проверяйте команды и системные советы перед применением.</p></section>
+<section class="faq"><h2>Частые вопросы</h2><details><summary>Можно ли вставить полный текст ошибки?</summary><p>Да. Поле диагностики принимает код, фрагмент лога или текст сообщения.</p></details>
+<details><summary>Есть ли решения ошибок EAC?</summary><p>Да. Для EAC и античита предусмотрена отдельная категория.</p></details>
+<details><summary>Стоит ли выполнять все рекомендации сразу?</summary><p>Нет. Выполняйте действия по одному и проверяйте результат после каждого шага.</p></details></section>
+<section class="content-section"><h2>Другие инструменты Rusty.Lub</h2><p>Продолжайте работу со справочником: откройте связанные инструменты и материалы.</p><div class="related"><a class="related-card" href="/fps-optimization/"><span>Оптимизация FPS в Rust</span><small>Открыть справочную страницу →</small></a>
+<a class="related-card" href="/rust-binds/"><span>Бинды Rust и команды для игрока</span><small>Открыть справочную страницу →</small></a>
+<a class="related-card" href="/raid-calculator/"><span>Калькулятор рейда Rust</span><small>Открыть справочную страницу →</small></a></div></section>
+</article>
+</main>
+<footer><div class="wrap">© 2026 Rusty.Lub · Независимый справочный проект для игроков Rust. <a href="/">На главную</a>. Rust является товарным знаком Facepunch Studios.</div></footer>
+</body>
+</html>
