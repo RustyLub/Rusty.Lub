@@ -1,20 +1,66 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // These collections are written only by the trusted server. Keeping them
-    // outside the public catch-all prevents clients from forging verified emails.
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function verifiedEmail() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email is string;
+    }
+
+    // Email-auth profiles are private to their owner. Privileged fields are
+    // immutable from the client; admin roles must be assigned out-of-band.
+    match /auth_users/{uid} {
+      allow get: if verifiedEmail() && request.auth.uid == uid;
+      allow list: if false;
+      allow create: if verifiedEmail()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly([
+          'uid', 'username', 'displayName', 'email', 'role', 'isBlocked',
+          'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.uid == uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.role == 'user'
+        && request.resource.data.isBlocked == false
+        && request.resource.data.username is string
+        && request.resource.data.username.matches('^[a-z0-9_-]{3,20}$')
+        && request.resource.data.username != 'serustqs'
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() >= 2
+        && request.resource.data.displayName.size() <= 40;
+      allow update, delete: if false;
+    }
+
+    // Username documents are only readable one-at-a-time by verified users
+    // for availability checks; public enumeration is disabled.
+    match /auth_usernames/{username} {
+      allow get: if verifiedEmail();
+      allow list: if false;
+      allow create: if verifiedEmail()
+        && request.resource.data.keys().hasOnly(['uid', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && username.matches('^[a-z0-9_-]{3,20}$')
+        && username != 'serustqs';
+      allow update, delete: if false;
+    }
+
+    // Legacy collections are deliberately left unchanged in this migration.
+    // Their existing rules should be reviewed in a separate compatibility pass.
     match /email_verification/{document} {
       allow read, write: if false;
     }
     match /chat_user_emails/{document} {
       allow read, write: if false;
     }
-
-    // Existing application collections retain their current access behavior.
-    // Tighten individual public collections separately to avoid breaking the app.
     match /{document=**} {
       allow read, write: if !document.matches('email_verification/.*')
-                         && !document.matches('chat_user_emails/.*');
+        && !document.matches('chat_user_emails/.*')
+        && !document.matches('auth_users/.*')
+        && !document.matches('auth_usernames/.*');
     }
   }
 }
