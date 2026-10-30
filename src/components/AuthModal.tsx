@@ -88,7 +88,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
           avatarClass: selectedAvatar, photoURL: matchedAvatar.url, gender,
           role: 'user', isBlocked: false, createdAt: new Date().toISOString()
         });
-        onUserLogin({ uid: cleanUsername, displayName: cleanDisplayName, photoURL: matchedAvatar.url, avatarClass: selectedAvatar, gender, role: 'user' } as CustomUser);
+        onUserLogin({ uid: cleanUsername, displayName: cleanDisplayName, photoURL: matchedAvatar.url, avatarClass: selectedAvatar, gender, role: 'user', createdAt: new Date().toISOString() } as CustomUser);
         onToast(lang === 'ru' ? 'Аккаунт создан!' : 'Account created!', 'success');
       } else {
         if (!userSnap.exists()) {
@@ -124,6 +124,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
         }
         onUserLogin({
           uid: cleanUsername, displayName: data.displayName || cleanUsername,
+          createdAt: data.createdAt || undefined,
           email: data.email || undefined, photoURL: data.photoURL || '',
           avatarClass: data.avatarClass || 'whiteout', gender: data.gender || 'male',
           role: data.role || 'user', isVip: Boolean(data.isVip), vipUntil: data.vipUntil
