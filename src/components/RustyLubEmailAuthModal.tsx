@@ -137,9 +137,31 @@ export default function RustyLubEmailAuthModal({ isOpen, onClose, lang, onUserLo
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.message || 'Profile migration failed.');
+      const migrated = payload.profile || {};
+      onUserLogin({
+        uid: user.uid,
+        authProvider: 'firebase-email',
+        displayName: 'SEO-RustyLub',
+        email: user.email || '',
+        photoURL: migrated.photoURL || '',
+        avatarClass: migrated.avatarClass || 'whiteout',
+        gender: migrated.gender === 'female' ? 'female' : 'male',
+        bio: migrated.bio || '',
+        clanTag: migrated.clanTag || '',
+        hoursPlayed: Number(migrated.hoursPlayed || 0),
+        playstyle: migrated.playstyle || '',
+        favoriteWeapon: migrated.favoriteWeapon || '',
+        steamId: migrated.steamId || '',
+        steamName: migrated.steamName || '',
+        steamAvatar: migrated.steamAvatar || '',
+        customTheme: migrated.customTheme || 'default',
+        role: 'user'
+      } as CustomUser);
       setMigrationComplete(true);
       setLegacyPassword('');
-      onToast(ru ? 'Старый профиль перенесён. Привилегии будут проверены отдельно.' : 'Legacy profile migrated. Privileges will be reviewed separately.', 'success');
+      onToast(ru
+        ? (payload.alreadyMigrated ? 'Профиль уже был перенесён. Данные загружены.' : 'Старый профиль перенесён и загружен.')
+        : (payload.alreadyMigrated ? 'Profile was already migrated. Data loaded.' : 'Legacy profile migrated and loaded.'), 'success');
     } catch (error: any) {
       onToast(error?.message || (ru ? 'Не удалось перенести профиль.' : 'Profile migration failed.'), 'error');
     } finally {
