@@ -116,6 +116,7 @@ const QuickOverlayModal = lazy(() => import('./components/QuickOverlayModal'));
 const WindowsTitlebar = lazy(() => import('./components/WindowsTitlebar'));
 const LauncherBar = lazy(() => import('./components/LauncherBar'));
 const LauncherSettingsModal = lazy(() => import('./components/LauncherSettingsModal'));
+const AppSettingsModal = lazy(() => import('./components/AppSettingsModal'));
 const CommandPaletteModal = lazy(() => import('./components/CommandPaletteModal').then(m => ({ default: m.CommandPaletteModal })));
 const SectionsDrawer = lazy(() => import('./components/SectionsDrawer'));
 const SpecialAccessGated = lazy(() => import('./components/SpecialAccessGated'));
@@ -355,7 +356,22 @@ export default function App() {
   }, [activeTab]);
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [lang, setLang] = useState<'ru' | 'en'>('en');
+  const [lang, setLang] = useState<'ru' | 'en'>(() => {
+    try {
+      return localStorage.getItem('rustylub_lang') === 'ru' ? 'ru' : 'en';
+    } catch {
+      return 'en';
+    }
+  });
+  useEffect(() => {
+    try { localStorage.setItem('rustylub_lang', lang); } catch (e) { console.warn(e); }
+  }, [lang]);
+  const [compactUi, setCompactUi] = useState<boolean>(() => {
+    try { return localStorage.getItem('rustylub_desktop_compact_ui') === 'true'; } catch { return false; }
+  });
+  const [reducedMotion, setReducedMotion] = useState<boolean>(() => {
+    try { return localStorage.getItem('rustylub_desktop_reduced_motion') === 'true'; } catch { return false; }
+  });
   const [appTheme, setAppTheme] = useState<'dark' | 'light'>(() => {
     try {
       return (localStorage.getItem('rust_app_theme') as 'dark' | 'light') || 'dark';
@@ -430,6 +446,7 @@ export default function App() {
   const [quickOverlayOpen, setQuickOverlayOpen] = useState(false);
   const [launcherSettings, setLauncherSettings] = useState<LauncherSettings>(getLauncherSettings);
   const [launcherSettingsOpen, setLauncherSettingsOpen] = useState(false);
+  const [appSettingsOpen, setAppSettingsOpen] = useState(false);
   const isTauri = typeof window !== 'undefined' && Boolean((window as any).__TAURI__ || (window as any).__TAURI_INTERNALS__);
   const [isLauncherPreview, setIsLauncherPreview] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -437,6 +454,19 @@ export default function App() {
   });
 
   const isWindowsApp = isTauri || isLauncherPreview;
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle('tauri-desktop', isWindowsApp);
+    root.classList.toggle('compact-ui', compactUi);
+    root.classList.toggle('reduce-motion', reducedMotion);
+    try {
+      localStorage.setItem('rustylub_desktop_compact_ui', String(compactUi));
+      localStorage.setItem('rustylub_desktop_reduced_motion', String(reducedMotion));
+    } catch (e) {
+      console.warn('Unable to persist desktop display preferences:', e);
+    }
+  }, [isWindowsApp, compactUi, reducedMotion]);
 
   const handleToggleLauncherPreview = useCallback(() => {
     setIsLauncherPreview(prev => {
@@ -1237,7 +1267,7 @@ export default function App() {
 
   return (
     <div 
-      className={`min-h-screen font-sans relative selection:bg-[#ff2a4d]/30 selection:text-white pb-20 transition-colors duration-200 ${
+      className={`min-h-screen font-sans relative selection:bg-[#ff2a4d]/30 selection:text-white pb-20 transition-colors duration-200 ${isWindowsApp ? 'tauri-desktop-shell' : ''} ${
         appTheme === 'light' 
           ? 'bg-[#f4f3f0] text-neutral-900' 
           : 'bg-transparent text-[#c8d0d8] scanlines'
@@ -1283,8 +1313,8 @@ export default function App() {
       {isWindowsApp && (
         <Suspense fallback={null}>
           <WindowsTitlebar
-            appName="RUSTY.LUB LAUNCHER"
-            appVersion={launcherSettings.appVersion || '2.6.4'}
+            appName="RUSTY.LUB DESKTOP"
+            appVersion={APP_VERSION.replace(/^v/, '')}
             activeTabLabel={activeTab.toUpperCase()}
             onlineCount={onlineCount}
             appTheme={appTheme}
@@ -1294,7 +1324,7 @@ export default function App() {
               setToasts(prev => [...prev, { id, message: msg, type }]);
               setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
             }}
-            onOpenSettings={() => setLauncherSettingsOpen(true)}
+            onOpenSettings={() => setAppSettingsOpen(true)}
           />
 
           <LauncherBar
@@ -2917,6 +2947,40 @@ export default function App() {
             onCopyBind={(code) => handleCopy(code)}
             onOpenFullRaid={() => handleTabChange('raid')}
             onOpenSettings={() => setLauncherSettingsOpen(true)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Application-wide Windows Desktop preferences */}
+      <AnimatePresence>
+        {appSettingsOpen && (
+          <AppSettingsModal
+            isOpen={appSettingsOpen}
+            onClose={() => setAppSettingsOpen(false)}
+            lang={lang}
+            appTheme={appTheme}
+            version={APP_VERSION}
+            isTauri={isTauri}
+            compactUi={compactUi}
+            reducedMotion={reducedMotion}
+            hudHotkey={launcherSettings.hudHotkey}
+            onLanguageChange={setLang}
+            onThemeChange={setAppTheme}
+            onCompactUiChange={setCompactUi}
+            onReducedMotionChange={setReducedMotion}
+            onOpenNotifications={() => {
+              setAppSettingsOpen(false);
+              setNotificationModalOpen(true);
+            }}
+            onOpenGameSettings={() => {
+              setAppSettingsOpen(false);
+              setLauncherSettingsOpen(true);
+            }}
+            onToast={(msg, type) => {
+              const id = Math.random().toString(36).substring(2, 9);
+              setToasts(prev => [...prev, { id, message: msg, type }]);
+              setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500);
+            }}
           />
         )}
       </AnimatePresence>
