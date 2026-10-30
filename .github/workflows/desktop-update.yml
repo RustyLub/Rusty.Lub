@@ -11,6 +11,11 @@ on:
 permissions:
   contents: write
 
+# Keep only the newest build for this release branch; each commit otherwise queues another installer build.
+concurrency:
+  group: rusty-lub-windows-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   release:
     name: Build and Publish Tauri 2 Windows Release
