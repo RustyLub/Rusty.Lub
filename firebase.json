@@ -27,6 +27,9 @@
   },
   "functions": {
     "source": ".",
-    "codebase": "default"
+    "codebase": "default",
+    "predeploy": [
+      "npm run build:server"
+    ]
   }
 }
