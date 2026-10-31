@@ -5,18 +5,17 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function verifiedEmail() {
+    function authenticatedEmail() {
       return signedIn()
-        && request.auth.token.email_verified == true
         && request.auth.token.email is string;
     }
 
     // Email-auth profiles are private to their owner. Privileged fields are
     // immutable from the client; admin roles must be assigned out-of-band.
     match /auth_users/{uid} {
-      allow get: if verifiedEmail() && request.auth.uid == uid;
+      allow get: if authenticatedEmail() && request.auth.uid == uid;
       allow list: if false;
-      allow create: if verifiedEmail()
+      allow create: if authenticatedEmail()
         && request.auth.uid == uid
         && request.resource.data.keys().hasOnly([
           'uid', 'username', 'displayName', 'email', 'role', 'isBlocked',
@@ -38,9 +37,9 @@ service cloud.firestore {
     // Username documents are only readable one-at-a-time by verified users
     // for availability checks; public enumeration is disabled.
     match /auth_usernames/{username} {
-      allow get: if verifiedEmail();
+      allow get: if authenticatedEmail();
       allow list: if false;
-      allow create: if verifiedEmail()
+      allow create: if authenticatedEmail()
         && request.resource.data.keys().hasOnly(['uid', 'createdAt'])
         && request.resource.data.uid == request.auth.uid
         && username.matches('^[a-z0-9_-]{3,20}$')
