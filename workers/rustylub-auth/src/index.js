@@ -148,18 +148,26 @@ export default {
 
       const signingKey = await importSigningKey(account.private_key);
       const accessToken = await googleAccessToken(account, signingKey);
-      const usernameDoc = await firestoreDocument(accessToken, 'usernames', login);
+      // Support both the original owner records (Users/usernames) and the
+      // current registration collections (auth_users/auth_usernames).
+      const usernameDoc = (await firestoreDocument(accessToken, 'usernames', login))
+        || await firestoreDocument(accessToken, 'auth_usernames', login);
       if (!usernameDoc?.uid) return json({ message: 'Неверный логин или пароль.' }, 401, origin);
 
       const uid = String(usernameDoc.uid);
-      const profile = await firestoreDocument(accessToken, 'Users', uid);
-      if (!profile || profile.uid !== uid ||
-          String(profile.normalizedLogin || '').toLowerCase() !== login ||
-          profile.status !== 'active') {
+      const profile = (await firestoreDocument(accessToken, 'Users', uid))
+        || await firestoreDocument(accessToken, 'auth_users', uid);
+      const profileLogin = String(profile?.normalizedLogin || profile?.login || profile?.username || '').toLowerCase();
+      const blocked = profile?.status && profile.status !== 'active' || profile?.isBlocked === true;
+      if (!profile || profile.uid !== uid || profileLogin !== login || blocked) {
         return json({ message: 'Неверный логин или пароль.' }, 401, origin);
       }
 
-      const email = await lookupAuthEmail(accessToken, uid);\n      if (!email) return json({ message: 'Неверный логин или пароль.' }, 401, origin);\n\n      const verify = await fetch(
+      const email = await lookupAuthEmail(accessToken, uid)
+        || (typeof profile.email === 'string' ? profile.email : `${login}@accounts.rusty-lub.invalid`);
+      if (!email) return json({ message: 'Неверный логин или пароль.' }, 401, origin);
+
+      const verify = await fetch(
         `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${encodeURIComponent(WEB_API_KEY)}`,
         {
           method: 'POST',
