@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft, Mail, Lock, User, Crosshair, ShieldCheck, KeyRound } from 'lucide-react';
 import type { CustomUser } from '../types';
 import {
-  completeVerifiedRegistration,
+  completeRegistration,
   loginWithEmail,
   registerWithEmail,
   requestPasswordReset,
@@ -29,7 +29,6 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [verificationPending, setVerificationPending] = useState(false);
   const [busy, setBusy] = useState(false);
   const [migrationBusy, setMigrationBusy] = useState(false);
   const [legacyPassword, setLegacyPassword] = useState('');
@@ -61,14 +60,8 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
           throw new Error(ru ? 'Проверьте пароль: минимум 8 символов, оба поля должны совпадать.' : 'Check your password: at least 8 characters and both fields must match.');
         }
         if (!verificationPending) {
-          await registerWithEmail(email, password, username, displayName);
-          setVerificationPending(true);
-          onToast(ru ? 'Письмо подтверждения отправлено. Откройте его, затем вернитесь сюда.' : 'Verification email sent. Open it, then return here.', 'success');
-          return;
-        }
-        const user = rustylubAuth.currentUser;
-        if (!user) throw new Error(ru ? 'Сессия регистрации не найдена. Начните регистрацию заново.' : 'Registration session not found. Please register again.');
-        const result = await completeVerifiedRegistration(user, username, displayName);
+          const user = await registerWithEmail(email, password, username, displayName);
+          const result = await completeRegistration(user, username, displayName);
         const profile = result.profile;
         onUserLogin({
           uid: profile.uid,
@@ -78,7 +71,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
           photoURL: '',
           role: 'user'
         } as CustomUser);
-        onToast(ru ? 'Email подтверждён, профиль создан.' : 'Email verified and profile created.', 'success');
+        onToast(ru ? 'Аккаунт создан. Добро пожаловать в Rusty.Lub!' : 'Account created. Welcome to Rusty.Lub!', 'success');
         onClose();
         return;
       }
@@ -134,8 +127,8 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
 
   const migrateLegacyProfile = async () => {
     const user = rustylubAuth.currentUser;
-    if (!user || !user.emailVerified) {
-      onToast(ru ? 'Сначала войдите в новый аккаунт и подтвердите email.' : 'Sign in to the new account and verify your email first.', 'warning');
+    if (!user) {
+      onToast(ru ? 'Сначала войдите в новый аккаунт.' : 'Sign in to the new account first.', 'warning');
       return;
     }
     if (user.email?.trim().toLowerCase() !== 'cheater.cooperation@inbox.ru') {
@@ -199,10 +192,10 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
           <div><div className="font-mono text-xs tracking-[.25em] text-orange-400">RUSTY.LUB</div><div className="text-[10px] tracking-widest text-zinc-500">FIREBASE EMAIL AUTH</div></div>
         </div>
         <h2 className="mb-2 text-3xl font-bold">{mode === 'login' ? (ru ? 'Вход по почте' : 'Email sign in') : mode === 'register' ? (ru ? 'Регистрация' : 'Create account') : (ru ? 'Восстановление пароля' : 'Reset password')}</h2>
-        <p className="mb-7 text-sm leading-6 text-zinc-400">{ru ? 'Новая авторизация Firebase. Email необходимо подтвердить перед использованием аккаунта.' : 'New Firebase authentication. Verify your email before using your account.'}</p>
+        <p className="mb-7 text-sm leading-6 text-zinc-400">{ru ? 'Новая авторизация Firebase. Подтверждение email не требуется — заполните данные и начинайте пользоваться сайтом.' : 'Create your account and start using Rusty.Lub immediately. Email verification is not required.'}</p>
         <div className="mb-6 flex border-b border-white/10">
-          <button type="button" onClick={() => { setMode('login'); setVerificationPending(false); }} className={`flex-1 border-b-2 py-3 text-sm ${mode === 'login' ? 'border-orange-400 text-orange-300' : 'border-transparent text-zinc-500'}`}>{ru ? 'Вход' : 'Sign in'}</button>
-          <button type="button" onClick={() => { setMode('register'); setVerificationPending(false); }} className={`flex-1 border-b-2 py-3 text-sm ${mode === 'register' ? 'border-orange-400 text-orange-300' : 'border-transparent text-zinc-500'}`}>{ru ? 'Регистрация' : 'Register'}</button>
+          <button type="button" onClick={() => { setMode('login'); }} className={`flex-1 border-b-2 py-3 text-sm ${mode === 'login' ? 'border-orange-400 text-orange-300' : 'border-transparent text-zinc-500'}`}>{ru ? 'Вход' : 'Sign in'}</button>
+          <button type="button" onClick={() => { setMode('register'); }} className={`flex-1 border-b-2 py-3 text-sm ${mode === 'register' ? 'border-orange-400 text-orange-300' : 'border-transparent text-zinc-500'}`}>{ru ? 'Регистрация' : 'Register'}</button>
         </div>
         <form onSubmit={submit} className="space-y-4">
           <label className="block text-xs text-zinc-300">{ru ? 'Электронная почта' : 'Email'}
@@ -226,7 +219,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
           <button disabled={busy} className="flex w-full items-center justify-center gap-2 bg-orange-500 px-5 py-4 text-sm font-bold text-black hover:bg-orange-400 disabled:opacity-50">{busy ? (ru ? 'Подождите...' : 'Please wait...') : mode === 'reset' ? (ru ? 'Отправить письмо' : 'Send email') : mode === 'register' ? (verificationPending ? (ru ? 'Я подтвердил email' : 'I verified my email') : (ru ? 'Зарегистрироваться и отправить письмо' : 'Register and send verification')) : (ru ? 'Войти' : 'Sign in')}</button>
         </form>
 
-        {mode === 'login' && rustylubAuth.currentUser?.emailVerified && rustylubAuth.currentUser.email?.toLowerCase() === 'cheater.cooperation@inbox.ru' && (
+        {mode === 'login' && rustylubAuth.currentUser?.email?.toLowerCase() === 'cheater.cooperation@inbox.ru' && (
           <section className="mt-6 border border-orange-500/20 bg-orange-500/5 p-4">
             <div className="mb-2 text-sm font-semibold text-orange-300">{ru ? 'Перенос старого профиля' : 'Legacy profile migration'}</div>
             <p className="mb-3 text-xs leading-5 text-zinc-400">{ru ? 'Подтвердите владение старым аккаунтом serustqs. Пароль проверяется сервером и не сохраняется в новом аккаунте.' : 'Prove ownership of the old serustqs account. The password is verified server-side and is not copied.'}</p>
