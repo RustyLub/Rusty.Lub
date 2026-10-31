@@ -59,8 +59,6 @@ import {
   LayoutGrid
 } from 'lucide-react';
 import { ToastType, CustomUser, APP_VERSION } from './types';
-import { onAuthStateChanged as onEmailAuthStateChanged } from 'firebase/auth';
-import { getEmailAuthProfile, logoutFromRustyLub, rustylubAuth } from './services/rustylubEmailAuth';
 
 // Firebase & Auth Presence dependencies
 import { 
@@ -421,7 +419,7 @@ export default function App() {
   });
   const [onlineCount, setOnlineCount] = useState<number>(0);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [emailAuthReady, setEmailAuthReady] = useState(false);
+  const [emailAuthReady] = useState(true);
   const isAdmin = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'admin');
   const isOwner = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'owner');
   const isVip = useMemo(() => {
@@ -576,54 +574,13 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  // Restore sessions created by the isolated Firebase Email Auth project.
-  useEffect(() => {
-    const unsubscribe = onEmailAuthStateChanged(rustylubAuth, async (firebaseUser) => {
-      setEmailAuthReady(true);
-      if (!firebaseUser) {
-        setCurrentUser(previous => previous?.authProvider === 'firebase-email' ? null : previous);
-        setIsAuthLoading(false);
-        return;
-      }
-      try {
-        const profile = await getEmailAuthProfile(firebaseUser);
-        if (!profile) {
-          setCurrentUser(null);
-          localStorage.removeItem('rust_survivor_user');
-          return;
-        }
-        const emailUser: CustomUser = {
-          uid: firebaseUser.uid,
-          authProvider: 'firebase-email',
-          displayName: profile.displayName || profile.username || 'Survivor',
-          email: profile.email || firebaseUser.email || '',
-          photoURL: profile.photoURL || '',
-          avatarClass: profile.avatarClass || 'whiteout',
-          role: profile.role === 'admin' ? 'admin' : 'user',
-          isVip: Boolean(profile.isVip),
-          isChatVip: Boolean(profile.isChatVip),
-          vipUntil: profile.vipUntil || ''
-        };
-        setCurrentUser(emailUser);
-        localStorage.setItem('rust_survivor_user', JSON.stringify(emailUser));
-      } catch (error) {
-        console.error('Firebase Email Auth session restore failed:', error);
-        setCurrentUser(null);
-        localStorage.removeItem('rust_survivor_user');
-      } finally {
-        setIsAuthLoading(false);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
   // Real-time Auth state sync for custom credentials
   useEffect(() => {
     let unsubUserDoc: (() => void) | null = null;
     
     if (!emailAuthReady) return () => {};
     const uid = currentUser?.uid;
-    if (currentUser?.authProvider === 'firebase-email' || (uid && rustylubAuth.currentUser?.uid === uid)) {
+    if (currentUser?.authProvider === 'firebase-email') {
       setIsAuthLoading(false);
       return () => {};
     }
@@ -2013,7 +1970,7 @@ export default function App() {
                   user={currentUser}
                   onOpenTab={(tab) => handleTabChange(tab as any)}
                   onUserLogout={() => {
-                    if (currentUser?.authProvider === 'firebase-email') void logoutFromRustyLub();
+                    
                     setCurrentUser(null);
                     localStorage.removeItem('rust_survivor_user');
                     handleTabChange('home');
