@@ -59,8 +59,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
         if (password.length < 8 || password.length > 128 || password !== confirmPassword) {
           throw new Error(ru ? 'Проверьте пароль: минимум 8 символов, оба поля должны совпадать.' : 'Check your password: at least 8 characters and both fields must match.');
         }
-        if (!verificationPending) {
-          const user = await registerWithEmail(email, password, username, displayName);
+        const user = await registerWithEmail(email, password, username, displayName);
           const result = await completeRegistration(user, username, displayName);
         const profile = result.profile;
         onUserLogin({
