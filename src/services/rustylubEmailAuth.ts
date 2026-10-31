@@ -45,10 +45,6 @@ export async function registerWithEmail(email: string, password: string, _userna
   return credential.user;
 }
 
-export async function resendVerification(user: User) {
-  await sendEmailVerification(user);
-}
-
 export async function completeRegistration(user: User, username: string, displayName: string) {
   await requireSignedInUser(user);
   const cleanUsername = username.trim().toLowerCase();
