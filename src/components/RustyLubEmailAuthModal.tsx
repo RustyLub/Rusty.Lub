@@ -12,6 +12,7 @@ import {
 
 interface Props {
   isOpen: boolean;
+  initialMode?: 'login' | 'register';
   onClose: () => void;
   lang: 'ru' | 'en';
   onUserLogin: (user: CustomUser) => void;
@@ -19,9 +20,9 @@ interface Props {
   onBackToLegacy: () => void;
 }
 
-export default function RustyLubEmailAuthModal({ isOpen, onClose, lang, onUserLogin, onToast, onBackToLegacy }: Props) {
+export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', onClose, lang, onUserLogin, onToast, onBackToLegacy }: Props) {
   const ru = lang === 'ru';
-  const [mode, setMode] = useState<'login' | 'register' | 'reset'>('login');
+  const [mode, setMode] = useState<'login' | 'register' | 'reset'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
