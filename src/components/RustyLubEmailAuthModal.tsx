@@ -30,6 +30,7 @@ export default function RustyLubEmailAuthModal({ isOpen, onClose, lang, onUserLo
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [verificationPending, setVerificationPending] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [migrationBusy, setMigrationBusy] = useState(false);
   const [legacyPassword, setLegacyPassword] = useState('');
   const [migrationComplete, setMigrationComplete] = useState(false);
 
@@ -127,7 +128,7 @@ export default function RustyLubEmailAuthModal({ isOpen, onClose, lang, onUserLo
       onToast(ru ? 'Введите пароль старого аккаунта serustqs.' : 'Enter the old serustqs account password.', 'warning');
       return;
     }
-    setBusy(true);
+    setMigrationBusy(true);
     try {
       const token = await user.getIdToken(true);
       const response = await fetch('/api/rustylub-auth/migrate-legacy-profile', {
@@ -165,7 +166,7 @@ export default function RustyLubEmailAuthModal({ isOpen, onClose, lang, onUserLo
     } catch (error: any) {
       onToast(error?.message || (ru ? 'Не удалось перенести профиль.' : 'Profile migration failed.'), 'error');
     } finally {
-      setBusy(false);
+      setMigrationBusy(false);
     }
   };
 
@@ -212,7 +213,7 @@ export default function RustyLubEmailAuthModal({ isOpen, onClose, lang, onUserLo
             <p className="mb-3 text-xs leading-5 text-zinc-400">{ru ? 'Подтвердите владение старым аккаунтом serustqs. Пароль проверяется сервером и не сохраняется в новом аккаунте.' : 'Prove ownership of the old serustqs account. The password is verified server-side and is not copied.'}</p>
             {migrationComplete ? <p className="text-xs text-emerald-300">{ru ? 'Профиль перенесён.' : 'Profile migrated.'}</p> : <>
               <input type="password" autoComplete="current-password" value={legacyPassword} onChange={e => setLegacyPassword(e.target.value)} placeholder={ru ? 'Пароль старого аккаунта' : 'Old account password'} className="mb-3 w-full border border-[#2a2f3b] bg-[#090b0f] px-3 py-3 text-sm text-white outline-none focus:border-orange-500" />
-              <button type="button" disabled={busy || !legacyPassword} onClick={migrateLegacyProfile} className="w-full border border-orange-500/50 px-4 py-3 text-xs font-bold text-orange-300 hover:bg-orange-500/10 disabled:opacity-50">{busy ? (ru ? 'Проверка...' : 'Verifying...') : (ru ? 'Проверить старый пароль и перенести профиль' : 'Verify old password and migrate profile')}</button>
+              <button type="button" disabled={migrationBusy} onClick={migrateLegacyProfile} className="w-full border border-orange-500/50 px-4 py-3 text-xs font-bold text-orange-300 hover:bg-orange-500/10 disabled:opacity-50">{migrationBusy ? (ru ? 'Проверка...' : 'Verifying...') : (ru ? 'Проверить старый пароль и перенести профиль' : 'Verify old password and migrate profile')}</button>
             </>}
           </section>
         )}
