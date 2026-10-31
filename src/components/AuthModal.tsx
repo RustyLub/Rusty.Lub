@@ -40,8 +40,8 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
 
     const cleanLogin = usernameInput.trim();
     if (authMode === 'register') {
-      if (!/^[a-zA-Z0-9_-]{3,20}$/.test(cleanLogin)) {
-        onToast(lang === 'ru' ? 'Логин должен содержать 3–20 символов: латинские буквы, цифры, _ или -.' : 'Username must be 3–20 characters using letters, numbers, _ or -.', 'warning');
+      if (!/^[a-zA-Z0-9._-]{3,32}$/.test(cleanLogin)) {
+        onToast(lang === 'ru' ? 'Логин должен содержать 3–32 символа: латинские буквы, цифры, точку, _ или -.' : 'Username must be 3–32 characters using letters, numbers, dot, _ or -.', 'warning');
         return;
       }
       if (passwordInput.length < 8 || passwordInput.length > 128 || passwordInput !== confirmPasswordInput) {
@@ -183,11 +183,11 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                   type="text"
                   required
                   minLength={3}
-                  maxLength={20}
+                  maxLength={32}
                   autoComplete="username"
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value)}
-                  placeholder={lang === 'ru' ? 'Логин (6–20 символов)' : 'Username (6–20 characters)'}
+                  placeholder={lang === 'ru' ? 'Логин (3–32 символа)' : 'Username (3–32 characters)'}
                   className="w-full bg-[#0c0d10] border border-[#2a2f3b] focus:border-[#cd412b]/60 text-white placeholder-gray-600 pl-9 pr-4 py-2 text-xs font-mono outline-none transition-all"
                 />
               </div>
@@ -244,7 +244,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
                     maxLength={32}
                     value={displayNameInput}
                     onChange={(e) => setDisplayNameInput(e.target.value)}
-                    placeholder={lang === 'ru' ? 'Никнейм (6–32 символа)' : 'Nickname (6–32 characters)'}
+                    placeholder={lang === 'ru' ? 'Никнейм (2–40 символов)' : 'Nickname (2–40 characters)'}
                     className="w-full bg-[#0c0d10] border border-[#2a2f3b] focus:border-[#cd412b]/60 text-white placeholder-gray-600 pl-9 pr-4 py-2 text-xs font-mono outline-none transition-all"
                   />
                 </div>
