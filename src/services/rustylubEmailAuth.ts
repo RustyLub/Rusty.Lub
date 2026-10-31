@@ -2,6 +2,7 @@ import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
+  signInWithCustomToken,
   signOut,
   type User
 } from 'firebase/auth';
@@ -123,3 +124,30 @@ export async function logoutFromRustyLub() {
 }
 
 export { rustylubAuth };
+
+
+export async function loginWithUsername(login: string, password: string) {
+  const response = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+    body: JSON.stringify({ login: login.trim(), password })
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || typeof payload.customToken !== 'string') {
+    throw new Error(typeof payload.message === 'string' ? payload.message : 'Не удалось выполнить вход.');
+  }
+
+  const credential = await signInWithCustomToken(rustylubAuth, payload.customToken);
+  return {
+    firebaseUser: credential.user,
+    profile: payload.profile as {
+      uid: string;
+      login: string;
+      nickname: string;
+      role: string;
+      status: string;
+    }
+  };
+}
