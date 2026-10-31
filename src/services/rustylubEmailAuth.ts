@@ -1,10 +1,8 @@
 import {
   createUserWithEmailAndPassword,
-  sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
-  reload,
   type User
 } from 'firebase/auth';
 import {
@@ -34,12 +32,7 @@ export interface RustyLubEmailProfile {
   vipUntil?: string;
 }
 
-async function requireVerifiedUser(user: User) {
-  await reload(user);
-  if (!user.emailVerified) {
-    throw new Error('Сначала подтвердите адрес электронной почты по ссылке из письма.');
-  }
-  // Refresh the ID token so Firestore Rules can see email_verified=true.
+async function requireSignedInUser(user: User) {
   await user.getIdToken(true);
 }
 
@@ -49,7 +42,6 @@ function profileRef(uid: string) {
 
 export async function registerWithEmail(email: string, password: string, _username: string, _displayName: string) {
   const credential = await createUserWithEmailAndPassword(rustylubAuth, email.trim().toLowerCase(), password);
-  await sendEmailVerification(credential.user);
   return credential.user;
 }
 
@@ -57,8 +49,8 @@ export async function resendVerification(user: User) {
   await sendEmailVerification(user);
 }
 
-export async function completeVerifiedRegistration(user: User, username: string, displayName: string) {
-  await requireVerifiedUser(user);
+export async function completeRegistration(user: User, username: string, displayName: string) {
+  await requireSignedInUser(user);
   const cleanUsername = username.trim().toLowerCase();
   const cleanDisplayName = displayName.trim();
   if (!/^[a-z0-9_-]{3,20}$/.test(cleanUsername) || (cleanUsername === 'serustqs' && (user.email || '').trim().toLowerCase() !== 'cheater.cooperation@inbox.ru')) {
@@ -98,7 +90,7 @@ export async function completeVerifiedRegistration(user: User, username: string,
 }
 
 export async function getEmailAuthProfile(user: User) {
-  await requireVerifiedUser(user);
+  await requireSignedInUser(user);
   const snapshot = await getDoc(profileRef(user.uid));
   if (!snapshot.exists()) return null;
 
@@ -112,7 +104,7 @@ export async function getEmailAuthProfile(user: User) {
 
 export async function loginWithEmail(email: string, password: string) {
   const credential = await signInWithEmailAndPassword(rustylubAuth, email.trim().toLowerCase(), password);
-  await requireVerifiedUser(credential.user);
+  await requireSignedInUser(credential.user);
   const snapshot = await getDoc(profileRef(credential.user.uid));
   if (!snapshot.exists()) {
     await signOut(rustylubAuth);
