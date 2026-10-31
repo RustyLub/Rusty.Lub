@@ -36,14 +36,14 @@ import {
 } from 'firebase/firestore';
 
 const firebaseConfig: any = {
-  "projectId": "psychic-origin-5kpr3",
-  "appId": "1:739344973051:web:329ad00b8b4f1e1385c45e",
-  "apiKey": "AIzaSyCKBAhIPVmCFhg8hom5G91VEbY3kaxNhGQ",
-  "authDomain": "psychic-origin-5kpr3.firebaseapp.com",
+  "projectId": "rustylub",
+  "appId": "1:835038801032:web:643113413df82f7af9033d",
+  "apiKey": "AIzaSyAdWMYqPO1mgx2h2DO3Iw8XZxEyZJQitO0",
+  "authDomain": "rustylub.firebaseapp.com",
   "firestoreDatabaseId": "ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59",
-  "storageBucket": "psychic-origin-5kpr3.firebasestorage.app",
-  "messagingSenderId": "739344973051",
-  "measurementId": ""
+  "storageBucket": "rustylub.firebasestorage.app",
+  "messagingSenderId": "835038801032",
+  "measurementId": "G-X4W9S6S0LH"
 };
 
 // Initialize Firebase
