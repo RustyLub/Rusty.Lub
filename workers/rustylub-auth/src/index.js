@@ -95,7 +95,7 @@ export default {
    const body=await request.json();
    const login=String(body?.login||'').trim().toLowerCase();
    const password=typeof body?.password==='string'?body.password:'';
-   if(!/^[a-z0-9_-]{3,20}$/.test(login)||password.length<1||password.length>128) return json({message:'Проверьте логин и пароль.'},400,origin);
+   if(!/^[a-z0-9._-]{3,32}$/.test(login)||password.length<1||password.length>128) return json({message:'Проверьте логин и пароль.'},400,origin);
    if(!env.FIREBASE_SERVICE_ACCOUNT_JSON) throw new Error('Missing service account secret');
    const account=JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_JSON);
    if(account.project_id!==PROJECT_ID||!account.client_email||!account.private_key) throw new Error('Invalid service account configuration');
