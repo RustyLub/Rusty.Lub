@@ -131,7 +131,7 @@ export default function RustyLubEmailAuthModal({ isOpen, onClose, lang, onUserLo
     setMigrationBusy(true);
     try {
       const token = await user.getIdToken(true);
-      const apiBase = String(import.meta.env.VITE_RUSTYLUB_AUTH_API_BASE || 'https://us-central1-rustylub.cloudfunctions.net/apiServer').replace(/\\/+$/, '');
+      const apiBase = String(import.meta.env.VITE_RUSTYLUB_AUTH_API_BASE || 'https://us-central1-rustylub.cloudfunctions.net/apiServer').replace(/\/+$/, '');
       const response = await fetch(`${apiBase}/api/rustylub-auth/migrate-legacy-profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
