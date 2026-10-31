@@ -10,7 +10,7 @@ import {
 import { CUSTOM_AVATARS } from '../customAvatars';
 import { CustomUser } from '../types';
 import TermsModal from './TermsModal';
-import { loginWithUsername } from '../services/rustylubEmailAuth';
+import { loginWithUsername, registerWithEmail, completeRegistration } from '../services/rustylubEmailAuth';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -38,13 +38,35 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const cleanLogin = usernameInput.trim();
     if (authMode === 'register') {
-      onToast(
-        lang === 'ru'
-          ? 'Регистрация временно закрыта на время настройки новой защищённой системы аккаунтов.'
-          : 'Registration is temporarily unavailable while the new secure account system is being configured.',
-        'warning'
-      );
+      if (!/^[a-zA-Z0-9_-]{3,20}$/.test(cleanLogin)) {
+        onToast(lang === 'ru' ? 'Логин должен содержать 3–20 символов: латинские буквы, цифры, _ или -.' : 'Username must be 3–20 characters using letters, numbers, _ or -.', 'warning');
+        return;
+      }
+      if (passwordInput.length < 8 || passwordInput.length > 128 || passwordInput !== confirmPasswordInput) {
+        onToast(lang === 'ru' ? 'Проверьте пароль: минимум 8 символов, подтверждение должно совпадать.' : 'Use at least 8 characters and make sure passwords match.', 'warning');
+        return;
+      }
+      if (displayNameInput.trim().length < 2 || displayNameInput.trim().length > 40 || !acceptedTerms) {
+        onToast(lang === 'ru' ? 'Укажите никнейм и примите условия использования.' : 'Enter a nickname and accept the terms.', 'warning');
+        return;
+      }
+      setAuthLoading(true);
+      try {
+        // Firebase Email/Password remains the credential provider; the public account ID is the username.
+        const internalEmail = `${cleanLogin.toLowerCase()}@accounts.rusty-lub.invalid`;
+        const user = await registerWithEmail(internalEmail, passwordInput, cleanLogin, displayNameInput.trim());
+        const saved = await completeRegistration(user, cleanLogin, displayNameInput.trim());
+        onUserLogin({ uid: user.uid, displayName: saved.profile.displayName || displayNameInput.trim(), role: saved.profile.role || 'user' } as CustomUser);
+        onToast(lang === 'ru' ? 'Аккаунт создан. Добро пожаловать!' : 'Account created. Welcome!', 'success');
+        onClose();
+      } catch (error: any) {
+        console.error('Rusty.Lub registration error:', error);
+        onToast(typeof error?.message === 'string' ? error.message : (lang === 'ru' ? 'Не удалось создать аккаунт.' : 'Registration failed.'), 'error');
+      } finally {
+        setAuthLoading(false);
+      }
       return;
     }
 
