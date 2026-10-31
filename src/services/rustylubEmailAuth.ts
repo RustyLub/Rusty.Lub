@@ -1,5 +1,4 @@
 import {
-  createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithCustomToken,
@@ -9,8 +8,6 @@ import {
 import {
   doc,
   getDoc,
-  runTransaction,
-  serverTimestamp,
   type Firestore
 } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
@@ -41,49 +38,10 @@ function profileRef(uid: string) {
   return doc(rustylubDb, 'auth_users', uid);
 }
 
-export async function registerWithEmail(email: string, password: string, _username: string, _displayName: string) {
-  const credential = await createUserWithEmailAndPassword(rustylubAuth, email.trim().toLowerCase(), password);
-  return credential.user;
-}
-
 export async function completeRegistration(user: User, username: string, displayName: string) {
   await requireSignedInUser(user);
-  const cleanUsername = username.trim().toLowerCase();
-  const cleanDisplayName = displayName.trim();
-  if (!/^[a-z0-9_-]{3,20}$/.test(cleanUsername) || (cleanUsername === 'serustqs' && (user.email || '').trim().toLowerCase() !== 'cheater.cooperation@inbox.ru')) {
-    throw new Error('Логин должен содержать 3–20 символов. Этот логин зарезервирован.');
-  }
-  if (cleanDisplayName.length < 2 || cleanDisplayName.length > 40 || /[<>]/.test(cleanDisplayName)) {
-    throw new Error('Никнейм должен содержать 2–40 допустимых символов.');
-  }
+  throw new Error('Регистрация должна выполняться через защищённый серверный endpoint.');
 
-  const userRef = profileRef(user.uid);
-  const usernameRef = doc(rustylubDb, 'auth_usernames', cleanUsername);
-  await runTransaction(rustylubDb, async (transaction) => {
-    const [profileSnap, usernameSnap] = await Promise.all([
-      transaction.get(userRef),
-      transaction.get(usernameRef)
-    ]);
-    if (profileSnap.exists()) return;
-    if (usernameSnap.exists()) throw new Error('Этот логин уже занят.');
-    transaction.set(usernameRef, {
-      uid: user.uid,
-      createdAt: serverTimestamp()
-    });
-    transaction.set(userRef, {
-      uid: user.uid,
-      username: cleanUsername,
-      displayName: cleanDisplayName,
-      email: (user.email || '').trim().toLowerCase(),
-      role: 'user',
-      isBlocked: false,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-  });
-  const saved = await getDoc(userRef);
-  if (!saved.exists()) throw new Error('Не удалось сохранить профиль.');
-  return { profile: saved.data() as RustyLubEmailProfile };
 }
 
 export async function getEmailAuthProfile(user: User) {
@@ -151,4 +109,21 @@ export async function loginWithUsername(login: string, password: string) {
       status: string;
     }
   };
+}
+
+
+export async function registerWithUsername(login: string, password: string, nickname: string) {
+  const authApiBase = (import.meta.env.VITE_AUTH_API_URL || 'https://rustylub-auth.unityzeusn1.workers.dev').replace(/\/$/, '');
+  const response = await fetch(`${authApiBase}/api/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+    body: JSON.stringify({ login: login.trim(), password, nickname: nickname.trim() })
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || typeof payload.customToken !== 'string') {
+    throw new Error(typeof payload.message === 'string' ? payload.message : 'Не удалось создать аккаунт.');
+  }
+  const credential = await signInWithCustomToken(rustylubAuth, payload.customToken);
+  return { firebaseUser: credential.user, profile: payload.profile as { uid: string; login: string; nickname: string; role: string; status: string } };
 }
