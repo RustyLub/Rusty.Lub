@@ -1,9 +1,9 @@
 {
   "projects": {
-    "default": "psychic-origin-5kpr3"
+    "default": "rustylub"
   },
   "targets": {
-    "psychic-origin-5kpr3": {
+    "rustylub": {
       "firestore": {
         "main": [
           "ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59"
