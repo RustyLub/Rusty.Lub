@@ -101,14 +101,31 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
     } catch (error: any) {
       const code = String(error?.code || '');
       const messages: Record<string, string> = {
-        'auth/email-already-in-use': ru ? 'Этот email уже зарегистрирован.' : 'This email is already registered.',
+        'auth/email-already-in-use': ru ? 'Этот email уже зарегистрирован. Войдите или восстановите пароль.' : 'This email is already registered. Sign in or reset the password.',
         'auth/invalid-email': ru ? 'Некорректный email.' : 'Invalid email address.',
-        'auth/weak-password': ru ? 'Пароль слишком простой.' : 'Password is too weak.',
+        'auth/weak-password': ru ? 'Пароль слишком простой. Используйте не менее 8 символов.' : 'Password is too weak. Use at least 8 characters.',
         'auth/invalid-credential': ru ? 'Неверный email или пароль.' : 'Incorrect email or password.',
-        'auth/too-many-requests': ru ? 'Слишком много попыток. Попробуйте позже.' : 'Too many attempts. Try again later.',
-        'auth/network-request-failed': ru ? 'Ошибка сети. Проверьте подключение.' : 'Network error. Check your connection.'
+        'auth/too-many-requests': ru ? 'Слишком много попыток. Подождите и попробуйте позже.' : 'Too many attempts. Wait and try again later.',
+        'auth/network-request-failed': ru ? 'Ошибка сети. Проверьте подключение.' : 'Network error. Check your connection.',
+        'auth/operation-not-allowed': ru ? 'Firebase отклонил регистрацию: провайдер Email/Password недоступен для используемого проекта. Проверьте Firebase Authentication в проекте rustylub.' : 'Firebase rejected sign-up: Email/Password is not available for the configured project.',
+        'auth/admin-restricted-operation': ru ? 'Firebase ограничил самостоятельное создание аккаунтов. Проверьте правила доступа Identity Platform.' : 'Firebase restricts self-service account creation. Check Identity Platform access settings.',
+        'auth/invalid-api-key': ru ? 'Firebase API key недействителен. Проверьте конфигурацию проекта rustylub.' : 'Firebase API key is invalid. Check the rustylub project configuration.',
+        'auth/app-not-authorized': ru ? 'Домен сайта не разрешён для этого Firebase-проекта. Проверьте Authorized domains.' : 'This site domain is not authorized for this Firebase project.'
       };
-      onToast(messages[code] || error?.message || (ru ? 'Не удалось выполнить операцию.' : 'The operation failed.'), 'error');
+      const rawMessage = String(error?.message || '');
+      const serverMessage = rawMessage.match(/(?:auth\/)?([A-Z][A-Z0-9_]+)/)?.[1] || '';
+      const serverMessages: Record<string, string> = {
+        OPERATION_NOT_ALLOWED: messages['auth/operation-not-allowed'],
+        ADMIN_ONLY_OPERATION: messages['auth/admin-restricted-operation'],
+        API_KEY_INVALID: messages['auth/invalid-api-key'],
+        API_KEY_SERVICE_BLOCKED: messages['auth/invalid-api-key'],
+        TOO_MANY_ATTEMPTS_TRY_LATER: messages['auth/too-many-requests'],
+        EMAIL_EXISTS: messages['auth/email-already-in-use'],
+        INVALID_EMAIL: messages['auth/invalid-email'],
+        WEAK_PASSWORD: messages['auth/weak-password'],
+        CONFIGURATION_NOT_FOUND: ru ? 'Конфигурация Firebase Authentication не найдена в проекте rustylub.' : 'Firebase Authentication configuration was not found in project rustylub.'
+      };
+      onToast(messages[code] || serverMessages[serverMessage] || (rawMessage || (ru ? 'Не удалось выполнить операцию.' : 'The operation failed.')), 'error');
     } finally {
       setBusy(false);
     }
