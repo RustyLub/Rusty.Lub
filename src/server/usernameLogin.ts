@@ -75,7 +75,16 @@ export function registerUsernameLoginRoute(app: Express) {
       }
 
       const customToken = await auth.createCustomToken(uid);
-      return res.status(200).json({ customToken });
+      return res.status(200).json({
+        customToken,
+        profile: {
+          uid,
+          login: String(profile.login || ''),
+          nickname: String(profile.nickname || profile.login || ''),
+          role: String(profile.role || 'user'),
+          status: String(profile.status || 'active')
+        }
+      });
     } catch (error) {
       console.error('[RustyLub username auth] Login failed:', error instanceof Error ? error.message : 'unknown');
       return res.status(503).json({ message: 'Авторизация временно недоступна. Попробуйте позже.' });
