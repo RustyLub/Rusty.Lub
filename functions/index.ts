@@ -1,6 +1,7 @@
 import express from 'express';
 import { onRequest } from 'firebase-functions/v2/https';
 import { registerRustyLubEmailAuthRoutes } from '../src/server/rustylubEmailAuth';
+import { registerUsernameLoginRoute } from '../src/server/usernameLogin';
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 registerRustyLubEmailAuthRoutes(app);
+registerUsernameLoginRoute(app);
 
 // The old profile is stored in a separate Firebase project. The runtime service
 // account must be granted access to that project's Firestore database.
