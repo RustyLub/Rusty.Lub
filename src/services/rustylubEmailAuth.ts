@@ -2,6 +2,7 @@ import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
+  signInWithCustomToken,
   signOut,
   type User
 } from 'firebase/auth';
@@ -111,6 +112,23 @@ export async function loginWithEmail(email: string, password: string) {
     await signOut(rustylubAuth);
     throw new Error('Аккаунт заблокирован.');
   }
+  return { firebaseUser: credential.user, profile };
+}
+
+
+/** Sign in by Firebase UID without exposing the account email to the browser. */
+export async function loginWithAccountId(uid: string, password: string) {
+  const cleanUid = uid.trim();
+  if (!/^[A-Za-z0-9_-]{20,128}$/.test(cleanUid) || !password || password.length > 128) throw new Error('Неверный ID аккаунта или пароль.');
+  const response = await fetch('/api/rustylub-auth/login-by-uid', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid: cleanUid, password }) });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || typeof payload.customToken !== 'string') throw new Error(payload.message || 'Неверный ID аккаунта или пароль.');
+  const credential = await signInWithCustomToken(rustylubAuth, payload.customToken);
+  await requireSignedInUser(credential.user);
+  const snapshot = await getDoc(profileRef(credential.user.uid));
+  if (!snapshot.exists()) { await signOut(rustylubAuth); throw new Error('Профиль аккаунта не найден.'); }
+  const profile = snapshot.data() as RustyLubEmailProfile;
+  if (profile.isBlocked === true) { await signOut(rustylubAuth); throw new Error('Аккаунт заблокирован.'); }
   return { firebaseUser: credential.user, profile };
 }
 
