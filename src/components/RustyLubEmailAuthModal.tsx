@@ -216,7 +216,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
             <span className="relative mt-2 block"><KeyRound size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" /><input type="password" required minLength={8} maxLength={128} autoComplete="new-password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full border border-[#2a2f3b] bg-[#090b0f] py-3 pl-10 pr-3 text-sm text-white outline-none focus:border-orange-500" /></span>
           </label>}
           {mode === 'register' && <label className="flex items-start gap-2 text-xs text-zinc-400"><input type="checkbox" checked={acceptedTerms} onChange={e => setAcceptedTerms(e.target.checked)} className="mt-0.5 accent-orange-500" />{ru ? 'Я принимаю условия использования Rusty.Lub.' : 'I accept the Rusty.Lub terms of use.'}</label>}
-          <button disabled={busy} className="flex w-full items-center justify-center gap-2 bg-orange-500 px-5 py-4 text-sm font-bold text-black hover:bg-orange-400 disabled:opacity-50">{busy ? (ru ? 'Подождите...' : 'Please wait...') : mode === 'reset' ? (ru ? 'Отправить письмо' : 'Send email') : mode === 'register' ? (verificationPending ? (ru ? 'Я подтвердил email' : 'I verified my email') : (ru ? 'Зарегистрироваться и отправить письмо' : 'Register and send verification')) : (ru ? 'Войти' : 'Sign in')}</button>
+          <button disabled={busy} className="flex w-full items-center justify-center gap-2 bg-orange-500 px-5 py-4 text-sm font-bold text-black hover:bg-orange-400 disabled:opacity-50">{busy ? (ru ? 'Подождите...' : 'Please wait...') : mode === 'reset' ? (ru ? 'Отправить письмо' : 'Send email') : mode === 'register' ? ((ru ? 'Создать аккаунт' : 'Create account')) : (ru ? 'Войти' : 'Sign in')}</button>
         </form>
 
         {mode === 'login' && rustylubAuth.currentUser?.email?.toLowerCase() === 'cheater.cooperation@inbox.ru' && (
@@ -230,7 +230,6 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
           </section>
         )}
         {mode === 'login' && <button type="button" onClick={() => setMode('reset')} className="mt-4 text-left text-xs text-orange-300 hover:underline">{ru ? 'Забыли пароль?' : 'Forgot password?'}</button>}
-        {verificationPending && <p className="mt-4 text-xs leading-5 text-amber-300">{ru ? 'Откройте письмо и подтвердите адрес. Затем нажмите «Я подтвердил email».' : 'Open the email and verify the address, then click “I verified my email”.'}</p>}
         <button type="button" onClick={onBackToLegacy} className="mt-8 flex items-center gap-2 border-t border-white/10 pt-5 text-xs text-zinc-500 hover:text-white"><ArrowLeft size={14} />{ru ? 'Вернуться к прежнему входу' : 'Back to existing sign in'}</button>
       </motion.div>
     </div>
