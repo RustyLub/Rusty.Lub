@@ -70,7 +70,6 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
       return;
     }
 
-    const cleanLogin = usernameInput.trim();
     if (!/^[a-zA-Z0-9._-]{3,32}$/.test(cleanLogin) || !passwordInput || passwordInput.length > 128) {
       onToast(lang === 'ru' ? 'Проверьте логин и пароль.' : 'Check your login and password.', 'warning');
       return;
