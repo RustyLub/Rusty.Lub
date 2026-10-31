@@ -27,6 +27,7 @@
   },
   "functions": {
     "source": ".",
-    "codebase": "default"
+    "codebase": "default",
+    "runtime": "nodejs22"
   }
 }
