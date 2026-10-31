@@ -127,7 +127,8 @@ export { rustylubAuth };
 
 
 export async function loginWithUsername(login: string, password: string) {
-  const response = await fetch('/api/auth/login', {
+  const authApiBase = (import.meta.env.VITE_AUTH_API_URL || 'https://rustylub-auth.unityzeusn1.workers.dev').replace(/\/$/, '');
+  const response = await fetch(`${authApiBase}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     cache: 'no-store',
