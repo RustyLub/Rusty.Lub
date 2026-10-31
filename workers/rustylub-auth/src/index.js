@@ -44,7 +44,7 @@ async function googleAccessToken(account, key) {
     iss: account.client_email,
     sub: account.client_email,
     aud: account.token_uri || 'https://oauth2.googleapis.com/token',
-    scope: 'https://www.googleapis.com/auth/datastore',
+    scope: 'https://www.googleapis.com/auth/cloud-platform',
     iat: now,
     exp: now + 3600
   }, key);
@@ -61,6 +61,21 @@ async function googleAccessToken(account, key) {
   const data = await response.json();
   if (typeof data.access_token !== 'string') throw new Error('Google access token missing');
   return data.access_token;
+}
+
+async function lookupAuthEmail(accessToken, uid) {
+  const response = await fetch(`https://identitytoolkit.googleapis.com/v1/projects/${PROJECT_ID}/accounts:lookup`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ localIds: [uid] })
+  });
+  if (!response.ok) throw new Error('Firebase Auth account lookup failed');
+  const data = await response.json();
+  const user = Array.isArray(data.users) ? data.users[0] : null;
+  return user && typeof user.email === 'string' ? user.email : '';
 }
 
 async function firestoreDocument(accessToken, collection, documentId) {
@@ -144,12 +159,12 @@ export default {
         return json({ message: 'Неверный логин или пароль.' }, 401, origin);
       }
 
-      const verify = await fetch(
+      const email = await lookupAuthEmail(accessToken, uid);\n      if (!email) return json({ message: 'Неверный логин или пароль.' }, 401, origin);\n\n      const verify = await fetch(
         `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${encodeURIComponent(WEB_API_KEY)}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: String(profile.email || ''), password, returnSecureToken: true })
+          body: JSON.stringify({ email, password, returnSecureToken: true })
         }
       );
       if (!verify.ok) return json({ message: 'Неверный логин или пароль.' }, 401, origin);
