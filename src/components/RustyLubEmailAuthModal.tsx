@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft, Mail, Lock, User, Crosshair, ShieldCheck, KeyRound } from 'lucide-react';
 import type { CustomUser } from '../types';
 import {
-  completeVerifiedRegistration,
+  completeRegistration,
   loginWithEmail,
   registerWithEmail,
   requestPasswordReset,
@@ -29,7 +29,6 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [verificationPending, setVerificationPending] = useState(false);
   const [busy, setBusy] = useState(false);
   const [migrationBusy, setMigrationBusy] = useState(false);
   const [legacyPassword, setLegacyPassword] = useState('');
@@ -60,15 +59,8 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
         if (password.length < 8 || password.length > 128 || password !== confirmPassword) {
           throw new Error(ru ? 'Проверьте пароль: минимум 8 символов, оба поля должны совпадать.' : 'Check your password: at least 8 characters and both fields must match.');
         }
-        if (!verificationPending) {
-          await registerWithEmail(email, password, username, displayName);
-          setVerificationPending(true);
-          onToast(ru ? 'Письмо подтверждения отправлено. Откройте его, затем вернитесь сюда.' : 'Verification email sent. Open it, then return here.', 'success');
-          return;
-        }
-        const user = rustylubAuth.currentUser;
-        if (!user) throw new Error(ru ? 'Сессия регистрации не найдена. Начните регистрацию заново.' : 'Registration session not found. Please register again.');
-        const result = await completeVerifiedRegistration(user, username, displayName);
+        const user = await registerWithEmail(email, password, username, displayName);
+          const result = await completeRegistration(user, username, displayName);
         const profile = result.profile;
         onUserLogin({
           uid: profile.uid,
@@ -78,7 +70,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
           photoURL: '',
           role: 'user'
         } as CustomUser);
-        onToast(ru ? 'Email подтверждён, профиль создан.' : 'Email verified and profile created.', 'success');
+        onToast(ru ? 'Аккаунт создан. Добро пожаловать в Rusty.Lub!' : 'Account created. Welcome to Rusty.Lub!', 'success');
         onClose();
         return;
       }
@@ -101,14 +93,31 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
     } catch (error: any) {
       const code = String(error?.code || '');
       const messages: Record<string, string> = {
-        'auth/email-already-in-use': ru ? 'Этот email уже зарегистрирован.' : 'This email is already registered.',
+        'auth/email-already-in-use': ru ? 'Этот email уже зарегистрирован. Войдите или восстановите пароль.' : 'This email is already registered. Sign in or reset the password.',
         'auth/invalid-email': ru ? 'Некорректный email.' : 'Invalid email address.',
-        'auth/weak-password': ru ? 'Пароль слишком простой.' : 'Password is too weak.',
+        'auth/weak-password': ru ? 'Пароль слишком простой. Используйте не менее 8 символов.' : 'Password is too weak. Use at least 8 characters.',
         'auth/invalid-credential': ru ? 'Неверный email или пароль.' : 'Incorrect email or password.',
-        'auth/too-many-requests': ru ? 'Слишком много попыток. Попробуйте позже.' : 'Too many attempts. Try again later.',
-        'auth/network-request-failed': ru ? 'Ошибка сети. Проверьте подключение.' : 'Network error. Check your connection.'
+        'auth/too-many-requests': ru ? 'Слишком много попыток. Подождите и попробуйте позже.' : 'Too many attempts. Wait and try again later.',
+        'auth/network-request-failed': ru ? 'Ошибка сети. Проверьте подключение.' : 'Network error. Check your connection.',
+        'auth/operation-not-allowed': ru ? 'Firebase отклонил регистрацию: провайдер Email/Password недоступен для используемого проекта. Проверьте Firebase Authentication в проекте rustylub.' : 'Firebase rejected sign-up: Email/Password is not available for the configured project.',
+        'auth/admin-restricted-operation': ru ? 'Firebase ограничил самостоятельное создание аккаунтов. Проверьте правила доступа Identity Platform.' : 'Firebase restricts self-service account creation. Check Identity Platform access settings.',
+        'auth/invalid-api-key': ru ? 'Firebase API key недействителен. Проверьте конфигурацию проекта rustylub.' : 'Firebase API key is invalid. Check the rustylub project configuration.',
+        'auth/app-not-authorized': ru ? 'Домен сайта не разрешён для этого Firebase-проекта. Проверьте Authorized domains.' : 'This site domain is not authorized for this Firebase project.'
       };
-      onToast(messages[code] || error?.message || (ru ? 'Не удалось выполнить операцию.' : 'The operation failed.'), 'error');
+      const rawMessage = String(error?.message || '');
+      const serverMessage = rawMessage.match(/(?:auth\/)?([A-Z][A-Z0-9_]+)/)?.[1] || '';
+      const serverMessages: Record<string, string> = {
+        OPERATION_NOT_ALLOWED: messages['auth/operation-not-allowed'],
+        ADMIN_ONLY_OPERATION: messages['auth/admin-restricted-operation'],
+        API_KEY_INVALID: messages['auth/invalid-api-key'],
+        API_KEY_SERVICE_BLOCKED: messages['auth/invalid-api-key'],
+        TOO_MANY_ATTEMPTS_TRY_LATER: messages['auth/too-many-requests'],
+        EMAIL_EXISTS: messages['auth/email-already-in-use'],
+        INVALID_EMAIL: messages['auth/invalid-email'],
+        WEAK_PASSWORD: messages['auth/weak-password'],
+        CONFIGURATION_NOT_FOUND: ru ? 'Конфигурация Firebase Authentication не найдена в проекте rustylub.' : 'Firebase Authentication configuration was not found in project rustylub.'
+      };
+      onToast(messages[code] || serverMessages[serverMessage] || (rawMessage || (ru ? 'Не удалось выполнить операцию.' : 'The operation failed.')), 'error');
     } finally {
       setBusy(false);
     }
@@ -117,8 +126,8 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
 
   const migrateLegacyProfile = async () => {
     const user = rustylubAuth.currentUser;
-    if (!user || !user.emailVerified) {
-      onToast(ru ? 'Сначала войдите в новый аккаунт и подтвердите email.' : 'Sign in to the new account and verify your email first.', 'warning');
+    if (!user) {
+      onToast(ru ? 'Сначала войдите в новый аккаунт.' : 'Sign in to the new account first.', 'warning');
       return;
     }
     if (user.email?.trim().toLowerCase() !== 'cheater.cooperation@inbox.ru') {
@@ -182,10 +191,10 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
           <div><div className="font-mono text-xs tracking-[.25em] text-orange-400">RUSTY.LUB</div><div className="text-[10px] tracking-widest text-zinc-500">FIREBASE EMAIL AUTH</div></div>
         </div>
         <h2 className="mb-2 text-3xl font-bold">{mode === 'login' ? (ru ? 'Вход по почте' : 'Email sign in') : mode === 'register' ? (ru ? 'Регистрация' : 'Create account') : (ru ? 'Восстановление пароля' : 'Reset password')}</h2>
-        <p className="mb-7 text-sm leading-6 text-zinc-400">{ru ? 'Новая авторизация Firebase. Email необходимо подтвердить перед использованием аккаунта.' : 'New Firebase authentication. Verify your email before using your account.'}</p>
+        <p className="mb-7 text-sm leading-6 text-zinc-400">{ru ? 'Новая авторизация Firebase. Подтверждение email не требуется — заполните данные и начинайте пользоваться сайтом.' : 'Create your account and start using Rusty.Lub immediately. Email verification is not required.'}</p>
         <div className="mb-6 flex border-b border-white/10">
-          <button type="button" onClick={() => { setMode('login'); setVerificationPending(false); }} className={`flex-1 border-b-2 py-3 text-sm ${mode === 'login' ? 'border-orange-400 text-orange-300' : 'border-transparent text-zinc-500'}`}>{ru ? 'Вход' : 'Sign in'}</button>
-          <button type="button" onClick={() => { setMode('register'); setVerificationPending(false); }} className={`flex-1 border-b-2 py-3 text-sm ${mode === 'register' ? 'border-orange-400 text-orange-300' : 'border-transparent text-zinc-500'}`}>{ru ? 'Регистрация' : 'Register'}</button>
+          <button type="button" onClick={() => { setMode('login'); }} className={`flex-1 border-b-2 py-3 text-sm ${mode === 'login' ? 'border-orange-400 text-orange-300' : 'border-transparent text-zinc-500'}`}>{ru ? 'Вход' : 'Sign in'}</button>
+          <button type="button" onClick={() => { setMode('register'); }} className={`flex-1 border-b-2 py-3 text-sm ${mode === 'register' ? 'border-orange-400 text-orange-300' : 'border-transparent text-zinc-500'}`}>{ru ? 'Регистрация' : 'Register'}</button>
         </div>
         <form onSubmit={submit} className="space-y-4">
           <label className="block text-xs text-zinc-300">{ru ? 'Электронная почта' : 'Email'}
@@ -206,10 +215,10 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
             <span className="relative mt-2 block"><KeyRound size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" /><input type="password" required minLength={8} maxLength={128} autoComplete="new-password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full border border-[#2a2f3b] bg-[#090b0f] py-3 pl-10 pr-3 text-sm text-white outline-none focus:border-orange-500" /></span>
           </label>}
           {mode === 'register' && <label className="flex items-start gap-2 text-xs text-zinc-400"><input type="checkbox" checked={acceptedTerms} onChange={e => setAcceptedTerms(e.target.checked)} className="mt-0.5 accent-orange-500" />{ru ? 'Я принимаю условия использования Rusty.Lub.' : 'I accept the Rusty.Lub terms of use.'}</label>}
-          <button disabled={busy} className="flex w-full items-center justify-center gap-2 bg-orange-500 px-5 py-4 text-sm font-bold text-black hover:bg-orange-400 disabled:opacity-50">{busy ? (ru ? 'Подождите...' : 'Please wait...') : mode === 'reset' ? (ru ? 'Отправить письмо' : 'Send email') : mode === 'register' ? (verificationPending ? (ru ? 'Я подтвердил email' : 'I verified my email') : (ru ? 'Зарегистрироваться и отправить письмо' : 'Register and send verification')) : (ru ? 'Войти' : 'Sign in')}</button>
+          <button disabled={busy} className="flex w-full items-center justify-center gap-2 bg-orange-500 px-5 py-4 text-sm font-bold text-black hover:bg-orange-400 disabled:opacity-50">{busy ? (ru ? 'Подождите...' : 'Please wait...') : mode === 'reset' ? (ru ? 'Отправить письмо' : 'Send email') : mode === 'register' ? ((ru ? 'Создать аккаунт' : 'Create account')) : (ru ? 'Войти' : 'Sign in')}</button>
         </form>
 
-        {mode === 'login' && rustylubAuth.currentUser?.emailVerified && rustylubAuth.currentUser.email?.toLowerCase() === 'cheater.cooperation@inbox.ru' && (
+        {mode === 'login' && rustylubAuth.currentUser?.email?.toLowerCase() === 'cheater.cooperation@inbox.ru' && (
           <section className="mt-6 border border-orange-500/20 bg-orange-500/5 p-4">
             <div className="mb-2 text-sm font-semibold text-orange-300">{ru ? 'Перенос старого профиля' : 'Legacy profile migration'}</div>
             <p className="mb-3 text-xs leading-5 text-zinc-400">{ru ? 'Подтвердите владение старым аккаунтом serustqs. Пароль проверяется сервером и не сохраняется в новом аккаунте.' : 'Prove ownership of the old serustqs account. The password is verified server-side and is not copied.'}</p>
@@ -220,7 +229,6 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
           </section>
         )}
         {mode === 'login' && <button type="button" onClick={() => setMode('reset')} className="mt-4 text-left text-xs text-orange-300 hover:underline">{ru ? 'Забыли пароль?' : 'Forgot password?'}</button>}
-        {verificationPending && <p className="mt-4 text-xs leading-5 text-amber-300">{ru ? 'Откройте письмо и подтвердите адрес. Затем нажмите «Я подтвердил email».' : 'Open the email and verify the address, then click “I verified my email”.'}</p>}
         <button type="button" onClick={onBackToLegacy} className="mt-8 flex items-center gap-2 border-t border-white/10 pt-5 text-xs text-zinc-500 hover:text-white"><ArrowLeft size={14} />{ru ? 'Вернуться к прежнему входу' : 'Back to existing sign in'}</button>
       </motion.div>
     </div>
