@@ -124,7 +124,7 @@ export default {
    const uid=String(usernameDoc.uid);
    const profile=(await firestoreDocument(accessToken,'Users',uid))||await firestoreDocument(accessToken,'auth_users',uid);
    const profileLogin=String(profile?.normalizedLogin||profile?.login||profile?.username||'').toLowerCase();
-   if(!profile||profile.uid!==uid||profileLogin!==login||(profile.status&&profile.status!=='active')||profile.isBlocked===true) return json({message:'Неверный логин или пароль.'},401,origin);
+   if(!profile||(profile.uid&&profile.uid!==uid)||(profileLogin&&profileLogin!==login)||(profile.status&&profile.status!=='active')||profile.isBlocked===true) return json({message:'Неверный логин или пароль.'},401,origin);
    const email=(typeof profile.email==='string'&&profile.email)||`${login}@accounts.rusty-lub.invalid`;
    const verify=await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${encodeURIComponent(WEB_API_KEY)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,returnSecureToken:true})});
    if(!verify.ok) return json({message:'Неверный логин или пароль.'},401,origin);
