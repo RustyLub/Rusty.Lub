@@ -10,7 +10,7 @@ import {
 import { CUSTOM_AVATARS } from '../customAvatars';
 import { CustomUser } from '../types';
 import TermsModal from './TermsModal';
-import { loginWithUsername, registerWithEmail, completeRegistration } from '../services/rustylubEmailAuth';
+import { loginWithUsername, registerWithUsername } from '../services/rustylubEmailAuth';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -54,11 +54,8 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
       }
       setAuthLoading(true);
       try {
-        // Firebase Email/Password remains the credential provider; the public account ID is the username.
-        const internalEmail = `${cleanLogin.toLowerCase()}@accounts.rusty-lub.invalid`;
-        const user = await registerWithEmail(internalEmail, passwordInput, cleanLogin, displayNameInput.trim());
-        const saved = await completeRegistration(user, cleanLogin, displayNameInput.trim());
-        onUserLogin({ uid: user.uid, displayName: saved.profile.displayName || displayNameInput.trim(), role: saved.profile.role || 'user' } as CustomUser);
+        const result = await registerWithUsername(cleanLogin, passwordInput, displayNameInput.trim());
+        onUserLogin({ uid: result.firebaseUser.uid, displayName: result.profile.nickname || displayNameInput.trim(), role: result.profile.role || 'user' } as CustomUser);
         onToast(lang === 'ru' ? 'Аккаунт создан. Добро пожаловать!' : 'Account created. Welcome!', 'success');
         onClose();
       } catch (error: any) {
