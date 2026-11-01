@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Minus, Square, Copy, X, RefreshCw, Shield, Sparkles, Monitor, Radio, Settings } from 'lucide-react';
-import { checkForAppUpdates } from '../services/appUpdater';
+import { Minus, Square, Copy, X, Sparkles, Monitor, Settings } from 'lucide-react';
 
 interface WindowsTitlebarProps {
   appName?: string;
@@ -25,13 +24,32 @@ export const WindowsTitlebar: React.FC<WindowsTitlebarProps> = ({
 }) => {
   const isLight = appTheme === 'light';
   const [isMaximized, setIsMaximized] = useState(false);
-  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [isTauriEnv, setIsTauriEnv] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && ('__TAURI_INTERNALS__' in window || '__TAURI__' in window)) {
       setIsTauriEnv(true);
     }
+    let unlisten: (() => void) | undefined;
+    let mounted = true;
+    const syncWindowState = async () => {
+      try {
+        const { getCurrentWindow } = await import('@tauri-apps/api/window');
+        const win = getCurrentWindow();
+        setIsMaximized(await win.isMaximized());
+        unlisten = await win.onResized(async () => {
+          const maximized = await win.isMaximized();
+          if (mounted) setIsMaximized(maximized);
+        });
+      } catch {
+        // Native window APIs are unavailable in browser preview.
+      }
+    };
+    void syncWindowState();
+    return () => {
+      mounted = false;
+      unlisten?.();
+    };
   }, []);
 
   const handleMinimize = async () => {
@@ -87,23 +105,7 @@ export const WindowsTitlebar: React.FC<WindowsTitlebarProps> = ({
     }
   };
 
-  const handleManualCheckUpdate = async () => {
-    setIsCheckingUpdate(true);
-    try {
-      let statusMsg = '';
-      const updated = await checkForAppUpdates((msg) => { statusMsg = msg; });
-      if (updated) {
-        if (onToast) onToast(lang === 'ru' ? 'Обновление загружено. Приложение перезапускается...' : 'Update downloaded. Restarting app...', 'success');
-      } else {
-        const failed = /ошиб|error|failed|не удалось/i.test(statusMsg);
-        if (onToast) onToast(statusMsg || (lang === 'ru' ? 'Установлена последняя версия v3.0.0!' : 'You have the latest version v3.0.0!'), failed ? 'error' : 'info');
-      }
-    } catch (e) {
-      if (onToast) onToast(lang === 'ru' ? 'Проверка обновлений синхронизирована с GitHub.' : 'Update check synced with GitHub.', 'info');
-    } finally {
-      setIsCheckingUpdate(false);
-    }
-  };
+
 
   return (
     <div 
@@ -165,20 +167,7 @@ export const WindowsTitlebar: React.FC<WindowsTitlebarProps> = ({
           </button>
         )}
 
-        {/* Quick Tauri Auto-Update Button */}
-        <button
-          onClick={handleManualCheckUpdate}
-          disabled={isCheckingUpdate}
-          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase flex items-center gap-1 transition-all cursor-pointer border ${
-            isLight
-              ? 'bg-neutral-100 hover:bg-white text-neutral-800 border-neutral-300'
-              : 'bg-[#121620] hover:bg-[#1a202c] text-[#c8d0d8] border-[#20293a]'
-          }`}
-          title={lang === 'ru' ? 'Проверить обновления приложения' : 'Check application updates'}
-        >
-          <RefreshCw size={10} className={`text-orange-500 ${isCheckingUpdate ? 'animate-spin' : ''}`} />
-          <span className="hidden lg:inline">{isCheckingUpdate ? (lang === 'ru' ? 'Проверка...' : 'Checking...') : (lang === 'ru' ? 'Автообновление' : 'Auto-Update')}</span>
-        </button>
+
 
         <span className="opacity-20 mx-1">|</span>
 
