@@ -13,7 +13,10 @@
     "clean": "rm -rf dist functions/index.cjs",
     "lint": "tsc --noEmit",
     "cap:sync": "npx cap sync android",
-    "dev:web": "vite --host 127.0.0.1 --port 1420"
+    "dev:web": "vite --host 127.0.0.1 --port 1420",
+    "desktop:dev": "npx --yes @tauri-apps/cli@^2 dev",
+    "desktop:build": "npx --yes @tauri-apps/cli@^2 build",
+    "desktop:build:windows": "npx --yes @tauri-apps/cli@^2 build --bundles nsis,msi"
   },
   "dependencies": {
     "@capacitor/core": "^8.4.1",
