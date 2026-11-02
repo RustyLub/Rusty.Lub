@@ -110,13 +110,13 @@ async function startServer() {
         let userDoc = await clientGetDoc(clientDoc(clientDb, 'chat_users', uid));
         let userData = userSnapToData(userDoc);
         
-        if (!userDoc.exists) {
+        if (!userDoc.exists()) {
           // Fallback to 'users' collection
           userDoc = await clientGetDoc(clientDoc(clientDb, 'users', uid));
           userData = userSnapToData(userDoc);
         }
 
-        if (!userDoc.exists) {
+        if (!userDoc.exists()) {
           // Auto-register user in 'users' if missing
           userData = {
             uid,
