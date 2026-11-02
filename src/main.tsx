@@ -1,6 +1,7 @@
 import { Component, ReactNode, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
+import RuntimeErrorMonitor from './components/RuntimeErrorMonitor';
 import './index.css';
 
 interface ErrorBoundaryProps {
@@ -105,6 +106,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
       <App />
+      <RuntimeErrorMonitor />
     </ErrorBoundary>
   </StrictMode>,
 );
