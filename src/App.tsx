@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense } from 'react';
+import { hasActiveVipSubscription } from './utils/vip';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Home,
@@ -423,24 +424,7 @@ export default function App() {
   const isAdmin = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'admin');
   const isOwner = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'owner');
   const isVip = useMemo(() => {
-    if (isAdmin) return true;
-    if (!currentUser) return false;
-    if (currentUser.isVip) return true;
-    
-    const vipUntil = currentUser.vipUntil;
-    if (vipUntil) {
-      try {
-        // Handle string or object (Timestamp-like)
-        const date = (typeof vipUntil === 'object' && (vipUntil as any).toDate) 
-          ? (vipUntil as any).toDate() 
-          : new Date(vipUntil);
-        return date.getTime() > Date.now();
-      } catch (e) {
-        console.error('VIP date check failed:', e);
-        return false;
-      }
-    }
-    return false;
+    return isAdmin || hasActiveVipSubscription(currentUser);
   }, [currentUser, isAdmin]);
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
