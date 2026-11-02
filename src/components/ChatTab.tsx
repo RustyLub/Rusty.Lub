@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { hasActiveVipSubscription } from '../utils/vip';
 import { 
   db, 
   collection, 
@@ -210,7 +211,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   // Admin controls & list
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([]);
-  const [usersMap, setUsersMap] = useState<Record<string, { isBlocked: boolean; isVip?: boolean; isChatVip?: boolean; isScam?: boolean; scamUntil?: string; role: string; displayName: string; photoURL: string; avatarClass: string; clanTag?: string; voiceChannel?: string | null }>>({});
+  const [usersMap, setUsersMap] = useState<Record<string, { isBlocked: boolean; isVip?: boolean; vipUntil?: any; isChatVip?: boolean; isScam?: boolean; scamUntil?: string; role: string; displayName: string; photoURL: string; avatarClass: string; clanTag?: string; voiceChannel?: string | null }>>({});
   const [searchUserQuery, setSearchUserQuery] = useState('');
   const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -342,6 +343,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
         uMap[doc.id] = {
           isBlocked: !!data.isBlocked,
           isVip: !!data.isVip,
+          vipUntil: data.vipUntil || '',
           isChatVip: !!data.isChatVip,
           isScam: !!data.isScam,
           scamUntil: data.scamUntil || '',
@@ -360,6 +362,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
           role: data.role || 'user',
           isBlocked: !!data.isBlocked,
           isVip: !!data.isVip,
+          vipUntil: data.vipUntil || '',
           isChatVip: !!data.isChatVip,
           isScam: !!data.isScam,
           scamUntil: data.scamUntil || '',
@@ -916,11 +919,11 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
   const isAdmin = user && (user.uid === 'serustqs' || user.email === 'misterzet556@gmail.com' || user.role === 'admin');
 
   // Check if current user is VIP Subscriber or Admin
-  const isCurrentVipSub = user && (
-    user.uid === 'serustqs' || 
-    !!usersMap[user.uid]?.isVip || 
-    user.role === 'admin' || 
-    user.email === 'misterzet556@gmail.com'
+  const isCurrentVipSub = !!user && (
+    user.uid === 'serustqs' ||
+    user.role === 'admin' ||
+    user.email === 'misterzet556@gmail.com' ||
+    hasActiveVipSubscription(usersMap[user.uid] || user)
   );
 
   const filteredMessages = messages.filter((msg: any) => {
@@ -1400,7 +1403,7 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
                   const avatarConfig = SURVIVOR_AVATARS.find(a => a.id === msg.avatarClass) || SURVIVOR_AVATARS[0];
                   const msgUser = usersMap[msg.uid] || { role: 'user', isVip: false, isChatVip: false, isScam: false, scamUntil: '' };
                   const isMsgChatVip = !!msgUser.isChatVip;
-                  const isMsgVipSub = msg.uid === 'serustqs' || !!msgUser.isVip || msgUser.role === 'admin';
+                  const isMsgVipSub = msg.uid === 'serustqs' || msgUser.role === 'admin' || hasActiveVipSubscription(msgUser);
                   const isMsgFounder = msg.uid === 'serustqs';
                   const isHighlighted = !!msg.isHighlighted || (activeChannel === 'rust-vip');
                   const isMsgScamActive = !!msgUser.isScam && (
