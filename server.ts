@@ -997,16 +997,39 @@ async function startServer() {
   app.post("/api/rustplus/test-webhook", verifyAdmin, async (req, res) => {
     try {
       const { webhookUrl } = req.body;
-      if (!webhookUrl) {
-        return res.status(400).json({ success: false, error: 'Webhook URL is required' });
+      if (typeof webhookUrl !== 'string' || webhookUrl.length > 512) {
+        return res.status(400).json({ success: false, error: 'A valid Discord webhook URL is required' });
       }
 
-      const response = await fetch(webhookUrl, {
+      // Only allow Discord webhook endpoints. Disable redirects so a trusted
+      // URL cannot redirect the server to an internal or arbitrary destination.
+      let parsedWebhook: URL;
+      try {
+        parsedWebhook = new URL(webhookUrl);
+      } catch {
+        return res.status(400).json({ success: false, error: 'Invalid Discord webhook URL' });
+      }
+      if (
+        parsedWebhook.protocol !== 'https:' ||
+        parsedWebhook.hostname !== 'discord.com' ||
+        parsedWebhook.port !== '' ||
+        parsedWebhook.username !== '' ||
+        parsedWebhook.password !== '' ||
+        !/^\/api\/webhooks\/\d+\/[A-Za-z0-9._-]+\/?$/.test(parsedWebhook.pathname) ||
+        parsedWebhook.search !== '' ||
+        parsedWebhook.hash !== ''
+      ) {
+        return res.status(400).json({ success: false, error: 'Only official Discord webhook URLs are allowed' });
+      }
+
+      const response = await fetch(parsedWebhook.toString(), {
         method: "POST",
+        redirect: "error",
+        signal: AbortSignal.timeout(10000),
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: "Rusty.Lub Rust+ Raid Siren Test",
-          content: "🚨 **RUST+ BOT TEST ALERT:** Discord Webhook Integration for Raid Alarms is working perfectly!"
+          content: "🚨 **RUST+ BOT TEST ALERT:** Discord Webhook Integration for Rust+ is working."
         })
       });
 
@@ -1292,7 +1315,12 @@ async function startServer() {
 
   app.get("/api/radar/player/:id/names", verifyVIP, async (req, res) => {
     const { id } = req.params;
+    const userId = (req as any).user?.uid;
     try {
+      const trackedPlayer = await clientGetDoc(clientDoc(clientDb, 'tracked_players', id));
+      if (!trackedPlayer.exists() || trackedPlayer.data()?.userId !== userId) {
+        return res.status(404).json({ success: false, message: "Tracked player not found" });
+      }
       const q = clientQuery(
         clientCollection(clientDb, 'name_history'),
         clientWhere('trackedPlayerId', '==', id),
@@ -1315,7 +1343,12 @@ async function startServer() {
 
   app.get("/api/radar/player/:id/sessions", verifyVIP, async (req, res) => {
     const { id } = req.params;
+    const userId = (req as any).user?.uid;
     try {
+      const trackedPlayer = await clientGetDoc(clientDoc(clientDb, 'tracked_players', id));
+      if (!trackedPlayer.exists() || trackedPlayer.data()?.userId !== userId) {
+        return res.status(404).json({ success: false, message: "Tracked player not found" });
+      }
       const q = clientQuery(
         clientCollection(clientDb, 'sessions'),
         clientWhere('trackedPlayerId', '==', id),
