@@ -36,6 +36,7 @@ import { CustomUser } from '../types';
 
 export type TabType = 
   | 'home' 
+  | 'outfit' 
   | 'tools' 
   | 'guides' 
   | 'faq' 
@@ -311,6 +312,16 @@ export default function SectionsDrawer({
       badgeRu: '4 раздела',
       badgeEn: '4 sections',
       items: [
+        {
+          id: 'outfit',
+          titleRu: 'Diamond Outfit Studio',
+          titleEn: 'Diamond Outfit Studio',
+          descRu: 'Конструктор экипировки Rust: подбор предметов, примерка и оценка комплектов',
+          descEn: 'Rust loadout builder: choose gear, preview outfits and estimate set value',
+          lucideIcon: <Sparkles size={20} className="text-orange-500" />,
+          badge: 'BETA',
+          badgeColor: 'bg-orange-500/10 text-orange-500 border-orange-500/20'
+        },
         {
           id: 'home',
           titleRu: 'Главная Страница',

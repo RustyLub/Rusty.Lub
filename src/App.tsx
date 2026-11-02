@@ -107,6 +107,7 @@ const ToolsHubTab = lazy(() => import('./components/ToolsHubTab'));
 const GuidesHubTab = lazy(() => import('./components/GuidesHubTab'));
 const SpecialAccessHubTab = lazy(() => import('./components/SpecialAccessHubTab'));
 const PlayerRadar = lazy(() => import('./components/Radar/PlayerRadar').then(m => ({ default: m.PlayerRadar })));
+const DiamondOutfitStudio = lazy(() => import('./components/DiamondOutfitStudio'));
 
 const Footer = lazy(() => import('./components/Footer'));
 const AuthModal = lazy(() => import('./components/AuthModal'));
@@ -260,9 +261,11 @@ const appTranslations = {
   }
 };
 
-type TabType = 'home' | 'ratings' | 'account' | 'support' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
+type TabType = 'outfit' | 'home' | 'ratings' | 'account' | 'support' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
 
 const VALID_TABS: Record<string, TabType> = {
+  outfit: 'outfit',
+  outfits: 'outfit',
   home: 'home',
   ratings: 'ratings',
   community: 'ratings',
@@ -2064,6 +2067,12 @@ export default function App() {
                 </button>
               </div>
               <TermsModal isOpen={true} pageMode={true} onClose={() => handleTabChange('home')} lang={lang} />
+            </motion.div>
+          )}
+
+          {activeTab === 'outfit' && (
+            <motion.div key="outfit" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.2 }}>
+              <DiamondOutfitStudio isVip={isVip} lang={lang} />
             </motion.div>
           )}
 

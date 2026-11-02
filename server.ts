@@ -28,6 +28,7 @@ import { rustPlusManager } from "./src/services/rustplusManager";
 import { FieldValue } from "firebase-admin/firestore";
 import { registerEmailAuthRoutes } from './src/server/emailAuth';
 import { registerRustyLubEmailAuthRoutes } from './src/server/rustylubEmailAuth';
+import { registerLisSkinsRoutes } from './src/server/lisSkins';
 
 dotenv.config();
 
@@ -163,6 +164,7 @@ async function startServer() {
   app.use(express.json());
   registerEmailAuthRoutes(app);
   registerRustyLubEmailAuthRoutes(app);
+  registerLisSkinsRoutes(app);
 
   // CMS endpoints use verified Firebase ID tokens and server-side role records.
   // The legacy verifyToken middleware accepts caller-supplied UID headers; do not use it here.
