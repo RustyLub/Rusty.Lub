@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { hasActiveVipSubscription } from '../utils/vip';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, 
@@ -888,7 +889,9 @@ export default function CabinetModal({
   const handleToggleVip = async (targetUsername: string, currentVip: boolean) => {
     try {
       const ref = doc(db, 'chat_users', targetUsername);
-      await setDoc(ref, { isVip: !currentVip }, { merge: true });
+      const nextVip = !currentVip;
+      const vipUntil = nextVip ? new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString() : '';
+      await setDoc(ref, { isVip: nextVip, vipUntil }, { merge: true });
       onToast(
         lang === 'ru' 
           ? `VIP-статус пользователя ${targetUsername} изменен.` 
@@ -1129,9 +1132,9 @@ export default function CabinetModal({
                     : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <Crown size={13} className={fullProfile?.isVip ? 'text-amber-500 animate-pulse' : ''} />
+                <Crown size={13} className={hasActiveVipSubscription(fullProfile) ? 'text-amber-500 animate-pulse' : ''} />
                 <span>{lang === 'ru' ? 'VIP Статус' : 'VIP Membership'}</span>
-                {fullProfile?.isVip && (
+                {hasActiveVipSubscription(fullProfile) && (
                   <span className="ml-auto bg-amber-500 text-black text-[8px] px-1 font-black font-mono uppercase tracking-widest rounded-sm">
                     {lang === 'ru' ? 'АКТИВЕН' : 'ACTIVE'}
                   </span>
@@ -1607,7 +1610,7 @@ export default function CabinetModal({
                           </div>
 
                           {/* Custom background image (VIP ONLY) */}
-                          {!(fullProfile?.isVip || fullProfile?.role === 'admin') ? (
+                          {!(hasActiveVipSubscription(fullProfile) || fullProfile?.role === 'admin' || fullProfile?.uid === 'serustqs') ? (
                             <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4 relative overflow-hidden group">
                               <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center gap-3 p-4 text-center">
                                 <div className="p-3 bg-amber-500/20 rounded-full border border-amber-500/40 text-amber-500">
@@ -1661,7 +1664,7 @@ export default function CabinetModal({
                                         onChange={(e) => {
                                           const file = e.target.files?.[0];
                                           if (file) {
-                                            const isVip = !!fullProfile?.isVip || fullProfile?.uid === "serustqs" || fullProfile?.role === "admin"; const limit = isVip ? 6 * 1024 * 1024 : 700 * 1024; const limitStr = isVip ? "6MB" : "700KB"; if (file.size > limit) {
+                                            const isVip = hasActiveVipSubscription(fullProfile) || fullProfile?.uid === "serustqs" || fullProfile?.role === "admin"; const limit = isVip ? 6 * 1024 * 1024 : 700 * 1024; const limitStr = isVip ? "6MB" : "700KB"; if (file.size > limit) {
                                               onToast(lang === 'ru' ? 'Размер файла превышает 700KB!' : 'File size exceeds 700KB!', 'warning');
                                               return;
                                             }
