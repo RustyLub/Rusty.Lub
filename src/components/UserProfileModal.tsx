@@ -21,6 +21,7 @@ import {
 import { doc, db, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot } from '../firebase';
 import { CustomUser } from '../types';
 import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
+import { hasActiveVipSubscription } from '../utils/vip';
 
 export interface BadgeInfo {
   id: string;
@@ -339,10 +340,10 @@ export default function UserProfileModal({
 
   // Check if target user has active VIP Subscription
   const isTargetVipSub = !!targetUser && (
-    targetUser.uid === 'serustqs' || 
-    !!targetUser.isVip || 
-    targetUser.role === 'admin' || 
-    targetUser.email === 'misterzet556@gmail.com'
+    targetUser.uid === 'serustqs' ||
+    targetUser.role === 'admin' ||
+    targetUser.email === 'misterzet556@gmail.com' ||
+    hasActiveVipSubscription(targetUser)
   );
 
   const isScamActive = !!targetUser?.isScam && (
