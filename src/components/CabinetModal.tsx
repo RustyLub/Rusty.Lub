@@ -2157,7 +2157,7 @@ export default function CabinetModal({
                 </div>
 
                 {/* If already VIP */}
-                {fullProfile?.isVip && (
+                {hasActiveVipSubscription(fullProfile) && (
                   <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
                       <CheckCircle2 size={18} />
