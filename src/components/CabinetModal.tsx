@@ -2109,21 +2109,10 @@ export default function CabinetModal({
                     </ul>
                   </div>
 
-                  {VIP_PLANS.map((plan) => {
-                    const isSelected = selectedPlanId === plan.id;
-                    return (
+                  {VIP_PLANS.map((plan) => (
                       <div
                         key={plan.id}
-                        onClick={() => {
-                          setSelectedPlanId(plan.id);
-                          setPaymentStatus('idle');
-                          setPaymentError('');
-                        }}
-                        className={`border p-4 flex flex-col justify-between cursor-pointer transition-all duration-300 relative ${
-                          isSelected
-                            ? 'bg-amber-500/5 border-amber-500 shadow-lg shadow-amber-950/10'
-                            : 'bg-zinc-950/40 border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/30'
-                        }`}
+                        className="border border-zinc-800/80 bg-zinc-950/40 p-4 flex flex-col justify-between relative"
                       >
                         <span className="absolute -top-2.5 right-3 bg-amber-500 text-black text-[8px] font-black font-mono px-2 py-0.5 uppercase tracking-wider">
                           {lang === 'ru' ? '🔥 ВСЁ ВКЛЮЧЕНО' : '🔥 ALL INCLUDED'}
@@ -2152,8 +2141,7 @@ export default function CabinetModal({
                           </ul>
                         </div>
                       </div>
-                    );
-                  })}
+                  ))}
                 </div>
 
                 {/* Payment is intentionally unavailable, matching the public VIP support section. */}
