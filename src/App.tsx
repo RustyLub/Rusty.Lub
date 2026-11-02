@@ -106,7 +106,7 @@ const FaqTab = lazy(() => import('./components/FaqTab'));
 const ToolsHubTab = lazy(() => import('./components/ToolsHubTab'));
 const GuidesHubTab = lazy(() => import('./components/GuidesHubTab'));
 const SpecialAccessHubTab = lazy(() => import('./components/SpecialAccessHubTab'));
-const PlayerRadar = lazy(() => import('./components/Radar/PlayerRadar').then(m => ({ default: m.PlayerRadar })));
+const PlayerRadar = lazy(() => import('./components/Radar/PlayerRadar').then(m => ({ default: m.PlayerRadar })));\nconst DiamondOutfitStudio = lazy(() => import('./components/DiamondOutfitStudio'));
 
 const Footer = lazy(() => import('./components/Footer'));
 const AuthModal = lazy(() => import('./components/AuthModal'));
@@ -260,9 +260,9 @@ const appTranslations = {
   }
 };
 
-type TabType = 'home' | 'ratings' | 'account' | 'support' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
+type TabType = 'outfit' | 'home' | 'ratings' | 'account' | 'support' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
 
-const VALID_TABS: Record<string, TabType> = {
+const VALID_TABS: Record<string, TabType> = {\n  outfit: 'outfit',\n  outfits: 'outfit',
   home: 'home',
   ratings: 'ratings',
   community: 'ratings',
@@ -2067,7 +2067,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {activeTab === 'home' && (
+          {activeTab === 'outfit' && (\n            <motion.div key="outfit" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.2 }}>\n              <DiamondOutfitStudio isVip={isVip} lang={lang} />\n            </motion.div>\n          )}\n\n          {activeTab === 'home' && (
             <motion.div
               key="home"
               initial={{ opacity: 0, y: 15 }}
