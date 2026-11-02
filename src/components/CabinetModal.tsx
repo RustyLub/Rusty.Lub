@@ -137,13 +137,7 @@ export default function CabinetModal({
   };
 
   
-  // USDT TRC20 Payment states
-  const [usdtTxId, setUsdtTxId] = useState('');
-  const [selectedPlanId, setSelectedPlanId] = useState('diamond');
-  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'verifying' | 'success' | 'error'>('idle');
-  const [isSandbox, setIsSandbox] = useState(false);
-  const [paymentError, setPaymentError] = useState('');
+  const [paymentUnavailableNotice, setPaymentUnavailableNotice] = useState(false);
   const [daNickname, setDaNickname] = useState('');
   const [isSubmittingDa, setIsSubmittingDa] = useState(false);
 
@@ -726,106 +720,6 @@ export default function CabinetModal({
       onToast(lang === 'ru' ? 'Удален из списка контактов.' : 'Removed contact node.', 'success');
     } catch (err) {
       console.error(err);
-    }
-  };
-
-  const handleVerifyUsdtPayment = async () => {
-    const trimmedTxId = usdtTxId.trim();
-    if (!trimmedTxId) {
-      onToast(lang === 'ru' ? 'Пожалуйста, введите ID транзакции (TxID)!' : 'Please enter the Transaction ID (TxID)!', 'error');
-      return;
-    }
-
-    const activePlan = VIP_PLANS.find(p => p.id === selectedPlanId) || VIP_PLANS[0];
-    const isActuallySandbox = isSandbox || trimmedTxId.toLowerCase().startsWith('demo_');
-
-    setIsVerifyingPayment(true);
-    setPaymentStatus('verifying');
-    setPaymentError('');
-
-    try {
-      // Step 1: Query the Express server verification endpoint
-      const token = await auth.currentUser?.getIdToken();
-      const response = await fetch('/api/payment/verify-usdt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          txId: trimmedTxId,
-          plan: activePlan.name[lang],
-          amount: activePlan.price,
-          userId: user.uid,
-          isSandbox: isActuallySandbox
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        setPaymentStatus('error');
-        setPaymentError(data.error || (lang === 'ru' ? 'Ошибка верификации платежа на сервере.' : 'Server payment verification error.'));
-        onToast(data.error || (lang === 'ru' ? 'Ошибка верификации!' : 'Verification failed!'), 'error');
-        return;
-      }
-
-      // Calculate 45 days expiration from now
-      const now = new Date();
-      const expiresAt = new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000);
-      const vipUntilIso = expiresAt.toISOString();
-
-      // Step 2: Write transaction log & update VIP status in Firestore
-      const paymentRef = doc(db, 'payments', trimmedTxId);
-      await setDoc(paymentRef, {
-        txId: trimmedTxId,
-        userId: user.uid,
-        userDisplayName: fullProfile?.displayName || user.displayName,
-        amount: activePlan.price,
-        plan: activePlan.id,
-        status: 'approved',
-        isSandbox: isActuallySandbox,
-        createdAt: now.toISOString(),
-        expiresAt: vipUntilIso
-      });
-
-      // Update user document
-      const userRef = doc(db, 'chat_users', user.uid);
-      const updatedBadges = [...(fullProfile?.badges || [])];
-      if (!updatedBadges.includes(activePlan.badgeId)) {
-        updatedBadges.push(activePlan.badgeId);
-      }
-      if (!updatedBadges.includes('vip')) {
-        updatedBadges.push('vip');
-      }
-
-      // Automatically unlock premium settings if user buys Gold or Diamond
-      let premiumTheme = fullProfile?.customTheme || 'slate';
-      if (activePlan.id === 'gold') premiumTheme = 'amber';
-      if (activePlan.id === 'diamond') premiumTheme = 'matrix';
-
-      await updateDoc(userRef, {
-        isVip: true,
-        vipUntil: vipUntilIso,
-        badges: updatedBadges,
-        customTheme: premiumTheme
-      });
-
-      setPaymentStatus('success');
-      setUsdtTxId('');
-      onToast(
-        lang === 'ru' 
-          ? 'Оплата подтверждена! VIP статус и бонусы успешно активированы! 🎉' 
-          : 'Payment verified! VIP status and rewards successfully activated! 🎉', 
-        'success'
-      );
-
-    } catch (err: any) {
-      console.error("[USDT VERIFICATION CLIENT ERROR]", err);
-      setPaymentStatus('error');
-      setPaymentError(lang === 'ru' ? 'Не удалось связаться с сервером верификации.' : 'Could not contact the verification server.');
-    } finally {
-      setIsVerifyingPayment(false);
     }
   };
 
@@ -2272,9 +2166,23 @@ export default function CabinetModal({
                   </div>
                   <p className="text-xs text-zinc-300 leading-relaxed">
                     {lang === 'ru'
-                      ? 'Оплата временно недоступна: платёжная система ещё не подключена. Нажатие кнопки не спишет деньги и не активирует VIP.'
-                      : 'Payment is temporarily unavailable because the payment provider is not connected. No money will be charged and VIP will not be activated.'}
+                      ? 'Diamond VIP открывает перечисленные выше преимущества на 45 дней.'
+                      : 'Diamond VIP unlocks the benefits listed above for 45 days.'}
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentUnavailableNotice(true)}
+                    className="w-full sm:w-auto px-5 py-3 bg-amber-500 hover:bg-amber-400 text-black text-xs font-black uppercase tracking-wider transition-colors"
+                  >
+                    {lang === 'ru' ? 'Купить за 300 ₽' : 'Buy for 300 RUB'}
+                  </button>
+                  {paymentUnavailableNotice && (
+                    <p role="status" aria-live="polite" className="text-xs text-amber-300 border border-amber-500/25 bg-black/30 p-3">
+                      {lang === 'ru'
+                        ? 'Оплата временно недоступна: платёжная система ещё не подключена. Деньги не списываются, VIP не активируется.'
+                        : 'Payment is temporarily unavailable because the payment provider is not connected. No money will be charged and VIP will not be activated.'}
+                    </p>
+                  )}
                 </div>
               </motion.div>
             )}
