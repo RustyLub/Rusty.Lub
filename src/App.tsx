@@ -425,6 +425,14 @@ export default function App() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [emailAuthReady] = useState(true);
   const isAdmin = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'admin');
+
+  // Diamond Outfit Studio is an administration-only workspace.
+  useEffect(() => {
+    if (!isAdmin && activeTab === 'outfit') {
+      setActiveTab('home');
+      window.history.replaceState({ tab: 'home' }, '', window.location.pathname + window.location.search);
+    }
+  }, [isAdmin, activeTab]);
   const isOwner = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'owner');
   const isVip = useMemo(() => {
     return isAdmin || hasActiveVipSubscription(currentUser);
@@ -817,6 +825,11 @@ export default function App() {
   };
 
   const handleTabChange = (tabId: TabType) => {
+    if (tabId === 'outfit' && !isAdmin) {
+      setActiveTab('home');
+      return;
+    }
+
     if (tabId === 'radar' && !isVip) {
       if (!currentUser) {
         setAuthModalOpen(true);
@@ -2070,7 +2083,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {activeTab === 'outfit' && (
+          {activeTab === 'outfit' && isAdmin && (
             <motion.div key="outfit" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.2 }}>
               <DiamondOutfitStudio isVip={isVip} lang={lang} />
             </motion.div>
