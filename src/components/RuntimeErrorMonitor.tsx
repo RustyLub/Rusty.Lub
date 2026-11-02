@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import type { CSSProperties } from 'react';
 
 type RuntimeLog = {
   id: number;
@@ -123,7 +124,7 @@ export default function RuntimeErrorMonitor() {
   );
 }
 
-const buttonStyle: React.CSSProperties = {
+const buttonStyle: CSSProperties = {
   color: '#f4f4f5', background: '#34302c', border: '1px solid #5a4638', borderRadius: 5,
   padding: '5px 8px', cursor: 'pointer', fontSize: 11
 };
