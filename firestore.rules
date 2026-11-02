@@ -47,6 +47,15 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Promo-code management is restricted to the explicitly approved Firebase account.
+    function isPromoCodeAdmin() {
+      return signedIn() && request.auth.uid == 'tZa25TCUCHXI8dfhhfC5mhSxq9J3';
+    }
+
+    match /promo_codes/{promoCodeId} {
+      allow read, create, update, delete: if isPromoCodeAdmin();
+    }
+
     // Legacy collections are deliberately left unchanged in this migration.
     // Their existing rules should be reviewed in a separate compatibility pass.
     match /email_verification/{document} {

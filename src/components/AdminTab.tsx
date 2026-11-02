@@ -7,6 +7,7 @@ import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 import UserProfileModal from './UserProfileModal';
 import AdminCmsPanel from './AdminCmsPanel';
 import AdminRatingsPanel from './AdminRatingsPanel';
+import AdminFinancePanel from './AdminFinancePanel';
 import { subscribeToActivityLogs, clearAllActivityLogs, clearAllSecurityLogs, UserActivityLog } from '../services/activityLogger';
 
 interface AdminTabProps {
@@ -315,7 +316,7 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
   };
 
   const [vipManagerUserId, setVipManagerUserId] = useState<string | null>(null);
-  const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'vip' | 'feedback' | 'news' | 'survivors' | 'activity_logs' | 'security_audit' | 'cms' | 'ratings'>('dashboard');
+  const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'vip' | 'feedback' | 'news' | 'survivors' | 'activity_logs' | 'security_audit' | 'cms' | 'ratings' | 'finance'>('dashboard');
   
   const [activityLogs, setActivityLogs] = useState<UserActivityLog[]>([]);
   const [activitySearch, setActivitySearch] = useState('');
@@ -697,6 +698,7 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
             isSecurity: true
           },
           { id: 'vip', label_ru: 'VIP Заявки', label_en: 'VIP Apps', icon: Crown, badge: vipApps.filter(a => a.status === 'pending').length },
+          { id: 'finance', label_ru: 'Финансы', label_en: 'Finance', icon: Wallet },
           { id: 'feedback', label_ru: 'Обратная связь', label_en: 'Feedback', icon: Mail, badge: feedbacks.length },
           { id: 'news', label_ru: 'Новости', label_en: 'News Hub', icon: Megaphone },
           { id: 'survivors', label_ru: 'Выжившие', label_en: 'Survivors', icon: Users, badge: registeredUsers.length },
@@ -916,6 +918,8 @@ export default function AdminTab({ currentUser, lang, onToast }: AdminTabProps) 
           </div>
         </div>
       )}
+
+      {activeSubTab === 'finance' && <AdminFinancePanel lang={lang} onToast={onToast} vipApplications={vipApps} />}
 
       {activeSubTab === 'vip' && (
         <div className="space-y-6 animate-in fade-in duration-300">
