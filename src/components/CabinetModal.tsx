@@ -150,7 +150,7 @@ export default function CabinetModal({
     {
       id: 'diamond',
       name: { ru: 'Diamond VIP', en: 'Diamond VIP' },
-      price: 3,
+      price: 300,
       perks: {
         ru: [
           'Персонализация профиля (кастомные темы и аватары)',
@@ -2242,7 +2242,7 @@ export default function CabinetModal({
                           </div>
 
                           <div className="text-2xl font-black text-amber-500 font-mono">
-                            {plan.price} <span className="text-xs text-zinc-400 font-bold font-sans">USDT / {lang === 'ru' ? '45 дней' : '45 days'}</span>
+                            {plan.price} ₽ <span className="text-xs text-zinc-400 font-bold font-sans">/ {lang === 'ru' ? '45 дней' : '45 days'}</span>
                           </div>
 
                           <ul className="space-y-1.5 pt-2 border-t border-zinc-900/40">
@@ -2259,262 +2259,19 @@ export default function CabinetModal({
                   })}
                 </div>
 
-                {/* Checkout & Payment Section */}
-                {(() => {
-                  const activePlan = VIP_PLANS.find(p => p.id === selectedPlanId) || VIP_PLANS[0];
-                  const merchantAddress = "TRAgQoGMAThBaSxkRaYvfzLtH92Fq89DSQ";
-                  return (
-                    <div className="bg-[#0c0d10] border border-zinc-850 p-5 space-y-5">
-                      <div className="space-y-4 w-full">
-                        <div className="space-y-1">
-                          <h3 className="text-xs font-black text-zinc-300 uppercase tracking-wide font-mono">
-                            1. {lang === 'ru' ? 'ОТПРАВЬТЕ USDT TRC20 (СЕТЬ TRON)' : 'SEND USDT TRC20 (TRON NETWORK)'}
-                          </h3>
-                          <p className="text-[10px] text-zinc-500 leading-relaxed font-medium">
-                            {lang === 'ru'
-                              ? 'Сделайте перевод точной суммы с любого удобного кошелька (Binance, Trust Wallet, Tonkeeper, HTX и т.д.) на указанный TRC20 адрес.'
-                              : 'Make a transfer of the exact amount from any wallet (Binance, Trust Wallet, Tonkeeper, etc.) to the specified TRC20 wallet.'}
-                          </p>
-                        </div>
-
-                        {/* Plan Details Summary */}
-                        <div className="bg-zinc-950 p-3 border border-zinc-900 flex justify-between items-center text-xs">
-                          <span className="font-bold text-zinc-400 font-mono uppercase">
-                            {lang === 'ru' ? 'Выбранный план:' : 'Selected Plan:'} {activePlan.name[lang]}
-                          </span>
-                          <span className="font-black text-amber-500 font-mono text-sm">
-                            {activePlan.price}.00 USDT
-                          </span>
-                        </div>
-
-                        {/* Target Address Copy Box */}
-                        <div className="space-y-1.5">
-                          <span className="text-[9px] font-mono text-zinc-500 font-bold uppercase tracking-wider">
-                            {lang === 'ru' ? 'АДРЕС ПОЛУЧАТЕЛЯ (TRC20)' : 'RECIPIENT TRC20 ADDRESS'}
-                          </span>
-                          <div className="flex bg-zinc-950 border border-zinc-900 p-1 rounded-sm gap-2">
-                            <input
-                              type="text"
-                              readOnly
-                              value={merchantAddress}
-                              className="bg-transparent border-0 text-zinc-300 font-mono text-[11px] flex-1 px-2 select-all focus:ring-0 focus:outline-none"
-                            />
-                            <button
-                              onClick={() => {
-                                navigator.clipboard.writeText(merchantAddress);
-                                onToast(lang === 'ru' ? 'Адрес скопирован!' : 'Address copied!', 'success');
-                              }}
-                              className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-black text-[10px] font-black font-mono uppercase tracking-wider cursor-pointer transition-colors"
-                            >
-                              <Copy size={11} className="inline mr-1" />
-                              {lang === 'ru' ? 'КОПИРОВАТЬ' : 'COPY'}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Verification Form Column */}
-                      <div className="border-t border-zinc-900 pt-5 space-y-4">
-                        <div className="space-y-1">
-                          <h3 className="text-xs font-black text-zinc-300 uppercase tracking-wide font-mono flex items-center justify-between">
-                            <span>2. {lang === 'ru' ? 'ПОДТВЕРДИТЕ ТРАНЗАКЦИЮ' : 'VERIFY TRANSACTION'}</span>
-                            {/* Sandbox Toggle */}
-                            <label className="flex items-center gap-1.5 cursor-pointer select-none">
-                              <input
-                                type="checkbox"
-                                checked={isSandbox}
-                                onChange={(e) => {
-                                  setIsSandbox(e.target.checked);
-                                  if (e.target.checked) {
-                                    setUsdtTxId('demo_tx_' + Array.from({length: 16}, () => Math.floor(Math.random()*16).toString(16)).join(''));
-                                  } else {
-                                    setUsdtTxId('');
-                                  }
-                                }}
-                                className="rounded border-zinc-850 bg-zinc-900 text-amber-500 focus:ring-amber-500/20 w-3.5 h-3.5"
-                              />
-                              <span className="text-[10px] text-amber-500 font-mono uppercase font-black">
-                                {lang === 'ru' ? 'Песочница (Тест)' : 'Sandbox Mode'}
-                              </span>
-                            </label>
-                          </h3>
-                          <p className="text-[10px] text-zinc-500 leading-relaxed font-medium">
-                            {lang === 'ru'
-                              ? 'Вставьте хеш выполненной транзакции (TxID / Hash) в поле ниже и нажмите проверить. Система автоматически сопоставит платеж на блокчейне.'
-                              : 'Paste your Transaction Hash (TxID) below and click verify. Our system will instantly fetch and validate it on the TRON ledger.'}
-                          </p>
-                        </div>
-
-                        {/* TxID Input box */}
-                        <div className="flex flex-col sm:flex-row gap-3">
-                          <input
-                            type="text"
-                            disabled={isVerifyingPayment}
-                            value={usdtTxId}
-                            onChange={(e) => setUsdtTxId(e.target.value)}
-                            placeholder={lang === 'ru' ? "Вставьте Hash транзакции (TxID, 64 символа)..." : "Paste Transaction Hash (TxID, 64 hex chars)..."}
-                            className="flex-1 bg-zinc-950 border border-zinc-900 hover:border-zinc-800 focus:border-amber-500 px-3 py-2 text-xs font-mono text-zinc-300 focus:ring-0 focus:outline-none transition-colors"
-                          />
-                          <button
-                            onClick={handleVerifyUsdtPayment}
-                            disabled={isVerifyingPayment}
-                            className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-zinc-800 disabled:to-zinc-900 disabled:text-zinc-600 font-black font-mono text-xs uppercase tracking-wider text-black cursor-pointer transition-all flex items-center justify-center gap-2"
-                          >
-                            {isVerifyingPayment ? (
-                              <>
-                                <RefreshCw size={12} className="animate-spin" />
-                                <span>{lang === 'ru' ? 'ПРОВЕРКА...' : 'VERIFYING...'}</span>
-                              </>
-                            ) : (
-                              <>
-                                <Check size={13} />
-                                <span>{lang === 'ru' ? 'ПРОВЕРИТЬ ОПЛАТУ' : 'VERIFY PAYMENT'}</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-
-                        {/* Payment Verification Messages */}
-                        <AnimatePresence mode="wait">
-                          {paymentStatus === 'verifying' && (
-                            <motion.div
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -5 }}
-                              className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-mono uppercase font-bold tracking-wide flex items-center gap-2"
-                            >
-                              <RefreshCw size={12} className="animate-spin text-amber-400" />
-                              <span>
-                                {lang === 'ru'
-                                  ? 'СВЯЗЫВАЕМСЯ С СЕТЬЮ TRON ДЛЯ ПРОВЕРКИ ТРАНЗАКЦИИ... ОПЕРАЦИЯ ЗАНУЛИВАЕТ ДВОЙНЫЕ ТРАТЫ.'
-                                  : 'CONTACTING THE TRON MAINNET FOR VERIFICATION... AVOIDING DOUBLE-SPENDS.'}
-                              </span>
-                            </motion.div>
-                          )}
-
-                          {paymentStatus === 'success' && (
-                            <motion.div
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -5 }}
-                              className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex flex-col gap-1 text-left"
-                            >
-                              <div className="font-black font-mono uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
-                                <CheckCircle2 size={14} className="text-emerald-400" />
-                                {lang === 'ru' ? 'ОПЛАТА УСПЕШНО ПОДТВЕРЖДЕНА! 🎉' : 'PAYMENT SUCCESSFULLY VERIFIED! 🎉'}
-                              </div>
-                              <p className="text-[10px] text-zinc-400 mt-1 leading-relaxed font-medium">
-                                {lang === 'ru'
-                                  ? 'Ваш VIP статус и все внутриигровые бонусы мгновенно активированы! Вы можете закрыть кабинет и наслаждаться игровым процессом с новыми правами.'
-                                  : 'Your VIP status and server perks have been permanently mapped. Close your profile page to enjoy survival with your newfound privileges.'}
-                              </p>
-                            </motion.div>
-                          )}
-
-                          {paymentStatus === 'error' && (
-                            <motion.div
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -5 }}
-                              className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex flex-col gap-1 text-left"
-                            >
-                              <div className="font-black font-mono uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
-                                <AlertTriangle size={14} className="text-red-400" />
-                                {lang === 'ru' ? 'ОШИБКА ПОДТВЕРЖДЕНИЯ ПЛАТЕЖА' : 'PAYMENT VERIFICATION FAILED'}
-                              </div>
-                              <p className="text-[10px] text-zinc-350 font-mono bg-black/30 p-2 border border-red-500/10 mt-1 leading-relaxed select-all">
-                                {paymentError}
-                              </p>
-                              <p className="text-[9px] text-zinc-500 mt-1 font-medium leading-relaxed">
-                                {lang === 'ru'
-                                  ? 'Рекомендация: Проверьте правильность выбранного тарифного плана, TxID транзакции и отправленной суммы USDT TRC20.'
-                                  : 'Resolution: Please review your selected subscription tier, TxID hash correctness, and sent amount.'}
-                              </p>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                {/* DonationAlerts Alternative Section */}
-                <div className="bg-gradient-to-br from-[#1a1505] to-[#0c0d10] border border-amber-500/30 p-6 space-y-5 relative overflow-hidden">
-                  <div className="absolute right-0 bottom-0 opacity-5 pointer-events-none">
-                    <Wallet size={120} />
-                  </div>
-                  
-                  <div className="space-y-1.5">
-                    <h3 className="text-xs font-black text-amber-500 uppercase tracking-widest font-mono flex items-center gap-2">
-                      <Wallet size={16} />
-                      {lang === 'ru' ? 'НЕТ КРИПТОВАЛЮТЫ? ОПЛАТА ЧЕРЕЗ DONATIONALERTS' : 'NO CRYPTO? PAY VIA DONATIONALERTS'}
+                {/* Payment is intentionally unavailable, matching the public VIP support section. */}
+                <div className="border border-amber-500/25 bg-amber-500/5 p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-amber-400">
+                    <AlertTriangle size={16} />
+                    <h3 className="text-xs font-black font-mono uppercase tracking-wider">
+                      {lang === 'ru' ? 'Diamond VIP — 300 ₽ / 45 дней' : 'Diamond VIP — 300 RUB / 45 days'}
                     </h3>
-                    <p className="text-[10px] text-zinc-400 max-w-2xl leading-relaxed">
-                      {lang === 'ru'
-                        ? 'Если вы не можете оплатить в USDT, воспользуйтесь сервисом DonationAlerts. Сумма с учетом комиссии составляет 260₽. Обязательно укажите ваш ID в сообщении к донату.'
-                        : 'If you cannot pay via USDT, use DonationAlerts. The total amount including fees is 3.5$. Make sure to include your ID in the donation message.'}
-                    </p>
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                    <div className="space-y-4">
-                      <div className="bg-black/40 border border-zinc-800 p-4 space-y-3">
-                        <div className="flex justify-between items-center text-[10px] font-mono">
-                          <span className="text-zinc-500 uppercase">{lang === 'ru' ? 'Сумма к оплате:' : 'Amount to pay:'}</span>
-                          <span className="text-amber-500 font-black">{lang === 'ru' ? '260 ₽' : '3.5$'}</span>
-                        </div>
-                        <div className="flex justify-between items-center text-[10px] font-mono">
-                          <span className="text-zinc-500 uppercase">{lang === 'ru' ? 'Ваш ID для доната:' : 'Your ID for donation:'}</span>
-                          <span className="text-blue-400 font-black select-all">{user.uid}</span>
-                        </div>
-                        <a 
-                          href="https://www.donationalerts.com/r/rusthub_vip" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-2 w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-[10px] font-black uppercase tracking-widest transition-all"
-                        >
-                          <ExternalLink size={14} />
-                          {lang === 'ru' ? 'ПЕРЕЙТИ К ОПЛАТЕ' : 'GO TO PAYMENT'}
-                        </a>
-                      </div>
-                      
-                      <div className="flex items-start gap-2 p-3 bg-red-950/20 border border-red-500/20 rounded-sm">
-                        <AlertTriangle size={16} className="text-red-500 shrink-0" />
-                        <p className="text-[9px] text-zinc-400 leading-normal uppercase font-mono">
-                          {lang === 'ru' 
-                            ? 'ВНИМАНИЕ: ЛЮБАЯ ПОПЫТКА ОБМАНА ПРИВЕДЕТ К БЛОКИРОВКЕ И ПОЛУЧЕНИЮ ТЕГА "SCAM" В ПРОФИЛЕ НАВСЕГДА.' 
-                            : 'WARNING: ANY ATTEMPT TO FRAUD WILL RESULT IN A PERMANENT "SCAM" TAG ON YOUR PROFILE AND BAN.'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block">
-                        {lang === 'ru' ? 'ПОДАТЬ ЗАЯВКУ ПОСЛЕ ОПЛАТЫ' : 'SUBMIT APPLICATION AFTER PAYMENT'}
-                      </span>
-                      <div className="space-y-3">
-                        <input
-                          type="text"
-                          value={daNickname}
-                          onChange={(e) => setDaNickname(e.target.value)}
-                          placeholder={lang === 'ru' ? 'Ваш никнейм в DonationAlerts...' : 'Your DonationAlerts nickname...'}
-                          className="w-full bg-black/40 border border-zinc-800 p-2.5 text-xs font-mono text-white outline-none focus:border-amber-500/50"
-                        />
-                        <button
-                          onClick={handleDonationSubmit}
-                          disabled={isSubmittingDa}
-                          className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-zinc-800 text-black text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2"
-                        >
-                          {isSubmittingDa ? (
-                            <RefreshCw size={14} className="animate-spin" />
-                          ) : (
-                            <Save size={14} />
-                          )}
-                          {lang === 'ru' ? 'ОТПРАВИТЬ ЗАЯВКУ' : 'SUBMIT APPLICATION'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <p className="text-xs text-zinc-300 leading-relaxed">
+                    {lang === 'ru'
+                      ? 'Оплата временно недоступна: платёжная система ещё не подключена. Нажатие кнопки не спишет деньги и не активирует VIP.'
+                      : 'Payment is temporarily unavailable because the payment provider is not connected. No money will be charged and VIP will not be activated.'}
+                  </p>
                 </div>
               </motion.div>
             )}
