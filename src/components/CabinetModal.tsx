@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { hasActiveVipSubscription } from '../utils/vip';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, 
@@ -136,13 +137,7 @@ export default function CabinetModal({
   };
 
   
-  // USDT TRC20 Payment states
-  const [usdtTxId, setUsdtTxId] = useState('');
-  const [selectedPlanId, setSelectedPlanId] = useState('diamond');
-  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'verifying' | 'success' | 'error'>('idle');
-  const [isSandbox, setIsSandbox] = useState(false);
-  const [paymentError, setPaymentError] = useState('');
+  const [paymentUnavailableNotice, setPaymentUnavailableNotice] = useState(false);
   const [daNickname, setDaNickname] = useState('');
   const [isSubmittingDa, setIsSubmittingDa] = useState(false);
 
@@ -728,106 +723,6 @@ export default function CabinetModal({
     }
   };
 
-  const handleVerifyUsdtPayment = async () => {
-    const trimmedTxId = usdtTxId.trim();
-    if (!trimmedTxId) {
-      onToast(lang === 'ru' ? 'Пожалуйста, введите ID транзакции (TxID)!' : 'Please enter the Transaction ID (TxID)!', 'error');
-      return;
-    }
-
-    const activePlan = VIP_PLANS.find(p => p.id === selectedPlanId) || VIP_PLANS[0];
-    const isActuallySandbox = isSandbox || trimmedTxId.toLowerCase().startsWith('demo_');
-
-    setIsVerifyingPayment(true);
-    setPaymentStatus('verifying');
-    setPaymentError('');
-
-    try {
-      // Step 1: Query the Express server verification endpoint
-      const token = await auth.currentUser?.getIdToken();
-      const response = await fetch('/api/payment/verify-usdt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          txId: trimmedTxId,
-          plan: activePlan.name[lang],
-          amount: activePlan.price,
-          userId: user.uid,
-          isSandbox: isActuallySandbox
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        setPaymentStatus('error');
-        setPaymentError(data.error || (lang === 'ru' ? 'Ошибка верификации платежа на сервере.' : 'Server payment verification error.'));
-        onToast(data.error || (lang === 'ru' ? 'Ошибка верификации!' : 'Verification failed!'), 'error');
-        return;
-      }
-
-      // Calculate 45 days expiration from now
-      const now = new Date();
-      const expiresAt = new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000);
-      const vipUntilIso = expiresAt.toISOString();
-
-      // Step 2: Write transaction log & update VIP status in Firestore
-      const paymentRef = doc(db, 'payments', trimmedTxId);
-      await setDoc(paymentRef, {
-        txId: trimmedTxId,
-        userId: user.uid,
-        userDisplayName: fullProfile?.displayName || user.displayName,
-        amount: activePlan.price,
-        plan: activePlan.id,
-        status: 'approved',
-        isSandbox: isActuallySandbox,
-        createdAt: now.toISOString(),
-        expiresAt: vipUntilIso
-      });
-
-      // Update user document
-      const userRef = doc(db, 'chat_users', user.uid);
-      const updatedBadges = [...(fullProfile?.badges || [])];
-      if (!updatedBadges.includes(activePlan.badgeId)) {
-        updatedBadges.push(activePlan.badgeId);
-      }
-      if (!updatedBadges.includes('vip')) {
-        updatedBadges.push('vip');
-      }
-
-      // Automatically unlock premium settings if user buys Gold or Diamond
-      let premiumTheme = fullProfile?.customTheme || 'slate';
-      if (activePlan.id === 'gold') premiumTheme = 'amber';
-      if (activePlan.id === 'diamond') premiumTheme = 'matrix';
-
-      await updateDoc(userRef, {
-        isVip: true,
-        vipUntil: vipUntilIso,
-        badges: updatedBadges,
-        customTheme: premiumTheme
-      });
-
-      setPaymentStatus('success');
-      setUsdtTxId('');
-      onToast(
-        lang === 'ru' 
-          ? 'Оплата подтверждена! VIP статус и бонусы успешно активированы! 🎉' 
-          : 'Payment verified! VIP status and rewards successfully activated! 🎉', 
-        'success'
-      );
-
-    } catch (err: any) {
-      console.error("[USDT VERIFICATION CLIENT ERROR]", err);
-      setPaymentStatus('error');
-      setPaymentError(lang === 'ru' ? 'Не удалось связаться с сервером верификации.' : 'Could not contact the verification server.');
-    } finally {
-      setIsVerifyingPayment(false);
-    }
-  };
-
   const handleDonationSubmit = async () => {
     if (!daNickname.trim()) {
       onToast(lang === 'ru' ? 'Введите ваш никнейм из DonationAlerts!' : 'Enter your DonationAlerts nickname!', 'warning');
@@ -888,7 +783,9 @@ export default function CabinetModal({
   const handleToggleVip = async (targetUsername: string, currentVip: boolean) => {
     try {
       const ref = doc(db, 'chat_users', targetUsername);
-      await setDoc(ref, { isVip: !currentVip }, { merge: true });
+      const nextVip = !currentVip;
+      const vipUntil = nextVip ? new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString() : '';
+      await setDoc(ref, { isVip: nextVip, vipUntil }, { merge: true });
       onToast(
         lang === 'ru' 
           ? `VIP-статус пользователя ${targetUsername} изменен.` 
@@ -1129,9 +1026,9 @@ export default function CabinetModal({
                     : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <Crown size={13} className={fullProfile?.isVip ? 'text-amber-500 animate-pulse' : ''} />
+                <Crown size={13} className={hasActiveVipSubscription(fullProfile) ? 'text-amber-500 animate-pulse' : ''} />
                 <span>{lang === 'ru' ? 'VIP Статус' : 'VIP Membership'}</span>
-                {fullProfile?.isVip && (
+                {hasActiveVipSubscription(fullProfile) && (
                   <span className="ml-auto bg-amber-500 text-black text-[8px] px-1 font-black font-mono uppercase tracking-widest rounded-sm">
                     {lang === 'ru' ? 'АКТИВЕН' : 'ACTIVE'}
                   </span>
@@ -1607,7 +1504,7 @@ export default function CabinetModal({
                           </div>
 
                           {/* Custom background image (VIP ONLY) */}
-                          {!(fullProfile?.isVip || fullProfile?.role === 'admin') ? (
+                          {!(hasActiveVipSubscription(fullProfile) || fullProfile?.role === 'admin' || fullProfile?.uid === 'serustqs') ? (
                             <div className="bg-[#0c0d10] border border-[#2a2f3b] p-5 space-y-4 relative overflow-hidden group">
                               <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center gap-3 p-4 text-center">
                                 <div className="p-3 bg-amber-500/20 rounded-full border border-amber-500/40 text-amber-500">
@@ -1661,7 +1558,7 @@ export default function CabinetModal({
                                         onChange={(e) => {
                                           const file = e.target.files?.[0];
                                           if (file) {
-                                            const isVip = !!fullProfile?.isVip || fullProfile?.uid === "serustqs" || fullProfile?.role === "admin"; const limit = isVip ? 6 * 1024 * 1024 : 700 * 1024; const limitStr = isVip ? "6MB" : "700KB"; if (file.size > limit) {
+                                            const isVip = hasActiveVipSubscription(fullProfile) || fullProfile?.uid === "serustqs" || fullProfile?.role === "admin"; const limit = isVip ? 6 * 1024 * 1024 : 700 * 1024; const limitStr = isVip ? "6MB" : "700KB"; if (file.size > limit) {
                                               onToast(lang === 'ru' ? 'Размер файла превышает 700KB!' : 'File size exceeds 700KB!', 'warning');
                                               return;
                                             }
@@ -2154,7 +2051,7 @@ export default function CabinetModal({
                 </div>
 
                 {/* If already VIP */}
-                {fullProfile?.isVip && (
+                {hasActiveVipSubscription(fullProfile) && (
                   <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
                       <CheckCircle2 size={18} />
@@ -2269,9 +2166,23 @@ export default function CabinetModal({
                   </div>
                   <p className="text-xs text-zinc-300 leading-relaxed">
                     {lang === 'ru'
-                      ? 'Оплата временно недоступна: платёжная система ещё не подключена. Нажатие кнопки не спишет деньги и не активирует VIP.'
-                      : 'Payment is temporarily unavailable because the payment provider is not connected. No money will be charged and VIP will not be activated.'}
+                      ? 'Diamond VIP открывает перечисленные выше преимущества на 45 дней.'
+                      : 'Diamond VIP unlocks the benefits listed above for 45 days.'}
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentUnavailableNotice(true)}
+                    className="w-full sm:w-auto px-5 py-3 bg-amber-500 hover:bg-amber-400 text-black text-xs font-black uppercase tracking-wider transition-colors"
+                  >
+                    {lang === 'ru' ? 'Купить за 300 ₽' : 'Buy for 300 RUB'}
+                  </button>
+                  {paymentUnavailableNotice && (
+                    <p role="status" aria-live="polite" className="text-xs text-amber-300 border border-amber-500/25 bg-black/30 p-3">
+                      {lang === 'ru'
+                        ? 'Оплата временно недоступна: платёжная система ещё не подключена. Деньги не списываются, VIP не активируется.'
+                        : 'Payment is temporarily unavailable because the payment provider is not connected. No money will be charged and VIP will not be activated.'}
+                    </p>
+                  )}
                 </div>
               </motion.div>
             )}
