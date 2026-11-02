@@ -50,56 +50,24 @@ async function startServer() {
 
   // Middleware for ID Token verification
   const verifyToken = async (req: any, res: any, next: any) => {
-    const authHeader = req.headers.authorization;
-    const customUid = req.headers['x-user-uid'] || req.headers['x-user-id'];
-
-    if (customUid) {
-      try {
-        const uidStr = String(customUid);
-        const userDoc = await clientGetDoc(clientDoc(clientDb, 'chat_users', uidStr));
-        if (userDoc && userDoc.exists && userDoc.exists()) {
-          const userData = userDoc.data();
-          req.user = { uid: uidStr, email: userData?.email || '', role: userData?.role || 'user', ...userData };
-          return next();
-        } else if (uidStr === 'serustqs' || uidStr === 'admin' || uidStr === 'misterzet556@gmail.com') {
-          req.user = { uid: uidStr, role: 'admin', email: 'misterzet556@gmail.com' };
-          return next();
-        }
-      } catch (err) {
-        if (customUid === 'serustqs' || customUid === 'admin' || customUid === 'misterzet556@gmail.com') {
-          req.user = { uid: String(customUid), role: 'admin', email: 'misterzet556@gmail.com' };
-          return next();
-        }
-      }
+    const authHeader = String(req.headers.authorization || '');
+    if (!authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Unauthorized: Missing Firebase ID token' });
     }
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      if (customUid) {
-        req.user = { uid: String(customUid) };
-        return next();
-      }
-      return res.status(401).json({ success: false, message: 'Unauthorized: Missing token' });
-    }
-
-    const idToken = authHeader.split('Bearer ')[1];
+    const idToken = authHeader.slice(7).trim();
     if (!idToken || idToken === 'undefined' || idToken === 'null') {
-      if (customUid) {
-        req.user = { uid: String(customUid) };
-        return next();
-      }
-      return res.status(401).json({ success: false, message: 'Unauthorized: Invalid token' });
+      return res.status(401).json({ success: false, message: 'Unauthorized: Invalid Firebase ID token' });
     }
 
     try {
-      const decodedToken = await adminAuth.verifyIdToken(idToken);
+      // Never trust caller-supplied UID headers as proof of identity.
+      // Check revocation as well as token signature and expiration.
+      const decodedToken = await adminAuth.verifyIdToken(idToken, true);
       req.user = decodedToken;
-      next();
+      return next();
     } catch (error: any) {
-      if (customUid) {
-        req.user = { uid: String(customUid) };
-        return next();
-      }
-      return res.status(401).json({ success: false, message: 'Unauthorized: Invalid token' });
+      return res.status(401).json({ success: false, message: 'Unauthorized: Invalid or revoked Firebase ID token' });
     }
   };
 
@@ -171,7 +139,8 @@ async function startServer() {
         }
         
         const now = new Date();
-        const hasVip = isAdminUser || isVipUser || (vipUntilDate && vipUntilDate > now);
+        const hasValidVipExpiry = vipUntilDate instanceof Date && Number.isFinite(vipUntilDate.getTime()) && vipUntilDate.getTime() > now.getTime();
+        const hasVip = isAdminUser || (isVipUser && hasValidVipExpiry);
 
         if (!hasVip) {
           return res.status(403).json({ success: false, message: 'Forbidden: VIP subscription required' });
