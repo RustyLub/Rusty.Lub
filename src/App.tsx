@@ -1471,7 +1471,7 @@ export default function App() {
               {/* User Profile / Cabinet / Login */}
               {currentUser ? (
                 <button
-                  onClick={() => setCabinetModalOpen(true)}
+                  onClick={() => handleTabChange('account')}
                   className={`flex items-center gap-1.5 sm:gap-2 px-1.5 sm:px-2.5 py-1.5 text-xs font-semibold transition-all cursor-pointer rounded-md shadow-xs shrink-0 group border ${
                     appTheme === 'light'
                       ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-800'
