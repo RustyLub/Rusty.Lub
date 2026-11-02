@@ -549,8 +549,8 @@ export default function CabinetModal({
       onToast(lang === 'ru' ? 'Введите новый пароль!' : 'Please enter a new password!', 'warning');
       return;
     }
-    if (newPassword.length < 4) {
-      onToast(lang === 'ru' ? 'Пароль должен быть не менее 4 символов!' : 'Password must be at least 4 characters!', 'warning');
+    if (newPassword.length < 8 || newPassword.length > 128) {
+      onToast(lang === 'ru' ? 'Пароль должен содержать от 8 до 128 символов.' : 'Password must be 8–128 characters.', 'warning');
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -560,8 +560,28 @@ export default function CabinetModal({
 
     setIsUpdatingPassword(true);
     try {
+      // Keep the legacy account format compatible with AuthModal, but never
+      // write a plaintext password to Firestore.
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const saltHex = Array.from(salt, byte => byte.toString(16).padStart(2, '0')).join('');
+      const key = await crypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(newPassword),
+        'PBKDF2',
+        false,
+        ['deriveBits']
+      );
+      const bits = await crypto.subtle.deriveBits(
+        { name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' },
+        key,
+        256
+      );
+      const passwordHash = Array.from(new Uint8Array(bits), byte => byte.toString(16).padStart(2, '0')).join('');
       await updateDoc(doc(db, 'chat_users', user.uid), {
-        password: newPassword
+        passwordHash,
+        passwordSalt: saltHex,
+        passwordAlgorithm: 'PBKDF2-SHA256',
+        password: null
       });
       onToast(lang === 'ru' ? 'Пароль успешно обновлен!' : 'Password updated successfully!', 'success');
       setNewPassword('');
