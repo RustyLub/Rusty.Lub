@@ -110,7 +110,7 @@ export default function HomeTab({
               <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10px] text-slate-300">
                 <span className="inline-flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-orange-500" /> {ru ? 'Регион: США' : 'Region: US'}</span>
                 <span className="inline-flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-orange-500" /> Procedural Map</span>
-                <span className="inline-flex items-center gap-2"><Users size={13} className="text-orange-500" /> {ru ? 'До 40 игроков' : 'Up to 40 players'}</span>
+                <span className="inline-flex items-center gap-2"><Users size={13} className="text-orange-500" /> {ru ? 'До 75 игроков' : 'Up to 75 players'}</span>
               </div>
             </div>
             <div className="relative flex w-full flex-col gap-3 lg:w-[320px] lg:shrink-0">
