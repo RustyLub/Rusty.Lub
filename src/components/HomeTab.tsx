@@ -98,36 +98,50 @@ export default function HomeTab({
         </div>
       </section>
 
-      {/* RUSTY.LUB GAME SERVER STATUS */}
-      <section className="mx-auto max-w-none border-b border-orange-500/30 px-5 py-7 sm:px-8 lg:px-10">
-        <div className="relative overflow-hidden border border-slate-600/70 bg-[linear-gradient(115deg,#111a22_0%,#0a1016_58%,#17100e_100%)] p-5 shadow-xl sm:p-7">
-          <div className="pointer-events-none absolute -right-12 -top-20 h-56 w-56 rounded-full bg-orange-500/10 blur-3xl" />
-          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="min-w-0">
-              <p className="font-mono text-[10px] font-black uppercase tracking-[.2em] text-orange-500"><span className="text-slate-500">///</span> {ru ? 'ИГРОВОЙ СЕРВЕР RUSTY.LUB' : 'RUSTY.LUB GAME SERVER'}</p>
-              <h2 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">Rusty.Lub <span className="text-orange-500">Vanilla 1x</span></h2>
-              <p className="mt-2 max-w-2xl text-xs leading-5 text-slate-400">{ru ? 'Присоединяйся к нашему серверу Rust. Классический игровой процесс, PvP и выживание.' : 'Join our Rust server. Classic gameplay, PvP and survival.'}</p>
-              <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10px] text-slate-300">
-                <span className="inline-flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-orange-500" /> {ru ? 'Регион: США' : 'Region: US'}</span>
-                <span className="inline-flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-orange-500" /> Procedural Map</span>
-                <span className="inline-flex items-center gap-2"><Users size={13} className="text-orange-500" /> {ru ? 'До 75 игроков' : 'Up to 75 players'}</span>
+      {/* RUSTY.LUB GAME SERVER */}
+      <section className="relative isolate overflow-hidden border-b border-orange-500/30 bg-[#080d12] px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
+        <div className="pointer-events-none absolute inset-0 -z-10 opacity-25" style={{ backgroundImage: 'linear-gradient(115deg, transparent 0%, rgba(249,115,22,.12) 52%, transparent 100%), repeating-linear-gradient(0deg, transparent 0px, transparent 39px, rgba(148,163,184,.07) 40px)' }} />
+        <div className="mx-auto grid max-w-[1500px] items-center gap-8 lg:grid-cols-[minmax(0,1fr)_390px]">
+          <div className="min-w-0">
+            <div className="mb-4 flex items-center gap-3">
+              <span className="h-px w-8 bg-orange-500" />
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[.24em] text-orange-400">{ru ? 'ИГРОВОЙ СЕРВЕР RUSTY.LUB' : 'RUSTY.LUB GAME SERVER'}</p>
+            </div>
+            <h2 className="text-3xl font-black leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">Rusty.Lub <span className="text-orange-500">Vanilla 1x</span></h2>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-slate-300">{ru ? 'Классический Rust без лишних модификаций. Стройся, объединяйся с командой и сражайся за выживание.' : 'Classic Rust without unnecessary modifications. Build, team up and fight to survive.'}</p>
+            <div className="mt-7 grid max-w-2xl grid-cols-3 gap-2 sm:gap-3">
+              <div className="border-l-2 border-orange-500 bg-white/[0.04] px-3 py-3 sm:px-4">
+                <p className="font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'РЕГИОН' : 'REGION'}</p>
+                <p className="mt-1 text-sm font-bold text-white">US / USA</p>
+              </div>
+              <div className="border-l-2 border-slate-600 bg-white/[0.04] px-3 py-3 sm:px-4">
+                <p className="font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'КАРТА' : 'MAP'}</p>
+                <p className="mt-1 text-sm font-bold text-white">Procedural</p>
+              </div>
+              <div className="border-l-2 border-slate-600 bg-white/[0.04] px-3 py-3 sm:px-4">
+                <p className="font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'СЛОТЫ' : 'SLOTS'}</p>
+                <p className="mt-1 text-sm font-bold text-white">75 {ru ? 'игроков' : 'players'}</p>
               </div>
             </div>
-            <div className="relative flex w-full flex-col gap-3 lg:w-[320px] lg:shrink-0">
-              <a href="https://enum.gg/server/rusty-lub-vanilla-fun-server-nmcqfPa3" target="_blank" rel="noopener noreferrer" className="flex min-h-12 items-center justify-center border border-slate-600/70 bg-black/35 px-3 py-2 transition hover:border-orange-500/70" aria-label={ru ? 'Открыть живой статус сервера на Enum' : 'Open live server status on Enum'}>
-                <img src="https://enum.gg/api/public/v1/servers/nmcqfPa3/badge.svg" alt={ru ? 'Статус сервера и количество игроков в реальном времени' : 'Live server status and player count'} className="h-7 max-w-full" />
-              </a>
-              <div className="flex min-h-10 items-center justify-between gap-2 border border-slate-700 bg-black/35 px-3">
-                <span className="truncate font-mono text-[11px] text-slate-200">135.148.15.101:26952</span>
-                <button type="button" onClick={async () => { try { await navigator.clipboard.writeText('135.148.15.101:26952'); setCopiedServerAddress(true); window.setTimeout(() => setCopiedServerAddress(false), 1800); } catch { setCopiedServerAddress(false); } }} className="inline-flex shrink-0 items-center gap-1.5 py-2 text-[10px] font-bold uppercase text-orange-400 transition hover:text-orange-300" aria-label={ru ? 'Скопировать адрес сервера' : 'Copy server address'}>
-                  {copiedServerAddress ? <Check size={13} /> : <Copy size={13} />}
-                  {copiedServerAddress ? (ru ? 'Скопировано' : 'Copied') : (ru ? 'Копировать' : 'Copy')}
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <a href="steam://connect/135.148.15.101:26952" className="inline-flex min-h-10 items-center justify-center gap-2 bg-orange-500 px-3 py-2 text-[10px] font-black uppercase text-[#101318] transition hover:bg-orange-400"><ArrowRight size={14} /> {ru ? 'Подключиться' : 'Connect'}</a>
-                <a href="https://enum.gg/server/rusty-lub-vanilla-fun-server-nmcqfPa3" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center justify-center gap-2 border border-slate-600 px-3 py-2 text-[10px] font-bold uppercase text-slate-200 transition hover:border-orange-500 hover:text-orange-400">{ru ? 'Подробнее' : 'Details'} <ExternalLink size={12} /></a>
-              </div>
+          </div>
+          <div className="border border-slate-700 bg-[#0d141c]/95 p-4 shadow-2xl sm:p-5">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[.18em] text-slate-400">{ru ? 'СТАТУС СЕРВЕРА' : 'SERVER STATUS'}</span>
+              <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-emerald-400"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> LIVE</span>
+            </div>
+            <a href="https://enum.gg/server/rusty-lub-vanilla-fun-server-nmcqfPa3" target="_blank" rel="noopener noreferrer" className="flex min-h-12 items-center justify-center border border-slate-700 bg-black/30 px-3 py-3 transition hover:border-orange-500/70" aria-label={ru ? 'Открыть статус сервера на Enum' : 'Open server status on Enum'}>
+              <img src="https://enum.gg/api/public/v1/servers/nmcqfPa3/badge.svg" alt={ru ? 'Текущий онлайн сервера' : 'Current server player count'} className="h-7 max-w-full" />
+            </a>
+            <div className="mt-3 flex items-center justify-between gap-3 border border-slate-700 bg-black/25 px-3 py-2.5">
+              <span className="truncate font-mono text-xs text-slate-200">135.148.15.101:26952</span>
+              <button type="button" onClick={async () => { try { await navigator.clipboard.writeText('135.148.15.101:26952'); setCopiedServerAddress(true); window.setTimeout(() => setCopiedServerAddress(false), 1800); } catch { setCopiedServerAddress(false); } }} className="inline-flex shrink-0 items-center gap-1.5 text-[10px] font-bold uppercase text-orange-400 transition hover:text-orange-300" aria-label={ru ? 'Скопировать адрес сервера' : 'Copy server address'}>
+                {copiedServerAddress ? <Check size={13} /> : <Copy size={13} />}
+                {copiedServerAddress ? (ru ? 'Скопировано' : 'Copied') : (ru ? 'Копировать' : 'Copy')}
+              </button>
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <a href="steam://connect/135.148.15.101:26952" className="inline-flex min-h-11 items-center justify-center gap-2 bg-orange-500 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-[#101318] transition hover:bg-orange-400"><ArrowRight size={15} /> {ru ? 'Играть' : 'Play now'}</a>
+              <a href="https://enum.gg/server/rusty-lub-vanilla-fun-server-nmcqfPa3" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 border border-slate-600 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-200 transition hover:border-orange-500 hover:text-orange-400">{ru ? 'Подробнее' : 'Details'} <ExternalLink size={13} /></a>
             </div>
           </div>
         </div>
