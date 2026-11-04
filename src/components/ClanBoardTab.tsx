@@ -231,7 +231,6 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
     };
     const onError = (error: Error) => {
       console.error('Error fetching applications:', error);
-      onToast(lang === 'ru' ? 'Не удалось загрузить заявки' : 'Could not load applications', 'error');
     };
     const sentUnsubscribe = onSnapshot(
       query(collection(db, 'clan_tickets'), where('applicantId', '==', user.uid)),
@@ -244,7 +243,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
       onError
     );
     return () => { sentUnsubscribe(); receivedUnsubscribe(); };
-  }, [user?.uid, lang, onToast]);
+  }, [user?.uid]);
 
   // Load comments when a thread post is opened
   useEffect(() => {
@@ -276,7 +275,6 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
     }, (error) => {
       console.error('Error loading clan discussion:', error);
       setLoadingComments(false);
-      onToast(lang === 'ru' ? 'Не удалось загрузить обсуждение' : 'Could not load discussion', 'error');
     });
 
     // If user is author of selected post, listen to incoming tickets for this post
