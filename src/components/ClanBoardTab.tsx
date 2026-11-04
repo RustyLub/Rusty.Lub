@@ -1413,7 +1413,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
                       </div>
                     ) : (
                       /* IF VISITOR -> Show Application Submission Form */
-                      {selectedPost.status === 'closed' ? (
+                      selectedPost.status === 'closed' ? (
                         <div className="rounded-xl border border-rose-500/25 bg-rose-500/5 p-5 text-center text-sm text-zinc-300">
                           {lang === 'ru' ? 'Набор по этому объявлению закрыт. Отправка заявок недоступна.' : 'Recruitment is closed. Applications are no longer accepted.'}
                         </div>
@@ -1516,7 +1516,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
                           <span>{lang === 'ru' ? 'Отправить тикет-заявку' : 'Submit Application Ticket'}</span>
                         </button>
                       </form>
-                      )}
+                      )
                     )}
                   </div>
                 )}
