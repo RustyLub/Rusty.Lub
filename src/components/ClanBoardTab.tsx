@@ -1395,14 +1395,16 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
                               {/* Action buttons for owner */}
                               <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#2a2f3b]">
                                 <button
+                                  disabled={t.status !== 'pending'}
                                   onClick={() => handleUpdateTicketStatus(t.id, 'rejected')}
-                                  className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 text-[10px] font-mono font-bold uppercase cursor-pointer border border-red-500/30"
+                                  className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 disabled:opacity-40 disabled:cursor-not-allowed text-red-300 text-[10px] font-mono font-bold uppercase cursor-pointer border border-red-500/30"
                                 >
                                   {lang === 'ru' ? 'Отклонить' : 'Reject'}
                                 </button>
                                 <button
+                                  disabled={t.status !== 'pending'}
                                   onClick={() => handleUpdateTicketStatus(t.id, 'accepted')}
-                                  className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-mono font-bold uppercase cursor-pointer"
+                                  className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[10px] font-mono font-bold uppercase cursor-pointer"
                                 >
                                   {lang === 'ru' ? 'Одобрить заявку' : 'Approve Application'}
                                 </button>
@@ -1756,9 +1758,10 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-[#cd412b] hover:bg-[#b83824] text-white text-xs font-mono font-bold uppercase transition-all cursor-pointer shadow-md"
+                  disabled={isSubmittingPost}
+                  className="px-6 py-2 bg-[#cd412b] hover:bg-[#b83824] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-mono font-bold uppercase transition-all cursor-pointer shadow-md"
                 >
-                  {lang === 'ru' ? 'Опубликовать тему' : 'Publish Thread'}
+                  {isSubmittingPost ? (lang === 'ru' ? 'Публикация...' : 'Publishing...') : (lang === 'ru' ? 'Опубликовать тему' : 'Publish Thread')}
                 </button>
               </div>
             </form>
