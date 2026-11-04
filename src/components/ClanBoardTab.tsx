@@ -119,6 +119,13 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
   const [tickets, setTickets] = useState<ClanTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmittingPost, setIsSubmittingPost] = useState(false);
+  const [editingPost, setEditingPost] = useState<ClanPost | null>(null);
+  const [editForm, setEditForm] = useState({
+    title: '', clanName: '', hours: 0, serverType: 'Любой сервер',
+    teamSize: '', primeTime: '', ageMin: 16, description: '', discord: ''
+  });
+  const [editRoles, setEditRoles] = useState<string[]>([]);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -519,6 +526,63 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
     } catch (err) {
       console.error("Error updating ticket status:", err);
       onToast(lang === 'ru' ? 'Ошибка изменения статуса' : 'Error updating ticket status', 'error');
+    }
+  };
+
+  const openEditPost = (post: ClanPost) => {
+    if (!user || user.uid !== post.authorId) return;
+    setEditingPost(post);
+    setEditForm({
+      title: post.title || '',
+      clanName: post.clanName || '',
+      hours: Number(post.hours) || 0,
+      serverType: post.serverType || 'Любой сервер',
+      teamSize: post.teamSize || '',
+      primeTime: post.primeTime || '',
+      ageMin: Number(post.ageMin) || 16,
+      description: post.description || '',
+      discord: post.discord || ''
+    });
+    setEditRoles(Array.isArray(post.rolesNeeded) ? post.rolesNeeded : []);
+  };
+
+  const handleSavePostEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !editingPost || editingPost.authorId !== user.uid) return;
+    const title = editForm.title.trim();
+    const description = editForm.description.trim();
+    const discord = editForm.discord.trim();
+    const hours = Number(editForm.hours);
+    const ageMin = Number(editForm.ageMin);
+    if (title.length < 3 || title.length > 100 || !description || description.length > 3000 ||
+        discord.length < 2 || discord.length > 100 || !Number.isFinite(hours) || hours < 0 || hours > 20000 ||
+        !Number.isFinite(ageMin) || ageMin < 12 || ageMin > 99 ||
+        editForm.clanName.length > 60 || editForm.teamSize.length > 60 || editForm.primeTime.length > 60) {
+      onToast(lang === 'ru' ? 'Проверьте заполнение и ограничения полей' : 'Please check the form fields and limits', 'error');
+      return;
+    }
+    setIsSavingEdit(true);
+    try {
+      await updateDoc(doc(db, 'clan_posts', editingPost.id), {
+        title,
+        clanName: editingPost.type === 'clan_recruit' ? editForm.clanName.trim() : '',
+        hours,
+        serverType: editForm.serverType,
+        teamSize: editForm.teamSize.trim(),
+        primeTime: editForm.primeTime.trim(),
+        ageMin,
+        rolesNeeded: editRoles,
+        description,
+        discord,
+        updatedAt: serverTimestamp()
+      });
+      setEditingPost(null);
+      onToast(lang === 'ru' ? 'Объявление обновлено' : 'Listing updated', 'success');
+    } catch (err) {
+      console.error('Error updating clan listing:', err);
+      onToast(lang === 'ru' ? 'Не удалось сохранить изменения' : 'Could not save changes', 'error');
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
@@ -962,6 +1026,12 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
 
                     {isOwner && (
                       <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => openEditPost(post)}
+                          className="px-2 py-1 bg-[#1b1e26] hover:bg-[#252a36] text-amber-300 text-[10px] font-mono border border-amber-500/30 cursor-pointer"
+                        >
+                          {lang === 'ru' ? 'Изменить' : 'Edit'}
+                        </button>
                         <button
                           onClick={() => handleTogglePostStatus(post)}
                           className="px-2 py-1 bg-[#1b1e26] hover:bg-[#252a36] text-zinc-300 text-[10px] font-mono border border-[#2a2f3b] cursor-pointer"
@@ -1522,6 +1592,82 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
                 )}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Edit Forum Post */}
+      {editingPost && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[60] flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-[#14171e] border border-[#2a2f3b] max-w-2xl w-full p-6 space-y-5 rust-metal-pattern relative max-h-[90vh] flex flex-col my-auto">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500" />
+            <div className="flex items-center justify-between border-b border-[#2a2f3b] pb-3 shrink-0">
+              <h3 className="text-xl font-bold text-white uppercase font-teko tracking-wider">
+                {lang === 'ru' ? 'Редактирование объявления' : 'Edit Listing'}
+              </h3>
+              <button type="button" onClick={() => setEditingPost(null)} className="text-zinc-400 hover:text-white text-xs font-mono p-1 border border-[#2a2f3b]">[X]</button>
+            </div>
+            <form onSubmit={handleSavePostEdit} className="space-y-4 overflow-y-auto pr-1 flex-1">
+              <div className="space-y-1">
+                <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold">{lang === 'ru' ? 'Заголовок' : 'Title'}</label>
+                <input required maxLength={100} value={editForm.title} onChange={(e) => setEditForm({...editForm, title:e.target.value})} className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono focus:border-[#cd412b] focus:outline-none" />
+              </div>
+              {editingPost.type === 'clan_recruit' && (
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold">{lang === 'ru' ? 'Название клана / тег' : 'Clan Name / Tag'}</label>
+                  <input maxLength={60} value={editForm.clanName} onChange={(e) => setEditForm({...editForm, clanName:e.target.value})} className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono" />
+                </div>
+              )}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold">{lang === 'ru' ? 'Часы в Rust' : 'Rust Hours'}</label>
+                  <input type="number" min={0} max={20000} value={editForm.hours} onChange={(e) => setEditForm({...editForm, hours:Number(e.target.value)})} className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold">{lang === 'ru' ? 'Формат сервера' : 'Server Format'}</label>
+                  <select value={editForm.serverType} onChange={(e) => setEditForm({...editForm, serverType:e.target.value})} className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono">
+                    {SERVER_TYPES.map((st) => <option key={st} value={st}>{st}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold">{lang === 'ru' ? 'Возраст от' : 'Minimum Age'}</label>
+                  <input type="number" min={12} max={99} value={editForm.ageMin} onChange={(e) => setEditForm({...editForm, ageMin:Number(e.target.value)})} className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold">{lang === 'ru' ? 'Состав команды' : 'Team Size'}</label>
+                  <input maxLength={60} value={editForm.teamSize} onChange={(e) => setEditForm({...editForm, teamSize:e.target.value})} className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold">Discord</label>
+                  <input required maxLength={100} value={editForm.discord} onChange={(e) => setEditForm({...editForm, discord:e.target.value})} className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold">{lang === 'ru' ? 'Прайм-тайм' : 'Prime Time'}</label>
+                <input maxLength={60} value={editForm.primeTime} onChange={(e) => setEditForm({...editForm, primeTime:e.target.value})} className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold">{lang === 'ru' ? 'Роли и навыки' : 'Roles & Skills'}</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {PRESET_ROLES.map((role) => {
+                    const selected = editRoles.includes(role);
+                    return <button key={role} type="button" onClick={() => toggleRoleSelection(role, editRoles, setEditRoles)} className={`px-2 py-1 text-[10px] font-mono border ${selected ? 'bg-[#cd412b] text-white border-orange-500' : 'bg-[#1b1e26] text-zinc-400 border-[#2a2f3b]'}`}>{role}</button>;
+                  })}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold">{lang === 'ru' ? 'Описание' : 'Description'}</label>
+                <textarea required rows={5} maxLength={3000} value={editForm.description} onChange={(e) => setEditForm({...editForm, description:e.target.value})} className="w-full bg-[#1b1e26] border border-[#2a2f3b] p-3 text-xs text-white font-mono resize-none" />
+              </div>
+              <div className="flex justify-end gap-3 pt-3 border-t border-[#2a2f3b]">
+                <button type="button" onClick={() => setEditingPost(null)} className="px-4 py-2 bg-[#1b1e26] text-zinc-300 text-xs font-mono uppercase">{lang === 'ru' ? 'Отмена' : 'Cancel'}</button>
+                <button type="submit" disabled={isSavingEdit} className="px-6 py-2 bg-[#cd412b] hover:bg-[#b83824] disabled:opacity-50 text-white text-xs font-mono font-bold uppercase">
+                  {isSavingEdit ? (lang === 'ru' ? 'Сохранение...' : 'Saving...') : (lang === 'ru' ? 'Сохранить изменения' : 'Save Changes')}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
