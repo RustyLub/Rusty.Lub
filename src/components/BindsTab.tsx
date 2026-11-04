@@ -394,9 +394,9 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
           </p>
           <p className="text-zinc-400">
             {bindsMode === 'player' ? (
-              lang === 'en' ? 'Click on card to copy command, in Rust open console (F1), paste (Ctrl+V) and press Enter. Click bookmark icon to save to cabinet.' : 'Кликните по карточке, чтобы скопировать. В Rust откройте консоль (F1), вставьте (Ctrl+V) и нажмите Enter. Нажмите значок закладки, чтобы сохранить в кабинет.'
+              lang === 'en' ? 'Click the command button to copy it, open the Rust console (F1), paste (Ctrl+V), and press Enter. Use the bookmark icon to save it to your cabinet.' : 'Нажмите кнопку команды, чтобы скопировать её. Откройте консоль Rust (F1), вставьте команду (Ctrl+V) и нажмите Enter. Значок закладки сохраняет бинд в личный кабинет.'
             ) : (
-              lang === 'en' ? 'Click to copy. You need auth level 1/2. Paste in console (F1), replace <ID> with actual value, and Enter.' : 'Кликните, чтобы скопировать. Нужен auth level 1/2. Вставьте в консоль (F1), замените <ID> на нужное значение и нажмите Enter.'
+              lang === 'en' ? 'Copy the command and paste it into the Rust server console (F1). Admin commands require the appropriate server permissions; replace placeholders such as <ID> before execution.' : 'Скопируйте команду и вставьте её в консоль сервера Rust (F1). Для выполнения нужны соответствующие права администратора; замените шаблоны вроде <ID> перед запуском.'
             )}
           </p>
         </div>
