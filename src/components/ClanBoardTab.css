@@ -1,21 +1,150 @@
-/* Rusty.Lub — Clan recruitment board visual system */
-.clan-board-page{--clan-accent:#e58a3a;--clan-line:rgba(164,178,194,.16);color:#e8edf2;min-width:0}
-.clan-board-page>div,.clan-board-page [class*="bg-[#14171e]"]{border-color:var(--clan-line)!important;border-radius:14px!important;box-shadow:0 14px 38px rgba(0,0,0,.18)}
-.clan-board-page>div:first-child{background:radial-gradient(ellipse at 90% 0%,rgba(229,138,58,.13),transparent 36%),linear-gradient(145deg,rgba(22,29,37,.98),rgba(12,16,21,.98))!important;padding:clamp(18px,2.5vw,30px)!important}
-.clan-board-page [class*="bg-[#1b1e26]"]{background:linear-gradient(145deg,rgba(27,35,44,.92),rgba(16,21,27,.96))!important;border-color:rgba(164,178,194,.13)!important;border-radius:10px!important}
+/* Rusty.Lub — Clan board / full interface redesign */
+.clan-board-page{
+  --cb-bg:#0c1117;--cb-panel:#121a23;--cb-panel-2:#18232e;--cb-line:rgba(166,184,201,.16);
+  --cb-muted:#94a3b2;--cb-text:#edf2f6;--cb-orange:#e47735;--cb-orange-bright:#ff9a4b;
+  color:var(--cb-text);min-width:0;isolation:isolate;gap:22px!important;
+}
+.clan-board-page>*{min-width:0}
+.clan-board-page>div:first-child{
+  position:relative;overflow:hidden;border:1px solid rgba(226,135,67,.28)!important;border-radius:18px!important;
+  padding:clamp(22px,3vw,38px)!important;
+  background:
+    radial-gradient(ellipse at 82% 8%,rgba(223,112,45,.22),transparent 34%),
+    radial-gradient(ellipse at 4% 100%,rgba(65,92,111,.17),transparent 38%),
+    linear-gradient(125deg,#1a2631 0%,#101820 55%,#0b1117 100%)!important;
+  box-shadow:0 22px 55px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.035);
+}
+.clan-board-page>div:first-child:after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.22;
+  background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:34px 34px;mask-image:linear-gradient(115deg,#000,transparent 75%);
+}
+.clan-board-page>div:first-child>*{position:relative;z-index:1}
+.clan-board-page>div:first-child>div:nth-of-type(2){gap:22px!important}
+.clan-board-page>div:first-child h1{font-size:clamp(28px,3.3vw,44px)!important;letter-spacing:-.045em!important;line-height:1.04!important;text-transform:none!important;max-width:780px}
+.clan-board-page>div:first-child p{font-size:14px!important;line-height:1.7!important;color:#b0bdc9!important;max-width:680px}
+.clan-board-page>div:first-child button{
+  min-height:48px;padding:0 22px!important;border-radius:9px!important;background:linear-gradient(135deg,#f08b43,#c9572b)!important;
+  border:1px solid rgba(255,190,130,.42)!important;box-shadow:0 9px 24px rgba(193,83,37,.23);font-size:11px!important;letter-spacing:.08em;
+}
+.clan-board-page>div:first-child button:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.clan-board-page>div:first-child>div:last-child{border-color:rgba(190,204,216,.15)!important;padding-top:20px!important}
+.clan-board-page>div:first-child>div:last-child>div{
+  min-height:76px;padding:14px 16px!important;border-radius:11px!important;border:1px solid rgba(179,196,211,.13)!important;
+  background:linear-gradient(145deg,rgba(35,49,62,.84),rgba(17,26,35,.86))!important;box-shadow:inset 0 1px rgba(255,255,255,.035);
+}
+.clan-board-page>div:first-child>div:last-child>div>div:first-child{border-radius:8px;padding:10px!important}
+.clan-board-page>div:first-child>div:last-child span:first-child{font-size:9px!important;letter-spacing:.12em;color:#9cabb8!important}
+.clan-board-page>div:first-child>div:last-child span:last-child{font-size:24px!important;line-height:1.2}
+.clan-board-page>div:nth-child(2){
+  padding:18px!important;border-radius:15px!important;border:1px solid var(--cb-line)!important;
+  background:linear-gradient(145deg,rgba(20,29,39,.97),rgba(13,19,26,.98))!important;
+  box-shadow:0 14px 38px rgba(0,0,0,.17);
+}
+.clan-board-page>div:nth-child(2)>div:first-child{gap:8px!important;border-color:var(--cb-line)!important;padding-bottom:14px!important}
+.clan-board-page>div:nth-child(2)>div:first-child button{
+  border:1px solid transparent!important;border-radius:8px!important;background:rgba(255,255,255,.035)!important;
+  min-height:40px;padding:0 14px!important;font-size:10px!important;letter-spacing:.035em!important;color:#aab6c2!important;
+}
+.clan-board-page>div:nth-child(2)>div:first-child button:hover{background:rgba(255,255,255,.075)!important;color:#fff!important}
+.clan-board-page>div:nth-child(2)>div:first-child button[class*="bg-[#cd412b]"],
+.clan-board-page>div:nth-child(2)>div:first-child button[class*="bg-amber-600"],
+.clan-board-page>div:nth-child(2)>div:first-child button[class*="bg-emerald-600"],
+.clan-board-page>div:nth-child(2)>div:first-child button[class*="bg-purple-600"],
+.clan-board-page>div:nth-child(2)>div:first-child button[class*="bg-blue-600"]{
+  color:#fff!important;background:linear-gradient(135deg,rgba(220,105,48,.95),rgba(161,66,37,.95))!important;border-color:rgba(255,163,100,.35)!important;box-shadow:0 5px 16px rgba(190,83,40,.16)
+}
+.clan-board-page>div:nth-child(2)>div:last-child{gap:10px!important}
+.clan-board-page>div:nth-child(2) input,.clan-board-page>div:nth-child(2) select{
+  height:44px!important;border-radius:8px!important;border:1px solid rgba(160,180,198,.19)!important;
+  background:#0c141c!important;color:#e5edf4!important;padding-top:0!important;padding-bottom:0!important;font-size:11px!important;
+}
+.clan-board-page>div:nth-child(2) input{padding-left:40px!important}
+.clan-board-page>div:nth-child(2) input::placeholder{color:#718191!important}
+.clan-board-page>div:nth-child(2) input:focus,.clan-board-page>div:nth-child(2) select:focus{border-color:#d9793c!important;box-shadow:0 0 0 3px rgba(217,121,60,.12)}
+.clan-board-page>div:nth-child(3){gap:15px!important}
+.clan-board-page>div:nth-child(3)>div:not(.text-center){
+  position:relative;padding:22px!important;border-radius:14px!important;border:1px solid rgba(157,179,198,.16)!important;
+  background:linear-gradient(145deg,rgba(23,34,45,.98),rgba(14,22,30,.99))!important;
+  box-shadow:0 12px 32px rgba(0,0,0,.19);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+.clan-board-page>div:nth-child(3)>div:not(.text-center):hover{
+  transform:translateY(-2px);border-color:rgba(224,132,68,.38)!important;box-shadow:0 18px 38px rgba(0,0,0,.25)
+}
+.clan-board-page>div:nth-child(3)>div>div:first-child>div:first-child{gap:7px!important}
+.clan-board-page>div:nth-child(3)>div>div:first-child span{border-radius:5px!important;letter-spacing:.045em}
+.clan-board-page>div:nth-child(3)>div>div:nth-child(2){align-items:center!important;gap:15px!important}
+.clan-board-page>div:nth-child(3)>div>div:nth-child(2)>img{
+  width:54px!important;height:54px!important;border-radius:12px!important;border:1px solid rgba(221,139,83,.36)!important;box-shadow:0 5px 16px rgba(0,0,0,.25)
+}
+.clan-board-page>div:nth-child(3)>div>div:nth-child(2) h2{
+  font-size:clamp(17px,1.7vw,21px)!important;line-height:1.25!important;letter-spacing:-.02em!important;text-transform:none!important;color:#f2f5f8!important
+}
+.clan-board-page>div:nth-child(3)>div>div:nth-child(2) h2:hover{color:#f09a5c!important}
+.clan-board-page>div:nth-child(3)>div>div:nth-child(2) span{font-size:11px!important}
+.clan-board-page>div:nth-child(3)>div>div:nth-child(3){gap:7px!important}
+.clan-board-page>div:nth-child(3)>div>div:nth-child(3)>span{
+  border-radius:6px!important;padding:6px 9px!important;background:rgba(255,255,255,.045)!important;border-color:rgba(170,190,207,.13)!important;color:#c1ccd6!important;font-size:10px!important
+}
+.clan-board-page>div:nth-child(3)>div>div:nth-child(4)>span:not(:first-child){
+  border-radius:5px!important;background:rgba(91,111,130,.18)!important;border-color:rgba(151,174,192,.15)!important;color:#c7d1db!important
+}
+.clan-board-page>div:nth-child(3)>div>p{
+  padding:14px 16px!important;border-radius:9px!important;border:1px solid rgba(158,180,199,.1)!important;
+  background:rgba(5,11,17,.36)!important;color:#b7c3ce!important;font-size:12px!important;line-height:1.75!important
+}
+.clan-board-page>div:nth-child(3)>div>div:last-child{
+  border-color:rgba(160,180,198,.14)!important;padding-top:15px!important
+}
+.clan-board-page>div:nth-child(3)>div>div:last-child button{border-radius:7px!important;min-height:34px;padding:0 12px!important}
+.clan-board-page button,.clan-board-page input,.clan-board-page select,.clan-board-page textarea{min-width:0}
+.clan-board-page button:focus-visible,.clan-board-page input:focus-visible,.clan-board-page select:focus-visible,.clan-board-page textarea:focus-visible{outline:2px solid rgba(240,144,78,.9)!important;outline-offset:2px}
+.clan-board-page [class*="text-zinc-500"]{color:#8797a6!important}
+.clan-board-page [class*="text-zinc-400"]{color:#a6b3bf!important}
 .clan-board-page [class*="rust-metal-pattern"]{background-image:none}
-.clan-board-page button{border-radius:8px;min-height:34px;transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
-.clan-board-page button:focus-visible,.clan-board-page input:focus-visible,.clan-board-page select:focus-visible,.clan-board-page textarea:focus-visible{outline:2px solid rgba(229,138,58,.9);outline-offset:2px}
-.clan-board-page input,.clan-board-page select,.clan-board-page textarea{border-radius:8px!important;min-width:0}
-.clan-board-page h1{letter-spacing:-.035em!important;line-height:1.08!important;text-wrap:balance}
-.clan-board-page h2,.clan-board-page h3,.clan-board-page h4{text-wrap:pretty}
-.clan-board-page img{border-radius:9px}
-.clan-board-page [class*="border-t"]{border-color:var(--clan-line)}
-.clan-board-page [class*="text-zinc-500"]{color:#84909d!important}
-.clan-board-page [class*="text-zinc-400"]{color:#a3adb8!important}
-.clan-board-page [class*="line-clamp-3"]{overflow-wrap:anywhere}
-@media(max-width:640px){.clan-board-page{gap:14px;padding-bottom:24px}.clan-board-page>div:first-child{padding:16px!important}.clan-board-page [class*="grid-cols-2"],.clan-board-page [class*="grid-cols-3"]{grid-template-columns:minmax(0,1fr)}.clan-board-page [class*="p-5"]{padding:14px}.clan-board-page [class*="p-6"]{padding:16px}.clan-board-page [class*="overflow-x-auto"]{scrollbar-width:thin}}
-body.light-theme .clan-board-page{color:#18212b}
-body.light-theme .clan-board-page>div:first-child,body.light-theme .clan-board-page [class*="bg-[#14171e]"],body.light-theme .clan-board-page [class*="bg-[#1b1e26]"]{background:#fff!important;color:#18212b!important;border-color:#dce2e8!important;box-shadow:0 8px 24px rgba(15,23,42,.06)}
-body.light-theme .clan-board-page [class*="text-white"],body.light-theme .clan-board-page [class*="text-zinc-200"],body.light-theme .clan-board-page [class*="text-zinc-300"]{color:#18212b!important}
-body.light-theme .clan-board-page input,body.light-theme .clan-board-page select,body.light-theme .clan-board-page textarea{background:#f8fafc!important;color:#18212b!important;border-color:#cbd5e1!important}
+.clan-board-page img{object-fit:cover}
+.clan-board-page [class*="fixed inset-0"]>div{
+  border-radius:15px!important;border-color:rgba(205,131,77,.3)!important;background:linear-gradient(145deg,#17222d,#0d151d)!important;box-shadow:0 28px 90px rgba(0,0,0,.55)
+}
+.clan-board-page [class*="fixed inset-0"] input,.clan-board-page [class*="fixed inset-0"] select,.clan-board-page [class*="fixed inset-0"] textarea{
+  border-radius:7px!important;background:#0c141c!important;border-color:rgba(160,180,198,.2)!important
+}
+.clan-board-page [class*="fixed inset-0"] button{border-radius:7px!important}
+@media(max-width:760px){
+  .clan-board-page{gap:14px!important;padding-bottom:22px}
+  .clan-board-page>div:first-child{padding:20px!important;border-radius:13px!important}
+  .clan-board-page>div:first-child>div:nth-of-type(2){gap:18px!important}
+  .clan-board-page>div:first-child>div:last-child{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .clan-board-page>div:nth-child(2){padding:12px!important}
+  .clan-board-page>div:nth-child(2)>div:first-child{flex-wrap:nowrap!important}
+  .clan-board-page>div:nth-child(2)>div:first-child button{padding:0 11px!important;flex:0 0 auto}
+  .clan-board-page>div:nth-child(3)>div:not(.text-center){padding:16px!important}
+  .clan-board-page>div:nth-child(3)>div>div:first-child{align-items:flex-start!important}
+  .clan-board-page>div:nth-child(3)>div>div:first-child>div:last-child{flex-wrap:wrap}
+  .clan-board-page>div:nth-child(3)>div>div:last-child>div{flex-wrap:wrap}
+}
+@media(max-width:430px){
+  .clan-board-page>div:first-child h1{font-size:27px!important}
+  .clan-board-page>div:first-child>div:last-child>div{padding:11px!important;gap:8px!important}
+  .clan-board-page>div:nth-child(3)>div>div:nth-child(2)>img{width:46px!important;height:46px!important}
+  .clan-board-page>div:nth-child(3)>div>div:last-child{align-items:stretch!important}
+  .clan-board-page>div:nth-child(3)>div>div:last-child>div:last-child{display:grid;grid-template-columns:1fr 1fr}
+}
+body.light-theme .clan-board-page{--cb-text:#18232d;--cb-line:rgba(39,56,72,.14);color:#18232d}
+body.light-theme .clan-board-page>div:first-child{
+  background:radial-gradient(ellipse at 82% 8%,rgba(223,112,45,.14),transparent 34%),linear-gradient(125deg,#edf2f5,#fff 60%,#e9eef2)!important;border-color:rgba(190,105,48,.3)!important
+}
+body.light-theme .clan-board-page>div:first-child h1{color:#17232d!important}
+body.light-theme .clan-board-page>div:first-child p{color:#536372!important}
+body.light-theme .clan-board-page>div:first-child>div:last-child>div{background:rgba(255,255,255,.8)!important;border-color:#d6dfe6!important}
+body.light-theme .clan-board-page>div:nth-child(2),body.light-theme .clan-board-page>div:nth-child(3)>div:not(.text-center){
+  background:linear-gradient(145deg,#fff,#f4f7f9)!important;border-color:#d9e1e7!important;color:#18232d!important
+}
+body.light-theme .clan-board-page>div:nth-child(2) input,body.light-theme .clan-board-page>div:nth-child(2) select,
+body.light-theme .clan-board-page [class*="fixed inset-0"] input,body.light-theme .clan-board-page [class*="fixed inset-0"] select,body.light-theme .clan-board-page [class*="fixed inset-0"] textarea{
+  background:#f6f8fa!important;color:#18232d!important;border-color:#cbd5de!important
+}
+body.light-theme .clan-board-page>div:nth-child(3)>div>div:nth-child(2) h2,
+body.light-theme .clan-board-page>div:nth-child(3)>div>div:nth-child(2) span{color:#253442!important}
+body.light-theme .clan-board-page>div:nth-child(3)>div>p{background:#f4f7f9!important;color:#526271!important;border-color:#dce4e9!important}
+body.light-theme .clan-board-page [class*="fixed inset-0"]>div{background:linear-gradient(145deg,#fff,#edf2f5)!important;color:#18232d!important}
