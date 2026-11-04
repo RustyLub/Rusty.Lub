@@ -853,7 +853,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
         </div>
 
         {/* Search & Filter Toolbar */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
           {/* Search Bar */}
           <div className="md:col-span-2 relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
@@ -885,6 +885,19 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
             <option value={1000}>1,000+ {lang === 'ru' ? 'часов' : 'hrs'}</option>
             <option value={2000}>2,000+ {lang === 'ru' ? 'часов' : 'hrs'}</option>
             <option value={3000}>3,000+ {lang === 'ru' ? 'часов' : 'hrs'}</option>
+          </select>
+
+          {/* Server Filter */}
+          <select
+            value={serverFilter}
+            onChange={(e) => setServerFilter(e.target.value)}
+            className="bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-zinc-300 font-mono focus:border-[#cd412b] focus:outline-none cursor-pointer"
+          >
+            <option value="all">{lang === 'ru' ? 'Любой сервер' : 'Any Server'}</option>
+            <option value="Vanilla">Vanilla</option>
+            <option value="2x">2x</option>
+            <option value="3x">3x–5x</option>
+            <option value="PvE">PvE / Roleplay</option>
           </select>
 
           {/* Sort By */}
