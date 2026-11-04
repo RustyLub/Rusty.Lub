@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowRight, BookOpen, Check, Copy, ExternalLink, Handshake, MessageCircle, Newspaper, Send, ShieldCheck, Users, Wrench, ChevronRight } from 'lucide-react';
 import { ItemImageOrFallback } from './IconUtils';
 import { CustomUser } from '../types';
@@ -31,6 +31,12 @@ export default function HomeTab({
 }: HomeTabProps) {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedServerAddress, setCopiedServerAddress] = useState(false);
+  const [serverBadgeRefresh, setServerBadgeRefresh] = useState(() => Date.now());
+
+  useEffect(() => {
+    const refreshId = window.setInterval(() => setServerBadgeRefresh(Date.now()), 45000);
+    return () => window.clearInterval(refreshId);
+  }, []);
   const ru = lang === 'ru';
 
   const copyEmail = async () => {
@@ -127,11 +133,19 @@ export default function HomeTab({
           <div className="border border-slate-700 bg-[#0d141c]/95 p-4 shadow-2xl sm:p-5">
             <div className="mb-3 flex items-center justify-between gap-3">
               <span className="font-mono text-[10px] font-bold uppercase tracking-[.18em] text-slate-400">{ru ? 'СТАТУС СЕРВЕРА' : 'SERVER STATUS'}</span>
-              <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-emerald-400"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> LIVE</span>
+              <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-500"><span className="h-1.5 w-1.5 rounded-full bg-orange-500" /> ENUM.GG</span>
             </div>
-            <a href="https://enum.gg/server/rusty-lub-vanilla-fun-server-nmcqfPa3" target="_blank" rel="noopener noreferrer" className="flex min-h-12 items-center justify-center border border-slate-700 bg-black/30 px-3 py-3 transition hover:border-orange-500/70" aria-label={ru ? 'Открыть статус сервера на Enum' : 'Open server status on Enum'}>
-              <img src="https://enum.gg/api/public/v1/servers/nmcqfPa3/badge.svg" alt={ru ? 'Текущий онлайн сервера' : 'Current server player count'} className="h-7 max-w-full" />
+            <a href="https://enum.gg/server/rusty-lub-vanilla-fun-server-nmcqfPa3" target="_blank" rel="noopener noreferrer" className="flex min-h-14 items-center justify-center border border-slate-700 bg-black/30 px-3 py-3 transition hover:border-orange-500/70" aria-label={ru ? 'Открыть актуальный статус сервера на Enum' : 'Open live server status on Enum'}>
+              <img
+                key={serverBadgeRefresh}
+                src={`https://enum.gg/api/public/v1/servers/nmcqfPa3/badge.svg?refresh=${serverBadgeRefresh}`}
+                alt={ru ? 'Актуальный статус и количество игроков на сервере' : 'Live server status and player count'}
+                className="h-7 max-w-full"
+                loading="eager"
+                decoding="async"
+              />
             </a>
+            <p className="mt-2 text-center font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'Автообновление · 45 секунд' : 'Auto-refresh · 45 seconds'}</p>
             <div className="mt-3 flex items-center justify-between gap-3 border border-slate-700 bg-black/25 px-3 py-2.5">
               <span className="truncate font-mono text-xs text-slate-200">135.148.15.101:26952</span>
               <button type="button" onClick={async () => { try { await navigator.clipboard.writeText('135.148.15.101:26952'); setCopiedServerAddress(true); window.setTimeout(() => setCopiedServerAddress(false), 1800); } catch { setCopiedServerAddress(false); } }} className="inline-flex shrink-0 items-center gap-1.5 text-[10px] font-bold uppercase text-orange-400 transition hover:text-orange-300" aria-label={ru ? 'Скопировать адрес сервера' : 'Copy server address'}>
