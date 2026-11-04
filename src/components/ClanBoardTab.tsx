@@ -273,6 +273,10 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
       });
       setComments(list);
       setLoadingComments(false);
+    }, (error) => {
+      console.error('Error loading clan discussion:', error);
+      setLoadingComments(false);
+      onToast(lang === 'ru' ? 'Не удалось загрузить обсуждение' : 'Could not load discussion', 'error');
     });
 
     // If user is author of selected post, listen to incoming tickets for this post
@@ -317,27 +321,35 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
       onOpenAuth();
       return;
     }
-    if (!newTitle.trim() || !newDesc.trim() || !newDiscord.trim()) {
+    const title = newTitle.trim();
+    const description = newDesc.trim();
+    const discord = newDiscord.trim();
+    const hours = Number(newHours);
+    if (!title || !description || !discord) {
       onToast(lang === 'ru' ? 'Заполните заголовок, описание и Discord!' : 'Fill title, description, and Discord!', 'error');
       return;
     }
-
+    if (title.length > 100 || description.length > 3000 || discord.length > 100 || !Number.isFinite(hours) || hours < 0 || hours > 20000) {
+      onToast(lang === 'ru' ? 'Проверьте длину текста и количество часов' : 'Check text length and hours', 'error');
+      return;
+    }
+    setIsSubmittingPost(true);
     try {
       const postData: Record<string, any> = {
         type: newPostType,
-        title: newTitle.trim(),
+        title,
         authorName: user.displayName || user.email?.split('@')[0] || 'Rust Player',
         authorId: user.uid,
         authorAvatar: getAvatarUrl(user.photoURL, user.avatarClass),
         authorVip: !!user.isVip,
-        hours: Number(newHours) || 0,
+        hours,
         serverType: newServerType,
         teamSize: newTeamSize,
         rolesNeeded: newSelectedRoles,
         primeTime: newPrimeTime,
         ageMin: Number(newAgeMin) || 16,
-        description: newDesc.trim(),
-        discord: newDiscord.trim(),
+        description,
+        discord,
         createdAt: serverTimestamp(),
         status: 'open',
         commentsCount: 0,
@@ -368,9 +380,13 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
       setNewClanName('');
       setNewDesc('');
       setNewDiscord('');
+      setNewHours(1000);
+      setNewSelectedRoles(['PvP Стрелок']);
     } catch (err) {
       console.error("Error creating post:", err);
       onToast(lang === 'ru' ? 'Ошибка при публикации темы' : 'Error publishing post', 'error');
+    } finally {
+      setIsSubmittingPost(false);
     }
   };
 
@@ -398,7 +414,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
       // Increment comments count on post
       const postRef = doc(db, 'clan_posts', selectedPost.id);
       await updateDoc(postRef, {
-        commentsCount: (selectedPost.commentsCount || 0) + 1
+        commentsCount: increment(1)
       });
 
       setNewCommentText('');
@@ -462,6 +478,9 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
   };
 
   const handleUpdateTicketStatus = async (ticketId: string, status: 'accepted' | 'rejected') => {
+    if (!user || !selectedPost || selectedPost.authorId !== user.uid) return;
+    const target = postTickets.find((ticket) => ticket.id === ticketId);
+    if (!target || target.status !== 'pending') return;
     try {
       const ticketRef = doc(db, 'clan_tickets', ticketId);
       const updatePayload: Record<string, any> = { status };
@@ -498,6 +517,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
       );
     } catch (err) {
       console.error("Error toggling status:", err);
+      onToast(lang === 'ru' ? 'Не удалось изменить статус объявления' : 'Could not update post status', 'error');
     }
   };
 
