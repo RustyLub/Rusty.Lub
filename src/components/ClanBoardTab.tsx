@@ -190,7 +190,21 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const list: ClanPost[] = [];
       snapshot.forEach((docSnap) => {
-        list.push({ id: docSnap.id, ...docSnap.data() } as ClanPost);
+        const raw = docSnap.data() as Partial<ClanPost>;
+        list.push({
+          ...raw,
+          id: docSnap.id,
+          type: raw.type === 'player_lfg' ? 'player_lfg' : 'clan_recruit',
+          title: typeof raw.title === 'string' ? raw.title : 'Без названия',
+          authorName: typeof raw.authorName === 'string' ? raw.authorName : 'Игрок Rust',
+          authorId: typeof raw.authorId === 'string' ? raw.authorId : '',
+          hours: Number.isFinite(Number(raw.hours)) ? Math.max(0, Number(raw.hours)) : 0,
+          serverType: typeof raw.serverType === 'string' ? raw.serverType : 'Любой сервер',
+          description: typeof raw.description === 'string' ? raw.description : '',
+          discord: typeof raw.discord === 'string' ? raw.discord : '',
+          rolesNeeded: Array.isArray(raw.rolesNeeded) ? raw.rolesNeeded.filter((role): role is string => typeof role === 'string') : [],
+          status: raw.status === 'closed' ? 'closed' : 'open'
+        } as ClanPost);
       });
       setPosts(list);
       setLoading(false);
@@ -202,28 +216,35 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
     return () => unsubscribe();
   }, []);
 
-  // Real-time listener for user's sent or received tickets
+  // Private applications are loaded through user-scoped queries, never by listing the full collection.
   useEffect(() => {
-    if (!user) {
+    if (!user?.uid) {
       setTickets([]);
       return;
     }
-    const q = query(collection(db, 'clan_tickets'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const list: ClanTicket[] = [];
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data() as ClanTicket;
-        if (data.applicantId === user.uid || data.postAuthorId === user.uid) {
-          list.push({ id: docSnap.id, ...data });
-        }
-      });
-      setTickets(list);
-    }, (error) => {
-      console.error("Error fetching tickets:", error);
-    });
-
-    return () => unsubscribe();
-  }, [user]);
+    let sent: ClanTicket[] = [];
+    let received: ClanTicket[] = [];
+    const sync = () => {
+      const unique = new Map<string, ClanTicket>();
+      [...sent, ...received].forEach((ticket) => unique.set(ticket.id, ticket));
+      setTickets(Array.from(unique.values()));
+    };
+    const onError = (error: Error) => {
+      console.error('Error fetching applications:', error);
+      onToast(lang === 'ru' ? 'Не удалось загрузить заявки' : 'Could not load applications', 'error');
+    };
+    const sentUnsubscribe = onSnapshot(
+      query(collection(db, 'clan_tickets'), where('applicantId', '==', user.uid)),
+      (snapshot) => { sent = snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as ClanTicket)); sync(); },
+      onError
+    );
+    const receivedUnsubscribe = onSnapshot(
+      query(collection(db, 'clan_tickets'), where('postAuthorId', '==', user.uid)),
+      (snapshot) => { received = snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as ClanTicket)); sync(); },
+      onError
+    );
+    return () => { sentUnsubscribe(); receivedUnsubscribe(); };
+  }, [user?.uid, lang, onToast]);
 
   // Load comments when a thread post is opened
   useEffect(() => {
@@ -259,7 +280,8 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
     if (user && selectedPost.authorId === user.uid) {
       const qTickets = query(
         collection(db, 'clan_tickets'),
-        where('postId', '==', selectedPost.id)
+        where('postId', '==', selectedPost.id),
+        where('postAuthorId', '==', user.uid)
       );
       unsubTickets = onSnapshot(qTickets, (snap) => {
         const tList: ClanTicket[] = [];
@@ -267,6 +289,9 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
           tList.push({ id: docSnap.id, ...docSnap.data() } as ClanTicket);
         });
         setPostTickets(tList);
+      }, (error) => {
+        console.error('Error loading post applications:', error);
+        onToast(lang === 'ru' ? 'Не удалось загрузить заявки' : 'Could not load applications', 'error');
       });
     }
 
@@ -503,7 +528,8 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
     // Tab filtering
     if (activeTab === 'clan_recruit' && post.type !== 'clan_recruit') return false;
     if (activeTab === 'player_lfg' && post.type !== 'player_lfg') return false;
-    if (activeTab === 'my_posts' && user && post.authorId !== user.uid) return false;
+    if (activeTab === 'my_posts' && user && post.authorId !== user.uid &&
+        !tickets.some((ticket) => ticket.applicantId === user.uid && ticket.postId === post.id)) return false;
     if (activeTab === 'bookmarks' && !bookmarks.includes(post.id)) return false;
 
     // Search query
