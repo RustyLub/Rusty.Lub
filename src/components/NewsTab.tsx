@@ -21,6 +21,112 @@ import {
 } from 'lucide-react';
 
 const DEFAULT_NEWS_ITEMS: NewsItem[] = [
+  {
+    id: 'rust-november-2026-blueprints-uzi-wipe',
+    category: 'updates',
+    title: {
+      ru: 'Rust — ноябрьское обновление 2026: чертежи, UZI и глобальный вайп',
+      en: 'Rust November 2026 Update: Blueprints, UZI and Force Wipe'
+    },
+    date: '2026-11-05T19:00:00.000Z',
+    author: 'Rusty.Lub',
+    badge: { ru: 'НОЯБРЬСКОЕ ОБНОВЛЕНИЕ', en: 'NOVEMBER UPDATE' },
+    isFeatured: true,
+    coverImage: 'https://prostoj.store/posts/rust-news/update/post-rust-update-5-november-2026-blueprints-uzi-wipe',
+    summary: {
+      ru: 'Большое ноябрьское обновление Rust ожидается 5 ноября вместе с ежемесячным вайпом. В центре внимания — изменения системы чертежей и прогрессии, а также подготовка нового оружия UZI. Часть деталей до официального патчноута остаётся предварительной.',
+      en: 'The November Rust update is expected on November 5 alongside the monthly force wipe. Key topics include blueprint progression changes and development of the new UZI. Some details remain provisional until the official patch notes.'
+    },
+    content: {
+      ru: [
+        {
+          sectionTitle: 'Дата обновления и глобальный вайп',
+          text: 'Ежемесячный апдейт ожидается в четверг, 5 ноября 2026 года. Вместе с обновлением серверы проходят принудительный сброс карты. Точное время перезапуска зависит от выпуска обновления и скорости восстановления серверов.',
+          highlights: [
+            'Планируй старт после установки обновления и перезапуска выбранного сервера.',
+            'Сброс карты не означает автоматически сброс чертежей на каждом сервере — правила BP wipe нужно уточнять отдельно.'
+          ]
+        },
+        {
+          sectionTitle: 'Изменения чертежей и прогрессии',
+          text: 'В предварительных материалах обсуждаются изменения получения и изучения чертежей. Это может повлиять на привычный маршрут развития после вайпа: сбор ресурсов, исследование предметов и открытие веток технологий.',
+          highlights: [
+            'Перед стартом проверь окончательные условия изучения предметов в официальном патчноуте.',
+            'На модифицированных и community-серверах правила сброса чертежей могут отличаться.'
+          ]
+        },
+        {
+          sectionTitle: 'UZI — новое оружие в разработке',
+          text: 'UZI 9mm фигурирует в материалах о ноябрьском обновлении, однако статус и доступность оружия необходимо сверять с финальным списком изменений Facepunch. Не стоит заранее рассчитывать на конкретные характеристики, рецепт или способ получения.',
+          highlights: [
+            'Характеристики и доступность могут измениться до релиза.',
+            'Окончательные сведения появятся после публикации официальных заметок.'
+          ]
+        },
+        {
+          sectionTitle: 'Что сделать перед вайпом',
+          text: 'Используй оставшееся время, чтобы подготовить стартовую стратегию и проверить расписание своего сервера.',
+          highlights: [
+            'Заверши важные исследования и подготовь ресурсы до сброса.',
+            'Проверь правила BP wipe именно на своём сервере.',
+            'Следи за официальным патчноутом Facepunch в день обновления.'
+          ]
+        },
+        {
+          sectionTitle: 'Источник и дополнительные материалы',
+          text: 'Материал-источник с обзором ноябрьского обновления:',
+          highlights: [
+            'https://prostoj.store/posts/rust-news/update/post-rust-update-5-november-2026-blueprints-uzi-wipe',
+            'https://rust.facepunch.com/news/'
+          ]
+        }
+      ],
+      en: [
+        {
+          sectionTitle: 'Update date and force wipe',
+          text: 'The monthly update is expected on Thursday, November 5, 2026. The release is accompanied by a forced map wipe. Exact server restart times depend on deployment and recovery.',
+          highlights: [
+            'Plan to join after the update has installed and your server has restarted.',
+            'A map wipe does not automatically confirm a blueprint wipe on every server; check local rules.'
+          ]
+        },
+        {
+          sectionTitle: 'Blueprint progression',
+          text: 'Preview materials discuss changes to blueprint acquisition and progression. Check the final Facepunch patch notes before planning your research route.',
+          highlights: [
+            'Confirm final research costs and progression rules after release.',
+            'Modded and community servers may use different blueprint wipe rules.'
+          ]
+        },
+        {
+          sectionTitle: 'UZI — weapon development',
+          text: 'The UZI 9mm appears in coverage of the November update, but its final status and availability must be confirmed against Facepunch release notes. Do not rely on unconfirmed stats, crafting recipes or loot sources.',
+          highlights: [
+            'Stats and availability may change before release.',
+            'Final details will be known after the official notes are published.'
+          ]
+        },
+        {
+          sectionTitle: 'Before wipe day',
+          text: 'Use the remaining time to prepare your starting strategy and check your server schedule.',
+          highlights: [
+            'Finish important research and prepare resources before the reset.',
+            'Check blueprint wipe rules for your specific server.',
+            'Follow Facepunch official patch notes on update day.'
+          ]
+        },
+        {
+          sectionTitle: 'Sources',
+          text: 'Read the source article and official update feed:',
+          highlights: [
+            'https://prostoj.store/posts/rust-news/update/post-rust-update-5-november-2026-blueprints-uzi-wipe',
+            'https://rust.facepunch.com/news/'
+          ]
+        }
+      ]
+    }
+  },
+
   // ==========================================
   // ОКТЯБРЬ 2026 (OCTOBER 2026)
   // ==========================================
@@ -730,7 +836,7 @@ interface NewsTabProps {
 export default function NewsTab({ lang, onOpenNotifications }: NewsTabProps) {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'updates' | 'blogs' | 'events'>('all');
   const [selectedMonth, setSelectedMonth] = useState<'all' | '10' | '09' | '08' | '07'>('all');
-  const [activeNewsId, setActiveNewsId] = useState<string>('rust-october-2026-halloween-event');
+  const [activeNewsId, setActiveNewsId] = useState<string>('rust-november-2026-blueprints-uzi-wipe');
   const [newsItems, setNewsItems] = useState<NewsItem[]>(DEFAULT_NEWS_ITEMS);
 
   console.log('NewsTab render - activeNewsId:', activeNewsId, 'newsItems count:', newsItems.length);
@@ -744,6 +850,7 @@ export default function NewsTab({ lang, onOpenNotifications }: NewsTabProps) {
 
   const months = [
     { id: 'all', label: { ru: 'Все месяцы', en: 'All Months' } },
+    { id: '11', label: { ru: '🍂 Ноябрь', en: '🍂 November' } },
     { id: '10', label: { ru: '🎃 Октябрь', en: '🎃 October' } },
     { id: '09', label: { ru: '🌿 Сентябрь', en: '🌿 September' } },
     { id: '08', label: { ru: '⚡ Август', en: '⚡ August' } },
@@ -801,7 +908,7 @@ export default function NewsTab({ lang, onOpenNotifications }: NewsTabProps) {
     }
   };
 
-  const handleMonthChange = (monthId: 'all' | '10' | '09' | '08' | '07') => {
+  const handleMonthChange = (monthId: 'all' | '11' | '10' | '09' | '08' | '07') => {
     setSelectedMonth(monthId);
     const matched = newsItems.filter(item => {
       const matchCat = selectedCategory === 'all' || item.category === selectedCategory;
