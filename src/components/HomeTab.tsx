@@ -141,30 +141,37 @@ export default function HomeTab({
       {/* ABOUT + GAME SERVER */}
       <section className="mx-auto grid max-w-none gap-6 border-b border-slate-700/70 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,390px)] lg:items-start lg:gap-8 lg:px-10">
         <div className="min-w-0">
-          <div className="relative isolate min-h-[190px] overflow-hidden border border-slate-600/60 bg-[#080d12]">
-            <img src={oilRigBg} alt="" aria-hidden="true" className="absolute inset-0 -z-20 h-full w-full object-cover object-center opacity-80" />
-            <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(5,9,13,.94)_0%,rgba(5,9,13,.72)_48%,rgba(5,9,13,.2)_100%),linear-gradient(0deg,rgba(5,9,13,.65),transparent)]" />
-            <div className="flex min-h-[190px] max-w-xl flex-col justify-end p-5 sm:p-6">
-              <span className="font-mono text-[9px] font-bold uppercase tracking-[.24em] text-orange-400">RUST KNOWLEDGE // SURVIVAL TOOLS</span>
-              <h2 className="mt-2 text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl">{ru ? 'Больше, чем просто сайт' : 'More than just a website'}</h2>
-              <p className="mt-2 max-w-lg text-xs leading-5 text-slate-200 sm:text-sm">{ru ? 'Rusty.Lub — практический справочник для выживших. Всё необходимое, чтобы планировать рейды, строить базы, разбираться в механиках и играть увереннее.' : 'Rusty.Lub is a practical field guide for survivors. Everything you need to plan raids, build bases, master game mechanics and play smarter.'}</p>
+          <div className="relative isolate min-h-[230px] overflow-hidden border border-slate-600/60 bg-[#080d12]">
+            <img src={oilRigBg} alt="" aria-hidden="true" className="absolute inset-0 -z-20 h-full w-full object-cover object-center opacity-90" />
+            <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(5,9,13,.96)_0%,rgba(5,9,13,.78)_48%,rgba(5,9,13,.24)_100%),linear-gradient(0deg,rgba(5,9,13,.78),transparent_75%)]" />
+            <div className="flex min-h-[230px] max-w-2xl flex-col justify-end p-5 sm:p-7">
+              <div className="mb-2 flex items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[.24em] text-orange-400"><span className="h-px w-7 bg-orange-500" /> RUST KNOWLEDGE // SURVIVAL TOOLS</div>
+              <h2 className="text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl">{ru ? 'Больше, чем просто сайт' : 'More than just a website'}</h2>
+              <p className="mt-2 max-w-xl text-xs leading-5 text-slate-200 sm:text-sm">{ru ? 'Rusty.Lub — практический справочник для выживших. Планируй рейды, строй базы, изучай игровые механики и находи свою команду — всё в одном месте.' : 'Rusty.Lub is a practical field guide for survivors. Plan raids, build bases, master game mechanics and find your team — all in one place.'}</p>
               <button onClick={() => onNavigate('guides')} className="mt-4 inline-flex w-fit items-center gap-2 border border-orange-400/80 bg-orange-500 px-4 py-2.5 text-[10px] font-black uppercase tracking-wider text-[#101318] transition hover:bg-orange-400">{ru ? 'Открыть справочник' : 'Explore the guide'} <ArrowRight size={14} /></button>
             </div>
           </div>
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {[
-              { icon: Wrench, number: '01', title: ru ? 'Инструменты' : 'Tools', desc: ru ? 'Калькуляторы, расчёты и полезные утилиты для игры.' : 'Calculators, planning tools and useful utilities.', action: 'tools' },
-              { icon: BookOpen, number: '02', title: ru ? 'База знаний' : 'Knowledge base', desc: ru ? 'Гайды по строительству, оружию, механикам и тактике.' : 'Guides for building, weapons, mechanics and tactics.', action: 'guides' },
-              { icon: Users, number: '03', title: ru ? 'Сообщество' : 'Community', desc: ru ? 'Игроки, кланы, общение и совместная игра.' : 'Players, clans, discussion and team play.', action: 'clans' },
-              { icon: Handshake, number: '04', title: ru ? 'Партнёрства' : 'Partnerships', desc: ru ? 'Совместные проекты и сотрудничество с Rusty.Lub.' : 'Joint projects and collaboration with Rusty.Lub.', action: 'support' }
-            ].map(({ icon: Icon, number, title, desc, action }) => <button key={number} type="button" onClick={() => onNavigate(action)} className="group flex min-h-[112px] items-start gap-3 border border-slate-700/80 bg-[#0d141c] p-3.5 text-left transition duration-200 hover:border-orange-500/70 hover:bg-[#131d27] sm:p-4">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center border border-orange-500/30 bg-orange-500/10 text-orange-400 transition group-hover:border-orange-500 group-hover:bg-orange-500 group-hover:text-[#101318]"><Icon size={19} /></span>
-              <span className="min-w-0 flex-1">
-                <span className="flex items-center gap-2"><b className="text-sm font-bold text-white">{title}</b><small className="font-mono text-[9px] text-slate-600">{number}</small></span>
-                <span className="mt-1.5 block text-[11px] leading-[1.55] text-slate-400">{desc}</span>
+              { icon: Wrench, number: '01', title: ru ? 'Инструменты' : 'Tools', desc: ru ? 'Рейд- и крафт-калькуляторы, расчёты ресурсов и игровые утилиты.' : 'Raid and craft calculators, resource planning and game utilities.', action: 'tools', meta: ru ? 'РАСЧЁТЫ И ПЛАНИРОВАНИЕ' : 'CALCULATORS & PLANNING' },
+              { icon: BookOpen, number: '02', title: ru ? 'База знаний' : 'Knowledge base', desc: ru ? 'Строительство, оружие, электричество, механики и тактики.' : 'Building, weapons, electricity, mechanics and tactics.', action: 'guides', meta: ru ? 'ГАЙДЫ И ИНСТРУКЦИИ' : 'GUIDES & HOW-TOS' },
+              { icon: Users, number: '03', title: ru ? 'Сообщество' : 'Community', desc: ru ? 'Находи игроков, собирай команду, вступай в кланы и общайся.' : 'Find players, build a team, join clans and connect.', action: 'clans', meta: ru ? 'ИГРОКИ И КЛАНЫ' : 'PLAYERS & CLANS' },
+              { icon: Handshake, number: '04', title: ru ? 'Партнёрства' : 'Partnerships', desc: ru ? 'Предлагай идеи, развивай совместные проекты и сотрудничай с нами.' : 'Share ideas, build joint projects and work with us.', action: 'support', meta: ru ? 'СВЯЗЬ И СОТРУДНИЧЕСТВО' : 'CONTACT & COLLABORATION' }
+            ].map(({ icon: Icon, number, title, desc, action, meta }) => <button key={number} type="button" onClick={() => onNavigate(action)} className="group relative flex min-h-[148px] flex-col overflow-hidden border border-slate-700/80 bg-[linear-gradient(135deg,#151f29_0%,#0b1118_72%)] p-4 text-left transition duration-200 hover:-translate-y-0.5 hover:border-orange-500/80 hover:bg-[#131d27] sm:min-h-[158px] sm:p-5">
+              <span className="pointer-events-none absolute -right-3 -top-5 text-[100px] font-black leading-none text-white/[.025] transition group-hover:text-orange-500/[.07]">{number}</span>
+              <span className="flex items-start justify-between">
+                <span className="flex h-11 w-11 items-center justify-center border border-orange-500/40 bg-orange-500/10 text-orange-400 transition group-hover:bg-orange-500 group-hover:text-[#101318]"><Icon size={21} /></span>
+                <span className="font-mono text-[10px] font-bold tracking-[.18em] text-slate-600">{number} / 04</span>
               </span>
-              <ArrowRight size={15} className="mt-1 shrink-0 text-slate-600 transition group-hover:translate-x-1 group-hover:text-orange-400" />
+              <span className="mt-4 block text-[9px] font-bold tracking-[.16em] text-orange-400">{meta}</span>
+              <span className="mt-1 block text-base font-black text-white">{title}</span>
+              <span className="mt-1.5 block max-w-md text-[11px] leading-[1.55] text-slate-400">{desc}</span>
+              <span className="mt-auto flex items-center gap-2 pt-4 text-[9px] font-black uppercase tracking-[.15em] text-slate-300 transition group-hover:text-orange-400">{ru ? 'Перейти в раздел' : 'Explore section'} <ArrowRight size={13} className="transition group-hover:translate-x-1" /></span>
             </button>)}
+          </div>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border border-slate-700/70 bg-[#0a1016] px-4 py-3">
+            <span className="font-mono text-[9px] font-bold uppercase tracking-[.18em] text-slate-500">{ru ? 'ОДНА ПЛАТФОРМА — ВСЁ ДЛЯ ВЫЖИВАНИЯ' : 'ONE PLATFORM — EVERYTHING FOR SURVIVAL'}</span>
+            <span className="flex flex-wrap gap-x-4 gap-y-1 text-[9px] font-bold uppercase tracking-wider text-slate-400"><span>{ru ? 'ПРАКТИКА' : 'PRACTICAL'}</span><span className="text-orange-500">/</span><span>{ru ? 'ЗНАНИЯ' : 'KNOWLEDGE'}</span><span className="text-orange-500">/</span><span>{ru ? 'СООБЩЕСТВО' : 'COMMUNITY'}</span></span>
           </div>
         </div>
 
