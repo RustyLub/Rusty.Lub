@@ -1,0 +1,21 @@
+/* Rusty.Lub — Clan recruitment board visual system */
+.clan-board-page{--clan-accent:#e58a3a;--clan-line:rgba(164,178,194,.16);color:#e8edf2;min-width:0}
+.clan-board-page>div,.clan-board-page [class*="bg-[#14171e]"]{border-color:var(--clan-line)!important;border-radius:14px!important;box-shadow:0 14px 38px rgba(0,0,0,.18)}
+.clan-board-page>div:first-child{background:radial-gradient(ellipse at 90% 0%,rgba(229,138,58,.13),transparent 36%),linear-gradient(145deg,rgba(22,29,37,.98),rgba(12,16,21,.98))!important;padding:clamp(18px,2.5vw,30px)!important}
+.clan-board-page [class*="bg-[#1b1e26]"]{background:linear-gradient(145deg,rgba(27,35,44,.92),rgba(16,21,27,.96))!important;border-color:rgba(164,178,194,.13)!important;border-radius:10px!important}
+.clan-board-page [class*="rust-metal-pattern"]{background-image:none}
+.clan-board-page button{border-radius:8px;min-height:34px;transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+.clan-board-page button:focus-visible,.clan-board-page input:focus-visible,.clan-board-page select:focus-visible,.clan-board-page textarea:focus-visible{outline:2px solid rgba(229,138,58,.9);outline-offset:2px}
+.clan-board-page input,.clan-board-page select,.clan-board-page textarea{border-radius:8px!important;min-width:0}
+.clan-board-page h1{letter-spacing:-.035em!important;line-height:1.08!important;text-wrap:balance}
+.clan-board-page h2,.clan-board-page h3,.clan-board-page h4{text-wrap:pretty}
+.clan-board-page img{border-radius:9px}
+.clan-board-page [class*="border-t"]{border-color:var(--clan-line)}
+.clan-board-page [class*="text-zinc-500"]{color:#84909d!important}
+.clan-board-page [class*="text-zinc-400"]{color:#a3adb8!important}
+.clan-board-page [class*="line-clamp-3"]{overflow-wrap:anywhere}
+@media(max-width:640px){.clan-board-page{gap:14px;padding-bottom:24px}.clan-board-page>div:first-child{padding:16px!important}.clan-board-page [class*="grid-cols-2"],.clan-board-page [class*="grid-cols-3"]{grid-template-columns:minmax(0,1fr)}.clan-board-page [class*="p-5"]{padding:14px}.clan-board-page [class*="p-6"]{padding:16px}.clan-board-page [class*="overflow-x-auto"]{scrollbar-width:thin}}
+body.light-theme .clan-board-page{color:#18212b}
+body.light-theme .clan-board-page>div:first-child,body.light-theme .clan-board-page [class*="bg-[#14171e]"],body.light-theme .clan-board-page [class*="bg-[#1b1e26]"]{background:#fff!important;color:#18212b!important;border-color:#dce2e8!important;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+body.light-theme .clan-board-page [class*="text-white"],body.light-theme .clan-board-page [class*="text-zinc-200"],body.light-theme .clan-board-page [class*="text-zinc-300"]{color:#18212b!important}
+body.light-theme .clan-board-page input,body.light-theme .clan-board-page select,body.light-theme .clan-board-page textarea{background:#f8fafc!important;color:#18212b!important;border-color:#cbd5e1!important}
