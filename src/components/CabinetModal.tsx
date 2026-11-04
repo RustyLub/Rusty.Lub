@@ -2097,101 +2097,36 @@ export default function CabinetModal({
                   </div>
                 )}
 
-                {/* Plans Selection Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Free Perks Card */}
-                  <div className="bg-zinc-950/20 border border-zinc-800/40 p-4 space-y-3 relative overflow-hidden group">
-                    <div className="absolute -right-4 -bottom-4 text-zinc-800/10 rotate-12 group-hover:rotate-0 transition-transform duration-500">
-                      <Lock size={60} />
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block">
-                        DEFAULT ACCESS
-                      </span>
-                      <h3 className="text-sm font-black text-zinc-300 font-sans uppercase mt-0.5">
-                        {lang === 'ru' ? 'БАЗОВЫЙ ДОСТУП (FREE)' : 'BASIC ACCESS (FREE)'}
-                      </h3>
-                    </div>
-                    <ul className="space-y-1.5 pt-2 border-t border-zinc-800/30">
-                      {[
-                        { ru: 'Глобальный радио-чат Rusty.Lub', en: 'Global Rusty.Lub radio chat' },
-                        { ru: 'Калькулятор рейдов (базовый)', en: 'Raid calculator (basic)' },
-                        { ru: 'Справочник биндов и консольных команд', en: 'Binds and console command library' },
-                        { ru: 'База ошибок Rust и способы их решения', en: 'Rust error database & fixes' },
-                        { ru: 'Просмотр новостей и блогов', en: 'News and developer blogs' },
-                        { ru: 'Создание своего профиля и списка друзей', en: 'Profile creation and friends list' }
-                      ].map((perk, i) => (
-                        <li key={i} className="text-[9px] text-zinc-500 flex items-start gap-1.5 leading-relaxed">
-                          <Check size={10} className="text-emerald-500/50 mt-0.5 shrink-0" />
-                          <span>{perk[lang]}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {VIP_PLANS.map((plan) => (
-                      <div
-                        key={plan.id}
-                        className="border border-zinc-800/80 bg-zinc-950/40 p-4 flex flex-col justify-between relative"
-                      >
-                        <span className="absolute -top-2.5 right-3 bg-amber-500 text-black text-[8px] font-black font-mono px-2 py-0.5 uppercase tracking-wider">
-                          {lang === 'ru' ? '🔥 ВСЁ ВКЛЮЧЕНО' : '🔥 ALL INCLUDED'}
-                        </span>
-                        <div className="space-y-3">
-                          <div>
-                            <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider block">
-                              {plan.id.toUpperCase()} PLAN
-                            </span>
-                            <h3 className="text-sm font-black text-white font-mono uppercase mt-0.5">
-                              {plan.name[lang]}
-                            </h3>
-                          </div>
-
-                          <div className="text-2xl font-black text-amber-500 font-mono">
-                            {plan.price} ₽ <span className="text-xs text-zinc-400 font-bold font-sans">/ {lang === 'ru' ? '45 дней' : '45 days'}</span>
-                          </div>
-
-                          <ul className="space-y-1.5 pt-2 border-t border-zinc-900/40">
-                            {plan.perks[lang].map((perk, i) => (
-                              <li key={i} className="text-[10px] text-zinc-400 flex items-start gap-1.5 leading-relaxed font-medium">
-                                <span className="text-amber-500 mt-0.5 select-none font-bold">✓</span>
-                                <span>{perk}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                  ))}
-                </div>
-
-                {/* Payment is intentionally unavailable, matching the public VIP support section. */}
-                <div className="border border-amber-500/25 bg-amber-500/5 p-5 space-y-3">
+                {/* VIP access is presented on the dedicated public support page. */}
+                <section className="border border-amber-500/25 bg-amber-500/[0.04] p-5 sm:p-6 space-y-3">
                   <div className="flex items-center gap-2 text-amber-400">
-                    <AlertTriangle size={16} />
-                    <h3 className="text-xs font-black font-mono uppercase tracking-wider">
+                    <Crown size={17} />
+                    <h3 className="text-sm font-bold text-white">
                       {lang === 'ru' ? 'Diamond VIP — 300 ₽ / 45 дней' : 'Diamond VIP — 300 RUB / 45 days'}
                     </h3>
                   </div>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
+                  <p className="max-w-2xl text-sm leading-relaxed text-zinc-400">
                     {lang === 'ru'
-                      ? 'Diamond VIP открывает перечисленные выше преимущества на 45 дней.'
-                      : 'Diamond VIP unlocks the benefits listed above for 45 days.'}
+                      ? 'Подробности VIP-доступа, условия покупки и способы добровольной поддержки проекта собраны на отдельной странице.'
+                      : 'VIP details, purchase information, and voluntary project support options are available on the dedicated support page.'}
                   </p>
                   <button
                     type="button"
-                    onClick={() => setPaymentUnavailableNotice(true)}
-                    className="w-full sm:w-auto px-5 py-3 bg-amber-500 hover:bg-amber-400 text-black text-xs font-black uppercase tracking-wider transition-colors"
+                    onClick={() => {
+                      onClose();
+                      onOpenTab?.('support');
+                    }}
+                    className="inline-flex items-center justify-center gap-2 bg-amber-500 px-5 py-3 text-xs font-black uppercase tracking-wider text-black transition-colors hover:bg-amber-400"
                   >
-                    {lang === 'ru' ? 'Купить за 300 ₽' : 'Buy for 300 RUB'}
+                    {lang === 'ru' ? 'Открыть страницу VIP и поддержки' : 'Open VIP & support page'}
+                    <ArrowRight size={15} />
                   </button>
-                  {paymentUnavailableNotice && (
-                    <p role="status" aria-live="polite" className="text-xs text-amber-300 border border-amber-500/25 bg-black/30 p-3">
-                      {lang === 'ru'
-                        ? 'Оплата временно недоступна: платёжная система ещё не подключена. Деньги не списываются, VIP не активируется.'
-                        : 'Payment is temporarily unavailable because the payment provider is not connected. No money will be charged and VIP will not be activated.'}
-                    </p>
-                  )}
-                </div>
+                  <p className="text-xs text-zinc-500">
+                    {lang === 'ru'
+                      ? 'Добровольное пожертвование не активирует VIP. Покупка VIP станет доступна после подключения платёжной системы.'
+                      : 'Voluntary donations do not activate VIP. VIP checkout will be available after a payment provider is connected.'}
+                  </p>
+                </section>
               </motion.div>
             )}
 
