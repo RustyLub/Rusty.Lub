@@ -631,18 +631,18 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
             <div className="flex items-center gap-2 flex-wrap">
               <span className="px-2.5 py-0.5 bg-[#cd412b]/20 text-[#cd412b] border border-[#cd412b]/40 text-[10px] font-mono font-black uppercase tracking-wider flex items-center gap-1">
                 <Shield size={12} />
-                {lang === 'ru' ? 'ФОРУМ И ДОСКА НАБОРА' : 'FORUM & RECRUITMENT BOARD'}
+                {lang === 'ru' ? 'ПОИСК И НАБОР ИГРОКОВ' : 'PLAYER & CLAN RECRUITMENT'}
               </span>
               <span className="text-[10px] font-mono text-zinc-400 bg-[#1b1e26] px-2 py-0.5 border border-[#2a2f3b]">
                 RUST LFG & RECRUITMENT v2.6
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-wider font-teko leading-none">
-              {lang === 'ru' ? 'Сбор в Клан & Поиск Тиммейтов' : 'Clan Recruitment & Teammate Board'}
+              {lang === 'ru' ? 'Поиск команды и набор игроков' : 'Find a Team & Recruit Players'}
             </h1>
             <p className="text-xs text-zinc-400 max-w-2xl font-sans">
               {lang === 'ru' 
-                ? 'Публикуйте объявления о наборе в кланы, ищите сквад или дуо/трио тиммейтов, обсуждайте темы на форуме и подавайте заявки-тикеты напрямую лидеру.'
+                ? 'Размещайте объявления о наборе, находите команду и отправляйте заявки с информацией о своём опыте, часах в Rust и предпочитаемых ролях.'
                 : 'Post clan recruitment threads, find duo/trio teammates, reply to forum discussions, and submit direct application tickets.'}
             </p>
           </div>
@@ -654,7 +654,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
                 className="px-5 py-3 bg-[#cd412b] hover:bg-[#b83824] text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg border border-orange-500/40 hover:scale-[1.02] active:scale-95"
               >
                 <Plus size={18} />
-                <span>{lang === 'ru' ? 'Создать пост / объявление' : 'Create Forum Post'}</span>
+                <span>{lang === 'ru' ? 'Создать объявление' : 'Create Listing'}</span>
               </button>
             ) : (
               <button
@@ -732,7 +732,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
             }`}
           >
             <Flame size={14} />
-            <span>{lang === 'ru' ? 'Все посты форума' : 'All Forum Posts'}</span>
+            <span>{lang === 'ru' ? 'Все объявления' : 'All Listings'}</span>
             <span className="px-1.5 py-0.2 text-[10px] bg-black/40 rounded-none">{posts.length}</span>
           </button>
 
@@ -1073,7 +1073,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
                     >
                       <MessageSquare size={14} className="text-blue-400" />
                       <span>
-                        {post.commentsCount || 0} {lang === 'ru' ? 'ответов на форуме' : 'replies'}
+                        {post.commentsCount || 0} {lang === 'ru' ? 'ответов' : 'replies'}
                       </span>
                     </button>
 
@@ -1230,7 +1230,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
                     }`}
                   >
                     <MessageSquare size={14} />
-                    <span>{lang === 'ru' ? 'Обсуждение на форуме' : 'Forum Discussion'} ({comments.length})</span>
+                    <span>{lang === 'ru' ? 'Обсуждение' : 'Discussion'} ({comments.length})</span>
                   </button>
 
                   <button
@@ -1537,7 +1537,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
             <div className="flex items-center justify-between border-b border-[#2a2f3b] pb-3 shrink-0">
               <h3 className="text-xl font-bold text-white uppercase font-teko tracking-wider flex items-center gap-2">
                 <Plus className="text-[#cd412b]" size={20} />
-                <span>{lang === 'ru' ? 'Создать новое объявление на доске' : 'New Board Post'}</span>
+                <span>{lang === 'ru' ? 'Новое объявление' : 'New Listing'}</span>
               </h3>
               <button
                 onClick={() => setIsCreateOpen(false)}
@@ -1551,7 +1551,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
               {/* Category selector */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold block">
-                  {lang === 'ru' ? 'Выберите тип темы / объявления:' : 'Select Post Type:'}
+                  {lang === 'ru' ? 'Выберите тип объявления:' : 'Select Listing Type:'}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -1631,7 +1631,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold block">
-                    {lang === 'ru' ? 'Мин. часов Rust' : 'Min Rust Hours'}
+                    {lang === 'ru' ? (newPostType === 'clan_recruit' ? 'Минимум часов в Rust' : 'Ваши часы в Rust') : (newPostType === 'clan_recruit' ? 'Minimum Rust Hours' : 'Your Rust Hours')}
                   </label>
                   <input
                     type="number"
@@ -1761,7 +1761,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
                   disabled={isSubmittingPost}
                   className="px-6 py-2 bg-[#cd412b] hover:bg-[#b83824] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-mono font-bold uppercase transition-all cursor-pointer shadow-md"
                 >
-                  {isSubmittingPost ? (lang === 'ru' ? 'Публикация...' : 'Publishing...') : (lang === 'ru' ? 'Опубликовать тему' : 'Publish Thread')}
+                  {isSubmittingPost ? (lang === 'ru' ? 'Публикация...' : 'Publishing...') : (lang === 'ru' ? 'Опубликовать объявление' : 'Publish Listing')}
                 </button>
               </div>
             </form>
