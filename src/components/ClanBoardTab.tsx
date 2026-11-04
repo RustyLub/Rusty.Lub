@@ -432,13 +432,34 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
       return;
     }
     if (!selectedPost) return;
+    if (selectedPost.status !== 'open') {
+      onToast(lang === 'ru' ? 'Набор по этому объявлению уже закрыт' : 'This recruitment post is closed', 'error');
+      return;
+    }
+    if (selectedPost.authorId === user.uid) {
+      onToast(lang === 'ru' ? 'Нельзя подать заявку на собственное объявление' : 'You cannot apply to your own post', 'error');
+      return;
+    }
     if (!applyMessage.trim() || !applyDiscord.trim()) {
       onToast(lang === 'ru' ? 'Заполните сообщение и ваш Discord' : 'Please fill message and Discord handle', 'error');
+      return;
+    }
+    if (applyMessage.trim().length > 2000 || applyDiscord.trim().length > 100 || !Number.isFinite(Number(applyHours)) || Number(applyHours) < 0 || Number(applyHours) > 20000 || !Number.isFinite(Number(applyAge)) || Number(applyAge) < 12 || Number(applyAge) > 99) {
+      onToast(lang === 'ru' ? 'Проверьте введённые данные' : 'Please check the submitted details', 'error');
+      return;
+    }
+    if (tickets.some((ticket) => ticket.postId === selectedPost.id && ticket.applicantId === user.uid)) {
+      onToast(lang === 'ru' ? 'Вы уже отправляли заявку на это объявление' : 'You have already applied to this post', 'info');
       return;
     }
 
     setIsSubmittingTicket(true);
     try {
+      const existing = await getDocs(query(collection(db, 'clan_tickets'), where('postId', '==', selectedPost.id), where('applicantId', '==', user.uid)));
+      if (!existing.empty) {
+        onToast(lang === 'ru' ? 'Вы уже отправляли заявку на это объявление' : 'You have already applied to this post', 'info');
+        return;
+      }
       await addDoc(collection(db, 'clan_tickets'), {
         postId: selectedPost.id,
         postTitle: selectedPost.title,
@@ -468,6 +489,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
         'success'
       );
       setApplyMessage('');
+      setApplyDiscord('');
       setThreadTab('comments');
     } catch (err) {
       console.error("Error submitting ticket:", err);
@@ -1355,7 +1377,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
                                   t.status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
                                   'bg-amber-500/10 text-amber-400 border-amber-500/30'
                                 }`}>
-                                  {t.status === 'accepted' ? '✅ Принят' : t.status === 'rejected' ? '❌ Отклонен' : '⏳ В обработке'}
+                                  {t.status === 'accepted' ? (lang === 'ru' ? 'Заявка одобрена' : 'Approved') : t.status === 'rejected' ? (lang === 'ru' ? 'Отклонена' : 'Rejected') : (lang === 'ru' ? 'На рассмотрении' : 'Pending')}
                                 </span>
                               </div>
 
@@ -1382,7 +1404,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
                                   onClick={() => handleUpdateTicketStatus(t.id, 'accepted')}
                                   className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-mono font-bold uppercase cursor-pointer"
                                 >
-                                  {lang === 'ru' ? 'Принять в клан' : 'Accept Player'}
+                                  {lang === 'ru' ? 'Одобрить заявку' : 'Approve Application'}
                                 </button>
                               </div>
                             </div>
@@ -1391,6 +1413,11 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
                       </div>
                     ) : (
                       /* IF VISITOR -> Show Application Submission Form */
+                      {selectedPost.status === 'closed' ? (
+                        <div className="rounded-xl border border-rose-500/25 bg-rose-500/5 p-5 text-center text-sm text-zinc-300">
+                          {lang === 'ru' ? 'Набор по этому объявлению закрыт. Отправка заявок недоступна.' : 'Recruitment is closed. Applications are no longer accepted.'}
+                        </div>
+                      ) : (
                       <form onSubmit={handleSendTicket} className="space-y-4 bg-[#1b1e26] p-4 border border-[#2a2f3b]">
                         <h4 className="text-sm font-bold text-white uppercase font-mono flex items-center gap-2">
                           <Send className="text-blue-400" size={16} />
@@ -1489,6 +1516,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
                           <span>{lang === 'ru' ? 'Отправить тикет-заявку' : 'Submit Application Ticket'}</span>
                         </button>
                       </form>
+                      )}
                     )}
                   </div>
                 )}
