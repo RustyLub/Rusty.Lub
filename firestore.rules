@@ -56,6 +56,101 @@ service cloud.firestore {
       allow read, create, update, delete: if isPromoCodeAdmin();
     }
 
+    // Public recruitment listings; editing is restricted to the listing owner.
+    match /clan_posts/{postId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.type in ['clan_recruit', 'player_lfg']
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 3
+        && request.resource.data.title.size() <= 100
+        && request.resource.data.description is string
+        && request.resource.data.description.size() >= 1
+        && request.resource.data.description.size() <= 3000
+        && request.resource.data.hours is number
+        && request.resource.data.hours >= 0
+        && request.resource.data.hours <= 20000
+        && request.resource.data.serverType is string
+        && request.resource.data.discord is string
+        && request.resource.data.discord.size() <= 100
+        && request.resource.data.status == 'open';
+      allow update: if signedIn() && (
+        (resource.data.authorId == request.auth.uid
+          && request.resource.data.authorId == resource.data.authorId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'title', 'clanName', 'hours', 'serverType', 'teamSize', 'rolesNeeded',
+            'primeTime', 'ageMin', 'description', 'discord', 'status', 'updatedAt'
+          ])
+          && request.resource.data.title is string
+          && request.resource.data.title.size() >= 3
+          && request.resource.data.title.size() <= 100
+          && request.resource.data.description is string
+          && request.resource.data.description.size() <= 3000
+          && request.resource.data.hours is number
+          && request.resource.data.hours >= 0
+          && request.resource.data.hours <= 20000
+          && request.resource.data.status in ['open', 'closed'])
+        ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['commentsCount'])
+          && request.resource.data.commentsCount is number
+          && request.resource.data.commentsCount == resource.data.get('commentsCount', 0) + 1)
+      );
+      allow delete: if signedIn()
+        && (resource.data.authorId == request.auth.uid || request.auth.token.admin == true);
+    }
+
+    // Public discussion messages do not contain private application data.
+    match /clan_comments/{commentId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.postId is string
+        && request.resource.data.content is string
+        && request.resource.data.content.size() >= 1
+        && request.resource.data.content.size() <= 2000;
+      allow update: if false;
+      allow delete: if signedIn()
+        && (resource.data.authorId == request.auth.uid || request.auth.token.admin == true);
+    }
+
+    // Applications are visible only to their applicant and the owner of the post.
+    match /clan_tickets/{ticketId} {
+      allow get, list: if signedIn()
+        && (resource.data.applicantId == request.auth.uid || resource.data.postAuthorId == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly([
+          'postId', 'postTitle', 'postAuthorId', 'applicantName', 'applicantId',
+          'applicantAvatar', 'applicantHours', 'applicantAge', 'applicantRoles',
+          'discord', 'message', 'createdAt', 'status'
+        ])
+        && request.resource.data.applicantId == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.postId is string
+        && request.resource.data.postAuthorId is string
+        && request.resource.data.postAuthorId != request.auth.uid
+        && request.resource.data.applicantName is string
+        && request.resource.data.applicantHours is number
+        && request.resource.data.applicantHours >= 0
+        && request.resource.data.applicantHours <= 20000
+        && request.resource.data.discord is string
+        && request.resource.data.discord.size() >= 2
+        && request.resource.data.discord.size() <= 100
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 1
+        && request.resource.data.message.size() <= 2000
+        && get(/databases/$(database)/documents/clan_posts/$(request.resource.data.postId)).data.authorId == request.resource.data.postAuthorId
+        && get(/databases/$(database)/documents/clan_posts/$(request.resource.data.postId)).data.status == 'open';
+      allow update: if signedIn()
+        && resource.data.postAuthorId == request.auth.uid
+        && resource.data.status == 'pending'
+        && request.resource.data.status in ['accepted', 'rejected']
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'responseNote', 'updatedAt']);
+      allow delete: if signedIn()
+        && resource.data.applicantId == request.auth.uid
+        && resource.data.status == 'pending';
+    }
+
     // Legacy collections are deliberately left unchanged in this migration.
     // Their existing rules should be reviewed in a separate compatibility pass.
     match /email_verification/{document} {
