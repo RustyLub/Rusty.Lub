@@ -97,6 +97,28 @@ export default function HomeTab({
         </div>
       </section>
 
+      {/* FEATURED NOVEMBER UPDATE */}
+      <section className="mx-auto max-w-none border-b border-orange-500/30 px-5 py-6 sm:px-8 lg:px-10">
+        <button
+          type="button"
+          onClick={() => onNavigate('news')}
+          className="group relative grid w-full overflow-hidden border border-orange-500/40 bg-[#0b1118] text-left transition hover:border-orange-400 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
+          aria-label={ru ? 'Открыть полную новость о ноябрьском обновлении Rust' : 'Read the full Rust November update article'}
+        >
+          <div className="relative min-h-[190px] overflow-hidden sm:min-h-[230px]">
+            <img src={oilRigBg} alt="" className="absolute inset-0 h-full w-full object-cover object-center opacity-75 transition duration-700 group-hover:scale-105" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#080d12]/20 via-[#080d12]/35 to-[#080d12]/80 lg:bg-gradient-to-r lg:from-transparent lg:to-[#0b1118]" />
+            <span className="absolute left-4 top-4 border border-orange-400/60 bg-[#101318]/90 px-3 py-1 font-mono text-[9px] font-black tracking-[.18em] text-orange-400">{ru ? 'ГЛАВНАЯ НОВОСТЬ · НОЯБРЬ 2026' : 'TOP STORY · NOVEMBER 2026'}</span>
+          </div>
+          <div className="relative flex flex-col justify-center p-5 sm:p-7 lg:-ml-10 lg:pl-12">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-[.2em] text-orange-500">{ru ? 'ОБНОВЛЕНИЕ RUST · 5 НОЯБРЯ' : 'RUST UPDATE · NOVEMBER 5'}</span>
+            <h2 className="mt-2 max-w-2xl text-xl font-black leading-tight text-white sm:text-2xl">{ru ? 'Ноябрьское обновление Rust: чертежи, UZI и глобальный вайп' : 'Rust November Update: Blueprints, UZI and Force Wipe'}</h2>
+            <p className="mt-3 max-w-2xl text-xs leading-5 text-slate-300">{ru ? 'Что известно о предстоящем обновлении, изменениях прогрессии и подготовке к вайпу. Предварительные детали сверяйте с финальными заметками Facepunch.' : 'What is known about the upcoming update, progression changes and wipe preparation. Check provisional details against Facepunch final notes.'}</p>
+            <span className="mt-5 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-orange-400">{ru ? 'ЧИТАТЬ ПОЛНУЮ НОВОСТЬ' : 'READ FULL ARTICLE'} <ArrowRight size={15} className="transition group-hover:translate-x-1" /></span>
+          </div>
+        </button>
+      </section>
+
       {/* POPULAR TOOLS */}
       <section className="mx-auto max-w-none border-b border-slate-700/70 px-5 py-8 sm:px-8 lg:px-10">
         <div className="mb-4 flex items-end justify-between gap-4"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[.2em] text-slate-400"><span className="text-orange-500">///</span> {ru ? 'БЫСТРЫЙ ДОСТУП' : 'QUICK ACCESS'}</p><h2 className="mt-1 text-xl font-black uppercase text-white sm:text-2xl">{ru ? 'Популярные инструменты' : 'Popular tools'}</h2></div><button onClick={() => onNavigate('tools')} className="mb-1 inline-flex shrink-0 items-center gap-2 text-[11px] font-bold text-orange-500 hover:text-orange-300">{ru ? 'Все инструменты' : 'All tools'} <ArrowRight size={14} /></button></div>
