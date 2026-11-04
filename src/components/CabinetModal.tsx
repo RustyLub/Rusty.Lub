@@ -137,36 +137,10 @@ export default function CabinetModal({
   };
 
   
-  const [paymentUnavailableNotice, setPaymentUnavailableNotice] = useState(false);
   const [daNickname, setDaNickname] = useState('');
   const [isSubmittingDa, setIsSubmittingDa] = useState(false);
 
-  const VIP_PLANS = [
-    {
-      id: 'diamond',
-      name: { ru: 'Diamond VIP', en: 'Diamond VIP' },
-      price: 300,
-      perks: {
-        ru: [
-          'Персонализация профиля (кастомные темы и аватары)',
-          'Радар игроков: отслеживание истории серверов Rust по SteamID64 через BattleMetrics',
-          'Анимированная фиолетовая корона 👑 в чате',
-          'Все платные аватары и профильные темы открыты',
-          'Добавление в почетный список спонсоров проекта',
-          'Выделенный золотой никнейм и иконка ⭐ в глобальном чате'
-        ],
-        en: [
-          'Profile personalization (custom themes & avatars)',
-          'Player Radar: track Rust server history via BattleMetrics by SteamID64',
-          'Animated purple crown 👑 in chat messages',
-          'All premium survival avatars & themes unlocked',
-          'Inclusion in the honorary project sponsors wall',
-          'Highlighted gold username and star icon ⭐ in global chat'
-        ]
-      },
-      badgeId: 'vip_diamond'
-    }
-  ];
+
 
   // Customization local states
   const [displayName, setDisplayName] = useState('');
