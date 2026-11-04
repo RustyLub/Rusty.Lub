@@ -90,6 +90,22 @@ service cloud.firestore {
           && request.resource.data.hours is number
           && request.resource.data.hours >= 0
           && request.resource.data.hours <= 20000
+          && request.resource.data.serverType is string
+          && request.resource.data.serverType.size() <= 60
+          && request.resource.data.discord is string
+          && request.resource.data.discord.size() >= 2
+          && request.resource.data.discord.size() <= 100
+          && request.resource.data.get('clanName', '') is string
+          && request.resource.data.get('clanName', '').size() <= 60
+          && request.resource.data.get('teamSize', '') is string
+          && request.resource.data.get('teamSize', '').size() <= 60
+          && request.resource.data.get('primeTime', '') is string
+          && request.resource.data.get('primeTime', '').size() <= 60
+          && request.resource.data.get('ageMin', 16) is number
+          && request.resource.data.get('ageMin', 16) >= 12
+          && request.resource.data.get('ageMin', 16) <= 99
+          && request.resource.data.get('rolesNeeded', []) is list
+          && request.resource.data.get('rolesNeeded', []).size() <= 7
           && request.resource.data.status in ['open', 'closed'])
         ||
         (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['commentsCount'])
