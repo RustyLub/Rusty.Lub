@@ -104,63 +104,6 @@ export default function HomeTab({
         </div>
       </section>
 
-      {/* RUSTY.LUB GAME SERVER */}
-      <section className="relative isolate overflow-hidden border-b border-orange-500/30 bg-[#080d12] px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
-        <div className="pointer-events-none absolute inset-0 -z-10 opacity-25" style={{ backgroundImage: 'linear-gradient(115deg, transparent 0%, rgba(249,115,22,.12) 52%, transparent 100%), repeating-linear-gradient(0deg, transparent 0px, transparent 39px, rgba(148,163,184,.07) 40px)' }} />
-        <div className="mx-auto grid max-w-[1500px] items-center gap-8 lg:grid-cols-[minmax(0,1fr)_390px]">
-          <div className="min-w-0">
-            <div className="mb-4 flex items-center gap-3">
-              <span className="h-px w-8 bg-orange-500" />
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[.24em] text-orange-400">{ru ? 'ИГРОВОЙ СЕРВЕР RUSTY.LUB' : 'RUSTY.LUB GAME SERVER'}</p>
-            </div>
-            <h2 className="text-3xl font-black leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">Rusty.Lub <span className="text-orange-500">Vanilla 1x</span></h2>
-            <p className="mt-4 max-w-xl text-sm leading-6 text-slate-300">{ru ? 'Классический Rust без лишних модификаций. Стройся, объединяйся с командой и сражайся за выживание.' : 'Classic Rust without unnecessary modifications. Build, team up and fight to survive.'}</p>
-            <div className="mt-7 grid max-w-2xl grid-cols-3 gap-2 sm:gap-3">
-              <div className="border-l-2 border-orange-500 bg-white/[0.04] px-3 py-3 sm:px-4">
-                <p className="font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'РЕГИОН' : 'REGION'}</p>
-                <p className="mt-1 text-sm font-bold text-white">US / USA</p>
-              </div>
-              <div className="border-l-2 border-slate-600 bg-white/[0.04] px-3 py-3 sm:px-4">
-                <p className="font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'КАРТА' : 'MAP'}</p>
-                <p className="mt-1 text-sm font-bold text-white">Procedural</p>
-              </div>
-              <div className="border-l-2 border-slate-600 bg-white/[0.04] px-3 py-3 sm:px-4">
-                <p className="font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'СЛОТЫ' : 'SLOTS'}</p>
-                <p className="mt-1 text-sm font-bold text-white">75 {ru ? 'игроков' : 'players'}</p>
-              </div>
-            </div>
-          </div>
-          <div className="border border-slate-700 bg-[#0d141c]/95 p-4 shadow-2xl sm:p-5">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[.18em] text-slate-400">{ru ? 'СТАТУС СЕРВЕРА' : 'SERVER STATUS'}</span>
-              <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-500"><span className="h-1.5 w-1.5 rounded-full bg-orange-500" /> ENUM.GG</span>
-            </div>
-            <a href="https://enum.gg/server/rusty-lub-vanilla-fun-server-nmcqfPa3" target="_blank" rel="noopener noreferrer" className="flex min-h-14 items-center justify-center border border-slate-700 bg-black/30 px-3 py-3 transition hover:border-orange-500/70" aria-label={ru ? 'Открыть актуальный статус сервера на Enum' : 'Open live server status on Enum'}>
-              <img
-                key={serverBadgeRefresh}
-                src={`https://enum.gg/api/public/v1/servers/nmcqfPa3/badge.svg?refresh=${serverBadgeRefresh}`}
-                alt={ru ? 'Актуальный статус и количество игроков на сервере' : 'Live server status and player count'}
-                className="h-7 max-w-full"
-                loading="eager"
-                decoding="async"
-              />
-            </a>
-            <p className="mt-2 text-center font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'Автообновление · 45 секунд' : 'Auto-refresh · 45 seconds'}</p>
-            <div className="mt-3 flex items-center justify-between gap-3 border border-slate-700 bg-black/25 px-3 py-2.5">
-              <span className="truncate font-mono text-xs text-slate-200">135.148.15.101:26952</span>
-              <button type="button" onClick={async () => { try { await navigator.clipboard.writeText('135.148.15.101:26952'); setCopiedServerAddress(true); window.setTimeout(() => setCopiedServerAddress(false), 1800); } catch { setCopiedServerAddress(false); } }} className="inline-flex shrink-0 items-center gap-1.5 text-[10px] font-bold uppercase text-orange-400 transition hover:text-orange-300" aria-label={ru ? 'Скопировать адрес сервера' : 'Copy server address'}>
-                {copiedServerAddress ? <Check size={13} /> : <Copy size={13} />}
-                {copiedServerAddress ? (ru ? 'Скопировано' : 'Copied') : (ru ? 'Копировать' : 'Copy')}
-              </button>
-            </div>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <a href="steam://connect/135.148.15.101:26952" className="inline-flex min-h-11 items-center justify-center gap-2 bg-orange-500 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-[#101318] transition hover:bg-orange-400"><ArrowRight size={15} /> {ru ? 'Играть' : 'Play now'}</a>
-              <a href="https://enum.gg/server/rusty-lub-vanilla-fun-server-nmcqfPa3" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 border border-slate-600 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-200 transition hover:border-orange-500 hover:text-orange-400">{ru ? 'Подробнее' : 'Details'} <ExternalLink size={13} /></a>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* FEATURED NOVEMBER UPDATE */}
       <section className="mx-auto max-w-none border-b border-orange-500/30 px-5 py-6 sm:px-8 lg:px-10">
         <button
@@ -195,18 +138,52 @@ export default function HomeTab({
         </div>
       </section>
 
-      {/* ABOUT */}
-      <section className="mx-auto grid max-w-none gap-6 border-b border-slate-700/70 px-5 py-8 sm:px-8 lg:grid-cols-[.8fr_1.5fr] lg:items-center lg:px-10">
-        <div><p className="font-mono text-[10px] font-bold uppercase tracking-[.2em] text-slate-400"><span className="text-orange-500">///</span> {ru ? 'О ПРОЕКТЕ' : 'ABOUT THE PROJECT'}</p><h2 className="mt-1 text-2xl font-black uppercase text-white">{ru ? 'Больше, чем просто сайт' : 'More than just a website'}</h2><p className="mt-3 max-w-lg text-xs leading-5 text-slate-400">{ru ? 'Rusty.Lub — это полноценный справочник по игре Rust, созданный с целью сделать игру проще, удобнее и интереснее. Мы собираем лучшие инструменты, гайды и полезные материалы для всех, кто хочет развиваться, строить, рейдить и побеждать.' : 'Rusty.Lub is a complete Rust knowledge hub designed to make the game easier, more convenient and more enjoyable. We bring together tools, guides and useful resources for every kind of player.'}</p><button onClick={() => onNavigate('guides')} className="mt-4 inline-flex items-center gap-2 border border-orange-500/70 px-4 py-2 text-[10px] font-bold text-orange-400 transition hover:bg-orange-500 hover:text-black">{ru ? 'Узнать больше' : 'Learn more'} <ArrowRight size={13} /></button></div>
-        <div className="relative grid min-h-[170px] grid-cols-2 gap-px overflow-hidden border border-slate-600/50 bg-slate-700/60 sm:grid-cols-4">
-          <div className="absolute inset-0"><img src={oilRigBg} alt="" className="h-full w-full object-cover opacity-30" /><div className="absolute inset-0 bg-[#080d12]/55" /></div>
-          {[
-            { icon: Wrench, title: ru ? 'Инструменты' : 'Tools', desc: ru ? 'Калькуляторы и утилиты' : 'Calculators and utilities' },
-            { icon: BookOpen, title: ru ? 'Гайды' : 'Guides', desc: ru ? 'Инструкции и советы' : 'Instructions and tips' },
-            { icon: Users, title: ru ? 'Сообщество' : 'Community', desc: ru ? 'Общение и кланы' : 'Players and clans' },
-            { icon: Handshake, title: ru ? 'Партнёрства' : 'Partnerships', desc: ru ? 'Сотрудничество' : 'Collaborations' }
-          ].map(({ icon: Icon, title, desc }) => <div key={title} className="relative flex flex-col justify-center border-r border-slate-600/40 p-4 last:border-0"><Icon size={22} className="mb-3 text-orange-500" /><b className="text-xs text-white">{title}</b><small className="mt-1 text-[10px] leading-4 text-slate-300">{desc}</small></div>)}
+      {/* ABOUT + GAME SERVER */}
+      <section className="mx-auto grid max-w-none gap-6 border-b border-slate-700/70 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,390px)] lg:items-start lg:gap-8 lg:px-10">
+        <div className="min-w-0">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[.2em] text-slate-400"><span className="text-orange-500">///</span> {ru ? 'О ПРОЕКТЕ' : 'ABOUT THE PROJECT'}</p>
+          <h2 className="mt-1 text-2xl font-black uppercase text-white">{ru ? 'Больше, чем просто сайт' : 'More than just a website'}</h2>
+          <p className="mt-3 max-w-2xl text-xs leading-5 text-slate-400">{ru ? 'Rusty.Lub — это полноценный справочник по игре Rust, созданный с целью сделать игру проще, удобнее и интереснее. Мы собираем лучшие инструменты, гайды и полезные материалы для всех, кто хочет развиваться, строить, рейдить и побеждать.' : 'Rusty.Lub is a complete Rust knowledge hub designed to make the game easier, more convenient and more enjoyable. We bring together tools, guides and useful resources for every kind of player.'}</p>
+          <button onClick={() => onNavigate('guides')} className="mt-4 inline-flex items-center gap-2 border border-orange-500/70 px-4 py-2 text-[10px] font-bold text-orange-400 transition hover:bg-orange-500 hover:text-black">{ru ? 'Узнать больше' : 'Learn more'} <ArrowRight size={13} /></button>
+          <div className="relative mt-6 grid grid-cols-2 gap-px overflow-hidden border border-slate-600/50 bg-slate-700/60 sm:grid-cols-4">
+            <div className="absolute inset-0"><img src={oilRigBg} alt="" className="h-full w-full object-cover opacity-30" /><div className="absolute inset-0 bg-[#080d12]/55" /></div>
+            {[
+              { icon: Wrench, title: ru ? 'Инструменты' : 'Tools', desc: ru ? 'Калькуляторы и утилиты' : 'Calculators and utilities' },
+              { icon: BookOpen, title: ru ? 'Гайды' : 'Guides', desc: ru ? 'Инструкции и советы' : 'Instructions and tips' },
+              { icon: Users, title: ru ? 'Сообщество' : 'Community', desc: ru ? 'Общение и кланы' : 'Players and clans' },
+              { icon: Handshake, title: ru ? 'Партнёрства' : 'Partnerships', desc: ru ? 'Сотрудничество' : 'Collaborations' }
+            ].map(({ icon: Icon, title, desc }) => <div key={title} className="relative flex flex-col justify-center border-r border-slate-600/40 p-3 sm:p-4"><Icon size={20} className="mb-2 text-orange-500" /><b className="text-xs text-white">{title}</b><small className="mt-1 text-[10px] leading-4 text-slate-300">{desc}</small></div>)}
+          </div>
         </div>
+
+        <aside className="min-w-0 border border-orange-500/30 bg-[#0b1118] p-4 shadow-xl sm:p-5">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-[.18em] text-slate-400">{ru ? 'СЕРВЕР СООБЩЕСТВА' : 'COMMUNITY SERVER'}</span>
+            <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-500"><span className="h-1.5 w-1.5 rounded-full bg-orange-500" /> ENUM.GG</span>
+          </div>
+          <h3 className="text-xl font-black leading-tight text-white">Rusty.Lub <span className="text-orange-500">Vanilla 1x</span></h3>
+          <p className="mt-2 text-xs leading-5 text-slate-400">{ru ? 'Классический Rust без лишних модификаций. Стройся, объединяйся с командой и сражайся за выживание.' : 'Classic Rust without unnecessary modifications. Build, team up and fight to survive.'}</p>
+          <a href="https://enum.gg/server/rusty-lub-vanilla-fun-server-nmcqfPa3" target="_blank" rel="noopener noreferrer" className="mt-4 flex min-h-14 items-center justify-center border border-slate-700 bg-black/30 px-3 py-3 transition hover:border-orange-500/70" aria-label={ru ? 'Открыть актуальный статус сервера на Enum' : 'Open live server status on Enum'}>
+            <img key={serverBadgeRefresh} src={`https://enum.gg/api/public/v1/servers/nmcqfPa3/badge.svg?refresh=${serverBadgeRefresh}`} alt={ru ? 'Актуальный статус и количество игроков на сервере' : 'Live server status and player count'} className="h-7 max-w-full" loading="eager" decoding="async" />
+          </a>
+          <p className="mt-2 text-center font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'Автообновление · 45 секунд' : 'Auto-refresh · 45 seconds'}</p>
+          <div className="mt-3 flex items-center justify-between gap-3 border border-slate-700 bg-black/25 px-3 py-2.5">
+            <span className="truncate font-mono text-xs text-slate-200">135.148.15.101:26952</span>
+            <button type="button" onClick={async () => { try { await navigator.clipboard.writeText('135.148.15.101:26952'); setCopiedServerAddress(true); window.setTimeout(() => setCopiedServerAddress(false), 1800); } catch { setCopiedServerAddress(false); } }} className="inline-flex shrink-0 items-center gap-1.5 text-[10px] font-bold uppercase text-orange-400 transition hover:text-orange-300" aria-label={ru ? 'Скопировать адрес сервера' : 'Copy server address'}>
+              {copiedServerAddress ? <Check size={13} /> : <Copy size={13} />}
+              {copiedServerAddress ? (ru ? 'Скопировано' : 'Copied') : (ru ? 'Копировать' : 'Copy')}
+            </button>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <a href="steam://connect/135.148.15.101:26952" className="inline-flex min-h-10 items-center justify-center gap-2 bg-orange-500 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-[#101318] transition hover:bg-orange-400"><ArrowRight size={15} /> {ru ? 'Играть' : 'Play now'}</a>
+            <a href="https://enum.gg/server/rusty-lub-vanilla-fun-server-nmcqfPa3" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center justify-center gap-2 border border-slate-600 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-200 transition hover:border-orange-500 hover:text-orange-400">{ru ? 'Подробнее' : 'Details'} <ExternalLink size={13} /></a>
+          </div>
+          <div className="mt-3 grid grid-cols-3 gap-2 border-t border-slate-700/70 pt-3">
+            <div><p className="font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'РЕГИОН' : 'REGION'}</p><p className="mt-1 text-xs font-bold text-white">US</p></div>
+            <div><p className="font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'КАРТА' : 'MAP'}</p><p className="mt-1 text-xs font-bold text-white">Procedural</p></div>
+            <div><p className="font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'СЛОТЫ' : 'SLOTS'}</p><p className="mt-1 text-xs font-bold text-white">75</p></div>
+          </div>
+        </aside>
       </section>
 
       {/* NEWS & GUIDES */}
