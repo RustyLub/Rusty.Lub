@@ -24,10 +24,13 @@ import {
   updateDoc,
   deleteDoc,
   where,
+  getDocs,
+  increment,
   onSnapshot
 } from '../firebase';
 import { logUserActivity } from '../services/activityLogger';
 import { getAvatarUrl } from '../customAvatars';
+import './ClanBoardTab.css';
 
 interface ClanBoardTabProps {
   lang: 'ru' | 'en';
@@ -115,6 +118,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
   const [posts, setPosts] = useState<ClanPost[]>([]);
   const [tickets, setTickets] = useState<ClanTicket[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -126,7 +130,8 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
   const [bookmarks, setBookmarks] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('rusty_clan_bookmarks');
-      return saved ? JSON.parse(saved) : [];
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed.filter((id) => typeof id === 'string') : [];
     } catch {
       return [];
     }
@@ -544,7 +549,7 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
   const totalCommentsCount = posts.reduce((acc, p) => acc + (p.commentsCount || 0), 0);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 pb-12">
+    <div className="clan-board-page space-y-6 animate-in fade-in duration-300 pb-12">
       {/* Tactical Header Banner */}
       <div className="bg-[#14171e] border border-[#2a2f3b] p-6 rounded-none space-y-4 rust-metal-pattern relative overflow-hidden">
         <div className="rust-bracket-tl" />
