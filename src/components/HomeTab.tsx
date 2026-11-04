@@ -141,18 +141,30 @@ export default function HomeTab({
       {/* ABOUT + GAME SERVER */}
       <section className="mx-auto grid max-w-none gap-6 border-b border-slate-700/70 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,390px)] lg:items-start lg:gap-8 lg:px-10">
         <div className="min-w-0">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[.2em] text-slate-400"><span className="text-orange-500">///</span> {ru ? 'О ПРОЕКТЕ' : 'ABOUT THE PROJECT'}</p>
-          <h2 className="mt-1 text-2xl font-black uppercase text-white">{ru ? 'Больше, чем просто сайт' : 'More than just a website'}</h2>
-          <p className="mt-3 max-w-2xl text-xs leading-5 text-slate-400">{ru ? 'Rusty.Lub — это полноценный справочник по игре Rust, созданный с целью сделать игру проще, удобнее и интереснее. Мы собираем лучшие инструменты, гайды и полезные материалы для всех, кто хочет развиваться, строить, рейдить и побеждать.' : 'Rusty.Lub is a complete Rust knowledge hub designed to make the game easier, more convenient and more enjoyable. We bring together tools, guides and useful resources for every kind of player.'}</p>
-          <button onClick={() => onNavigate('guides')} className="mt-4 inline-flex items-center gap-2 border border-orange-500/70 px-4 py-2 text-[10px] font-bold text-orange-400 transition hover:bg-orange-500 hover:text-black">{ru ? 'Узнать больше' : 'Learn more'} <ArrowRight size={13} /></button>
-          <div className="relative mt-6 grid grid-cols-2 gap-px overflow-hidden border border-slate-600/50 bg-slate-700/60 sm:grid-cols-4">
-            <div className="absolute inset-0"><img src={oilRigBg} alt="" className="h-full w-full object-cover opacity-30" /><div className="absolute inset-0 bg-[#080d12]/55" /></div>
+          <div className="relative isolate min-h-[190px] overflow-hidden border border-slate-600/60 bg-[#080d12]">
+            <img src={oilRigBg} alt="" aria-hidden="true" className="absolute inset-0 -z-20 h-full w-full object-cover object-center opacity-80" />
+            <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(5,9,13,.94)_0%,rgba(5,9,13,.72)_48%,rgba(5,9,13,.2)_100%),linear-gradient(0deg,rgba(5,9,13,.65),transparent)]" />
+            <div className="flex min-h-[190px] max-w-xl flex-col justify-end p-5 sm:p-6">
+              <span className="font-mono text-[9px] font-bold uppercase tracking-[.24em] text-orange-400">RUST KNOWLEDGE // SURVIVAL TOOLS</span>
+              <h2 className="mt-2 text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl">{ru ? 'Больше, чем просто сайт' : 'More than just a website'}</h2>
+              <p className="mt-2 max-w-lg text-xs leading-5 text-slate-200 sm:text-sm">{ru ? 'Rusty.Lub — практический справочник для выживших. Всё необходимое, чтобы планировать рейды, строить базы, разбираться в механиках и играть увереннее.' : 'Rusty.Lub is a practical field guide for survivors. Everything you need to plan raids, build bases, master game mechanics and play smarter.'}</p>
+              <button onClick={() => onNavigate('guides')} className="mt-4 inline-flex w-fit items-center gap-2 border border-orange-400/80 bg-orange-500 px-4 py-2.5 text-[10px] font-black uppercase tracking-wider text-[#101318] transition hover:bg-orange-400">{ru ? 'Открыть справочник' : 'Explore the guide'} <ArrowRight size={14} /></button>
+            </div>
+          </div>
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {[
-              { icon: Wrench, title: ru ? 'Инструменты' : 'Tools', desc: ru ? 'Калькуляторы и утилиты' : 'Calculators and utilities' },
-              { icon: BookOpen, title: ru ? 'Гайды' : 'Guides', desc: ru ? 'Инструкции и советы' : 'Instructions and tips' },
-              { icon: Users, title: ru ? 'Сообщество' : 'Community', desc: ru ? 'Общение и кланы' : 'Players and clans' },
-              { icon: Handshake, title: ru ? 'Партнёрства' : 'Partnerships', desc: ru ? 'Сотрудничество' : 'Collaborations' }
-            ].map(({ icon: Icon, title, desc }) => <div key={title} className="relative flex flex-col justify-center border-r border-slate-600/40 p-3 sm:p-4"><Icon size={20} className="mb-2 text-orange-500" /><b className="text-xs text-white">{title}</b><small className="mt-1 text-[10px] leading-4 text-slate-300">{desc}</small></div>)}
+              { icon: Wrench, number: '01', title: ru ? 'Инструменты' : 'Tools', desc: ru ? 'Калькуляторы, расчёты и полезные утилиты для игры.' : 'Calculators, planning tools and useful utilities.', action: 'tools' },
+              { icon: BookOpen, number: '02', title: ru ? 'База знаний' : 'Knowledge base', desc: ru ? 'Гайды по строительству, оружию, механикам и тактике.' : 'Guides for building, weapons, mechanics and tactics.', action: 'guides' },
+              { icon: Users, number: '03', title: ru ? 'Сообщество' : 'Community', desc: ru ? 'Игроки, кланы, общение и совместная игра.' : 'Players, clans, discussion and team play.', action: 'clans' },
+              { icon: Handshake, number: '04', title: ru ? 'Партнёрства' : 'Partnerships', desc: ru ? 'Совместные проекты и сотрудничество с Rusty.Lub.' : 'Joint projects and collaboration with Rusty.Lub.', action: 'support' }
+            ].map(({ icon: Icon, number, title, desc, action }) => <button key={number} type="button" onClick={() => onNavigate(action)} className="group flex min-h-[112px] items-start gap-3 border border-slate-700/80 bg-[#0d141c] p-3.5 text-left transition duration-200 hover:border-orange-500/70 hover:bg-[#131d27] sm:p-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center border border-orange-500/30 bg-orange-500/10 text-orange-400 transition group-hover:border-orange-500 group-hover:bg-orange-500 group-hover:text-[#101318]"><Icon size={19} /></span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-2"><b className="text-sm font-bold text-white">{title}</b><small className="font-mono text-[9px] text-slate-600">{number}</small></span>
+                <span className="mt-1.5 block text-[11px] leading-[1.55] text-slate-400">{desc}</span>
+              </span>
+              <ArrowRight size={15} className="mt-1 shrink-0 text-slate-600 transition group-hover:translate-x-1 group-hover:text-orange-400" />
+            </button>)}
           </div>
         </div>
 
