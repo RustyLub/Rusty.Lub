@@ -32,7 +32,6 @@ const DEFAULT_NEWS_ITEMS: NewsItem[] = [
     author: 'Rusty.Lub',
     badge: { ru: 'НОЯБРЬСКОЕ ОБНОВЛЕНИЕ', en: 'NOVEMBER UPDATE' },
     isFeatured: true,
-    coverImage: 'https://prostoj.store/posts/rust-news/update/post-rust-update-5-november-2026-blueprints-uzi-wipe',
     summary: {
       ru: 'Большое ноябрьское обновление Rust ожидается 5 ноября вместе с ежемесячным вайпом. В центре внимания — изменения системы чертежей и прогрессии, а также подготовка нового оружия UZI. Часть деталей до официального патчноута остаётся предварительной.',
       en: 'The November Rust update is expected on November 5 alongside the monthly force wipe. Key topics include blueprint progression changes and development of the new UZI. Some details remain provisional until the official patch notes.'
