@@ -243,7 +243,18 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
   };
 
   return (
-    <div className="space-y-4">
+    <div className="binds-page space-y-5">
+      <section className="binds-hero">
+        <div className="binds-hero-copy">
+          <span className="binds-eyebrow">{lang === 'ru' ? 'RUST // КОМАНДЫ И УПРАВЛЕНИЕ' : 'RUST // COMMANDS & CONTROLS'}</span>
+          <h1>{lang === 'ru' ? 'Бинды и команды Rust' : 'Rust binds & commands'}</h1>
+          <p>{lang === 'ru' ? 'Подборка полезных игровых биндов и консольных команд. Найдите нужное действие, скопируйте команду и сохраните свои настройки.' : 'A curated library of useful game binds and console commands. Find an action, copy its command, and save your setup.'}</p>
+        </div>
+        <div className="binds-hero-stats">
+          <div><span>{lang === 'ru' ? 'В КАТАЛОГЕ' : 'IN LIBRARY'}</span><strong>{totalBinds}</strong></div>
+          <div><span>{lang === 'ru' ? 'СОХРАНЕНО' : 'SAVED'}</span><strong>{savedCount}</strong></div>
+        </div>
+      </section>
       {/* Quick 1-Click Config Export Banner */}
       {onOpenConfigExporter && (
         <div className="bg-gradient-to-r from-[#f97316]/20 via-[#181c28] to-[#14171e] border border-[#f97316]/50 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
@@ -274,7 +285,7 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
       )}
 
       {/* Mode Switcher & Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1e2633] pb-2">
+      <div className="binds-modebar flex flex-wrap items-center justify-between gap-3">
         <div className="flex gap-2">
           <button
             onClick={() => handleModeChange('player')}
@@ -316,22 +327,23 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
       </div>
 
       {/* Search and Filters Header */}
-      <div className="flex flex-col xl:flex-row gap-3 bg-[#12161e] p-4 border border-[#1e2633]">
+      <div className="binds-filter-panel flex flex-col xl:flex-row gap-3">
         {/* Smart Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
           <input
             type="text"
             id="binds-search-input"
+            aria-label={lang === 'ru' ? 'Поиск по биндам и командам' : 'Search binds and commands'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={lang === 'en' ? "Search..." : "Поиск..."}
+            placeholder={lang === 'en' ? "Search command, action, category..." : "Поиск команды, действия или категории..."}
             className="w-full bg-[#08090c] border border-[#1e2633] text-[#eef2f7] placeholder-zinc-600 pl-10 pr-3 py-2 text-xs outline-none font-mono focus:border-[#f97316]"
           />
         </div>
 
         {/* Categories Tab Pill */}
-        <div className="flex flex-wrap gap-1">
+        <div className="binds-categories flex flex-wrap gap-1">
           {(bindsMode === 'player'
             ? [
                 { id: 'all', label: lang === 'en' ? 'All' : 'Все' },
@@ -358,7 +370,7 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-3 py-1.5 text-xs uppercase font-mono transition-all ${
+              className={`binds-category px-3 py-1.5 text-xs uppercase font-mono transition-all ${
                 activeCategory === cat.id
                   ? 'bg-[#f97316] text-white font-bold'
                   : 'text-zinc-400 hover:text-white bg-[#0d1016] border border-[#1e2633]'
@@ -371,7 +383,7 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
       </div>
 
       {/* Info Notice */}
-      <div className="bg-[#12161e] border border-[#1e2633] text-white p-4 flex gap-3">
+      <div className="binds-instruction text-white p-4 flex gap-3">
         <Info size={18} className="text-[#f97316] mt-0.5 flex-shrink-0" />
         <div className="text-xs space-y-1">
           <p className="font-bold text-[#f97316] uppercase font-mono">
@@ -391,7 +403,12 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
       </div>
 
       {/* Binds Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="binds-results-head flex items-center justify-between gap-3">
+        <div><h2>{lang === 'ru' ? 'Библиотека биндов' : 'Bind library'}</h2><p>{lang === 'ru' ? 'Нажмите на команду, чтобы скопировать её в буфер обмена' : 'Select a command to copy it to your clipboard'}</p></div>
+        <span>{filteredBinds.length} / {totalBinds}</span>
+      </div>
+      <div className="binds-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {filteredBinds.length === 0 && <div className="binds-empty"><Search size={28}/><strong>{lang === 'ru' ? 'Ничего не найдено' : 'No results found'}</strong><p>{lang === 'ru' ? 'Измените запрос или выберите другую категорию.' : 'Try another search or category.'}</p><button type="button" onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}>{lang === 'ru' ? 'Сбросить фильтры' : 'Reset filters'}</button></div>}
         {filteredBinds.map((bind) => {
           const trans = lang === 'en' && bindsTranslationMap[bind.cmd] ? {
             ...bind,
@@ -405,8 +422,7 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
           return (
             <div
               key={bind.cmd}
-              onClick={() => onCopy(bind.cmd)}
-              className="tactical-card p-4 cursor-pointer flex flex-col justify-between group hover:border-[#f97316]/60 transition-all"
+              className="binds-card tactical-card p-4 flex flex-col justify-between group"
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -436,9 +452,9 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
                 )}
               </div>
 
-              <div className="mt-2 bg-[#08090c] border border-[#1e2633] p-2 text-xs font-mono text-[#f97316] truncate">
-                {bind.cmd}
-              </div>
+              <button type="button" onClick={() => onCopy(bind.cmd)} aria-label={lang === 'ru' ? 'Скопировать команду: ' + trans.desc : 'Copy command: ' + trans.desc} className="binds-command mt-2 bg-[#08090c] border border-[#1e2633] p-2 text-xs font-mono text-[#f97316]">
+                <code>{bind.cmd}</code><span><Copy size={13}/>{lang === 'ru' ? 'Копировать' : 'Copy'}</span>
+              </button>
             </div>
           );
         })}
@@ -446,8 +462,8 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
 
       {/* Modal: Create Custom Bind */}
       {showCreateBindModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <form onSubmit={handleCreateCustomBind} className="bg-[#12161e] border border-[#1e2633] max-w-md w-full p-5 space-y-4 shadow-2xl relative">
+        <div className="binds-modal fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <form onSubmit={handleCreateCustomBind} className="binds-modal-card bg-[#12161e] border border-[#1e2633] max-w-md w-full p-5 space-y-4 shadow-2xl relative">
             <div className="hud-corner-tl" />
             <div className="hud-corner-tr" />
             <div className="hud-corner-bl" />
@@ -481,6 +497,7 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
                   value={newBindCommand}
                   onChange={(e) => setNewBindCommand(e.target.value)}
                   placeholder="+attack;+duck"
+                  maxLength={240}
                   required
                   className="w-full px-3 py-2 text-xs bg-[#08090c] border border-[#1e2633] text-white focus:outline-none focus:border-[#f97316] font-mono"
                 />
@@ -495,6 +512,7 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
                   value={newBindDesc}
                   onChange={(e) => setNewBindDesc(e.target.value)}
                   placeholder={lang === 'ru' ? 'Авто-атака с приседом' : 'Auto-attack crouch'}
+                  maxLength={80}
                   required
                   className="w-full px-3 py-2 text-xs bg-[#08090c] border border-[#1e2633] text-white focus:outline-none focus:border-[#f97316] font-sans"
                 />
