@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import './BindsTab.css';
 import { bindsDatabase, adminCommandsDatabase } from '../data';
 import { BindItem, AdminCommandItem } from '../types';
 import { db, collection, addDoc } from '../firebase';
@@ -27,28 +28,37 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
   const [isSavingCustomBind, setIsSavingCustomBind] = useState(false);
 
   useEffect(() => {
-    if (user?.uid) {
-      try {
-        const localKey = `saved_binds_${user.uid}`;
-        const raw = localStorage.getItem(localKey);
-        if (raw) {
-          const list = JSON.parse(raw);
-          setSavedBindKeys(list.map((b: any) => b.command || b.cmd));
-        }
-      } catch (e) {
-        console.error(e);
-      }
+    if (!user?.uid) {
+      setSavedBindKeys([]);
+      return;
     }
-  }, [user]);
+    try {
+      const raw = localStorage.getItem('saved_binds_' + user.uid);
+      const list = raw ? JSON.parse(raw) : [];
+      setSavedBindKeys(Array.isArray(list)
+        ? [...new Set(list.map((b: any) => b?.command || b?.cmd).filter((value: unknown): value is string => typeof value === 'string'))]
+        : []);
+    } catch (e) {
+      console.error('Failed to load saved binds:', e);
+      setSavedBindKeys([]);
+    }
+  }, [user?.uid]);
 
   const handleSaveBindToProfile = async (bind: BindItem, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!user) {
-      if (onRequireAuth) onRequireAuth();
+    if (!user?.uid) {
+      onRequireAuth?.();
       return;
     }
-
+    const localKey = 'saved_binds_' + user.uid;
     try {
+      const raw = localStorage.getItem(localKey);
+      const parsed = raw ? JSON.parse(raw) : [];
+      const existing = Array.isArray(parsed) ? parsed : [];
+      if (existing.some((item: any) => (item?.command || item?.cmd) === bind.cmd)) {
+        onToast?.(lang === 'ru' ? 'Этот бинд уже сохранён' : 'This bind is already saved', 'warning');
+        return;
+      }
       const payload = {
         userId: user.uid,
         name: bindsTranslationMap[bind.cmd]?.[lang]?.desc || bind.desc,
@@ -57,65 +67,74 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
         category: bind.category,
         createdAt: new Date().toISOString()
       };
-
-      const localKey = `saved_binds_${user.uid}`;
-      const existing = JSON.parse(localStorage.getItem(localKey) || '[]');
-      if (!existing.some((b: any) => (b.command || b.cmd) === bind.cmd)) {
-        const updated = [{ ...payload, id: 'local_' + Date.now() }, ...existing];
-        localStorage.setItem(localKey, JSON.stringify(updated));
-        setSavedBindKeys(prev => [...prev, bind.cmd]);
+      localStorage.setItem(localKey, JSON.stringify([{ ...payload, id: 'local_' + Date.now() }, ...existing]));
+      setSavedBindKeys(prev => prev.includes(bind.cmd) ? prev : [...prev, bind.cmd]);
+      try {
+        await addDoc(collection(db, 'saved_binds'), payload);
+        onToast?.(lang === 'ru' ? 'Бинд сохранён в профиль' : 'Bind saved to profile', 'success');
+      } catch (cloudError) {
+        console.error('Cloud save failed; local copy retained:', cloudError);
+        onToast?.(lang === 'ru' ? 'Бинд сохранён на этом устройстве. Синхронизация недоступна.' : 'Bind saved on this device. Cloud sync is unavailable.', 'warning');
       }
-
-      await addDoc(collection(db, 'saved_binds'), payload);
-      if (onToast) onToast(lang === 'ru' ? 'Бинд сохранен в ваш профиль!' : 'Bind saved to your cabinet!', 'success');
     } catch (err) {
-      console.error(err);
-      if (onToast) onToast(lang === 'ru' ? 'Бинд сохранен локально' : 'Bind saved locally', 'success');
+      console.error('Failed to save bind locally:', err);
+      onToast?.(lang === 'ru' ? 'Не удалось сохранить бинд. Проверьте хранилище браузера.' : 'Could not save bind. Check browser storage.', 'error');
     }
   };
 
   const handleCreateCustomBind = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      if (onRequireAuth) onRequireAuth();
+    if (!user?.uid) {
+      onRequireAuth?.();
       return;
     }
-
-    if (!newBindCommand.trim() || !newBindDesc.trim()) {
-      if (onToast) onToast(lang === 'ru' ? 'Заполните команду и описание!' : 'Fill command and description!', 'warning');
+    const key = newBindKey.trim().toLowerCase();
+    const command = newBindCommand.trim();
+    const description = newBindDesc.trim();
+    if (!command || !description) {
+      onToast?.(lang === 'ru' ? 'Заполните команду и описание' : 'Enter a command and description', 'warning');
       return;
     }
-
+    if (key && !/^[a-z0-9_+-]+$/i.test(key)) {
+      onToast?.(lang === 'ru' ? 'В клавише допустимы латинские буквы, цифры, _ + -' : 'Key may contain Latin letters, numbers, _ + -', 'warning');
+      return;
+    }
     setIsSavingCustomBind(true);
+    const escapedCommand = command.replace(/"/g, '\\"');
+    const fullCmd = key ? 'bind ' + key + ' "' + escapedCommand + '"' : command;
+    const payload = {
+      userId: user.uid,
+      name: description,
+      command: fullCmd,
+      key: key || 'Custom',
+      category: 'Пользовательские',
+      createdAt: new Date().toISOString()
+    };
+    const localKey = 'saved_binds_' + user.uid;
     try {
-      const fullCmd = newBindKey.trim() 
-        ? `bind ${newBindKey.trim().toLowerCase()} "${newBindCommand.trim()}"`
-        : newBindCommand.trim();
-
-      const payload = {
-        userId: user.uid,
-        name: newBindDesc.trim(),
-        command: fullCmd,
-        key: newBindKey.trim() || 'Custom',
-        category: 'Пользовательские',
-        createdAt: new Date().toISOString()
-      };
-
-      const localKey = `saved_binds_${user.uid}`;
-      const existing = JSON.parse(localStorage.getItem(localKey) || '[]');
+      const raw = localStorage.getItem(localKey);
+      const parsed = raw ? JSON.parse(raw) : [];
+      const existing = Array.isArray(parsed) ? parsed : [];
+      if (existing.some((item: any) => (item?.command || item?.cmd) === fullCmd)) {
+        onToast?.(lang === 'ru' ? 'Такой бинд уже есть в сохранённых' : 'This bind is already saved', 'warning');
+        return;
+      }
       localStorage.setItem(localKey, JSON.stringify([{ ...payload, id: 'local_' + Date.now() }, ...existing]));
-
-      await addDoc(collection(db, 'saved_binds'), payload);
-      setSavedBindKeys(prev => [...prev, fullCmd]);
+      setSavedBindKeys(prev => prev.includes(fullCmd) ? prev : [...prev, fullCmd]);
+      try {
+        await addDoc(collection(db, 'saved_binds'), payload);
+        onToast?.(lang === 'ru' ? 'Пользовательский бинд создан и сохранён' : 'Custom bind created and saved', 'success');
+      } catch (cloudError) {
+        console.error('Custom bind cloud save failed; local copy retained:', cloudError);
+        onToast?.(lang === 'ru' ? 'Бинд сохранён локально. Облачная синхронизация недоступна.' : 'Bind saved locally. Cloud sync is unavailable.', 'warning');
+      }
       setShowCreateBindModal(false);
       setNewBindKey('');
       setNewBindCommand('');
       setNewBindDesc('');
-      if (onToast) onToast(lang === 'ru' ? 'Свой бинд создан и сохранен в кабинет!' : 'Custom bind created & saved to cabinet!', 'success');
     } catch (err) {
-      console.error(err);
-      if (onToast) onToast(lang === 'ru' ? 'Бинд сохранен в профиль' : 'Bind saved to profile', 'success');
-      setShowCreateBindModal(false);
+      console.error('Failed to create custom bind:', err);
+      onToast?.(lang === 'ru' ? 'Не удалось сохранить бинд в браузере' : 'Could not save bind in browser storage', 'error');
     } finally {
       setIsSavingCustomBind(false);
     }
@@ -143,6 +162,9 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
 
     return matchesCategory && matchesSearch;
   });
+
+  const totalBinds = bindsMode === 'player' ? bindsDatabase.length : adminCommandsDatabase.length;
+  const savedCount = savedBindKeys.length;
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
