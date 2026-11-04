@@ -139,68 +139,58 @@ export default function HomeTab({
       </section>
 
       {/* ABOUT + GAME SERVER */}
-      <section className="mx-auto grid max-w-none gap-6 border-b border-slate-700/70 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,390px)] lg:items-start lg:gap-8 lg:px-10">
+      <section className="mx-auto grid max-w-none gap-5 border-b border-slate-700/70 px-5 py-5 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(290px,350px)] lg:items-start lg:gap-6 lg:px-10">
         <div className="min-w-0">
-          <div className="relative isolate min-h-[230px] overflow-hidden border border-slate-600/60 bg-[#080d12]">
-            <img src={oilRigBg} alt="" aria-hidden="true" className="absolute inset-0 -z-20 h-full w-full object-cover object-center opacity-90" />
-            <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(5,9,13,.96)_0%,rgba(5,9,13,.78)_48%,rgba(5,9,13,.24)_100%),linear-gradient(0deg,rgba(5,9,13,.78),transparent_75%)]" />
-            <div className="flex min-h-[230px] max-w-2xl flex-col justify-end p-5 sm:p-7">
-              <div className="mb-2 flex items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[.24em] text-orange-400"><span className="h-px w-7 bg-orange-500" /> RUST KNOWLEDGE // SURVIVAL TOOLS</div>
-              <h2 className="text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl">{ru ? 'Больше, чем просто сайт' : 'More than just a website'}</h2>
-              <p className="mt-2 max-w-xl text-xs leading-5 text-slate-200 sm:text-sm">{ru ? 'Rusty.Lub — практический справочник для выживших. Планируй рейды, строй базы, изучай игровые механики и находи свою команду — всё в одном месте.' : 'Rusty.Lub is a practical field guide for survivors. Plan raids, build bases, master game mechanics and find your team — all in one place.'}</p>
-              <button onClick={() => onNavigate('guides')} className="mt-4 inline-flex w-fit items-center gap-2 border border-orange-400/80 bg-orange-500 px-4 py-2.5 text-[10px] font-black uppercase tracking-wider text-[#101318] transition hover:bg-orange-400">{ru ? 'Открыть справочник' : 'Explore the guide'} <ArrowRight size={14} /></button>
+          <div className="relative isolate overflow-hidden border border-slate-600/60 bg-[#080d12]">
+            <img src={oilRigBg} alt="" aria-hidden="true" className="absolute inset-0 -z-20 h-full w-full object-cover object-center opacity-75" />
+            <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(5,9,13,.96)_0%,rgba(5,9,13,.76)_58%,rgba(5,9,13,.42)_100%)]" />
+            <div className="flex min-h-[145px] flex-col justify-center p-4 sm:min-h-[155px] sm:p-5">
+              <div className="mb-1.5 flex items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[.2em] text-orange-400"><span className="h-px w-6 bg-orange-500" /> RUST KNOWLEDGE // SURVIVAL TOOLS</div>
+              <h2 className="text-xl font-black leading-tight tracking-tight text-white sm:text-2xl">{ru ? 'Больше, чем просто сайт' : 'More than just a website'}</h2>
+              <p className="mt-1.5 max-w-2xl text-[11px] leading-4 text-slate-200 sm:text-xs">{ru ? 'Практический справочник по Rust: инструменты, строительство, игровые механики и сообщество — в одном месте.' : 'A practical Rust hub for tools, building, game mechanics and community — all in one place.'}</p>
+              <button onClick={() => onNavigate('guides')} className="mt-3 inline-flex w-fit items-center gap-2 border border-orange-400/80 bg-orange-500 px-3 py-2 text-[9px] font-black uppercase tracking-wider text-[#101318] transition hover:bg-orange-400">{ru ? 'Открыть справочник' : 'Explore the guide'} <ArrowRight size={13} /></button>
             </div>
           </div>
-          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="mt-2 grid grid-cols-2 gap-2 xl:grid-cols-4">
             {[
-              { icon: Wrench, number: '01', title: ru ? 'Инструменты' : 'Tools', desc: ru ? 'Рейд- и крафт-калькуляторы, расчёты ресурсов и игровые утилиты.' : 'Raid and craft calculators, resource planning and game utilities.', action: 'tools', meta: ru ? 'РАСЧЁТЫ И ПЛАНИРОВАНИЕ' : 'CALCULATORS & PLANNING' },
-              { icon: BookOpen, number: '02', title: ru ? 'База знаний' : 'Knowledge base', desc: ru ? 'Строительство, оружие, электричество, механики и тактики.' : 'Building, weapons, electricity, mechanics and tactics.', action: 'guides', meta: ru ? 'ГАЙДЫ И ИНСТРУКЦИИ' : 'GUIDES & HOW-TOS' },
-              { icon: Users, number: '03', title: ru ? 'Сообщество' : 'Community', desc: ru ? 'Находи игроков, собирай команду, вступай в кланы и общайся.' : 'Find players, build a team, join clans and connect.', action: 'clans', meta: ru ? 'ИГРОКИ И КЛАНЫ' : 'PLAYERS & CLANS' },
-              { icon: Handshake, number: '04', title: ru ? 'Партнёрства' : 'Partnerships', desc: ru ? 'Предлагай идеи, развивай совместные проекты и сотрудничай с нами.' : 'Share ideas, build joint projects and work with us.', action: 'support', meta: ru ? 'СВЯЗЬ И СОТРУДНИЧЕСТВО' : 'CONTACT & COLLABORATION' }
-            ].map(({ icon: Icon, number, title, desc, action, meta }) => <button key={number} type="button" onClick={() => onNavigate(action)} className="group relative flex min-h-[148px] flex-col overflow-hidden border border-slate-700/80 bg-[linear-gradient(135deg,#151f29_0%,#0b1118_72%)] p-4 text-left transition duration-200 hover:-translate-y-0.5 hover:border-orange-500/80 hover:bg-[#131d27] sm:min-h-[158px] sm:p-5">
-              <span className="pointer-events-none absolute -right-3 -top-5 text-[100px] font-black leading-none text-white/[.025] transition group-hover:text-orange-500/[.07]">{number}</span>
-              <span className="flex items-start justify-between">
-                <span className="flex h-11 w-11 items-center justify-center border border-orange-500/40 bg-orange-500/10 text-orange-400 transition group-hover:bg-orange-500 group-hover:text-[#101318]"><Icon size={21} /></span>
-                <span className="font-mono text-[10px] font-bold tracking-[.18em] text-slate-600">{number} / 04</span>
-              </span>
-              <span className="mt-4 block text-[9px] font-bold tracking-[.16em] text-orange-400">{meta}</span>
-              <span className="mt-1 block text-base font-black text-white">{title}</span>
-              <span className="mt-1.5 block max-w-md text-[11px] leading-[1.55] text-slate-400">{desc}</span>
-              <span className="mt-auto flex items-center gap-2 pt-4 text-[9px] font-black uppercase tracking-[.15em] text-slate-300 transition group-hover:text-orange-400">{ru ? 'Перейти в раздел' : 'Explore section'} <ArrowRight size={13} className="transition group-hover:translate-x-1" /></span>
+              { icon: Wrench, title: ru ? 'Инструменты' : 'Tools', desc: ru ? 'Калькуляторы и утилиты.' : 'Calculators and utilities.', action: 'tools' },
+              { icon: BookOpen, title: ru ? 'База знаний' : 'Knowledge base', desc: ru ? 'Гайды и игровые механики.' : 'Guides and game mechanics.', action: 'guides' },
+              { icon: Users, title: ru ? 'Сообщество' : 'Community', desc: ru ? 'Игроки, команды и кланы.' : 'Players, teams and clans.', action: 'clans' },
+              { icon: Handshake, title: ru ? 'Партнёрства' : 'Partnerships', desc: ru ? 'Идеи и сотрудничество.' : 'Ideas and collaboration.', action: 'support' }
+            ].map(({ icon: Icon, title, desc, action }) => <button key={title} type="button" onClick={() => onNavigate(action)} className="group flex min-h-[76px] items-center gap-3 border border-slate-700/80 bg-[#101820] px-3 py-2.5 text-left transition hover:border-orange-500/80">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-orange-500/40 bg-orange-500/10 text-orange-400 transition group-hover:bg-orange-500 group-hover:text-[#101318]"><Icon size={16} /></span>
+              <span className="min-w-0"><span className="block text-xs font-black text-white">{title}</span><span className="mt-0.5 block text-[10px] leading-4 text-slate-400">{desc}</span></span>
+              <ArrowRight size={13} className="ml-auto shrink-0 text-orange-500 transition group-hover:translate-x-0.5" />
             </button>)}
-          </div>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border border-slate-700/70 bg-[#0a1016] px-4 py-3">
-            <span className="font-mono text-[9px] font-bold uppercase tracking-[.18em] text-slate-500">{ru ? 'ОДНА ПЛАТФОРМА — ВСЁ ДЛЯ ВЫЖИВАНИЯ' : 'ONE PLATFORM — EVERYTHING FOR SURVIVAL'}</span>
-            <span className="flex flex-wrap gap-x-4 gap-y-1 text-[9px] font-bold uppercase tracking-wider text-slate-400"><span>{ru ? 'ПРАКТИКА' : 'PRACTICAL'}</span><span className="text-orange-500">/</span><span>{ru ? 'ЗНАНИЯ' : 'KNOWLEDGE'}</span><span className="text-orange-500">/</span><span>{ru ? 'СООБЩЕСТВО' : 'COMMUNITY'}</span></span>
           </div>
         </div>
 
-        <aside className="min-w-0 border border-orange-500/30 bg-[#0b1118] p-4 shadow-xl sm:p-5">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[.18em] text-slate-400">{ru ? 'СЕРВЕР СООБЩЕСТВА' : 'COMMUNITY SERVER'}</span>
-            <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-500"><span className="h-1.5 w-1.5 rounded-full bg-orange-500" /> ENUM.GG</span>
+        <aside className="min-w-0 border border-orange-500/30 bg-[#0b1118] p-3.5 shadow-xl sm:p-4">
+          <div className="mb-2.5 flex items-center justify-between gap-3">
+            <span className="font-mono text-[9px] font-bold uppercase tracking-[.16em] text-slate-400">{ru ? 'СЕРВЕР СООБЩЕСТВА' : 'COMMUNITY SERVER'}</span>
+            <span className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-500"><span className="h-1.5 w-1.5 rounded-full bg-orange-500" /> ENUM.GG</span>
           </div>
-          <h3 className="text-xl font-black leading-tight text-white">Rusty.Lub <span className="text-orange-500">Vanilla 1x</span></h3>
-          <p className="mt-2 text-xs leading-5 text-slate-400">{ru ? 'Классический Rust без лишних модификаций. Стройся, объединяйся с командой и сражайся за выживание.' : 'Classic Rust without unnecessary modifications. Build, team up and fight to survive.'}</p>
-          <a href="https://enum.gg/server/rusty-lub-vanilla-fun-server-nmcqfPa3" target="_blank" rel="noopener noreferrer" className="mt-4 flex min-h-14 items-center justify-center border border-slate-700 bg-black/30 px-3 py-3 transition hover:border-orange-500/70" aria-label={ru ? 'Открыть актуальный статус сервера на Enum' : 'Open live server status on Enum'}>
-            <img key={serverBadgeRefresh} src={`https://enum.gg/api/public/v1/servers/nmcqfPa3/badge.svg?refresh=${serverBadgeRefresh}`} alt={ru ? 'Актуальный статус и количество игроков на сервере' : 'Live server status and player count'} className="h-7 max-w-full" loading="eager" decoding="async" />
+          <h3 className="text-lg font-black leading-tight text-white">Rusty.Lub <span className="text-orange-500">Vanilla 1x</span></h3>
+          <p className="mt-1.5 text-[11px] leading-4 text-slate-400">{ru ? 'Классический Rust без лишних модификаций.' : 'Classic Rust without unnecessary modifications.'}</p>
+          <a href="https://enum.gg/server/rusty-lub-vanilla-fun-server-nmcqfPa3" target="_blank" rel="noopener noreferrer" className="mt-3 flex min-h-12 items-center justify-center border border-slate-700 bg-black/30 px-3 py-2 transition hover:border-orange-500/70" aria-label={ru ? 'Открыть актуальный статус сервера на Enum' : 'Open live server status on Enum'}>
+            <img key={serverBadgeRefresh} src={`https://enum.gg/api/public/v1/servers/nmcqfPa3/badge.svg?refresh=${serverBadgeRefresh}`} alt={ru ? 'Актуальный статус и количество игроков на сервере' : 'Live server status and player count'} className="h-6 max-w-full" loading="eager" decoding="async" />
           </a>
-          <p className="mt-2 text-center font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'Автообновление · 45 секунд' : 'Auto-refresh · 45 seconds'}</p>
-          <div className="mt-3 flex items-center justify-between gap-3 border border-slate-700 bg-black/25 px-3 py-2.5">
-            <span className="truncate font-mono text-xs text-slate-200">135.148.15.101:26952</span>
-            <button type="button" onClick={async () => { try { await navigator.clipboard.writeText('135.148.15.101:26952'); setCopiedServerAddress(true); window.setTimeout(() => setCopiedServerAddress(false), 1800); } catch { setCopiedServerAddress(false); } }} className="inline-flex shrink-0 items-center gap-1.5 text-[10px] font-bold uppercase text-orange-400 transition hover:text-orange-300" aria-label={ru ? 'Скопировать адрес сервера' : 'Copy server address'}>
-              {copiedServerAddress ? <Check size={13} /> : <Copy size={13} />}
+          <p className="mt-1.5 text-center font-mono text-[8px] uppercase tracking-wider text-slate-500">{ru ? 'Обновление каждые 45 секунд' : 'Refreshes every 45 seconds'}</p>
+          <div className="mt-2 flex items-center justify-between gap-2 border border-slate-700 bg-black/25 px-2.5 py-2">
+            <span className="truncate font-mono text-[11px] text-slate-200">135.148.15.101:26952</span>
+            <button type="button" onClick={async () => { try { await navigator.clipboard.writeText('135.148.15.101:26952'); setCopiedServerAddress(true); window.setTimeout(() => setCopiedServerAddress(false), 1800); } catch { setCopiedServerAddress(false); } }} className="inline-flex shrink-0 items-center gap-1 text-[9px] font-bold uppercase text-orange-400 transition hover:text-orange-300" aria-label={ru ? 'Скопировать адрес сервера' : 'Copy server address'}>
+              {copiedServerAddress ? <Check size={12} /> : <Copy size={12} />}
               {copiedServerAddress ? (ru ? 'Скопировано' : 'Copied') : (ru ? 'Копировать' : 'Copy')}
             </button>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <a href="steam://connect/135.148.15.101:26952" className="inline-flex min-h-10 items-center justify-center gap-2 bg-orange-500 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-[#101318] transition hover:bg-orange-400"><ArrowRight size={15} /> {ru ? 'Играть' : 'Play now'}</a>
-            <a href="https://enum.gg/server/rusty-lub-vanilla-fun-server-nmcqfPa3" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center justify-center gap-2 border border-slate-600 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-200 transition hover:border-orange-500 hover:text-orange-400">{ru ? 'Подробнее' : 'Details'} <ExternalLink size={13} /></a>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <a href="steam://connect/135.148.15.101:26952" className="inline-flex min-h-9 items-center justify-center gap-1.5 bg-orange-500 px-2 py-2 text-[10px] font-black uppercase tracking-wide text-[#101318] transition hover:bg-orange-400"><ArrowRight size={13} /> {ru ? 'Играть' : 'Play now'}</a>
+            <a href="https://enum.gg/server/rusty-lub-vanilla-fun-server-nmcqfPa3" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-9 items-center justify-center gap-1.5 border border-slate-600 px-2 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-200 transition hover:border-orange-500 hover:text-orange-400">{ru ? 'Подробнее' : 'Details'} <ExternalLink size={12} /></a>
           </div>
-          <div className="mt-3 grid grid-cols-3 gap-2 border-t border-slate-700/70 pt-3">
-            <div><p className="font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'РЕГИОН' : 'REGION'}</p><p className="mt-1 text-xs font-bold text-white">US</p></div>
-            <div><p className="font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'КАРТА' : 'MAP'}</p><p className="mt-1 text-xs font-bold text-white">Procedural</p></div>
-            <div><p className="font-mono text-[9px] uppercase tracking-wider text-slate-500">{ru ? 'СЛОТЫ' : 'SLOTS'}</p><p className="mt-1 text-xs font-bold text-white">75</p></div>
+          <div className="mt-2.5 grid grid-cols-3 gap-2 border-t border-slate-700/70 pt-2.5">
+            <div><p className="font-mono text-[8px] uppercase tracking-wider text-slate-500">{ru ? 'РЕГИОН' : 'REGION'}</p><p className="mt-0.5 text-[11px] font-bold text-white">US</p></div>
+            <div><p className="font-mono text-[8px] uppercase tracking-wider text-slate-500">{ru ? 'КАРТА' : 'MAP'}</p><p className="mt-0.5 text-[11px] font-bold text-white">Procedural</p></div>
+            <div><p className="font-mono text-[8px] uppercase tracking-wider text-slate-500">{ru ? 'СЛОТЫ' : 'SLOTS'}</p><p className="mt-0.5 text-[11px] font-bold text-white">75</p></div>
           </div>
         </aside>
       </section>
