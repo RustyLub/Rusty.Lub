@@ -1534,12 +1534,12 @@ export default function App() {
               }`}>
                 {[
                   { id: 'home', label: lang === 'ru' ? 'Главная' : 'Home' },
+                  { id: 'news', label: lang === 'ru' ? 'Новости' : 'News' },
+                  { id: 'guides', label: lang === 'ru' ? 'Гайды' : 'Guides' },
                   { id: 'tools', label: lang === 'ru' ? 'Калькуляторы' : 'Tools' },
                   { id: 'raid', label: lang === 'ru' ? 'Рейд' : 'Raid', isHot: true },
-                  { id: 'guides', label: lang === 'ru' ? 'Гайды' : 'Guides' },
                   { id: 'clan', label: lang === 'ru' ? 'Кланы' : 'Clans' },
                   { id: 'chat', label: lang === 'ru' ? 'Чат' : 'Chat' },
-                  { id: 'news', label: lang === 'ru' ? 'Новости' : 'News' },
                   { id: 'faq', label: lang === 'ru' ? 'FAQ' : 'FAQ' }
                 ].map((item) => {
                   const isActive = activeTab === item.id;
@@ -1570,6 +1570,8 @@ export default function App() {
               }`}>
                 {[
                   { id: 'home', label: lang === 'ru' ? 'Главная' : 'Home' },
+                  { id: 'news', label: lang === 'ru' ? 'Новости' : 'News' },
+                  { id: 'guides', label: lang === 'ru' ? 'Гайды' : 'Guides' },
                   { id: 'tools', label: lang === 'ru' ? 'Калькуляторы' : 'Tools' },
                   { id: 'raid', label: lang === 'ru' ? 'Рейд' : 'Raid', isHot: true }
                 ].map((item) => {
