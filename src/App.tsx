@@ -1236,6 +1236,7 @@ export default function App() {
     {
       title: lang === 'ru' ? 'ЗНАНИЯ' : 'KNOWLEDGE',
       items: [
+        { id: 'guides', label: lang === 'ru' ? 'Гайды и справочники' : 'Guides & Reference', icon: <BookOpen size={14} className="text-orange-400" /> },
         { id: 'faq', label: lang === 'ru' ? 'Частые Вопросы (FAQ)' : 'FAQ', icon: <HelpCircle size={14} className="text-orange-400" /> },
         { id: 'errors', label: lang === 'ru' ? 'Ошибки & Решения' : 'Fixes', icon: <BookOpen size={14} /> },
         { id: 'binds', label: lang === 'ru' ? 'Бинды & Команды' : 'Binds', icon: <Keyboard size={14} /> },
