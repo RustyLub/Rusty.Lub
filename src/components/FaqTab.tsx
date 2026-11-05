@@ -100,7 +100,52 @@ const FAQ_DATA: FaqItem[] = [
     answerRu: 'Rust+ — это официальное мобильное приложение от Facepunch. Оно позволяет получать уведомления на телефон при срабатывании тревоги на базе (если вас рейдят), отслеживать карту, взрывы вертолета/карго и удаленно переключать умные переключатели (Smart Switch) для закрытия дверей или включения турелей.',
     answerEn: 'Rust+ is the official mobile companion app by Facepunch. It notifies your phone in real-time when raid alarms trigger, lets you view the live map, cargo spawns, and remotely control Smart Switches for auto-turrets and bunker doors.',
     tags: ['rust+', 'растплюс', 'приложение', 'рейд', 'тревога', 'телефон']
-  }
+  },
+  {
+    id: 'raid-cost',
+    category: 'combat',
+    questionRu: 'Как понять, сколько взрывчатки брать на рейд?',
+    questionEn: 'How do I know how much explosives to bring on a raid?',
+    answerRu: 'Сначала посмотри, из чего сделана цель: дерево, камень, металл или МВК. Потом выбери, чем будешь вскрывать — C4, ракетами, сатчелями или разрывными патронами. В нашем рейд-калькуляторе можно добавить сразу несколько стен и дверей, чтобы не считать всё в голове. И заложи небольшой запас: по дороге может встретиться ещё одна дверь или внешний шкаф.',
+    answerEn: 'Check the target material first: wood, stone, sheet metal or armored. Then decide what you are using — C4, rockets, satchels or explosive ammo. The raid calculator lets you add several walls and doors at once. Keep a little spare in case there is another door or external cupboard.',
+    tags: ['рейд', 'взрывчатка', 'c4', 'ракеты', 'сатчели', 'raid']
+  },
+  {
+    id: 'raid-defenses',
+    category: 'combat',
+    questionRu: 'Что проверить перед тем, как идти на рейд?',
+    questionEn: 'What should I check before starting a raid?',
+    answerRu: 'Проверь верстак и запас взрывчатки, возьми строительный план и молоток для постановки лестниц или укрытий, а ещё не забудь спальник неподалёку. Договоритесь в тиме, кто несёт взрывчатку, кто прикрывает и кто следит за контр-рейдерами. Если идёте небольшой группой, заранее решите, когда сворачиваетесь — затяжной рейд быстро превращается в потерю всего лута.',
+    answerEn: 'Check your explosives and workbench, bring a building plan and hammer for quick cover, and place a bag nearby. Decide who carries explosives, who covers and who watches for counters. Small groups should agree on when to leave — a long raid can turn into losing everything.',
+    tags: ['рейд', 'подготовка', 'тим', 'спальник', 'raid']
+  },
+  {
+    id: 'external-tc',
+    category: 'basics',
+    questionRu: 'Зачем ставят внешние шкафы вокруг основной базы?',
+    questionEn: 'Why do players place external tool cupboards?',
+    answerRu: 'Внешние ТС помогают расширить зону авторизации и мешают противнику быстро забрать контроль над территорией после вскрытия основной базы. Их обычно связывают с основной постройкой через зоны перекрытия. Важно следить за содержимым шкафов и обновлять блоки строительства: пустой внешний ТС не спасёт от проблем с привилегиями.',
+    answerEn: 'External TCs extend building privilege and make it harder for raiders to take control of the area after breaching the main base. They are usually connected to the main build through overlapping building zones. Keep them stocked and maintain the connected blocks — an empty external TC will not help.',
+    tags: ['внешний шкаф', 'tc', 'авторизация', 'строительство', 'база']
+  },
+  {
+    id: 'electricity-basics',
+    category: 'survival',
+    questionRu: 'С чего начать разбираться с электричеством в Rust?',
+    questionEn: 'Where should I start with electricity in Rust?',
+    answerRu: 'Для начала разберись с тремя вещами: сколько энергии дают источники, сколько потребляют устройства и как работает разветвитель. Собери простую схему на солнечной панели или ветряке, аккумуляторе и одном потребителе. Не подключай всё подряд в одну линию — сначала посчитай расход энергии и оставь запас на турели или ловушки.',
+    answerEn: 'Start with three basics: how much power your sources produce, how much each device uses and how splitters work. Build a simple circuit with a solar panel or wind turbine, a battery and one device. Do not wire everything into one line — calculate the load and leave spare power for turrets or traps.',
+    tags: ['электрика', 'энергия', 'аккумулятор', 'турель', 'electricity']
+  },
+  {
+    id: 'blueprint-workbench',
+    category: 'basics',
+    questionRu: 'Какой верстак ставить первым и что изучать?',
+    questionEn: 'Which workbench should I build first, and what should I research?',
+    answerRu: 'Не трать скрап на всё подряд. Сначала открой то, что реально нужно вашей группе: оружие и патроны, аптечки, двери, печи и базовые строительные детали. Верстак первого уровня закрывает стартовые рецепты, второй и третий нужны для более серьёзного снаряжения. Перед изучением проверь, не выгоднее ли открыть предмет через техдерево.',
+    answerEn: 'Do not spend scrap on every blueprint. Unlock what your group actually needs first: weapons and ammo, meds, doors, furnaces and core building pieces. Tier 1 covers starter recipes; tiers 2 and 3 unlock stronger gear. Check the tech tree before researching an item directly.',
+    tags: ['верстак', 'скрап', 'чертежи', 'техдерево', 'blueprint']
+  },
 ];
 
 interface FaqTabProps {
@@ -165,26 +210,26 @@ export default function FaqTab({ lang }: FaqTabProps) {
   };
 
   return (
-    <div id="faq-section" className="space-y-6 max-w-5xl mx-auto pb-12">
+    <div id="faq-section" className="mx-auto w-full max-w-[1440px] space-y-5 pb-10 text-left">
       {/* Header Banner with Real-time Search Box */}
-      <div className="bg-stone-900/90 border border-stone-800/80 rounded-2xl p-6 sm:p-8 backdrop-blur-md relative overflow-hidden shadow-2xl">
+      <div className="relative overflow-hidden border border-[#29313b] bg-[#11171e] p-5 sm:p-7">
         <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-orange-600/10 rounded-full blur-3xl pointer-events-none" />
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="p-3.5 bg-orange-600/20 text-orange-500 rounded-xl border border-orange-500/30 shadow-lg shadow-orange-950/40">
+            <div className="p-3.5 bg-orange-600/20 text-orange-500 rounded-none border border-orange-500/30 shadow-lg shadow-orange-950/40">
               <HelpCircle className="w-8 h-8" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-stone-100 tracking-tight flex items-center gap-2.5">
-                {lang === 'ru' ? 'База знаний: Вопросы и Ответы' : 'Rust Knowledge Base: FAQ'}
+              <h1 className="flex flex-wrap items-center gap-2.5 text-2xl font-black tracking-tight text-white sm:text-3xl">
+                {lang === 'ru' ? 'Вопросы и ответы' : 'Questions & answers'}
                 <span className="text-xs px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 font-medium">
-                  {FAQ_DATA.length} {lang === 'ru' ? 'гайда' : 'guides'}
+                  {FAQ_DATA.length} {lang === 'ru' ? 'вопросов' : 'questions'}
                 </span>
               </h1>
-              <p className="text-stone-400 text-sm mt-1 max-w-2xl">
+              <p className="text-slate-400 text-sm mt-1 max-w-2xl">
                 {lang === 'ru'
-                  ? 'Подробные ответы на главные вопросы новичков: выбор первого сервера, надёжная постройка, поиск клана и ключевые механики выживания.'
-                  : 'Answers to the most common beginner questions: server selection, starter building, finding a team, and essential survival mechanics.'}
+                  ? 'Короткие ответы на то, с чем сталкиваешься в игре: база, рейды, электричество, скрап, серверы и командная игра. Ищи по вопросу или выбери тему ниже.'
+                  : 'Straight answers to everyday Rust questions: bases, raids, electricity, scrap, servers and team play. Search for a topic or pick a category below.'}
               </p>
             </div>
           </div>
@@ -192,13 +237,13 @@ export default function FaqTab({ lang }: FaqTabProps) {
           <div className="flex items-center gap-2 self-end sm:self-auto">
             <button
               onClick={expandAll}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700 transition cursor-pointer"
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#18212b] hover:bg-[#26313d] text-stone-300 border border-stone-700 transition cursor-pointer"
             >
               {lang === 'ru' ? 'Развернуть все' : 'Expand All'}
             </button>
             <button
               onClick={collapseAll}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-stone-800/80 hover:bg-stone-700 text-stone-400 border border-stone-700 transition cursor-pointer"
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#18212b] hover:bg-[#26313d] text-slate-400 border border-stone-700 transition cursor-pointer"
             >
               {lang === 'ru' ? 'Свернуть' : 'Collapse All'}
             </button>
@@ -215,7 +260,7 @@ export default function FaqTab({ lang }: FaqTabProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={lang === 'ru' ? '🔍 Поиск по вопросам, ответам и тегам (сервер, 2x1, softside, decay, scrap, спрей)...' : '🔍 Search FAQ by questions, answers & tags (server, 2x1, softside, decay, scrap, spray)...'}
-              className="w-full bg-stone-950/90 border border-stone-700/90 focus:border-orange-500 rounded-xl pl-11 pr-24 py-3.5 text-stone-100 placeholder-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition shadow-inner"
+              className="w-full bg-[#0c1117] border border-stone-700/90 focus:border-orange-500 rounded-none pl-11 pr-24 py-3.5 text-white placeholder-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition shadow-inner"
             />
             {searchQuery && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -224,7 +269,7 @@ export default function FaqTab({ lang }: FaqTabProps) {
                 </span>
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="text-xs text-stone-400 hover:text-stone-100 bg-stone-800 hover:bg-stone-700 px-2 py-1 rounded transition cursor-pointer"
+                  className="text-xs text-slate-400 hover:text-white bg-[#18212b] hover:bg-[#26313d] px-2 py-1 rounded transition cursor-pointer"
                 >
                   {lang === 'ru' ? 'Очистить' : 'Clear'}
                 </button>
@@ -234,7 +279,7 @@ export default function FaqTab({ lang }: FaqTabProps) {
 
           {/* Quick Filter Keyword Pills */}
           <div className="flex items-center gap-1.5 flex-wrap text-xs pt-1">
-            <span className="text-stone-500 text-[11px] font-medium mr-1 flex items-center gap-1">
+            <span className="text-slate-500 text-[11px] font-medium mr-1 flex items-center gap-1">
               <Sparkles size={12} className="text-orange-400" />
               {lang === 'ru' ? 'Быстрый поиск:' : 'Quick tags:'}
             </span>
@@ -245,7 +290,7 @@ export default function FaqTab({ lang }: FaqTabProps) {
                 className={`text-[11px] px-2.5 py-1 rounded-lg border transition cursor-pointer ${
                   searchQuery.toLowerCase() === hint.query.toLowerCase()
                     ? 'bg-orange-500 text-white border-orange-400 shadow-sm shadow-orange-900/50 font-bold'
-                    : 'bg-stone-950/60 hover:bg-stone-800 text-stone-400 hover:text-orange-300 border-stone-800 hover:border-orange-500/40'
+                    : 'bg-stone-950/60 hover:bg-[#18212b] text-slate-400 hover:text-orange-300 border-[#29313b] hover:border-orange-500/40'
                 }`}
               >
                 {hint.label}
@@ -264,10 +309,10 @@ export default function FaqTab({ lang }: FaqTabProps) {
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all border ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-none text-xs sm:text-sm font-semibold whitespace-nowrap transition-all border ${
                 isActive
                   ? 'bg-orange-600 text-white border-orange-500 shadow-md shadow-orange-950/40'
-                  : 'bg-stone-900/80 text-stone-400 border-stone-800/80 hover:bg-stone-800 hover:text-stone-200'
+                  : 'bg-[#11171e] text-slate-400 border-[#29313b] hover:bg-[#18212b] hover:text-stone-200'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -280,12 +325,12 @@ export default function FaqTab({ lang }: FaqTabProps) {
       {/* FAQ Accordion List */}
       <div className="space-y-3">
         {filteredFaq.length === 0 ? (
-          <div className="bg-stone-900/60 border border-stone-800 rounded-2xl p-12 text-center">
+          <div className="bg-stone-900/60 border border-[#29313b] rounded-none p-12 text-center">
             <HelpCircle className="w-12 h-12 text-stone-600 mx-auto mb-3" />
             <p className="text-stone-300 font-bold text-base">
               {lang === 'ru' ? 'Ничего не найдено' : 'No matching questions found'}
             </p>
-            <p className="text-stone-500 text-sm mt-1">
+            <p className="text-slate-500 text-sm mt-1">
               {lang === 'ru' ? 'Попробуйте изменить поисковый запрос или выбрать другую категорию' : 'Try adjusting your search query or choosing another category'}
             </p>
           </div>
@@ -299,8 +344,8 @@ export default function FaqTab({ lang }: FaqTabProps) {
               <div
                 key={item.id}
                 id={`faq-item-${item.id}`}
-                className={`bg-stone-900/80 border rounded-xl overflow-hidden transition-colors ${
-                  isOpen ? 'border-orange-500/40 bg-stone-900/95 shadow-lg shadow-black/40' : 'border-stone-800 hover:border-stone-700/80'
+                className={`bg-[#11171e] border rounded-none overflow-hidden transition-colors ${
+                  isOpen ? 'border-orange-500/40 bg-stone-900/95 shadow-lg shadow-black/40' : 'border-[#29313b] hover:border-stone-700/80'
                 }`}
               >
                 <button
@@ -308,11 +353,11 @@ export default function FaqTab({ lang }: FaqTabProps) {
                   onClick={() => toggleAccordion(item.id)}
                   className="w-full px-5 py-4 flex items-center justify-between text-left gap-4 focus:outline-none"
                 >
-                  <span className="font-bold text-stone-100 text-sm sm:text-base flex items-center gap-3">
+                  <span className="font-bold text-white text-sm sm:text-base flex items-center gap-3">
                     <span className={`w-2 h-2 rounded-full flex-shrink-0 ${isOpen ? 'bg-orange-500 shadow-sm shadow-orange-500' : 'bg-stone-600'}`} />
                     {q}
                   </span>
-                  <div className={`p-1.5 rounded-lg bg-stone-800/80 text-stone-400 transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180 text-orange-400 bg-orange-500/20' : ''}`}>
+                  <div className={`p-1.5 rounded-lg bg-[#18212b] text-slate-400 transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180 text-orange-400 bg-orange-500/20' : ''}`}>
                     <ChevronDown className="w-4 h-4" />
                   </div>
                 </button>
@@ -326,12 +371,12 @@ export default function FaqTab({ lang }: FaqTabProps) {
                       transition={{ duration: 0.2 }}
                       className="overflow-hidden"
                     >
-                      <div className="px-5 pb-5 pt-1 text-sm text-stone-300 leading-relaxed border-t border-stone-800/60 mt-1">
+                      <div className="px-5 pb-5 pt-1 text-sm text-stone-300 leading-relaxed border-t border-[#29313b]/60 mt-1">
                         <p className="pt-2">{a}</p>
 
                         {/* Tag Pills */}
-                        <div className="flex flex-wrap items-center gap-1.5 mt-4 pt-3 border-t border-stone-800/40">
-                          <span className="text-[11px] font-medium text-stone-500 uppercase tracking-wider mr-1">
+                        <div className="flex flex-wrap items-center gap-1.5 mt-4 pt-3 border-t border-[#29313b]/40">
+                          <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mr-1">
                             {lang === 'ru' ? 'Теги:' : 'Tags:'}
                           </span>
                           {item.tags.map((tag, i) => (
@@ -341,7 +386,7 @@ export default function FaqTab({ lang }: FaqTabProps) {
                                 e.stopPropagation();
                                 setSearchQuery(tag);
                               }}
-                              className="cursor-pointer text-[11px] px-2 py-0.5 rounded-md bg-stone-800 text-stone-400 hover:bg-orange-500/20 hover:text-orange-300 border border-stone-700/60 transition"
+                              className="cursor-pointer text-[11px] px-2 py-0.5 rounded-md bg-[#18212b] text-slate-400 hover:bg-orange-500/20 hover:text-orange-300 border border-stone-700/60 transition"
                             >
                               #{tag}
                             </span>
