@@ -149,6 +149,7 @@ export const bindsCategoryMap: Record<string, Record<'ru' | 'en', string>> = {
   'УПРАВЛЕНИЕ': { ru: 'Управление', en: 'Controls' },
   'QOL': { ru: 'QoL / Комфорт', en: 'QoL / Comfort' },
   'МОДОВЫЕ': { ru: 'Модовые', en: 'Modded' },
+  'АДМИН': { ru: 'Администраторские', en: 'Administrator' },
   // Admin Categories
   'ПРАВА': { ru: '👑 Права', en: '👑 Permissions' },
   'МОДЕРАЦИЯ': { ru: '🚨 Модерация', en: '🚨 Moderation' },
@@ -162,6 +163,14 @@ export const bindsCategoryMap: Record<string, Record<'ru' | 'en', string>> = {
 
 // Translate Binds Data
 export const bindsTranslationMap: Record<string, { desc: string; explanation?: string; category: string; example?: string }> = {
+  'bind [leftshift+h] debugcamera': { category: 'АДМИН', desc: 'Free admin camera', explanation: 'Enables debugcamera for observing the world. It does not make your player character invisible.' },
+  'bind [leftshift+t] teleport2marker': { category: 'АДМИН', desc: 'Teleport to map marker', explanation: 'Moves the administrator to the marker placed on the map.' },
+  'bind p "ent kill"': { category: 'АДМИН', desc: 'Remove targeted entity', explanation: 'Deletes the entity under your crosshair. Use carefully; the action may be irreversible.' },
+  'bind u "ent unlock"': { category: 'АДМИН', desc: 'Unlock targeted lock', explanation: 'Unlocks the selected lock.' },
+  'bind l "ent lock"': { category: 'АДМИН', desc: 'Lock targeted lock', explanation: 'Locks the selected lock.' },
+  'bind j noclip': { category: 'АДМИН', desc: 'Toggle noclip', explanation: 'Enables or disables noclip. Administrator permissions are required.' },
+  'bind delete "layer.toggle Construction"': { category: 'АДМИН', desc: 'Toggle building layer', explanation: 'Toggles the Construction layer in administrator tools.' },
+  'bind [leftshift+rightcontrol] "weather.load clear"': { category: 'АДМИН', desc: 'Clear server weather', explanation: 'Loads clear weather on the server. Administrator permissions are required.' },
   'bind x forward;sprint': { category: 'УПРАВЛЕНИЕ', desc: 'Auto-run', explanation: 'Starts continuous forward movement and sprinting until normal movement input overrides it.' },
   'bind z duck': { category: 'УПРАВЛЕНИЕ', desc: 'Toggle crouch', explanation: 'Toggles crouching on each press.' },
   'bind [leftshift+k] kill': { category: 'УПРАВЛЕНИЕ', desc: 'Quick respawn / suicide', explanation: 'Kills your character and opens the respawn screen. You will drop carried items.' },
