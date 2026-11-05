@@ -680,107 +680,27 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
 
   return (
     <div className="clan-board-page space-y-6 animate-in fade-in duration-300 pb-12">
-      {/* Tactical Header Banner */}
-      <div className="bg-[#14171e] border border-[#2a2f3b] p-6 rounded-none space-y-4 rust-metal-pattern relative overflow-hidden">
-        <div className="rust-bracket-tl" />
-        <div className="rust-bracket-tr" />
-        <div className="rust-bracket-bl" />
-        <div className="rust-bracket-br" />
-        <div className="absolute top-0 left-0 right-0 h-1 rust-hazard" />
-
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-0.5 bg-[#cd412b]/20 text-[#cd412b] border border-[#cd412b]/40 text-[10px] font-mono font-black uppercase tracking-wider flex items-center gap-1">
-                <Shield size={12} />
-                {lang === 'ru' ? 'ПОИСК И НАБОР ИГРОКОВ' : 'PLAYER & CLAN RECRUITMENT'}
-              </span>
-              <span className="text-[10px] font-mono text-zinc-400 bg-[#1b1e26] px-2 py-0.5 border border-[#2a2f3b]">
-                RUST LFG & RECRUITMENT v2.6
-              </span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-wider font-teko leading-none">
-              {lang === 'ru' ? 'Поиск команды и набор игроков' : 'Find a Team & Recruit Players'}
-            </h1>
-            <p className="text-xs text-zinc-400 max-w-2xl font-sans">
-              {lang === 'ru' 
-                ? 'Размещайте объявления о наборе, находите команду и отправляйте заявки с информацией о своём опыте, часах в Rust и предпочитаемых ролях.'
-                : 'Post clan recruitment threads, find duo/trio teammates, reply to forum discussions, and submit direct application tickets.'}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            {user ? (
-              <button
-                onClick={() => setIsCreateOpen(true)}
-                className="px-5 py-3 bg-[#cd412b] hover:bg-[#b83824] text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg border border-orange-500/40 hover:scale-[1.02] active:scale-95"
-              >
-                <Plus size={18} />
-                <span>{lang === 'ru' ? 'Создать объявление' : 'Create Listing'}</span>
-              </button>
-            ) : (
-              <button
-                onClick={onOpenAuth}
-                className="px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer border border-blue-400/40"
-              >
-                <Users size={18} />
-                <span>{lang === 'ru' ? 'Войти для публикации / отклика' : 'Login to Post / Apply'}</span>
-              </button>
-            )}
-          </div>
+      {/* Compact Rusty.Lub clan hub header */}
+      <section className="clan-hub-hero">
+        <div className="clan-hub-hero__copy">
+          <span className="clan-hub-eyebrow"><Shield size={13} /> {lang === 'ru' ? 'СООБЩЕСТВО RUSTY.LUB' : 'RUSTY.LUB COMMUNITY'}</span>
+          <h1>{lang === 'ru' ? 'Кланы и поиск команды' : 'Clans & LFG'}</h1>
+          <p>{lang === 'ru' ? 'Найди команду для следующего вайпа или собери игроков в свой состав.' : 'Find a squad for the next wipe or recruit players for your own team.'}</p>
         </div>
-
-        {/* Overview Stats Widget Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-[#2a2f3b]">
-          <div className="bg-[#1b1e26] p-3 border border-[#2a2f3b] flex items-center gap-3">
-            <div className="p-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0">
-              <Shield size={20} />
-            </div>
-            <div>
-              <span className="text-[10px] font-mono text-zinc-400 uppercase block font-bold">
-                {lang === 'ru' ? 'Сбор в Клан' : 'Clan Recruits'}
-              </span>
-              <span className="text-lg font-bold text-white font-mono">{clanRecruitCount}</span>
-            </div>
-          </div>
-
-          <div className="bg-[#1b1e26] p-3 border border-[#2a2f3b] flex items-center gap-3">
-            <div className="p-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shrink-0">
-              <UserPlus size={20} />
-            </div>
-            <div>
-              <span className="text-[10px] font-mono text-zinc-400 uppercase block font-bold">
-                {lang === 'ru' ? 'Поиск Тиммейтов' : 'Players LFG'}
-              </span>
-              <span className="text-lg font-bold text-white font-mono">{playerLfgCount}</span>
-            </div>
-          </div>
-
-          <div className="bg-[#1b1e26] p-3 border border-[#2a2f3b] flex items-center gap-3">
-            <div className="p-2 bg-blue-500/10 border border-blue-500/30 text-blue-400 shrink-0">
-              <MessageSquare size={20} />
-            </div>
-            <div>
-              <span className="text-[10px] font-mono text-zinc-400 uppercase block font-bold">
-                {lang === 'ru' ? 'Обсуждения' : 'Discussions'}
-              </span>
-              <span className="text-lg font-bold text-white font-mono">{totalCommentsCount}</span>
-            </div>
-          </div>
-
-          <div className="bg-[#1b1e26] p-3 border border-[#2a2f3b] flex items-center gap-3">
-            <div className="p-2 bg-purple-500/10 border border-purple-500/30 text-purple-400 shrink-0">
-              <Send size={20} />
-            </div>
-            <div>
-              <span className="text-[10px] font-mono text-zinc-400 uppercase block font-bold">
-                {lang === 'ru' ? 'Мои Тикеты' : 'My Tickets'}
-              </span>
-              <span className="text-lg font-bold text-white font-mono">{myTicketsCount}</span>
-            </div>
-          </div>
+        <div className="clan-hub-hero__actions">
+          <div className="clan-hub-count"><strong>{clanRecruitCount}</strong><span>{lang === 'ru' ? 'наборов' : 'recruiting'}</span></div>
+          <div className="clan-hub-count"><strong>{playerLfgCount}</strong><span>{lang === 'ru' ? 'ищут команду' : 'looking for team'}</span></div>
+          {user ? (
+            <button onClick={() => { setNewPostType('clan_recruit'); setIsCreateOpen(true); }} className="clan-hub-primary">
+              <UserPlus size={16} /> {lang === 'ru' ? 'Начать набор' : 'Start recruiting'}
+            </button>
+          ) : (
+            <button onClick={onOpenAuth} className="clan-hub-primary">
+              <Users size={16} /> {lang === 'ru' ? 'Войти и начать набор' : 'Sign in to recruit'}
+            </button>
+          )}
         </div>
-      </div>
+      </section>
 
       {/* Main Forum Category Tabs */}
       <div className="bg-[#14171e] border border-[#2a2f3b] p-3 space-y-4">
@@ -852,63 +772,29 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
           </button>
         </div>
 
-        {/* Search & Filter Toolbar */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-          {/* Search Bar */}
-          <div className="md:col-span-2 relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+        {/* Compact search and filters */}
+        <div className="clan-hub-filters">
+          <div className="clan-hub-search">
+            <Search size={16} />
             <input
               type="text"
-              placeholder={lang === 'ru' ? 'Поиск по заголовку, роли, автору, серверу...' : 'Search title, role, author, server...'}
+              placeholder={lang === 'ru' ? 'Поиск: клан, игрок, роль, сервер…' : 'Search clan, player, role, server…'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#1b1e26] border border-[#2a2f3b] pl-9 pr-3 py-2 text-xs text-white font-mono placeholder:text-zinc-500 focus:border-[#cd412b] focus:outline-none"
             />
-            {searchQuery && (
-              <button 
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs font-mono"
-              >
-                ×
-              </button>
-            )}
+            {searchQuery && <button type="button" onClick={() => setSearchQuery('')} aria-label={lang === 'ru' ? 'Очистить поиск' : 'Clear search'}>×</button>}
           </div>
-
-          {/* Hours Filter */}
-          <select
-            value={hoursFilter}
-            onChange={(e) => setHoursFilter(Number(e.target.value))}
-            className="bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-zinc-300 font-mono focus:border-[#cd412b] focus:outline-none cursor-pointer"
-          >
-            <option value={0}>{lang === 'ru' ? 'Любые часы в Rust' : 'Any Hours'}</option>
-            <option value={500}>500+ {lang === 'ru' ? 'часов' : 'hrs'}</option>
-            <option value={1000}>1,000+ {lang === 'ru' ? 'часов' : 'hrs'}</option>
-            <option value={2000}>2,000+ {lang === 'ru' ? 'часов' : 'hrs'}</option>
-            <option value={3000}>3,000+ {lang === 'ru' ? 'часов' : 'hrs'}</option>
-          </select>
-
-          {/* Server Filter */}
-          <select
-            value={serverFilter}
-            onChange={(e) => setServerFilter(e.target.value)}
-            className="bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-zinc-300 font-mono focus:border-[#cd412b] focus:outline-none cursor-pointer"
-          >
-            <option value="all">{lang === 'ru' ? 'Любой сервер' : 'Any Server'}</option>
+          <select value={serverFilter} onChange={(e) => setServerFilter(e.target.value)} aria-label={lang === 'ru' ? 'Формат сервера' : 'Server type'}>
+            <option value="all">{lang === 'ru' ? 'Все серверы' : 'All servers'}</option>
             <option value="Vanilla">Vanilla</option>
             <option value="2x">2x</option>
             <option value="3x">3x–5x</option>
             <option value="PvE">PvE / Roleplay</option>
           </select>
-
-          {/* Sort By */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-zinc-300 font-mono focus:border-[#cd412b] focus:outline-none cursor-pointer"
-          >
-            <option value="newest">{lang === 'ru' ? 'Сначала новые' : 'Newest First'}</option>
-            <option value="comments">{lang === 'ru' ? 'Самые обсуждаемые' : 'Most Discussed'}</option>
-            <option value="hours">{lang === 'ru' ? 'Макс. требование часов' : 'Highest Hours'}</option>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} aria-label={lang === 'ru' ? 'Сортировка' : 'Sort'}>
+            <option value="newest">{lang === 'ru' ? 'Сначала новые' : 'Newest first'}</option>
+            <option value="comments">{lang === 'ru' ? 'По обсуждениям' : 'Most discussed'}</option>
+            <option value="hours">{lang === 'ru' ? 'По часам' : 'By hours'}</option>
           </select>
         </div>
       </div>
@@ -1685,244 +1571,92 @@ export default function ClanBoardTab({ lang, user, onToast, onOpenAuth }: ClanBo
         </div>
       )}
 
-      {/* Modal: Create Forum Post */}
+      {/* Start recruitment / find teammates modal */}
       {isCreateOpen && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-[#14171e] border border-[#2a2f3b] max-w-2xl w-full p-6 space-y-5 rounded-none rust-metal-pattern relative max-h-[90vh] flex flex-col my-auto">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-[#cd412b]" />
+        <div className="clan-hub-modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setIsCreateOpen(false); }}>
+          <section className="clan-hub-modal" role="dialog" aria-modal="true" aria-labelledby="clan-hub-modal-title">
+            <header className="clan-hub-modal__header">
+              <div>
+                <span className="clan-hub-eyebrow"><UserPlus size={12} /> {lang === 'ru' ? 'НОВАЯ КОМАНДА' : 'NEW TEAM'}</span>
+                <h2 id="clan-hub-modal-title">{lang === 'ru' ? 'Начать набор участников' : 'Start recruiting players'}</h2>
+                <p>{lang === 'ru' ? 'Укажи главное — игроки смогут откликнуться и отправить заявку.' : 'Add the essentials so players can find and apply to your team.'}</p>
+              </div>
+              <button type="button" className="clan-hub-modal__close" onClick={() => setIsCreateOpen(false)} aria-label={lang === 'ru' ? 'Закрыть' : 'Close'}>×</button>
+            </header>
 
-            <div className="flex items-center justify-between border-b border-[#2a2f3b] pb-3 shrink-0">
-              <h3 className="text-xl font-bold text-white uppercase font-teko tracking-wider flex items-center gap-2">
-                <Plus className="text-[#cd412b]" size={20} />
-                <span>{lang === 'ru' ? 'Новое объявление' : 'New Listing'}</span>
-              </h3>
-              <button
-                onClick={() => setIsCreateOpen(false)}
-                className="text-zinc-400 hover:text-white text-xs font-mono font-bold cursor-pointer p-1 bg-[#1b1e26] border border-[#2a2f3b]"
-              >
-                [X]
-              </button>
-            </div>
-
-            <form onSubmit={handleCreatePost} className="space-y-4 overflow-y-auto pr-1 flex-1">
-              {/* Category selector */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold block">
-                  {lang === 'ru' ? 'Выберите тип объявления:' : 'Select Listing Type:'}
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setNewPostType('clan_recruit')}
-                    className={`p-3 border text-left cursor-pointer transition-all ${
-                      newPostType === 'clan_recruit'
-                        ? 'bg-amber-500/10 border-amber-500 text-amber-300 shadow-md'
-                        : 'bg-[#1b1e26] border-[#2a2f3b] text-zinc-400 hover:text-white'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 font-mono font-bold text-xs uppercase mb-1">
-                      <Shield size={16} />
-                      <span>{lang === 'ru' ? 'Сбор в Клан' : 'Clan Recruiting'}</span>
-                    </div>
-                    <p className="text-[10px] text-zinc-400 font-sans leading-tight">
-                      {lang === 'ru' ? 'Ваш клан или команда набирает игроков' : 'Your clan or squad is recruiting players'}
-                    </p>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setNewPostType('player_lfg')}
-                    className={`p-3 border text-left cursor-pointer transition-all ${
-                      newPostType === 'player_lfg'
-                        ? 'bg-emerald-500/10 border-emerald-500 text-emerald-300 shadow-md'
-                        : 'bg-[#1b1e26] border-[#2a2f3b] text-zinc-400 hover:text-white'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 font-mono font-bold text-xs uppercase mb-1">
-                      <UserPlus size={16} />
-                      <span>{lang === 'ru' ? 'Поиск Тиммейта / Клана' : 'Player LFG'}</span>
-                    </div>
-                    <p className="text-[10px] text-zinc-400 font-sans leading-tight">
-                      {lang === 'ru' ? 'Вы игрок и ищете себе клан или дуо/трио' : 'You are looking for a clan or duo/trio squad'}
-                    </p>
-                  </button>
-                </div>
+            <form onSubmit={handleCreatePost} className="clan-hub-form">
+              <div className="clan-hub-type-switch">
+                <button type="button" className={newPostType === 'clan_recruit' ? 'active' : ''} onClick={() => setNewPostType('clan_recruit')}>
+                  <Shield size={16} /><span>{lang === 'ru' ? 'Набираю в клан' : 'Recruiting for a clan'}</span>
+                </button>
+                <button type="button" className={newPostType === 'player_lfg' ? 'active' : ''} onClick={() => setNewPostType('player_lfg')}>
+                  <Users size={16} /><span>{lang === 'ru' ? 'Ищу команду' : 'Looking for a team'}</span>
+                </button>
               </div>
 
-              {/* Title Input */}
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold block">
-                  {lang === 'ru' ? 'Заголовок темы' : 'Thread Title'}
+              <div className="clan-hub-form__grid">
+                {newPostType === 'clan_recruit' && (
+                  <label className="clan-hub-field">
+                    <span>{lang === 'ru' ? 'Название клана / тег' : 'Clan name / tag'}</span>
+                    <input maxLength={60} value={newClanName} onChange={(e) => setNewClanName(e.target.value)} placeholder="[RUSTY] / название клана" />
+                  </label>
+                )}
+                <label className="clan-hub-field clan-hub-field--wide">
+                  <span>{lang === 'ru' ? 'Короткий заголовок' : 'Short headline'}</span>
+                  <input required maxLength={100} value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder={newPostType === 'clan_recruit' ? (lang === 'ru' ? 'Набираем активных игроков на вайп' : 'Recruiting active players for wipe') : (lang === 'ru' ? 'Ищу команду на следующий вайп' : 'Looking for a team for next wipe')} />
                 </label>
-                <input
-                  type="text"
-                  required
-                  placeholder={
-                    newPostType === 'clan_recruit'
-                      ? (lang === 'ru' ? 'Клан [NEXUS] набирает стрелков и строителя на Vanilla 2x' : 'Clan recruiting PvP & Builder')
-                      : (lang === 'ru' ? 'Ищу дуо/трио для плотного фарма и рейдов (3,500ч)' : 'Player looking for Duo/Trio')
-                  }
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono focus:border-[#cd412b] focus:outline-none"
-                />
-              </div>
-
-              {/* Clan Name (If Clan Recruit) */}
-              {newPostType === 'clan_recruit' && (
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold block">
-                    {lang === 'ru' ? 'Название клана / тег' : 'Clan Name / Tag'}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="E.g. [RAIDERS] / DOMINATION"
-                    value={newClanName}
-                    onChange={(e) => setNewClanName(e.target.value)}
-                    className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono focus:border-[#cd412b] focus:outline-none"
-                  />
-                </div>
-              )}
-
-              {/* Specs Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold block">
-                    {lang === 'ru' ? (newPostType === 'clan_recruit' ? 'Минимум часов в Rust' : 'Ваши часы в Rust') : (newPostType === 'clan_recruit' ? 'Minimum Rust Hours' : 'Your Rust Hours')}
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={20000}
-                    value={newHours}
-                    onChange={(e) => setNewHours(Number(e.target.value))}
-                    className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono focus:border-[#cd412b] focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold block">
-                    {lang === 'ru' ? 'Формат сервера' : 'Server Format'}
-                  </label>
-                  <select
-                    value={newServerType}
-                    onChange={(e) => setNewServerType(e.target.value)}
-                    className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono focus:border-[#cd412b] focus:outline-none"
-                  >
-                    {SERVER_TYPES.map(st => (
-                      <option key={st} value={st}>{st}</option>
-                    ))}
+                <label className="clan-hub-field">
+                  <span>{lang === 'ru' ? 'Формат сервера' : 'Server type'}</span>
+                  <select value={newServerType} onChange={(e) => setNewServerType(e.target.value)}>
+                    {SERVER_TYPES.map(st => <option key={st} value={st}>{st}</option>)}
                   </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold block">
-                    {lang === 'ru' ? 'Состав / Формат' : 'Team Format'}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Duo / Trio / 6-8 players"
-                    value={newTeamSize}
-                    onChange={(e) => setNewTeamSize(e.target.value)}
-                    className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono focus:border-[#cd412b] focus:outline-none"
-                  />
-                </div>
+                </label>
+                <label className="clan-hub-field">
+                  <span>{lang === 'ru' ? 'Состав команды' : 'Team size'}</span>
+                  <select value={newTeamSize} onChange={(e) => setNewTeamSize(e.target.value)}>
+                    {['Solo','Duo (2 игрока)','Trio (3 игрока)','Quad (4 игрока)','5–8 игроков','8+ игроков'].map(size => <option key={size} value={size}>{size}</option>)}
+                  </select>
+                </label>
+                <label className="clan-hub-field">
+                  <span>{lang === 'ru' ? (newPostType === 'clan_recruit' ? 'Минимум часов в Rust' : 'Твои часы в Rust') : (newPostType === 'clan_recruit' ? 'Minimum Rust hours' : 'Your Rust hours')}</span>
+                  <input type="number" min={0} max={20000} value={newHours} onChange={(e) => setNewHours(Number(e.target.value))} />
+                </label>
+                <label className="clan-hub-field">
+                  <span>{lang === 'ru' ? 'Время игры (необязательно)' : 'Play time (optional)'}</span>
+                  <input maxLength={60} value={newPrimeTime} onChange={(e) => setNewPrimeTime(e.target.value)} placeholder="Например, 18:00–00:00 МСК" />
+                </label>
+                <label className="clan-hub-field clan-hub-field--wide">
+                  <span>{lang === 'ru' ? 'Discord для связи' : 'Discord contact'}</span>
+                  <input required maxLength={100} value={newDiscord} onChange={(e) => setNewDiscord(e.target.value)} placeholder="Discord username или приглашение на сервер" />
+                </label>
               </div>
 
-              {/* Roles Chips */}
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold block">
-                  {lang === 'ru' ? 'Выберите нужные роли / навыки:' : 'Select Required Roles:'}
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {PRESET_ROLES.map((role) => {
-                    const isSel = newSelectedRoles.includes(role);
-                    return (
-                      <button
-                        key={role}
-                        type="button"
-                        onClick={() => toggleRoleSelection(role, newSelectedRoles, setNewSelectedRoles)}
-                        className={`px-2.5 py-1 text-[10px] font-mono border cursor-pointer transition-all ${
-                          isSel
-                            ? 'bg-[#cd412b] text-white border-orange-500 font-bold'
-                            : 'bg-[#1b1e26] text-zinc-400 border-[#2a2f3b] hover:text-white'
-                        }`}
-                      >
-                        {role}
-                      </button>
-                    );
+              <div className="clan-hub-field">
+                <span>{lang === 'ru' ? 'Кого ищете' : 'Roles / play styles wanted'}</span>
+                <div className="clan-hub-role-list">
+                  {PRESET_ROLES.map(role => {
+                    const selected = newSelectedRoles.includes(role);
+                    return <button key={role} type="button" className={selected ? 'active' : ''} onClick={() => toggleRoleSelection(role, newSelectedRoles, setNewSelectedRoles)}>{role}</button>;
                   })}
                 </div>
               </div>
 
-              {/* Discord & Prime Time */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold block">
-                    {lang === 'ru' ? 'Discord для связи' : 'Discord Handle'}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="username#0000 / link"
-                    value={newDiscord}
-                    onChange={(e) => setNewDiscord(e.target.value)}
-                    className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono focus:border-[#cd412b] focus:outline-none"
-                  />
+              <label className="clan-hub-field">
+                <span>{lang === 'ru' ? 'О команде и требованиях' : 'About the team and requirements'}</span>
+                <textarea required rows={4} maxLength={3000} value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder={lang === 'ru' ? 'Расскажи о целях на вайп, активности, требованиях и стиле игры…' : 'Describe your wipe goals, activity, requirements and play style…'} />
+              </label>
+
+              <footer className="clan-hub-form__footer">
+                <span>{lang === 'ru' ? 'Поля со связью и описанием обязательны. Остальное можно изменить позже.' : 'Contact and description are required. Other details can be edited later.'}</span>
+                <div>
+                  <button type="button" className="clan-hub-secondary" onClick={() => setIsCreateOpen(false)}>{lang === 'ru' ? 'Отмена' : 'Cancel'}</button>
+                  <button type="submit" disabled={isSubmittingPost} className="clan-hub-primary">
+                    <Send size={15} /> {isSubmittingPost ? (lang === 'ru' ? 'Публикация…' : 'Publishing…') : (newPostType === 'clan_recruit' ? (lang === 'ru' ? 'Опубликовать набор' : 'Publish recruitment') : (lang === 'ru' ? 'Опубликовать поиск' : 'Publish LFG'))}
+                  </button>
                 </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold block">
-                    {lang === 'ru' ? 'Прайм-тайм' : 'Prime Time'}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="18:00 - 24:00 MSK"
-                    value={newPrimeTime}
-                    onChange={(e) => setNewPrimeTime(e.target.value)}
-                    className="w-full bg-[#1b1e26] border border-[#2a2f3b] px-3 py-2 text-xs text-white font-mono focus:border-[#cd412b] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-zinc-400 uppercase font-bold block">
-                  {lang === 'ru' ? 'Подробное описание и правила' : 'Detailed Description & Rules'}
-                </label>
-                <textarea
-                  required
-                  rows={4}
-                  placeholder={
-                    lang === 'ru'
-                      ? 'Опишите требования к игрокам, дисциплине, прайм-тайму, опыту рейдов и коммуникации...'
-                      : 'Describe team requirements, schedule, communication expectations...'
-                  }
-                  value={newDesc}
-                  onChange={(e) => setNewDesc(e.target.value)}
-                  className="w-full bg-[#1b1e26] border border-[#2a2f3b] p-3 text-xs text-white font-mono focus:border-[#cd412b] focus:outline-none resize-none"
-                />
-              </div>
-
-              {/* Submit / Cancel Buttons */}
-              <div className="flex justify-end gap-3 pt-3 border-t border-[#2a2f3b] shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateOpen(false)}
-                  className="px-4 py-2 bg-[#1b1e26] text-zinc-300 text-xs font-mono uppercase cursor-pointer hover:bg-[#252a36]"
-                >
-                  {lang === 'ru' ? 'Отмена' : 'Cancel'}
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmittingPost}
-                  className="px-6 py-2 bg-[#cd412b] hover:bg-[#b83824] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-mono font-bold uppercase transition-all cursor-pointer shadow-md"
-                >
-                  {isSubmittingPost ? (lang === 'ru' ? 'Публикация...' : 'Publishing...') : (lang === 'ru' ? 'Опубликовать объявление' : 'Publish Listing')}
-                </button>
-              </div>
+              </footer>
             </form>
-          </div>
+          </section>
         </div>
       )}
     </div>
