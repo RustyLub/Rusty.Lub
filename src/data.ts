@@ -492,8 +492,8 @@ export const bindsDatabase: BindItem[] = [
   },
   {
     category: 'PVP',
-    cmd: 'bind mouse1 +lighttoggle;+attack2',
-    key: 'ПКМ',
+    cmd: 'bind mouse3 +lighttoggle;+attack2',
+    key: 'БОКОВАЯ КНОПКА МЫШИ',
     desc: 'Фонарик или лазер при прицеливании',
     explanation: 'Включает фонарик или лазер при использовании прицела. mouse1 — правая кнопка мыши в системе биндов Rust.'
   },
@@ -568,8 +568,8 @@ export const bindsDatabase: BindItem[] = [
   },
   {
     category: 'QOL',
-    cmd: 'bind mouse4 +meta.if_true "fov 70";+meta.if_false "fov 80"',
-    key: 'БОКОВАЯ КНОПКА МЫШИ',
+    cmd: 'bind mouse2 +meta.if_true "fov 70";+meta.if_false "fov 80"',
+    key: 'НАЖАТИЕ КОЛЁСИКА',
     desc: 'Приближение камеры при удержании',
     explanation: 'Удерживайте кнопку для FOV 70; после отпускания возвращается FOV 80. При необходимости измените значения под себя.'
   }
