@@ -50,13 +50,11 @@ export default function ToolsHubTab({
     { id: 'gameplay', label: ru ? 'Геймплей' : 'Gameplay' }
   ];
 
+  const term = search.trim().toLocaleLowerCase();
   const filteredTools = publicTools.filter(tool => {
-    const term = search.trim().toLocaleLowerCase();
-    return publicTools.filter(tool => {
-      const matchesCategory = category === 'all' || tool.category === category;
-      const matchesSearch = !term || `${tool.title} ${tool.desc}`.toLocaleLowerCase().includes(term);
-      return matchesCategory && matchesSearch;
-    });
+    const matchesCategory = category === 'all' || tool.category === category;
+    const matchesSearch = !term || `${tool.title} ${tool.desc}`.toLocaleLowerCase().includes(term);
+    return matchesCategory && matchesSearch;
   });
 
   const hasSpecialAccess = Boolean(currentUser && (isVip || isOwner || isAdmin));
