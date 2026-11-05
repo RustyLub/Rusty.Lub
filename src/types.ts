@@ -19,6 +19,8 @@ export interface ErrorItem {
   title: string;
   desc?: string;
   sols: string[];
+  sourceUrl?: string;
+  sourceLabel?: string;
 }
 
 export interface BindItem {
