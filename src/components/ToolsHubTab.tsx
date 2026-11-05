@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { ChevronRight, Lock, Search, Shield, Zap, Package, Keyboard, Grid3X3, Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronRight, Lock, Search, Grid3X3 } from 'lucide-react';
 import { ItemImageOrFallback } from './IconUtils';
 import { CustomUser } from '../types';
 
@@ -50,14 +50,14 @@ export default function ToolsHubTab({
     { id: 'gameplay', label: ru ? 'Геймплей' : 'Gameplay' }
   ];
 
-  const filteredTools = useMemo(() => {
+  const filteredTools = publicTools.filter(tool => {
     const term = search.trim().toLocaleLowerCase();
     return publicTools.filter(tool => {
       const matchesCategory = category === 'all' || tool.category === category;
       const matchesSearch = !term || `${tool.title} ${tool.desc}`.toLocaleLowerCase().includes(term);
       return matchesCategory && matchesSearch;
     });
-  }, [category, search, ru]);
+  });
 
   const hasSpecialAccess = Boolean(currentUser && (isVip || isOwner || isAdmin));
   const specialTools = [
