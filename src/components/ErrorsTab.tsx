@@ -20,7 +20,8 @@ import {
   Flame, 
   Info,
   ExternalLink,
-  Layers
+  Layers,
+  BookOpen
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
@@ -210,8 +211,8 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
 
   return (
     <div className="w-full max-w-full overflow-hidden space-y-4">
-      {/* Search and Category Filter Header (Rust Industrial Military Styling) */}
-      <div className="bg-[#121620] border border-[#222938] p-3.5 sm:p-4 relative overflow-hidden shadow-lg rust-metal-pattern rounded-xl w-full max-w-full">
+      {/* Search and Category Filter Header */}
+      <div className="relative isolate overflow-hidden border border-slate-700/80 bg-[#0b1118] p-3 sm:p-4 shadow-xl w-full max-w-full">
         <div className="rust-bracket-tl" />
         <div className="rust-bracket-tr" />
         <div className="rust-bracket-bl" />
@@ -272,7 +273,7 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
         <div className="mt-3 pt-2.5 border-t border-[#1c2230] flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-neutral-400 w-full min-w-0">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>{lang === 'en' ? 'DATABASE: VERIFIED 2026' : 'БАЗА: 2026 АКТУАЛЬНО'}</span>
+            <span>{lang === 'en' ? 'FACEPUNCH SOURCES · REVIEWED NOV 2026' : 'ИСТОЧНИКИ FACEPUNCH · ПРОВЕРЕНО НОЯБРЬ 2026'}</span>
           </div>
           <div>
             {lang === 'en' ? `${filteredErrors.length} verified fixes` : `Найдено ${filteredErrors.length} решений`}
@@ -280,8 +281,8 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
         </div>
       </div>
 
-      {/* AI Diagnostic Panel (Rust Tactical Console) */}
-      <div className="bg-[#121620] border border-[#2a3447] p-3.5 sm:p-4 relative overflow-hidden shadow-lg rust-metal-pattern rounded-xl w-full max-w-full">
+      {/* AI Diagnostic Panel */}
+      <div className="relative isolate overflow-hidden border border-slate-700/80 bg-[#0b1118] p-3 sm:p-4 shadow-xl w-full max-w-full">
         <div className="flex items-center justify-between gap-2 mb-2.5">
           <div className="flex items-center gap-2 text-xs font-mono font-black text-orange-500 uppercase tracking-widest min-w-0 truncate">
             <Sparkles size={15} className="text-[#f97316] shrink-0" />
@@ -348,7 +349,7 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
         )}
       </div>
 
-      {/* RUST-THEMED ERROR CARDS GRID (1 column on mobile/tablet, 2 on desktop to guarantee zero overflow) */}
+      {/* Compact error cards */}
       {filteredErrors.length === 0 ? (
         <div className="bg-[#121620] border border-[#222938] p-8 text-center rounded-xl font-mono space-y-2 w-full max-w-full">
           <AlertTriangle size={28} className="mx-auto text-neutral-600 mb-1" />
@@ -360,7 +361,7 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full max-w-full">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 w-full max-w-full">
           {filteredErrors.map((error, idx) => {
             const trans = lang === 'en' ? (errorsTranslationMap[error.title] || error) : error;
             const catConfig = getCategoryConfig(error.category);
@@ -382,7 +383,7 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
             return (
               <div
                 key={error.title}
-                className={`relative bg-[#10141d] border transition-all duration-200 group flex flex-col justify-between rounded-xl overflow-hidden min-w-0 max-w-full w-full ${
+                className={`relative relative isolate bg-[#0c131b] border transition-all duration-200 group flex flex-col justify-between overflow-hidden min-w-0 max-w-full w-full ${
                   isExpanded
                     ? 'border-[#f97316] shadow-[0_6px_25px_rgba(205,65,43,0.22)] ring-1 ring-[#f97316]/50'
                     : 'border-[#222938] hover:border-[#f97316]/90 hover:shadow-[0_4px_20px_rgba(205,65,43,0.16)]'
@@ -420,7 +421,7 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
 
                   {/* Title & Description */}
                   <div className="space-y-1 flex-1 min-w-0">
-                    <h3 className="text-sm font-black text-neutral-100 group-hover:text-orange-400 transition-colors uppercase tracking-wide leading-snug break-words">
+                    <h3 className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors leading-snug break-words">
                       {trans.title}
                     </h3>
                     {trans.desc && (
@@ -429,6 +430,20 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
                       </p>
                     )}
                   </div>
+
+                  {error.sourceUrl && (
+                    <a
+                      href={error.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex w-fit items-center gap-1.5 text-[10px] font-semibold text-orange-400/90 hover:text-orange-300 transition"
+                    >
+                      <BookOpen size={11} />
+                      <span>{error.sourceLabel || (lang === 'en' ? 'Official source' : 'Источник')}</span>
+                      <ExternalLink size={10} />
+                    </a>
+                  )}
 
                   {/* Console Command / Launch Option Box (if detected in solutions) */}
                   {detectedCmd && (
