@@ -85,3 +85,10 @@ body.light-theme .binds-empty{background:#f6f8fa;border-color:#cbd7df}
 body.light-theme .binds-empty strong{color:#263642}
 body.light-theme .binds-modal-card{background:linear-gradient(145deg,#fff,#eef3f6)!important;color:#1c2934}
 body.light-theme .binds-modal-card input{background:#fff!important;color:#1c2934!important;border-color:#cbd6df!important}
+
+.binds-key-chip{display:inline-flex;align-items:center;min-height:20px;padding:3px 7px;border:1px solid rgba(249,115,22,.35);background:rgba(249,115,22,.09);color:#fdba74;font:800 9px/1.2 ui-monospace,monospace;letter-spacing:.05em}
+.binds-command{align-items:flex-start!important;min-height:44px;padding:10px!important}
+.binds-command code{flex:1 1 auto;overflow:visible!important;white-space:normal!important;overflow-wrap:anywhere;word-break:break-word;line-height:1.55}
+.binds-command>span{align-self:center}
+@media(max-width:520px){.binds-command{gap:7px}.binds-command>span{font-size:0}.binds-command>span svg{width:16px;height:16px}}
+body.light-theme .binds-key-chip{background:rgba(249,115,22,.08);color:#a94c1d;border-color:rgba(190,105,48,.3)}
