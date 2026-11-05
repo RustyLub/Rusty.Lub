@@ -309,7 +309,7 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            {lang === 'en' ? 'Admin Panel' : 'Для админов'}
+            {lang === 'en' ? 'Server Admin Commands' : 'Команды администратора'}
           </button>
           <button
             onClick={() => handleModeChange('adminBinds')}
@@ -365,8 +365,8 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
                 { id: 'МЕДИЦИНА', label: lang === 'en' ? 'Medical' : 'Медицина' },
                 { id: 'ФАРМ', label: lang === 'en' ? 'Farming' : 'Фарм' },
                 { id: 'УПРАВЛЕНИЕ', label: lang === 'en' ? 'Controls' : 'Управление' },
-                { id: 'QOL', label: 'QoL' },
-                              ]
+                { id: 'QOL', label: 'QoL' }
+              ]
             : bindsMode === 'adminBinds'
               ? [
                   { id: 'all', label: lang === 'en' ? 'All' : 'Все' },
