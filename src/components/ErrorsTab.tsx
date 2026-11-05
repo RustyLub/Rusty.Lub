@@ -27,6 +27,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import { errorCategoryMap, errorsTranslationMap } from '../translations';
 import { auth } from '../firebase';
+import './ErrorsTab.css';
 
 interface ErrorsTabProps {
   onCopy: (text: string) => void;
@@ -210,7 +211,22 @@ export default function ErrorsTab({ onCopy, lang, appTheme = 'dark' }: ErrorsTab
   };
 
   return (
-    <div className="w-full max-w-full overflow-hidden space-y-4">
+    <div className="errors-page w-full max-w-full overflow-hidden space-y-4">
+      <section className="errors-hero">
+        <div className="errors-hero__content">
+          <div className="errors-eyebrow"><span /> RUSTY.LUB / {lang === 'en' ? 'PLAYER SUPPORT' : 'БАЗА РЕШЕНИЙ'}</div>
+          <div className="errors-hero__layout">
+            <div>
+              <h1>{lang === 'en' ? 'Rust error guide' : 'Ошибки Rust — решения'}</h1>
+              <p>{lang === 'en' ? 'Find the cause, follow a clear fix, and get back into the game.' : 'Найди причину сбоя, выбери понятное решение и возвращайся в игру.'}</p>
+            </div>
+            <div className="errors-hero__stats">
+              <span><strong>{errorDatabase.length}</strong>{lang === 'en' ? 'solutions' : 'решений в базе'}</span>
+              <span><strong>AI</strong>{lang === 'en' ? 'diagnostics' : 'ИИ-диагностика'}</span>
+            </div>
+          </div>
+        </div>
+      </section>
       {/* Search and Category Filter Header */}
       <div className="relative isolate overflow-hidden border border-slate-700/80 bg-[#0b1118] p-3 sm:p-4 shadow-xl w-full max-w-full">
         <div className="rust-bracket-tl" />
