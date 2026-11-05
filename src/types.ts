@@ -22,7 +22,7 @@ export interface ErrorItem {
 }
 
 export interface BindItem {
-  category: 'PVP' | 'МЕДИЦИНА' | 'ФАРМ' | 'СТРОЙКА' | 'УПРАВЛЕНИЕ' | 'QOL' | 'МОДОВЫЕ';
+  category: 'PVP' | 'МЕДИЦИНА' | 'ФАРМ' | 'СТРОЙКА' | 'УПРАВЛЕНИЕ' | 'QOL' | 'МОДОВЫЕ' | 'АДМИН';
   cmd: string;
   desc: string;
   key?: string;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './BindsTab.css';
-import { bindsDatabase, adminCommandsDatabase } from '../data';
+import { bindsDatabase, adminBindsDatabase, adminCommandsDatabase } from '../data';
 import { BindItem, AdminCommandItem } from '../types';
 import { db, collection, addDoc } from '../firebase';
 import { Search, Copy, Terminal, Shield, Plus, Zap, Heart, RotateCw, Info, Wrench, Settings, Download, FileCode, Sparkles, Bookmark, Check, Save } from 'lucide-react';
@@ -19,7 +19,7 @@ interface BindsTabProps {
 export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onRequireAuth, onToast }: BindsTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [bindsMode, setBindsMode] = useState<'player' | 'admin'>('player');
+  const [bindsMode, setBindsMode] = useState<'player' | 'admin' | 'adminBinds'>('player');
   const [savedBindKeys, setSavedBindKeys] = useState<string[]>([]);
   const [showCreateBindModal, setShowCreateBindModal] = useState(false);
   const [newBindKey, setNewBindKey] = useState('');
@@ -140,13 +140,13 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
     }
   };
 
-  const handleModeChange = (mode: 'player' | 'admin') => {
+  const handleModeChange = (mode: 'player' | 'admin' | 'adminBinds') => {
     setBindsMode(mode);
     setActiveCategory('all');
     setSearchQuery('');
   };
 
-  const filteredBinds = (bindsMode === 'player' ? bindsDatabase : (adminCommandsDatabase as unknown as BindItem[])).filter((bind) => {
+  const filteredBinds = (bindsMode === 'player' ? bindsDatabase : bindsMode === 'adminBinds' ? adminBindsDatabase : (adminCommandsDatabase as unknown as BindItem[])).filter((bind) => {
     const matchesCategory = activeCategory === 'all' || bind.category === activeCategory;
     const trans = lang === 'en' && bindsTranslationMap[bind.cmd] ? {
       ...bind,
@@ -163,11 +163,13 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
     return matchesCategory && matchesSearch;
   });
 
-  const totalBinds = bindsMode === 'player' ? bindsDatabase.length : adminCommandsDatabase.length;
+  const totalBinds = bindsMode === 'player' ? bindsDatabase.length : bindsMode === 'adminBinds' ? adminBindsDatabase.length : adminCommandsDatabase.length;
   const savedCount = savedBindKeys.length;
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
+      case 'АДМИН':
+        return <Shield size={12} className="text-orange-400" />;
       case 'PVP':
         return <Shield size={12} className="text-rose-400" />;
       case 'МЕДИЦИНА':
@@ -206,6 +208,8 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
 
   const getCategoryClass = (category: string) => {
     switch (category) {
+      case 'АДМИН':
+        return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
       case 'PVP':
         return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
       case 'МЕДИЦИНА':
@@ -305,7 +309,17 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            {lang === 'en' ? 'Admin Panel' : 'Для админов'}
+            {lang === 'en' ? 'Server Admin Commands' : 'Команды администратора'}
+          </button>
+          <button
+            onClick={() => handleModeChange('adminBinds')}
+            className={`px-4 py-2 text-xs uppercase transition-all cursor-pointer font-bold font-mono ${
+              bindsMode === 'adminBinds'
+                ? 'text-[#f97316] border-b-2 border-[#f97316]'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            {lang === 'en' ? 'Admin Binds' : 'Админские бинды'}
           </button>
         </div>
 
@@ -350,12 +364,15 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
                 { id: 'PVP', label: 'PVP' },
                 { id: 'МЕДИЦИНА', label: lang === 'en' ? 'Medical' : 'Медицина' },
                 { id: 'ФАРМ', label: lang === 'en' ? 'Farming' : 'Фарм' },
-                { id: 'СТРОЙКА', label: lang === 'en' ? 'Building' : 'Стройка' },
                 { id: 'УПРАВЛЕНИЕ', label: lang === 'en' ? 'Controls' : 'Управление' },
-                { id: 'QOL', label: 'QoL' },
-                { id: 'МОДОВЫЕ', label: lang === 'en' ? 'Modded' : 'Модовые' }
+                { id: 'QOL', label: 'QoL' }
               ]
-            : [
+            : bindsMode === 'adminBinds'
+              ? [
+                  { id: 'all', label: lang === 'en' ? 'All' : 'Все' },
+                  { id: 'АДМИН', label: lang === 'en' ? 'Admin' : 'Админ' }
+                ]
+              : [
                 { id: 'all', label: lang === 'en' ? 'All' : 'Все' },
                 { id: 'ПРАВА', label: lang === 'en' ? 'Perms' : 'Права' },
                 { id: 'МОДЕРАЦИЯ', label: lang === 'en' ? 'Mod' : 'Модерация' },
@@ -389,14 +406,18 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
           <p className="font-bold text-[#f97316] uppercase font-mono">
             {bindsMode === 'player'
               ? (lang === 'en' ? 'How to install?' : 'Как установить?')
-              : (lang === 'en' ? 'How to use admin commands?' : 'Как использовать админ-команды?')
+              : bindsMode === 'adminBinds'
+                ? (lang === 'en' ? 'Administrator keybinds' : 'Администраторские бинды')
+                : (lang === 'en' ? 'How to use admin commands?' : 'Как использовать админ-команды?')
             }
           </p>
           <p className="text-zinc-400">
             {bindsMode === 'player' ? (
-              lang === 'en' ? 'Click the command button to copy it, open the Rust console (F1), paste (Ctrl+V), and press Enter. Use the bookmark icon to save it to your cabinet.' : 'Нажмите кнопку команды, чтобы скопировать её. Откройте консоль Rust (F1), вставьте команду (Ctrl+V) и нажмите Enter. Значок закладки сохраняет бинд в личный кабинет.'
+              lang === 'en' ? 'Copy the full command, open the Rust console (F1), paste it and press Enter. Run writecfg to save your keybinds to the local config.' : 'Скопируйте полную команду, откройте консоль Rust (F1), вставьте её и нажмите Enter. Выполните writecfg, чтобы сохранить бинды в локальный конфиг.'
+            ) : bindsMode === 'adminBinds' ? (
+              lang === 'en' ? 'These keybinds are for server administrators only. Enter them in the client F1 console while connected with the required admin permissions. They do not grant admin rights.' : 'Эти бинды предназначены только для администраторов сервера. Вводите их в клиентскую консоль F1, находясь на сервере с нужными правами. Сами бинды административные права не выдают.'
             ) : (
-              lang === 'en' ? 'Copy the command and paste it into the Rust server console (F1). Admin commands require the appropriate server permissions; replace placeholders such as <ID> before execution.' : 'Скопируйте команду и вставьте её в консоль сервера Rust (F1). Для выполнения нужны соответствующие права администратора; замените шаблоны вроде <ID> перед запуском.'
+              lang === 'en' ? 'Copy the command into the server console or RCON. Admin commands require the appropriate server permissions; replace placeholders such as <ID> before execution.' : 'Скопируйте команду в серверную консоль или RCON. Для выполнения нужны соответствующие права администратора; замените шаблоны вроде <ID> перед запуском.'
             )}
           </p>
         </div>
@@ -404,7 +425,7 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
 
       {/* Binds Grid */}
       <div className="binds-results-head flex items-center justify-between gap-3">
-        <div><h2>{lang === 'ru' ? 'Библиотека биндов' : 'Bind library'}</h2><p>{lang === 'ru' ? 'Нажмите на команду, чтобы скопировать её в буфер обмена' : 'Select a command to copy it to your clipboard'}</p></div>
+        <div><h2>{lang === 'ru' ? 'Библиотека биндов' : 'Bind library'}</h2><p>{lang === 'ru' ? 'Команда копируется целиком — вместе с кавычками, скобками и разделителями' : 'Commands are copied in full, including quotes, brackets and separators'}</p></div>
         <span>{filteredBinds.length} / {totalBinds}</span>
       </div>
       <div className="binds-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -426,7 +447,10 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] text-zinc-500 font-mono uppercase">{bindsCategoryMap[bind.category]?.[lang] || bind.category}</span>
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <span className="text-[10px] text-zinc-500 font-mono uppercase">{bindsCategoryMap[bind.category]?.[lang] || bind.category}</span>
+                    {bind.key && <span className="binds-key-chip">{bind.key}</span>}
+                  </div>
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
