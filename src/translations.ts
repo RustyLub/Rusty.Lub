@@ -162,6 +162,23 @@ export const bindsCategoryMap: Record<string, Record<'ru' | 'en', string>> = {
 
 // Translate Binds Data
 export const bindsTranslationMap: Record<string, { desc: string; explanation?: string; category: string; example?: string }> = {
+  'bind x forward;sprint': { category: 'УПРАВЛЕНИЕ', desc: 'Auto-run', explanation: 'Starts continuous forward movement and sprinting until normal movement input overrides it.' },
+  'bind z duck': { category: 'УПРАВЛЕНИЕ', desc: 'Toggle crouch', explanation: 'Toggles crouching on each press.' },
+  'bind [leftshift+k] kill': { category: 'УПРАВЛЕНИЕ', desc: 'Quick respawn / suicide', explanation: 'Kills your character and opens the respawn screen. You will drop carried items.' },
+  'bind [leftshift+f11] attack': { category: 'УПРАВЛЕНИЕ', desc: 'Continuous primary attack', explanation: 'Starts continuous primary attack. Use your normal attack input to stop it.' },
+  'bind [rightshift+f11] attack;duck': { category: 'PVP', desc: 'Attack while crouching', explanation: 'Runs primary attack and crouch together.' },
+  'bind leftalt +altlook': { category: 'PVP', desc: 'Free look', explanation: 'Look around without changing your movement direction.' },
+  'bind mouse1 "+attack2;+input.sensitivity .45;input.sensitivity .2"': { category: 'PVP', desc: 'Lower sensitivity while aiming', explanation: 'Changes mouse sensitivity while aiming. Adjust .45 and .2 to suit your normal sensitivity.' },
+  'bind mouse3 +lighttoggle;+attack2': { category: 'PVP', desc: 'Flashlight or laser while aiming', explanation: 'Toggles the weapon light or laser with the aiming action.' },
+  'bind h "craft.add -2072273936 1"': { category: 'МЕДИЦИНА', desc: 'Queue one bandage', explanation: 'Adds one medical bandage to the crafting queue. Required resources must be available.' },
+  'bind mousewheelup "craft.add -2072273936 2"': { category: 'МЕДИЦИНА', desc: 'Queue two bandages', explanation: 'Adds two medical bandages to the crafting queue when scrolling up.' },
+  'bind mouse4 +buttons.hoverloot': { category: 'ФАРМ', desc: 'Quick loot transfer', explanation: 'Hold the key and hover over items in an open inventory to transfer them quickly.' },
+  'bind f1 consoletoggle;combatlog': { category: 'QOL', desc: 'Console with CombatLog', explanation: 'Toggles the console and displays the combat log.' },
+  'bind f10 client.disconnect': { category: 'QOL', desc: 'Quick disconnect', explanation: 'Disconnects from the current server. Avoid assigning this to a key you press accidentally.' },
+  'bind 7 chat.say "Hello everyone!"': { category: 'QOL', desc: 'Global chat message', explanation: 'Sends the configured text to global chat. Replace the sample message with your own.' },
+  'bind 8 chat.teamsay "Hey Team!!"': { category: 'QOL', desc: 'Team chat message', explanation: 'Sends the configured text to your team chat. Replace the sample message with your own.' },
+  'bind rightarrow ~graphics.vm_horizontal_flip 0;graphics.vm_horizontal_flip 1': { category: 'QOL', desc: 'Switch weapon viewmodel side', explanation: 'Cycles the held item viewmodel between its normal and horizontally flipped positions.' },
+  'bind mouse2 +meta.if_true "fov 70";+meta.if_false "fov 80"': { category: 'QOL', desc: 'Hold-to-zoom', explanation: 'Sets FOV to 70 while held and returns it to 80 when released. Adjust both values to your preference.' },
   'bind <клавиша>': {
     category: 'УПРАВЛЕНИЕ',
     desc: 'Check key binding',
