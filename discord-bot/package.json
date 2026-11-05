@@ -1,9 +1,0 @@
-{
-  "name": "rustylub-discord-rcon",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "engines": { "node": ">=22" },
-  "scripts": { "start": "node src/index.js", "check": "node --check src/index.js" },
-  "dependencies": { "discord.js": "^14.22.1", "dotenv": "^16.4.7", "ws": "^8.18.3" }
-}
