@@ -155,7 +155,7 @@ class WebRcon {
     if (!ch) return;
     const clean = output(line, 1700).replace(/```/g, "'''");
     const embed = new EmbedBuilder().setColor(0x7c8795)
-      .setDescription(```text\n${clean}\n```)
+      .setDescription('\\`\\`\\`text\\n' + clean + '\\n\\`\\`\\`')
       .setFooter({ text: `Rust WebRCON · Type ${Number(packet.Type) || 0}` })
       .setTimestamp();
     await ch.send({ embeds: [embed] }).catch(e => console.warn('Log relay failed:', e.message));
