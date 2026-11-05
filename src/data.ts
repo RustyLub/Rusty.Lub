@@ -567,6 +567,65 @@ export const bindsDatabase: BindItem[] = [
   }
 ];
 
+export const adminBindsDatabase: BindItem[] = [
+  {
+    category: 'АДМИН',
+    cmd: 'bind [leftshift+h] debugcamera',
+    key: 'SHIFT + H',
+    desc: 'Свободная камера администратора',
+    explanation: 'Включает debugcamera для наблюдения за миром. Это не делает персонажа невидимым.'
+  },
+  {
+    category: 'АДМИН',
+    cmd: 'bind [leftshift+t] teleport2marker',
+    key: 'SHIFT + T',
+    desc: 'Телепорт к своей метке',
+    explanation: 'Перемещает администратора к установленной метке на карте.'
+  },
+  {
+    category: 'АДМИН',
+    cmd: 'bind p "ent kill"',
+    key: 'P',
+    desc: 'Удалить объект под прицелом',
+    explanation: 'Удаляет сущность, на которую направлен прицел. Используйте осторожно: действие может быть необратимым.'
+  },
+  {
+    category: 'АДМИН',
+    cmd: 'bind u "ent unlock"',
+    key: 'U',
+    desc: 'Открыть замок под прицелом',
+    explanation: 'Снимает блокировку с выбранного замка.'
+  },
+  {
+    category: 'АДМИН',
+    cmd: 'bind l "ent lock"',
+    key: 'L',
+    desc: 'Закрыть замок под прицелом',
+    explanation: 'Блокирует выбранный замок.'
+  },
+  {
+    category: 'АДМИН',
+    cmd: 'bind j noclip',
+    key: 'J',
+    desc: 'Переключить режим полёта',
+    explanation: 'Включает или выключает noclip. Требуются административные права.'
+  },
+  {
+    category: 'АДМИН',
+    cmd: 'bind delete "layer.toggle Construction"',
+    key: 'DELETE',
+    desc: 'Скрыть слой построек',
+    explanation: 'Переключает отображение слоя Construction в инструментах администратора.'
+  },
+  {
+    category: 'АДМИН',
+    cmd: 'bind [leftshift+rightcontrol] "weather.load clear"',
+    key: 'LEFT SHIFT + RIGHT CTRL',
+    desc: 'Очистить погоду',
+    explanation: 'Загружает ясную погоду на сервере. Требуются административные права.'
+  }
+];
+
 export const adminCommandsDatabase: AdminCommandItem[] = [
   // --- УПРАВЛЕНИЕ ПРАВАМИ АДМИНИСТРАТОРА ---
   {
