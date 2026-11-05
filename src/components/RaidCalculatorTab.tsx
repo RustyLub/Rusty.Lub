@@ -701,20 +701,42 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
   const totalGP = totalWeaponsNeeded * selectedWeapon.gpPer;
   const totalMetal = totalWeaponsNeeded * selectedWeapon.metalPer;
 
+  const calculatorHeader = (
+    <header className="relative overflow-hidden border border-[#29313b] bg-[#11171e] px-5 py-5 sm:px-7 sm:py-6">
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-[radial-gradient(ellipse_at_right,rgba(249,115,22,.15),transparent_72%)]" />
+      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="max-w-2xl">
+          <div className="mb-2 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[.2em] text-orange-500">
+            <span>// RUSTY.LUB</span><span className="text-slate-600">·</span><span className="text-slate-400">{lang === 'ru' ? 'ПЛАНИРОВАНИЕ РЕЙДА' : 'RAID PLANNER'}</span>
+          </div>
+          <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">{lang === 'ru' ? 'Рейд-калькулятор' : 'Raid calculator'}</h1>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400">{lang === 'ru' ? 'Прикинь расход взрывчатки до выхода. Выбери оружие, добавь стены и двери — калькулятор соберёт общий список.' : 'Work out the explosive cost before you head out. Pick your weapon, add walls and doors, and get the full total.'}</p>
+        </div>
+        <div className="flex items-center gap-3 border-l border-slate-700/70 pl-4">
+          <div className="text-right"><div className="text-xl font-black tabular-nums text-white">{Object.values(quantities).reduce((sum, qty) => sum + qty, 0)}</div><div className="text-[9px] font-mono uppercase tracking-widest text-slate-400">{lang === 'ru' ? 'ЦЕЛЕЙ В СПИСКЕ' : 'TARGETS ADDED'}</div></div>
+          <div className="flex h-10 w-10 items-center justify-center border border-orange-500/30 bg-orange-500/10 text-orange-400"><Bomb size={20}/></div>
+        </div>
+      </div>
+    </header>
+  );
+
   const modeSwitcher = (
-    <div className="flex gap-1 bg-[#0c0d10] p-1 border border-[#2a2f3b] w-fit">
-      <button onClick={() => setCalculatorMode('raid')} className={`px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-colors ${calculatorMode === 'raid' ? 'bg-[#f97316] text-white' : 'text-gray-400 hover:text-white'}`}>
-        {lang === 'en' ? 'Raid calculator' : 'Рейд-калькулятор'}
+    <div className="flex w-full flex-col gap-1 border border-[#29313b] bg-[#0c1117] p-1 sm:w-fit sm:flex-row" role="tablist" aria-label={lang === 'ru' ? 'Режим калькулятора' : 'Calculator mode'}>
+      <button type="button" role="tab" aria-selected={calculatorMode === 'raid'} onClick={() => setCalculatorMode('raid')} className={`min-h-10 px-4 py-2 text-left text-xs font-bold transition-colors sm:min-w-[190px] ${calculatorMode === 'raid' ? 'bg-orange-500 text-[#101318]' : 'text-slate-400 hover:bg-[#18212b] hover:text-white'}`}>
+        <span className="flex items-center gap-2"><Bomb size={15}/>{lang === 'en' ? 'Raid calculator' : 'Расчёт рейда'}</span>
+        <span className={`mt-0.5 block text-[10px] font-normal ${calculatorMode === 'raid' ? 'text-[#33200f]/80' : 'text-slate-500'}`}>{lang === 'ru' ? 'Сколько взрывчатки нужно' : 'Explosives needed'}</span>
       </button>
-      <button onClick={() => setCalculatorMode('craft')} className={`px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-colors ${calculatorMode === 'craft' ? 'bg-[#f97316] text-white' : 'text-gray-400 hover:text-white'}`}>
-        {lang === 'en' ? 'Craft calculator' : 'Крафт-калькулятор'}
+      <button type="button" role="tab" aria-selected={calculatorMode === 'craft'} onClick={() => setCalculatorMode('craft')} className={`min-h-10 px-4 py-2 text-left text-xs font-bold transition-colors sm:min-w-[190px] ${calculatorMode === 'craft' ? 'bg-orange-500 text-[#101318]' : 'text-slate-400 hover:bg-[#18212b] hover:text-white'}`}>
+        <span className="flex items-center gap-2"><Hammer size={15}/>{lang === 'en' ? 'Craft calculator' : 'Расчёт крафта'}</span>
+        <span className={`mt-0.5 block text-[10px] font-normal ${calculatorMode === 'craft' ? 'text-[#33200f]/80' : 'text-slate-500'}`}>{lang === 'ru' ? 'Сколько ресурсов подготовить' : 'Resources to prepare'}</span>
       </button>
     </div>
   );
 
   if (calculatorMode === 'craft') {
     return (
-      <div className="space-y-4">
+      <div className="mx-auto w-full max-w-[1440px] space-y-4 pb-8">
+        {calculatorHeader}
         {modeSwitcher}
         <CraftCalculatorTab lang={lang} onBackToRaid={() => setCalculatorMode('raid')} />
       </div>
@@ -722,11 +744,16 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
   }
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto w-full max-w-[1440px] space-y-4 pb-8">
+      {calculatorHeader}
       {modeSwitcher}
+      <div className="border border-[#29313b] bg-[#11171e] px-4 py-3 text-xs leading-5 text-slate-400">
+        <span className="font-bold text-orange-400">{lang === 'ru' ? 'Как пользоваться: ' : 'Quick start: '}</span>
+        {lang === 'ru' ? 'Слева выбери тип взрывчатки, справа добавь нужные стены, двери или объекты. Если считаешь несколько точек, просто увеличивай количество — итог обновится сам.' : 'Choose your explosives on the left, then add the walls, doors or deployables on the right. Increase quantities for multiple targets and the totals update automatically.'}
+      </div>
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
       {/* Weapon Selector */}
-      <div className="xl:col-span-4 bg-[#14171e] p-4 border border-[#2a2f3b] space-y-3 h-fit">
+      <div className="xl:col-span-4 bg-[#11171e] p-4 border border-[#29313b] space-y-3 h-fit">
         <h3 className="text-xs font-bold text-white uppercase flex items-center gap-2">
           <span>⚔️</span> {lang === 'en' ? 'Weapon Selection' : 'Выбор Вооружения'}
         </h3>
@@ -764,7 +791,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
 
       {/* Targets & Calculations */}
       <div className="xl:col-span-8 space-y-4">
-        <div className="bg-[#14171e] p-4 border border-[#2a2f3b] flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div className="bg-[#11171e] p-4 border border-[#29313b] flex flex-col sm:flex-row justify-between items-center gap-3">
           <div className="flex gap-1 bg-[#0c0d10] p-0.5 border border-[#2a2f3b] w-full sm:w-auto">
             {[
               { id: 'walls', label: lang === 'en' ? '🧱 Walls' : '🧱 Стены' },
@@ -1021,7 +1048,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
         )}
 
         {/* Selected Targets Chip Container */}
-        <div className="bg-[#14171e]/90 p-5 rounded-none border border-[#2a2f3b] space-y-4 shadow-xl relative overflow-hidden">
+        <div className="bg-[#11171e] p-5 border border-[#29313b] space-y-4 shadow-xl relative overflow-hidden">
           <div className="rust-bracket-tl" />
           <div className="rust-bracket-tr" />
           <div className="rust-bracket-bl" />
