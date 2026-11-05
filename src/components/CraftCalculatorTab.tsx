@@ -82,18 +82,19 @@ export default function CraftCalculatorTab({ lang, onBackToRaid }: Props) {
   const selectedCount = Object.values(quantities).reduce((a, b) => a + b, 0);
 
   return (
-    <section className="bg-[#14171e] border border-[#2a2f3b] p-4 space-y-4">
+    <section className="space-y-4 border border-[#29313b] bg-[#11171e] p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-sm font-black uppercase tracking-wider text-white">{isRu ? 'Калькулятор изготовления' : 'Craft calculator'}</h3>
-          <p className="text-xs text-gray-500 mt-1">{isRu ? 'Укажи количество предметов — ингредиенты суммируются автоматически.' : 'Set item quantities — ingredients are combined automatically.'}</p>
+          <div className="mb-2 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[.18em] text-orange-500"><Package size={13}/>{isRu ? 'Подготовка ресурсов' : 'Resource planning'}</div>
+          <h2 className="text-xl font-black tracking-tight text-white">{isRu ? 'Калькулятор крафта' : 'Craft calculator'}</h2>
+          <p className="mt-1 max-w-xl text-xs leading-5 text-slate-400">{isRu ? 'Добавь, что собираешься крафтить. Ниже увидишь, сколько серы, угля, металла и остальных ресурсов нужно принести на верстак.' : 'Add the items you want to craft. The list below shows how much sulfur, charcoal, metal and other resources you need.'}</p>
         </div>
-        <button onClick={onBackToRaid} className="inline-flex items-center gap-2 border border-[#3a414e] px-3 py-2 text-xs font-bold text-gray-300 hover:border-orange-500 hover:text-white">
+        <button onClick={onBackToRaid} className="inline-flex min-h-10 items-center justify-center gap-2 border border-[#3a414e] px-3 py-2 text-xs font-bold text-gray-300 transition-colors hover:border-orange-500 hover:text-white">
           <ArrowLeftRight size={14}/>{isRu ? 'К рейд-калькулятору' : 'Raid calculator'}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
         {items.map(item => {
           const qty = quantities[item.id] || 0;
           const name = weaponTranslationMap[item.id]?.[lang] || item.name;
@@ -106,27 +107,27 @@ export default function CraftCalculatorTab({ lang, onBackToRaid }: Props) {
               <div className="text-[10px] text-gray-500">{isRu ? 'Количество к изготовлению' : 'Quantity to craft'}</div>
             </div>
             <div className="flex items-center gap-2">
-              <button aria-label="Decrease" onClick={() => update(item.id, -1)} className="w-7 h-7 border border-[#3a414e] text-gray-300 flex items-center justify-center"><Minus size={13}/></button>
-              <input type="number" min="0" max="99999" value={qty || ''} placeholder="0" onChange={e => setQuantities(p => ({...p, [item.id]: Math.max(0, Math.min(99999, Math.floor(Number(e.target.value) || 0)))}))} className="w-16 bg-[#0c0d10] border border-[#3a414e] text-center text-sm text-white py-1"/>
-              <button aria-label="Increase" onClick={() => update(item.id, 1)} className="w-7 h-7 border border-[#3a414e] text-orange-400 flex items-center justify-center"><Plus size={13}/></button>
+              <button aria-label="Decrease" onClick={() => update(item.id, -1)} className="h-9 w-9 shrink-0 border border-[#3a414e] text-gray-300 transition-colors hover:border-orange-500 hover:text-white"><Minus size={13}/></button>
+              <input type="number" min="0" max="99999" value={qty || ''} placeholder="0" onChange={e => setQuantities(p => ({...p, [item.id]: Math.max(0, Math.min(99999, Math.floor(Number(e.target.value) || 0)))}))} className="h-9 w-16 bg-[#0c0d10] border border-[#3a414e] text-center text-sm text-white py-1 outline-none focus:border-orange-500"/>
+              <button aria-label="Increase" onClick={() => update(item.id, 1)} className="h-9 w-9 shrink-0 border border-[#3a414e] text-orange-400 transition-colors hover:bg-orange-500 hover:text-[#101318]"><Plus size={13}/></button>
             </div>
           </div>;
         })}
       </div>
 
-      <div className="border border-[#3a414e] bg-[#0e1117] p-4 space-y-3">
+      <div className="border border-orange-500/30 bg-[#0c1117] p-4 sm:p-5 space-y-3">
         <div className="flex items-center justify-between gap-2">
           <h4 className="text-xs font-black uppercase tracking-widest text-orange-400 flex items-center gap-2"><Package size={15}/>{isRu ? 'Общий список ресурсов' : 'Combined resource list'}</h4>
           <button onClick={() => setQuantities({})} className="text-[10px] uppercase font-bold text-gray-500 hover:text-white flex items-center gap-1"><RotateCcw size={12}/>{isRu ? 'Сбросить' : 'Reset'}</button>
         </div>
         {selectedCount === 0 ? <p className="text-xs text-gray-500 py-4 text-center">{isRu ? 'Добавь предметы выше, чтобы рассчитать ингредиенты.' : 'Add items above to calculate ingredients.'}</p> :
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            {Object.entries(totals).filter(([,v]) => v > 0).map(([key, value]) => <div key={key} className="bg-[#1b1e26] border border-[#2a2f3b] p-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+            {Object.entries(totals).filter(([,v]) => v > 0).map(([key, value]) => <div key={key} className="bg-[#11171e] border border-[#29313b] p-3">
               <div className="text-[10px] text-gray-500">{labels[key]?.[lang] || key}</div>
               <div className="text-lg font-black text-white tabular-nums">{Math.ceil(value).toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US')}</div>
             </div>)}
           </div>}
-        <p className="text-[10px] text-gray-600">{isRu ? 'Расчёт по рецептам крафта Rust; округление выполняется до целых партий. MLRS и пропановая бомба не включены: они не входят в обычный крафт.' : 'Based on Rust crafting recipes; quantities are rounded up to whole crafting batches. MLRS and propane bomb are excluded because they are not standard craftable items.'}</p>
+        <p className="text-[10px] text-gray-600">{isRu ? 'Считаем по обычным рецептам Rust. Если предмет крафтится партией, калькулятор округляет вверх — лишний ресурс лучше учесть заранее.' : 'Uses standard Rust crafting recipes. Items made in batches are rounded up, so you can bring enough materials.'}</p>
       </div>
     </section>
   );
