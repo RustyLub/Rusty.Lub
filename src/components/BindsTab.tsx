@@ -350,11 +350,9 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
                 { id: 'PVP', label: 'PVP' },
                 { id: 'МЕДИЦИНА', label: lang === 'en' ? 'Medical' : 'Медицина' },
                 { id: 'ФАРМ', label: lang === 'en' ? 'Farming' : 'Фарм' },
-                { id: 'СТРОЙКА', label: lang === 'en' ? 'Building' : 'Стройка' },
                 { id: 'УПРАВЛЕНИЕ', label: lang === 'en' ? 'Controls' : 'Управление' },
                 { id: 'QOL', label: 'QoL' },
-                { id: 'МОДОВЫЕ', label: lang === 'en' ? 'Modded' : 'Модовые' }
-              ]
+                              ]
             : [
                 { id: 'all', label: lang === 'en' ? 'All' : 'Все' },
                 { id: 'ПРАВА', label: lang === 'en' ? 'Perms' : 'Права' },
@@ -394,9 +392,9 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
           </p>
           <p className="text-zinc-400">
             {bindsMode === 'player' ? (
-              lang === 'en' ? 'Click the command button to copy it, open the Rust console (F1), paste (Ctrl+V), and press Enter. Use the bookmark icon to save it to your cabinet.' : 'Нажмите кнопку команды, чтобы скопировать её. Откройте консоль Rust (F1), вставьте команду (Ctrl+V) и нажмите Enter. Значок закладки сохраняет бинд в личный кабинет.'
+              lang === 'en' ? 'Copy the full command, open the Rust console (F1), paste it and press Enter. Run writecfg to save your keybinds to the local config.' : 'Скопируйте полную команду, откройте консоль Rust (F1), вставьте её и нажмите Enter. Выполните writecfg, чтобы сохранить бинды в локальный конфиг.'
             ) : (
-              lang === 'en' ? 'Copy the command and paste it into the Rust server console (F1). Admin commands require the appropriate server permissions; replace placeholders such as <ID> before execution.' : 'Скопируйте команду и вставьте её в консоль сервера Rust (F1). Для выполнения нужны соответствующие права администратора; замените шаблоны вроде <ID> перед запуском.'
+              lang === 'en' ? 'Copy the command into the server console or RCON. Admin commands require the appropriate server permissions; replace placeholders such as <ID> before execution.' : 'Скопируйте команду в серверную консоль или RCON. Для выполнения нужны соответствующие права администратора; замените шаблоны вроде <ID> перед запуском.'
             )}
           </p>
         </div>
@@ -404,7 +402,7 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
 
       {/* Binds Grid */}
       <div className="binds-results-head flex items-center justify-between gap-3">
-        <div><h2>{lang === 'ru' ? 'Библиотека биндов' : 'Bind library'}</h2><p>{lang === 'ru' ? 'Нажмите на команду, чтобы скопировать её в буфер обмена' : 'Select a command to copy it to your clipboard'}</p></div>
+        <div><h2>{lang === 'ru' ? 'Библиотека биндов' : 'Bind library'}</h2><p>{lang === 'ru' ? 'Команда копируется целиком — вместе с кавычками, скобками и разделителями' : 'Commands are copied in full, including quotes, brackets and separators'}</p></div>
         <span>{filteredBinds.length} / {totalBinds}</span>
       </div>
       <div className="binds-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -426,7 +424,10 @@ export default function BindsTab({ onCopy, lang, onOpenConfigExporter, user, onR
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] text-zinc-500 font-mono uppercase">{bindsCategoryMap[bind.category]?.[lang] || bind.category}</span>
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <span className="text-[10px] text-zinc-500 font-mono uppercase">{bindsCategoryMap[bind.category]?.[lang] || bind.category}</span>
+                    {bind.key && <span className="binds-key-chip">{bind.key}</span>}
+                  </div>
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
