@@ -567,6 +567,290 @@ export const bindsDatabase: BindItem[] = [
   }
 ];
 
+export const raidWeapons: RaidWeapon[] = [
+  {
+    id: 'c4',
+    name: 'C4 (Таймерная взрывчатка)',
+    sulfurPer: 2200,
+    charcoalPer: 3000,
+    gpPer: 1000,
+    metalPer: 200,
+    icon: '💣'
+  },
+  {
+    id: 'rocket',
+    name: 'Боевая ракета',
+    sulfurPer: 1400,
+    charcoalPer: 1950,
+    gpPer: 650,
+    metalPer: 150,
+    icon: '🚀'
+  },
+  {
+    id: 'satchel',
+    name: 'Сачель (Сумка со взрывчаткой)',
+    sulfurPer: 480,
+    charcoalPer: 720,
+    gpPer: 240,
+    metalPer: 80,
+    icon: '🎒'
+  },
+  {
+    id: 'explosive_ammo',
+    name: 'Разрывной патрон 5.56 (1 шт)',
+    sulfurPer: 25,
+    charcoalPer: 30,
+    gpPer: 10,
+    metalPer: 5,
+    icon: '⚡'
+  },
+  {
+    id: 'beancan',
+    name: 'Бобовая граната',
+    sulfurPer: 120,
+    charcoalPer: 180,
+    gpPer: 60,
+    metalPer: 20,
+    icon: '🥫'
+  },
+  {
+    id: 'propane',
+    name: 'Пропановая бомба',
+    sulfurPer: 900,
+    charcoalPer: 1350,
+    gpPer: 450,
+    metalPer: 0,
+    icon: '🛢️'
+  },
+  {
+    id: 'mlrs',
+    name: 'Ракета MLRS (Некрафтится)',
+    sulfurPer: 0,
+    charcoalPer: 0,
+    gpPer: 0,
+    metalPer: 0,
+    icon: '🎯'
+  }
+];
+
+export const raidTargets: RaidTarget[] = [
+  // --- WALLS ---
+  {
+    id: 'wood_wall',
+    name: 'Деревянная стена/фундамент',
+    category: 'walls',
+    icon: '🪵',
+    hp: 250,
+    c4: 1,
+    rocket: 2,
+    satchel: 3,
+    explosive_ammo: 49,
+    beancan: 13,
+    propane: 2,
+    mlrs: 1
+  },
+  {
+    id: 'stone_wall',
+    name: 'Каменная стена/фундамент',
+    category: 'walls',
+    icon: '🪨',
+    hp: 500,
+    c4: 2,
+    rocket: 4,
+    satchel: 10,
+    explosive_ammo: 200,
+    beancan: 46,
+    propane: 7,
+    mlrs: 3
+  },
+  {
+    id: 'sheet_wall',
+    name: 'Металлическая стена',
+    category: 'walls',
+    icon: '🔩',
+    hp: 1000,
+    c4: 4,
+    rocket: 8,
+    satchel: 23,
+    explosive_ammo: 400,
+    beancan: 112,
+    propane: 13,
+    mlrs: 6
+  },
+  {
+    id: 'armored_wall',
+    name: 'Бронированная стена (МВК)',
+    category: 'walls',
+    icon: '🛡',
+    hp: 2000,
+    c4: 8,
+    rocket: 15,
+    satchel: 46,
+    explosive_ammo: 800,
+    beancan: 223,
+    propane: 25,
+    mlrs: 12
+  },
+  {
+    id: 'high_stone_wall',
+    name: 'Высокая каменная стена',
+    category: 'walls',
+    icon: '🧱',
+    hp: 500,
+    c4: 2,
+    rocket: 4,
+    satchel: 10,
+    explosive_ammo: 200,
+    beancan: 46,
+    propane: 7,
+    mlrs: 3
+  },
+  {
+    id: 'high_wood_wall',
+    name: 'Высокая деревянная стена',
+    category: 'walls',
+    icon: '🪵',
+    hp: 250,
+    c4: 1,
+    rocket: 2,
+    satchel: 3,
+    explosive_ammo: 49,
+    beancan: 13,
+    propane: 2,
+    mlrs: 1
+  },
+
+  // --- DOORS ---
+  {
+    id: 'wood_door',
+    name: 'Деревянная дверь',
+    category: 'doors',
+    icon: '🚪',
+    hp: 200,
+    c4: 1,
+    rocket: 1,
+    satchel: 2,
+    explosive_ammo: 19,
+    beancan: 6,
+    propane: 1,
+    mlrs: 1
+  },
+  {
+    id: 'sheet_door',
+    name: 'Железная дверь (Листовой металл)',
+    category: 'doors',
+    icon: '🔧',
+    hp: 250,
+    c4: 1,
+    rocket: 2,
+    satchel: 4,
+    explosive_ammo: 63,
+    beancan: 18,
+    propane: 2,
+    mlrs: 1
+  },
+  {
+    id: 'garage_door',
+    name: 'Гаражная дверь',
+    category: 'doors',
+    icon: '🏠',
+    hp: 600,
+    c4: 2,
+    rocket: 3,
+    satchel: 9,
+    explosive_ammo: 150,
+    beancan: 40,
+    propane: 5,
+    mlrs: 3
+  },
+  {
+    id: 'armored_door',
+    name: 'Бронированная дверь (МВК)',
+    category: 'doors',
+    icon: '🔒',
+    hp: 800,
+    c4: 2,
+    rocket: 4,
+    satchel: 12,
+    explosive_ammo: 200,
+    beancan: 56,
+    propane: 8,
+    mlrs: 4
+  },
+  {
+    id: 'armored_hatch',
+    name: 'Armored Hatch (HQM)',
+    category: 'doors',
+    icon: '⬛',
+    hp: 800,
+    c4: 2,
+    rocket: 4,
+    satchel: 12,
+    explosive_ammo: 200,
+    beancan: 56,
+    propane: 8,
+    mlrs: 4
+  },
+
+  // --- DEPLOYABLES ---
+  {
+    id: 'tc',
+    name: 'Шкаф с инструментами (TC)',
+    category: 'deployables',
+    icon: '🗄',
+    hp: 100,
+    c4: 1,
+    rocket: 1,
+    satchel: 1,
+    explosive_ammo: 10,
+    beancan: 3,
+    propane: 1,
+    mlrs: 1
+  },
+  {
+    id: 'auto_turret',
+    name: 'Авто-турель',
+    category: 'deployables',
+    icon: '🤖',
+    hp: 1000,
+    c4: 1,
+    rocket: 3,
+    satchel: 3,
+    explosive_ammo: 40,
+    beancan: 12,
+    propane: 3,
+    mlrs: 2
+  },
+  {
+    id: 'guntrap',
+    name: 'Дробовик-ловушка (Guntrap)',
+    category: 'deployables',
+    icon: '💥',
+    hp: 100,
+    c4: 1,
+    rocket: 1,
+    satchel: 1,
+    explosive_ammo: 10,
+    beancan: 3,
+    propane: 1,
+    mlrs: 1
+  },
+  {
+    id: 'flametrap',
+    name: 'Огнеметная турель',
+    category: 'deployables',
+    icon: '🔥',
+    hp: 150,
+    c4: 1,
+    rocket: 1,
+    satchel: 1,
+    explosive_ammo: 15,
+    beancan: 4,
+    propane: 1,
+    mlrs: 1
+  }
+];
+
 export const adminBindsDatabase: BindItem[] = [
   {
     category: 'АДМИН',
