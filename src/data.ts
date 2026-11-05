@@ -467,14 +467,6 @@ export const bindsDatabase: BindItem[] = [
     desc: 'Непрерывная атака',
     explanation: 'Запускает непрерывное действие основной атаки. Остановить его можно обычным нажатием атаки.'
   },
-  {
-    category: 'УПРАВЛЕНИЕ',
-    cmd: 'bind [rightshift+f11] attack;duck',
-    key: 'RIGHT SHIFT + F11',
-    desc: 'Атака с приседанием',
-    explanation: 'Запускает основную атаку и приседание одной комбинацией.'
-  },
-
   // --- PVP ---
   {
     category: 'PVP',
