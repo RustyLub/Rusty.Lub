@@ -82,6 +82,15 @@ export default function GuidesHubTab({ lang, onNavigate }: GuidesHubTabProps) {
       detail: ru ? 'Расписание' : 'Schedule'
     },
     {
+      id: 'raid',
+      category: 'gameplay' as const,
+      icon: Crosshair,
+      code: '08',
+      title: ru ? 'Рейд и взрывчатка' : 'Raiding & explosives',
+      desc: ru ? 'Подсчёт C4, ракет, сатчелей и патронов перед выходом на рейд.' : 'Plan C4, rockets, satchels and explosive ammo before a raid.',
+      detail: ru ? 'Калькулятор' : 'Calculator'
+    },
+    {
       id: 'faq',
       category: 'gameplay' as const,
       icon: GraduationCap,
@@ -115,8 +124,8 @@ export default function GuidesHubTab({ lang, onNavigate }: GuidesHubTabProps) {
             <div className="mb-2 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[.2em] text-orange-500">
               <span>// RUSTY.LUB KNOWLEDGE</span><span className="text-slate-500">·</span><span className="text-slate-400">{ru ? 'БАЗА ЗНАНИЙ' : 'FIELD MANUAL'}</span>
             </div>
-            <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">{ru ? 'Гайды и справочники' : 'Guides & reference'}</h1>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400">{ru ? 'Практичные инструкции по настройке, бою и механикам Rust. Выбери тему и переходи сразу к делу.' : 'Practical guides to Rust settings, combat and game mechanics. Pick a topic and get straight to it.'}</p>
+            <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">{ru ? 'База знаний Rust' : 'Rust knowledge base'}</h1>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400">{ru ? 'Собрали полезные вещи по игре в одном месте: от первых часов и стройки до рейдов, монументов и настроек. Без длинных вступлений — только то, что пригодится на сервере.' : 'A practical collection for Rust: from your first hours and base building to raids, monuments and settings. No long intros — just useful stuff.'}</p>
           </div>
           <div className="flex items-center gap-3 border-l border-slate-700/70 pl-4">
             <div className="text-right">
