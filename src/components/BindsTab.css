@@ -92,3 +92,8 @@ body.light-theme .binds-modal-card input{background:#fff!important;color:#1c2934
 .binds-command>span{align-self:center}
 @media(max-width:520px){.binds-command{gap:7px}.binds-command>span{font-size:0}.binds-command>span svg{width:16px;height:16px}}
 body.light-theme .binds-key-chip{background:rgba(249,115,22,.08);color:#a94c1d;border-color:rgba(190,105,48,.3)}
+
+.binds-modebar>div:first-child{display:flex;flex-wrap:wrap;gap:6px}
+.binds-modebar>div:first-child button{border:1px solid transparent;border-radius:2px}
+.binds-modebar>div:first-child button[class*="text-[#f97316]"]{background:rgba(249,115,22,.09)}
+@media(max-width:760px){.binds-modebar>div:first-child{width:100%;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}.binds-modebar>div:first-child button{flex:0 0 auto}}
