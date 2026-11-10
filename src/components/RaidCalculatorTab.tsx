@@ -696,10 +696,15 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
     }
   });
 
-  const totalSulfur = totalWeaponsNeeded * selectedWeapon.sulfurPer;
-  const totalCharcoal = totalWeaponsNeeded * selectedWeapon.charcoalPer;
-  const totalGP = totalWeaponsNeeded * selectedWeapon.gpPer;
-  const totalMetal = totalWeaponsNeeded * selectedWeapon.metalPer;
+  // Explosive 5.56 crafts in batches of two. Round the required ammo up to a complete batch,
+  // otherwise odd quantities would understate the real materials needed.
+  const costedWeaponUnits = selectedWeaponId === 'explosive_ammo'
+    ? Math.ceil(totalWeaponsNeeded / 2) * 2
+    : totalWeaponsNeeded;
+  const totalSulfur = costedWeaponUnits * selectedWeapon.sulfurPer;
+  const totalCharcoal = costedWeaponUnits * selectedWeapon.charcoalPer;
+  const totalGP = costedWeaponUnits * selectedWeapon.gpPer;
+  const totalMetal = costedWeaponUnits * selectedWeapon.metalPer;
 
   const calculatorHeader = (
     <header className="relative overflow-hidden border border-[#29313b] bg-[#11171e] px-5 py-5 sm:px-7 sm:py-6">
@@ -931,7 +936,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                         </span>
                         <div className="flex items-center justify-center gap-1.5 mt-1 text-xs font-black">
                           <WeaponIcon id={selectedWeaponId} size={14} />
-                          <span className="text-[#f97316]">{singleTargetWeaponNeed}</span>
+                          <span className="text-[#f97316]">{singleTargetWeaponNeed > 0 ? singleTargetWeaponNeed : '—'}</span>
                           <span className="text-gray-500 text-[10px]">x</span>
                           <span className="text-gray-300">{qty || 1}</span>
                           {qty > 0 && (
@@ -1249,8 +1254,8 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                   <Info size={14} className="text-[#f97316] flex-shrink-0 mt-0.5" />
                   <span>
                     {lang === 'en' 
-                      ? 'All calculations are based on the official Rust Wiki for 2026. Data includes raw crafting costs only, excluding workbenches and blueprints.'
-                      : 'Все расчеты основаны на официальном справочнике Rust Wiki за 2026 год. Данные включают в себя только чистые затраты сырья без учета верстаков и рецептов.'
+                      ? 'Counts are for full-health targets and the hard side. Unsupported explosive/target combinations are shown as a dash. Resource totals use Rust recipes; explosive ammo is rounded up to full two-round craft batches.'
+                      : 'Количество указано для объекта с полным HP и жёсткой стороны. Для неподтверждённых сочетаний цели и взрывчатки показан прочерк. Разрывные патроны округляются до полной партии по 2 штуки.'
                     }
                   </span>
                 </div>

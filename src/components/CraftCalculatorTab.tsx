@@ -12,8 +12,12 @@ const recipes: Record<string, { yields: number; ingredients: ResourceMap }> = {
   c4: { yields: 1, ingredients: { explosives: 20, cloth: 5, techTrash: 2 } },
   rocket: { yields: 1, ingredients: { explosives: 10, gunpowder: 150, metal: 50, pipes: 2 } },
   satchel: { yields: 1, ingredients: { beancan: 4, stash: 1, rope: 1 } },
-  explosive_ammo: { yields: 2, ingredients: { gunpowder: 10, sulfur: 5, metal: 10 } },
-  beancan: { yields: 1, ingredients: { gunpowder: 60, sulfur: 10, metal: 20 } }
+  explosive_ammo: { yields: 2, ingredients: { gunpowder: 20, sulfur: 10, metal: 10 } },
+  beancan: { yields: 1, ingredients: { gunpowder: 60, metal: 20 } },
+  f1_grenade: { yields: 1, ingredients: { gunpowder: 30, metal: 25 } },
+  landmine: { yields: 1, ingredients: { gunpowder: 30, metal: 50 } },
+  molotov: { yields: 1, ingredients: { lowgrade: 50, cloth: 10 } },
+  hv_rocket: { yields: 3, ingredients: { gunpowder: 10, metal: 10 } }
 };
 
 const labels: Record<string, { ru: string; en: string }> = {
@@ -31,7 +35,18 @@ const labels: Record<string, { ru: string; en: string }> = {
   lowgrade: { ru: 'Топливо низкого качества', en: 'Low grade fuel' }
 };
 
-const craftableIds = ['c4', 'rocket', 'satchel', 'explosive_ammo', 'beancan'];
+const craftableIds = ['c4', 'rocket', 'satchel', 'explosive_ammo', 'beancan', 'f1_grenade', 'landmine', 'molotov', 'hv_rocket'];
+
+const extraCraftItems = [
+  { id: 'f1_grenade', name: 'F1 Grenade' },
+  { id: 'landmine', name: 'Homemade Landmine' },
+  { id: 'molotov', name: 'Molotov Cocktail' },
+  { id: 'hv_rocket', name: 'High Velocity Rocket' }
+];
+
+const craftEmoji: Record<string, string> = {
+  f1_grenade: '💣', landmine: '🧨', molotov: '🍾', hv_rocket: '🚀'
+};
 
 export default function CraftCalculatorTab({ lang, onBackToRaid }: Props) {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -71,14 +86,15 @@ export default function CraftCalculatorTab({ lang, onBackToRaid }: Props) {
     }
     const totalGunpowder = result.gunpowder || 0;
     if (totalGunpowder) {
-      add('sulfur', totalGunpowder);
-      add('charcoal', totalGunpowder * 2);
+      // Rust gunpowder recipe: 10 GP = 20 sulfur + 30 charcoal.
+      add('sulfur', totalGunpowder * 2);
+      add('charcoal', totalGunpowder * 3);
       delete result.gunpowder;
     }
     return result;
   }, [quantities]);
 
-  const items = raidWeapons.filter(w => craftableIds.includes(w.id));
+  const items = [...raidWeapons.filter(w => craftableIds.includes(w.id)), ...extraCraftItems];
   const selectedCount = Object.values(quantities).reduce((a, b) => a + b, 0);
 
   return (
@@ -100,7 +116,7 @@ export default function CraftCalculatorTab({ lang, onBackToRaid }: Props) {
           const name = weaponTranslationMap[item.id]?.[lang] || item.name;
           return <div key={item.id} className={`flex items-center gap-3 border p-3 ${qty ? 'border-orange-500/60 bg-orange-500/5' : 'border-[#2a2f3b] bg-[#1b1e26]'}`}>
             <div className="w-10 h-10 shrink-0 flex items-center justify-center bg-[#101319]">
-              <ItemImageOrFallback id={item.id} lang={lang} size={30}/>
+              {craftEmoji[item.id] ? <span className="text-2xl" aria-hidden="true">{craftEmoji[item.id]}</span> : <ItemImageOrFallback id={item.id} lang={lang} size={30}/>}
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-xs font-bold text-white">{name}</div>
@@ -127,7 +143,7 @@ export default function CraftCalculatorTab({ lang, onBackToRaid }: Props) {
               <div className="text-lg font-black text-white tabular-nums">{Math.ceil(value).toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US')}</div>
             </div>)}
           </div>}
-        <p className="text-[10px] text-gray-600">{isRu ? 'Считаем по обычным рецептам Rust. Если предмет крафтится партией, калькулятор округляет вверх — лишний ресурс лучше учесть заранее.' : 'Uses standard Rust crafting recipes. Items made in batches are rounded up, so you can bring enough materials.'}</p>
+        <p className="text-[10px] text-gray-600">{isRu ? 'Расчёт по рецептам Rust: 10 пороха требуют 20 серы и 30 угля. Партии округляются вверх. Пропановая бомба и ракета MLRS не крафтятся — их можно только найти.' : 'Uses current Rust recipes. Batch crafting is rounded up; gunpowder is expanded at 20 sulfur and 30 charcoal per 10 GP. Propane bombs and MLRS rockets are loot-only.'}</p>
       </div>
     </section>
   );
