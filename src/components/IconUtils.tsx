@@ -193,15 +193,16 @@ export const getRustLabsIconUrls = (id: string): string[] => {
   const targetId = ID_ALIASES[id] || id;
   const urls: string[] = [];
 
+  // Official Facepunch inventory PNGs are preferred over third-party mirrors or cached images.
+  urls.push(`https://files.facepunch.com/rust/item/${targetId}_512.png`);
+
+
   // Check if saved in localStorage
   const cache = getIconCache();
   const cachedUrl = cache[id] || cache[targetId];
   if (cachedUrl) {
     urls.push(cachedUrl);
   }
-
-  // Official Facepunch item art (the same inventory PNGs used by Rust).
-  urls.push(`https://files.facepunch.com/rust/item/${targetId}_512.png`);
 
   // 1. Direct verified mapping from comprehensive dictionary
   const mappedFandom = (fandomIcons as Record<string, string>)[id] || (fandomIcons as Record<string, string>)[targetId];
