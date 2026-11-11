@@ -2289,6 +2289,27 @@ export default function App() {
             </motion.div>
           )}
 
+          {activeTab === 'mixing' && (
+            <motion.div
+              key="mixing"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <MixingTableTab
+                lang={lang}
+                onToast={(msg, type) => {
+                  const id = Math.random().toString(36).substring(2, 9);
+                  setToasts(prev => [...prev, { id, message: msg, type }]);
+                  setTimeout(() => {
+                    setToasts(prev => prev.filter(t => t.id !== id));
+                  }, 3000);
+                }}
+              />
+            </motion.div>
+          )}
+
           {activeTab === 'clan' && (
             <motion.div
               key="clan"
