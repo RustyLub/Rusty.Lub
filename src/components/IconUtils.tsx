@@ -5,6 +5,12 @@ import fandomIcons from './fandom_icons.json';
 const localImages = import.meta.glob<{ default: string }>('../assets/images/*.(webp|png|jpg|jpeg|svg)', { eager: true });
 
 const ID_ALIASES: Record<string, string> = {
+  // Craft calculator: exact Rust inventory shortnames for official item artwork.
+  f1_grenade: 'grenade.f1',
+  molotov: 'grenade.molotov',
+  hv_rocket: 'ammo.rocket.hv',
+  landmine: 'trap.landmine',
+
   // Raid calculator: actual Rust item shortnames (no illustrative SVG substitutes)
   explosive_ammo: 'ammo.rifle.explosive',
   beancan: 'grenade.beancan',
