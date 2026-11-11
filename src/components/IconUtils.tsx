@@ -29,6 +29,12 @@ const ID_ALIASES: Record<string, string> = {
   strengthened_glass_window: 'wall.window.glass.reinforced',
   metal_embrasure: 'shutter.metal.embrasure.a',
   chain_link_fence: 'wall.frame.fence',
+  chain_link_gate: 'wall.frame.fence.gate',
+  prison_cell_wall: 'wall.frame.cell',
+  prison_cell_gate: 'wall.frame.cell.gate',
+  triangle_ladder_hatch: 'floor.triangle.ladder.hatch',
+  armored_triangle_ladder_hatch: 'floor.triangle.ladder.hatch.toptier',
+
   wood_door: 'door.hinged.wood',
   double_wood_door: 'door.double.hinged.wood',
   sheet_door: 'door.hinged.metal',
