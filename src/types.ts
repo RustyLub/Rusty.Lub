@@ -47,6 +47,8 @@ export interface RaidWeapon {
   gpPer: number;
   metalPer: number;
   icon: string;
+  extraCosts?: { id: string; amount: number; nameRu: string; nameEn: string }[];
+  craftable?: boolean;
 }
 
 export interface WeaponStat {
