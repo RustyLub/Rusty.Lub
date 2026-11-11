@@ -401,7 +401,12 @@ export const raidWeapons: RaidWeapon[] = [
     charcoalPer: 3000,
     gpPer: 1000,
     metalPer: 200,
-    icon: '💣'
+    icon: '💣',
+    extraCosts: [
+      { id: 'lowgradefuel', amount: 60, nameRu: 'Топливо низкого качества', nameEn: 'Low Grade Fuel' },
+      { id: 'cloth', amount: 5, nameRu: 'Ткань', nameEn: 'Cloth' },
+      { id: 'techtrash', amount: 2, nameRu: 'Техно-мусор', nameEn: 'Tech Trash' }
+    ]
   },
   {
     id: 'rocket',
@@ -410,7 +415,11 @@ export const raidWeapons: RaidWeapon[] = [
     charcoalPer: 1950,
     gpPer: 650,
     metalPer: 100,
-    icon: '🚀'
+    icon: '🚀',
+    extraCosts: [
+      { id: 'lowgradefuel', amount: 30, nameRu: 'Топливо низкого качества', nameEn: 'Low Grade Fuel' },
+      { id: 'metalpipe', amount: 2, nameRu: 'Металлические трубы', nameEn: 'Metal Pipes' }
+    ]
   },
   {
     id: 'satchel',
@@ -419,7 +428,11 @@ export const raidWeapons: RaidWeapon[] = [
     charcoalPer: 720,
     gpPer: 240,
     metalPer: 80,
-    icon: '🎒'
+    icon: '🎒',
+    extraCosts: [
+      { id: 'cloth', amount: 10, nameRu: 'Ткань', nameEn: 'Cloth' },
+      { id: 'rope', amount: 1, nameRu: 'Верёвка', nameEn: 'Rope' }
+    ]
   },
   {
     id: 'explosive_ammo',
@@ -446,7 +459,11 @@ export const raidWeapons: RaidWeapon[] = [
     charcoalPer: 1350,
     gpPer: 450,
     metalPer: 0,
-    icon: '🛢️'
+    icon: '🛢️',
+    extraCosts: [
+      { id: 'lowgradefuel', amount: 20, nameRu: 'Топливо низкого качества', nameEn: 'Low Grade Fuel' },
+      { id: 'propanetank', amount: 1, nameRu: 'Пустой пропановый баллон', nameEn: 'Empty Propane Tank' }
+    ]
   },
   {
     id: 'mlrs',
@@ -455,7 +472,8 @@ export const raidWeapons: RaidWeapon[] = [
     charcoalPer: 0,
     gpPer: 0,
     metalPer: 0,
-    icon: '🎯'
+    icon: '🎯',
+    craftable: false
   }
 ];
 
@@ -475,11 +493,13 @@ export const raidTargets: RaidTarget[] = [
   { id: 'stone_gate', name: 'Каменные внешние ворота', category: 'walls', icon: '🚧', hp: 500, c4: 2, rocket: 4, satchel: 10, explosive_ammo: 185, beancan: 46, propane: 7, mlrs: 3 },
   { id: 'wood_window_bars', name: 'Деревянная оконная решётка', category: 'walls', icon: '🪟', hp: 250, c4: 1, rocket: 2, satchel: 3, explosive_ammo: 42, beancan: 13, propane: 2, mlrs: 1 },
   { id: 'sheet_window_bars', name: 'Металлическая оконная решётка', category: 'walls', icon: '🪟', hp: 500, c4: 2, rocket: 4, satchel: 12, explosive_ammo: 200, beancan: 56, propane: 7, mlrs: 3 },
-  { id: 'armored_window_bars', name: 'Бронированная оконная решётка', category: 'walls', icon: '🪟', hp: 750, c4: 2, rocket: 6, satchel: 18, explosive_ammo: 300, beancan: 84, propane: 7, mlrs: 4 },
   { id: 'reinforced_glass_window', name: 'Укреплённое стеклянное окно', category: 'walls', icon: '🪟', hp: 500, c4: 2, rocket: 4, satchel: 12, explosive_ammo: 200, beancan: 56, propane: 7, mlrs: 3 },
   { id: 'strengthened_glass_window', name: 'Усиленное стеклянное окно', category: 'walls', icon: '🪟', hp: 350, c4: 2, rocket: 3, satchel: 9, explosive_ammo: 140, beancan: 0, propane: 0, mlrs: 0 },
   { id: 'metal_embrasure', name: 'Металлическая бойница', category: 'walls', icon: '🪟', hp: 500, c4: 2, rocket: 4, satchel: 13, explosive_ammo: 173, beancan: 0, propane: 0, mlrs: 0 },
   { id: 'chain_link_fence', name: 'Сетчатое ограждение', category: 'walls', icon: '🚧', hp: 100, c4: 1, rocket: 1, satchel: 2, explosive_ammo: 20, beancan: 0, propane: 0, mlrs: 0 },
+  { id: 'chain_link_gate', name: 'Ворота сетчатого ограждения', category: 'walls', icon: '🚧', hp: 75, c4: 0, rocket: 0, satchel: 0, explosive_ammo: 15, beancan: 0, propane: 0, mlrs: 0 },
+  { id: 'prison_cell_wall', name: 'Стена тюремной камеры', category: 'walls', icon: '▥', hp: 300, c4: 1, rocket: 2, satchel: 5, explosive_ammo: 75, beancan: 21, propane: 2, mlrs: 2 },
+  { id: 'prison_cell_gate', name: 'Ворота тюремной камеры', category: 'walls', icon: '▥', hp: 300, c4: 1, rocket: 2, satchel: 5, explosive_ammo: 75, beancan: 21, propane: 2, mlrs: 2 },
   { id: 'wood_door', name: 'Деревянная дверь', category: 'doors', icon: '🚪', hp: 200, c4: 1, rocket: 1, satchel: 2, explosive_ammo: 19, beancan: 6, propane: 1, mlrs: 1 },
   { id: 'double_wood_door', name: 'Двойная деревянная дверь', category: 'doors', icon: '🚪', hp: 200, c4: 1, rocket: 1, satchel: 2, explosive_ammo: 19, beancan: 6, propane: 1, mlrs: 1 },
   { id: 'sheet_door', name: 'Железная дверь (листовой металл)', category: 'doors', icon: '🔧', hp: 250, c4: 1, rocket: 2, satchel: 4, explosive_ammo: 63, beancan: 18, propane: 2, mlrs: 1 },
@@ -487,8 +507,10 @@ export const raidTargets: RaidTarget[] = [
   { id: 'garage_door', name: 'Гаражная дверь', category: 'doors', icon: '🏠', hp: 600, c4: 2, rocket: 3, satchel: 9, explosive_ammo: 150, beancan: 42, propane: 5, mlrs: 3 },
   { id: 'armored_door', name: 'Бронированная дверь (МВК)', category: 'doors', icon: '🔒', hp: 1000, c4: 3, rocket: 4, satchel: 15, explosive_ammo: 250, beancan: 69, propane: 15, mlrs: 2 },
   { id: 'double_armored_door', name: 'Двойная бронированная дверь', category: 'doors', icon: '🔒', hp: 1000, c4: 3, rocket: 4, satchel: 15, explosive_ammo: 250, beancan: 69, propane: 15, mlrs: 2 },
-  { id: 'armored_hatch', name: 'Бронированный люк', category: 'doors', icon: '⬛', hp: 1000, c4: 3, rocket: 5, satchel: 15, explosive_ammo: 250, beancan: 69, propane: 15, mlrs: 2 },
+  { id: 'armored_hatch', name: 'Бронированный люк с лестницей', category: 'doors', icon: '⬛', hp: 1000, c4: 3, rocket: 5, satchel: 15, explosive_ammo: 250, beancan: 69, propane: 15, mlrs: 2 },
   { id: 'ladder_hatch', name: 'Люк с лестницей', category: 'doors', icon: '🪜', hp: 250, c4: 1, rocket: 2, satchel: 4, explosive_ammo: 63, beancan: 18, propane: 2, mlrs: 1 },
+  { id: 'triangle_ladder_hatch', name: 'Треугольный люк с лестницей', category: 'doors', icon: '🪜', hp: 250, c4: 1, rocket: 2, satchel: 4, explosive_ammo: 63, beancan: 18, propane: 2, mlrs: 1 },
+  { id: 'armored_triangle_ladder_hatch', name: 'Бронированный треугольный люк с лестницей', category: 'doors', icon: '🪜', hp: 1000, c4: 3, rocket: 5, satchel: 15, explosive_ammo: 250, beancan: 69, propane: 15, mlrs: 2 },
   { id: 'tc', name: 'Шкаф с инструментами (TC)', category: 'deployables', icon: '🗄️', hp: 100, c4: 1, rocket: 1, satchel: 1, explosive_ammo: 10, beancan: 4, propane: 1, mlrs: 1 },
   { id: 'auto_turret', name: 'Автоматическая турель', category: 'deployables', icon: '🤖', hp: 1000, c4: 1, rocket: 4, satchel: 2, explosive_ammo: 112, beancan: 16, propane: 6, mlrs: 2 },
   { id: 'guntrap', name: 'Дробовик-ловушка (Guntrap)', category: 'deployables', icon: '💥', hp: 100, c4: 1, rocket: 1, satchel: 1, explosive_ammo: 34, beancan: 7, propane: 1, mlrs: 1 },
