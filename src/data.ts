@@ -430,6 +430,7 @@ export const raidWeapons: RaidWeapon[] = [
     metalPer: 80,
     icon: '🎒',
     extraCosts: [
+      { id: 'wood', amount: 10, nameRu: 'Дерево', nameEn: 'Wood' },
       { id: 'cloth', amount: 10, nameRu: 'Ткань', nameEn: 'Cloth' },
       { id: 'rope', amount: 1, nameRu: 'Верёвка', nameEn: 'Rope' }
     ]
