@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { raidWeapons, raidTargets } from '../data';
 import { RaidWeapon, RaidTarget } from '../types';
-import fandomIcons from './fandom_icons.json';
 import { ItemImageOrFallback } from './IconUtils';
 import { db, collection, addDoc } from '../firebase';
 import { 
@@ -547,34 +546,7 @@ interface RaidCalculatorTabProps {
 }
 
 
-// Gorgeous custom icon mappers with tailored theme classes and subtle dropshadow glows
-const weaponSvgMap: Record<string, React.FC<{ size?: number }>> = {
-  'c4': C4WeaponSVG,
-  'rocket': RocketWeaponSVG,
-  'satchel': SatchelWeaponSVG,
-  'explosive_ammo': ExplosiveAmmoWeaponSVG,
-  'beancan': BeancanWeaponSVG,
-  'propane': PropaneWeaponSVG,
-  'mlrs': MLRSWeaponSVG,
-};
-
-const targetSvgMap: Record<string, React.FC<{ size?: number }>> = {
-  'wood_wall': WoodWallSVG,
-  'stone_wall': StoneWallSVG,
-  'sheet_wall': SheetWallSVG,
-  'armored_wall': ArmoredWallSVG,
-  'high_stone_wall': HighStoneWallSVG,
-  'high_wood_wall': HighWoodWallSVG,
-  'wood_door': WoodDoorSVG,
-  'sheet_door': SheetDoorSVG,
-  'garage_door': GarageDoorSVG,
-  'armored_door': ArmoredDoorSVG,
-  'tc': TCSvg,
-  'auto_turret': AutoTurretSVG,
-  'guntrap': GuntrapSVG,
-  'flametrap': FlametrapSVG,
-};
-
+// Use the original Rust item/building icons resolved by their real shortnames.
 export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }: RaidCalculatorTabProps) {
   const [calculatorMode, setCalculatorMode] = useState<'raid' | 'craft'>('raid');
   const [selectedWeaponId, setSelectedWeaponId] = useState<RaidWeapon['id']>('c4');
@@ -586,17 +558,13 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
 
 
   const WeaponIcon = ({ id, size = 20 }: { id: string; size?: number }) => {
-    const Svg = weaponSvgMap[id] || C4WeaponSVG;
-    return (
-      <ItemImageOrFallback id={id} lang={lang} fallback={Svg} size={size} />
-    );
+    const weapon = raidWeapons.find((item) => item.id === id);
+    return <ItemImageOrFallback id={id} lang={lang} size={size} icon={weapon?.icon} />;
   };
 
   const TargetIcon = ({ id, size = 24 }: { id: string; size?: number }) => {
-    const Svg = targetSvgMap[id] || WoodWallSVG;
-    return (
-      <ItemImageOrFallback id={id} lang={lang} fallback={Svg} size={size} />
-    );
+    const target = raidTargets.find((item) => item.id === id);
+    return <ItemImageOrFallback id={id} lang={lang} size={size} icon={target?.icon} />;
   };
 
   const selectedWeapon = raidWeapons.find((w) => w.id === selectedWeaponId)!;
@@ -843,7 +811,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                   hp: 250,
                   costRU: '200 Дерева',
                   costEN: '200 Wood',
-                  svg: <WoodWallSVG size={48} />,
+                  
                   bgColor: 'border-[#854d0e]/30 bg-[#854d0e]/5 hover:bg-[#854d0e]/10'
                 },
                 {
@@ -853,7 +821,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                   hp: 500,
                   costRU: '300 Камня',
                   costEN: '300 Stone',
-                  svg: <StoneWallSVG size={48} />,
+                  
                   bgColor: 'border-[#4b5563]/30 bg-[#4b5563]/5 hover:bg-[#4b5563]/10'
                 },
                 {
@@ -863,7 +831,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                   hp: 1000,
                   costRU: '200 Фрагментов',
                   costEN: '200 Metal Frags',
-                  svg: <SheetWallSVG size={48} />,
+                  
                   bgColor: 'border-[#334155]/30 bg-[#334155]/5 hover:bg-[#334155]/10'
                 },
                 {
@@ -873,7 +841,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                   hp: 2000,
                   costRU: '25 МВК (HQM)',
                   costEN: '25 HQM',
-                  svg: <ArmoredWallSVG size={48} />,
+                  
                   bgColor: 'border-[#ca8a04]/30 bg-[#ca8a04]/5 hover:bg-[#ca8a04]/10'
                 }
               ].map((wall) => {
@@ -903,7 +871,7 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                       <div className="text-center space-y-2">
                         <div className="mx-auto w-16 h-16 flex items-center justify-center bg-[#0c0d10] border border-[#2a2f3b] rounded-none shadow-inner relative">
                           <div className="absolute top-0.5 left-0.5 w-0.5 h-0.5 bg-gray-500/50" />
-                          {wall.svg}
+                          <TargetIcon id={wall.id} size={48} />
                         </div>
                         <div>
                           <h4 className="text-xs font-black tracking-wider text-white uppercase font-sans">
