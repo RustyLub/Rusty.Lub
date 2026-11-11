@@ -24,7 +24,6 @@ const ID_ALIASES: Record<string, string> = {
   stone_gate: 'gates.external.high.stone',
   wood_window_bars: 'wall.window.bars.wood',
   sheet_window_bars: 'wall.window.bars.metal',
-  armored_window_bars: 'wall.window.bars.toptier',
   reinforced_glass_window: 'wall.window.bars.toptier',
   strengthened_glass_window: 'wall.window.glass.reinforced',
   metal_embrasure: 'shutter.metal.embrasure.a',
