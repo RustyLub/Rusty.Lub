@@ -6,9 +6,6 @@ const localImages = import.meta.glob<{ default: string }>('../assets/images/*.(w
 
 const ID_ALIASES: Record<string, string> = {
   // Raid calculator: actual Rust item shortnames (no illustrative SVG substitutes)
-  c4: 'explosive.timed',
-  rocket: 'ammo.rocket.basic',
-  satchel: 'explosive.satchel',
   explosive_ammo: 'ammo.rifle.explosive',
   beancan: 'grenade.beancan',
   propane: 'catapult.ammo.explosive',
@@ -41,7 +38,6 @@ const ID_ALIASES: Record<string, string> = {
   double_armored_door: 'door.double.hinged.toptier',
   armored_hatch: 'floor.ladder.hatch.toptier',
   ladder_hatch: 'floor.ladder.hatch',
-  tc: 'cupboard.tool',
   auto_turret: 'autoturret',
   guntrap: 'guntrap',
   flametrap: 'flameturret',
@@ -197,6 +193,9 @@ export const getRustLabsIconUrls = (id: string): string[] => {
   if (cachedUrl) {
     urls.push(cachedUrl);
   }
+
+  // Official Facepunch item art (the same inventory PNGs used by Rust).
+  urls.push(`https://files.facepunch.com/rust/item/${targetId}_512.png`);
 
   // 1. Direct verified mapping from comprehensive dictionary
   const mappedFandom = (fandomIcons as Record<string, string>)[id] || (fandomIcons as Record<string, string>)[targetId];
