@@ -985,9 +985,9 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                         </h4>
                         <span className="inline-block text-[10px] text-gray-500 font-sans mt-1">
                           {lang === 'en' ? (
-                            <>HP: {target.hp} | Need: <strong className="text-[#f97316] font-mono font-bold text-xs">{singleTargetWeaponNeed}</strong> pcs.</>
+                            <>HP: {target.hp} | Need: <strong className="text-[#f97316] font-mono font-bold text-xs">{singleTargetWeaponNeed > 0 ? singleTargetWeaponNeed : '—'}</strong> pcs.</>
                           ) : (
-                            <>HP: {target.hp} | Надо: <strong className="text-[#f97316] font-mono font-bold text-xs">{singleTargetWeaponNeed}</strong> шт.</>
+                            <>HP: {target.hp} | Надо: <strong className="text-[#f97316] font-mono font-bold text-xs">{singleTargetWeaponNeed > 0 ? singleTargetWeaponNeed : '—'}</strong> шт.</>
                           )}
                         </span>
                       </div>
@@ -1134,6 +1134,25 @@ export default function RaidCalculatorTab({ lang, user, onRequireAuth, onToast }
                       </span>
                     </div>
                   </div>
+                  {selectedWeapon.extraCosts && selectedWeapon.extraCosts.length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {selectedWeapon.extraCosts.map((cost) => (
+                        <div key={cost.id} className="bg-[#1b1e26] p-3 border border-[#2a2f3b] flex flex-col justify-between">
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider font-mono">
+                            {lang === 'en' ? cost.nameEn : cost.nameRu}
+                          </span>
+                          <span className="text-sm font-black text-slate-200 font-mono mt-1">
+                            {(cost.amount * costedWeaponUnits).toLocaleString()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {selectedWeapon.craftable === false && (
+                    <p className="text-[10px] text-amber-400">
+                      {lang === 'en' ? 'Loot-only item: no crafting recipe.' : 'Предмет не крафтится — добывается из игрового события/лут-таблицы.'}
+                    </p>
+                  )}
                 </div>
 
                 {/* Save Raid Action Bar */}
