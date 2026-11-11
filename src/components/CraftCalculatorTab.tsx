@@ -44,10 +44,6 @@ const extraCraftItems = [
   { id: 'hv_rocket', name: 'High Velocity Rocket' }
 ];
 
-const craftEmoji: Record<string, string> = {
-  f1_grenade: '💣', landmine: '🧨', molotov: '🍾', hv_rocket: '🚀'
-};
-
 export default function CraftCalculatorTab({ lang, onBackToRaid }: Props) {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const isRu = lang === 'ru';
@@ -116,7 +112,7 @@ export default function CraftCalculatorTab({ lang, onBackToRaid }: Props) {
           const name = weaponTranslationMap[item.id]?.[lang] || item.name;
           return <div key={item.id} className={`flex items-center gap-3 border p-3 ${qty ? 'border-orange-500/60 bg-orange-500/5' : 'border-[#2a2f3b] bg-[#1b1e26]'}`}>
             <div className="w-10 h-10 shrink-0 flex items-center justify-center bg-[#101319]">
-              {craftEmoji[item.id] ? <span className="text-2xl" aria-hidden="true">{craftEmoji[item.id]}</span> : <ItemImageOrFallback id={item.id} lang={lang} size={30}/>}
+              <ItemImageOrFallback id={item.id} lang={lang} size={30}/>
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-xs font-bold text-white">{name}</div>
