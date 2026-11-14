@@ -92,3 +92,46 @@ body:not(.light-theme) main [class*="rounded-md"][class*="border"] {
 body.light-theme:not(.industrial-home) {
   background-image: none !important;
 }
+
+
+/* Explicit homepage widget surface. The previous inner fills masked the card surface. */
+.industrial-home .rl-widget-surface {
+  position: relative;
+  isolation: isolate;
+  background-color: #141c24 !important;
+  background-image:
+    radial-gradient(ellipse at 92% 0%, rgba(242,138,36,.16), transparent 42%),
+    linear-gradient(135deg, rgba(255,255,255,.045), transparent 42%),
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(190,205,220,.025) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(190,205,220,.025) 31px 32px),
+    linear-gradient(145deg, #18232d 0%, #121a22 58%, #0d131a 100%) !important;
+  border-color: rgba(148,163,184,.28) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055), 0 10px 28px rgba(0,0,0,.24) !important;
+}
+
+.industrial-home .rl-widget-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 0 68%, rgba(242,138,36,.055) 68.2%, transparent 68.8%),
+    radial-gradient(ellipse at 0% 100%, rgba(255,255,255,.035), transparent 48%);
+}
+
+.industrial-home .rl-widget-surface > [aria-hidden="true"] {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.025), transparent 48%),
+    linear-gradient(145deg, rgba(18,27,36,.20), rgba(9,14,20,.30)) !important;
+}
+
+.industrial-home .rl-widget-surface:hover {
+  border-color: rgba(242,138,36,.58) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 14px 32px rgba(0,0,0,.30), 0 0 20px rgba(242,138,36,.055) !important;
+}
+
+.industrial-home .rl-widget-surface:focus-visible {
+  outline: 2px solid rgba(242,138,36,.85);
+  outline-offset: 3px;
+}
