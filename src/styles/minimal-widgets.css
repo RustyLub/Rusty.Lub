@@ -44,11 +44,7 @@ body:not(.light-theme) main [class*="rounded-md"][class*="border"] {
   border-color: rgba(174, 190, 207, .10);
 }
 
-/* Preserve the distinct homepage hero; only the surrounding homepage widgets use
-   the same minimal surface treatment as the rest of the site. */
-body:not(.light-theme) .industrial-home > section:first-child {
-  background-image: revert-layer;
-}
+/* The homepage hero is intentionally not targeted by these surface rules. */
 body.light-theme:not(.industrial-home) {
   background-image: none !important;
 }
