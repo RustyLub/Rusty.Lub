@@ -1,50 +1,94 @@
-/* Rusty.Lub — minimal surfaces for every page except the homepage hero. */
+/* Rusty.Lub — restrained industrial surfaces. Homepage hero artwork remains untouched. */
 :root {
   --rl-widget-bg: #11161d;
   --rl-widget-bg-soft: #0d1218;
-  --rl-widget-border: rgba(174, 190, 207, 0.13);
+  --rl-widget-border: rgba(174, 190, 207, 0.15);
   --rl-widget-highlight: rgba(242, 138, 36, 0.08);
 }
 
-/* Remove the shared Rust artwork from the application canvas.
-   The homepage hero keeps its own independent artwork and styling. */
 body:not(.light-theme) {
   background-color: #090c10 !important;
   background-image:
-    radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, 0.075), transparent 42rem),
+    radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, 0.065), transparent 42rem),
     linear-gradient(180deg, #090c10 0%, #0c1117 52%, #090c10 100%) !important;
   background-attachment: scroll !important;
 }
+
 body:not(.light-theme)::before {
   opacity: 1 !important;
   background-image:
-    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px),
-    radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, .045), transparent 46rem) !important;
-  background-size: 48px 48px, 48px 48px, cover !important;
+    linear-gradient(rgba(255,255,255,.014) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.014) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, .035), transparent 46rem) !important;
+  background-size: 56px 56px, 56px 56px, cover !important;
   background-position: center top, center top, center top !important;
   background-repeat: repeat, repeat, no-repeat !important;
 }
 
-/* Quiet, consistent widget surfaces: graphite, subtle depth, no photographs. */
+/* Shared app panels: quiet graphite with a fine top edge and restrained depth. */
 body:not(.light-theme) main .tactical-card,
 body:not(.light-theme) main .cyber-panel,
-body:not(.light-theme) main [class*="rounded-2xl"][class*="border"]:not(.industrial-home > section:first-child),
-body:not(.light-theme) main [class*="rounded-xl"][class*="border"]:not(.industrial-home > section:first-child) {
+body:not(.light-theme) main [class*="rounded-2xl"][class*="border"],
+body:not(.light-theme) main [class*="rounded-xl"][class*="border"] {
   background-color: var(--rl-widget-bg);
-  background-image: linear-gradient(145deg, rgba(255,255,255,.018), transparent 58%);
+  background-image:
+    linear-gradient(135deg, rgba(255,255,255,.022), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,.012), transparent 34%);
   border-color: var(--rl-widget-border);
-  box-shadow: 0 10px 28px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.018);
+  box-shadow: 0 12px 30px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.025);
 }
 
-/* Inner tiles stay a shade quieter than their parent widget. */
+/* Inner controls remain visually subordinate to their parent panel. */
 body:not(.light-theme) main [class*="rounded-lg"][class*="border"],
 body:not(.light-theme) main [class*="rounded-md"][class*="border"] {
   background-color: var(--rl-widget-bg-soft);
-  border-color: rgba(174, 190, 207, .10);
+  border-color: rgba(174, 190, 207, .11);
 }
 
-/* The homepage hero is intentionally not targeted by these surface rules. */
+/* Homepage cards: no stock art, no large empty flat fills — only subtle structure. */
+.industrial-home > section:not(:first-child) {
+  position: relative;
+  background-image:
+    linear-gradient(90deg, transparent, rgba(242,138,36,.018) 50%, transparent);
+}
+
+.industrial-home button.group {
+  background-color: #101820;
+  background-image:
+    radial-gradient(ellipse at 88% 4%, rgba(242,138,36,.105), transparent 38%),
+    linear-gradient(135deg, rgba(255,255,255,.035), transparent 40%),
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(255,255,255,.018) 27px 28px),
+    repeating-linear-gradient(90deg, transparent 0 27px, rgba(255,255,255,.018) 27px 28px),
+    linear-gradient(145deg, #17212a 0%, #101820 52%, #0c1218 100%);
+  background-size: auto, auto, 112px 112px, 112px 112px, auto;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 8px 22px rgba(0,0,0,.18);
+}
+
+.industrial-home button.group:hover {
+  border-color: rgba(242,138,36,.62);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.26), 0 0 22px rgba(242,138,36,.045);
+}
+
+/* Quietly separate image-free news thumbnails from their text areas. */
+.industrial-home button.group > div:first-child {
+  border-bottom: 1px solid rgba(174,190,207,.12);
+}
+
+.industrial-home button.group > div:first-child::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, transparent 0 58%, rgba(242,138,36,.055) 58.2%, transparent 58.7%),
+    linear-gradient(90deg, transparent 0 72%, rgba(255,255,255,.025) 72.2%, transparent 72.7%);
+}
+
+.industrial-home button.group:focus-visible {
+  outline: 2px solid rgba(242,138,36,.85);
+  outline-offset: 3px;
+}
+
 body.light-theme:not(.industrial-home) {
   background-image: none !important;
 }
