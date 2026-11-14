@@ -1,0 +1,54 @@
+/* Rusty.Lub — minimal surfaces for every page except the homepage hero. */
+:root {
+  --rl-widget-bg: #11161d;
+  --rl-widget-bg-soft: #0d1218;
+  --rl-widget-border: rgba(174, 190, 207, 0.13);
+  --rl-widget-highlight: rgba(242, 138, 36, 0.08);
+}
+
+/* Remove the shared Rust artwork from the application canvas.
+   The homepage hero keeps its own independent artwork and styling. */
+body:not(.light-theme) {
+  background-color: #090c10 !important;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, 0.075), transparent 42rem),
+    linear-gradient(180deg, #090c10 0%, #0c1117 52%, #090c10 100%) !important;
+  background-attachment: scroll !important;
+}
+body:not(.light-theme)::before {
+  opacity: 1 !important;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 0%, rgba(242, 138, 36, .045), transparent 46rem) !important;
+  background-size: 48px 48px, 48px 48px, cover !important;
+  background-position: center top, center top, center top !important;
+  background-repeat: repeat, repeat, no-repeat !important;
+}
+
+/* Quiet, consistent widget surfaces: graphite, subtle depth, no photographs. */
+body:not(.light-theme) main .tactical-card,
+body:not(.light-theme) main .cyber-panel,
+body:not(.light-theme) main [class*="rounded-2xl"][class*="border"],
+body:not(.light-theme) main [class*="rounded-xl"][class*="border"] {
+  background-color: var(--rl-widget-bg);
+  background-image: linear-gradient(145deg, rgba(255,255,255,.018), transparent 58%);
+  border-color: var(--rl-widget-border);
+  box-shadow: 0 10px 28px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.018);
+}
+
+/* Inner tiles stay a shade quieter than their parent widget. */
+body:not(.light-theme) main [class*="rounded-lg"][class*="border"],
+body:not(.light-theme) main [class*="rounded-md"][class*="border"] {
+  background-color: var(--rl-widget-bg-soft);
+  border-color: rgba(174, 190, 207, .10);
+}
+
+/* Preserve the distinct homepage hero; only the surrounding homepage widgets use
+   the same minimal surface treatment as the rest of the site. */
+body:not(.light-theme) .industrial-home > section:first-child {
+  background-image: revert-layer;
+}
+body.light-theme:not(.industrial-home) {
+  background-image: none !important;
+}
