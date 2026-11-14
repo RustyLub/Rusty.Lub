@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import RuntimeErrorMonitor from './components/RuntimeErrorMonitor';
 import './index.css';
+import './styles/minimal-widgets.css';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
