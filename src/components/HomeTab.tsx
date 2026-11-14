@@ -85,7 +85,7 @@ export default function HomeTab({
               <a href="https://discord.gg/R2TyKZ9xvZ" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 border border-slate-400/50 bg-slate-950/45 px-5 py-3 text-xs font-bold text-white transition hover:border-orange-400"><MessageCircle size={15} /> Discord <ExternalLink size={11} /></a>
             </div>
           </div>
-          <aside className="relative isolate overflow-hidden border border-slate-500/50 bg-[#080d12] p-4 shadow-2xl sm:p-5"><img src={oilRigBg} alt="" aria-hidden="true" className="absolute inset-0 -z-20 h-full w-full object-cover object-[65%_center] opacity-55" /><div aria-hidden="true" className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(7,12,17,.72),rgba(7,12,17,.94)),linear-gradient(0deg,rgba(249,115,22,.12),transparent_55%)]" />
+          <aside className="relative isolate overflow-hidden border border-slate-500/50 bg-[#080d12] p-4 shadow-2xl sm:p-5"><div aria-hidden="true" className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(7,12,17,.72),rgba(7,12,17,.94)),linear-gradient(0deg,rgba(249,115,22,.12),transparent_55%)]" />
             <p className="mb-4 border-b border-slate-700 pb-3 font-mono text-[10px] font-black uppercase tracking-[.18em] text-white"><span className="text-orange-500">///</span> {ru ? 'ПОЧЕМУ RUSTY.LUB?' : 'WHY RUSTY.LUB?'}</p>
             {[
               { icon: Wrench, title: ru ? 'Удобные инструменты' : 'Useful tools', desc: ru ? 'Все нужные калькуляторы и сервисы.' : 'Calculators and utilities in one place.' },
