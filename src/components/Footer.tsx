@@ -6,11 +6,13 @@ interface FooterProps {
   onOpenCabinet?: () => void;
   onOpenDonation?: () => void;
   onOpenTerms?: () => void;
+  onOpenCookiePolicy?: () => void;
+  onManageCookies?: () => void;
 }
 
 const linkClass = 'text-left text-sm text-[#9aa5b5] hover:text-[#f28a24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f28a24] transition-colors';
 
-export default function Footer({ lang, onNavigate, onOpenCabinet, onOpenDonation, onOpenTerms }: FooterProps) {
+export default function Footer({ lang, onNavigate, onOpenCabinet, onOpenDonation, onOpenTerms, onOpenCookiePolicy, onManageCookies }: FooterProps) {
   const ru = lang === 'ru';
   return (
     <footer className="w-full mt-16 border-t border-white/10 bg-[#090c10]/95 px-4 pb-8 pt-10 text-left sm:px-6 lg:px-8">
@@ -62,6 +64,8 @@ export default function Footer({ lang, onNavigate, onOpenCabinet, onOpenDonation
             <h2 className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#f28a24]">{ru ? 'Документы' : 'Documents'}</h2>
             <nav className="flex flex-col items-start gap-2">
               <button className={linkClass} onClick={onOpenTerms}>{ru ? 'Пользовательское соглашение' : 'User agreement'}</button>
+              <button className={linkClass} onClick={onOpenCookiePolicy}>{ru ? 'Политика Cookies и конфиденциальности' : 'Cookie & Privacy Policy'}</button>
+              <button className={linkClass} onClick={onManageCookies}>{ru ? 'Настройки Cookies' : 'Cookie settings'}</button>
               <a className={linkClass} href="mailto:rusty.lub_offers@bk.ru?subject=Privacy%20and%20personal%20data">{ru ? 'Вопросы по персональным данным' : 'Privacy and personal data'}</a>
               <a className={linkClass} href="mailto:rusty.lub_offers@bk.ru?subject=Paid%20services%20and%20refunds">{ru ? 'Платные услуги и возвраты' : 'Paid services and refunds'}</a>
             </nav>
