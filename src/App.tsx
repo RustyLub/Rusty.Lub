@@ -112,6 +112,7 @@ const DiamondOutfitStudio = lazy(() => import('./components/DiamondOutfitStudio'
 const Footer = lazy(() => import('./components/Footer'));
 const CookieConsentManager = lazy(() => import('./components/CookieConsentManager'));
 const CookiePolicy = lazy(() => import('./components/CookiePolicy'));
+const DiscordBotLegal = lazy(() => import('./components/DiscordBotLegal'));
 const AuthModal = lazy(() => import('./components/AuthModal'));
 const CabinetModal = lazy(() => import('./components/CabinetModal'));
 const TermsModal = lazy(() => import('./components/TermsModal'));
@@ -263,9 +264,13 @@ const appTranslations = {
   }
 };
 
-type TabType = 'cookies' | 'outfit' | 'home' | 'ratings' | 'account' | 'support' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
+type TabType = 'discord-bot-terms' | 'discord-bot-privacy' | 'cookies' | 'outfit' | 'home' | 'ratings' | 'account' | 'support' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
 
 const VALID_TABS: Record<string, TabType> = {
+  'discord-bot-terms': 'discord-bot-terms',
+  'discord-bot-privacy': 'discord-bot-privacy',
+  'bot-terms': 'discord-bot-terms',
+  'bot-privacy': 'discord-bot-privacy',
   outfit: 'outfit',
   outfits: 'outfit',
   home: 'home',
@@ -2034,6 +2039,12 @@ export default function App() {
                 </a>
               </section>
               <p className="text-xs leading-relaxed text-zinc-500">{lang === 'ru' ? 'Платёж проходит на стороне DonationAlerts и привлечённых платёжных партнёров. Перед отправкой средств ознакомьтесь с условиями и политикой платформы.' : 'Payments are handled by DonationAlerts and its payment partners. Please review the platform terms and privacy policy before sending funds.'}</p>
+            </motion.div>
+          )}
+
+          {(activeTab === 'discord-bot-terms' || activeTab === 'discord-bot-privacy') && (
+            <motion.div key={activeTab} className="w-full" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.2 }}>
+              <DiscordBotLegal lang={lang} document={activeTab === 'discord-bot-terms' ? 'terms' : 'privacy'} onBack={() => handleTabChange('home')} />
             </motion.div>
           )}
 
