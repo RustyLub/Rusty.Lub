@@ -110,6 +110,8 @@ const PlayerRadar = lazy(() => import('./components/Radar/PlayerRadar').then(m =
 const DiamondOutfitStudio = lazy(() => import('./components/DiamondOutfitStudio'));
 
 const Footer = lazy(() => import('./components/Footer'));
+const CookieConsentManager = lazy(() => import('./components/CookieConsentManager'));
+const CookiePolicy = lazy(() => import('./components/CookiePolicy'));
 const AuthModal = lazy(() => import('./components/AuthModal'));
 const CabinetModal = lazy(() => import('./components/CabinetModal'));
 const TermsModal = lazy(() => import('./components/TermsModal'));
@@ -261,7 +263,7 @@ const appTranslations = {
   }
 };
 
-type TabType = 'outfit' | 'home' | 'ratings' | 'account' | 'support' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
+type TabType = 'cookies' | 'outfit' | 'home' | 'ratings' | 'account' | 'support' | 'terms' | 'tools' | 'guides' | 'faq' | 'errors' | 'binds' | 'fps' | 'raid' | 'decay' | 'electrical' | 'weapons' | 'breeder' | 'chat' | 'news' | 'admin' | 'radar' | 'recycler' | 'icons' | 'monuments' | 'wipe' | 'ecoraid' | 'quarry' | 'mixing' | 'clan' | 'rustplus' | 'special';
 
 const VALID_TABS: Record<string, TabType> = {
   outfit: 'outfit',
@@ -273,6 +275,8 @@ const VALID_TABS: Record<string, TabType> = {
   cabinet: 'account',
   support: 'support',
   terms: 'terms',
+  cookies: 'cookies',
+  privacy: 'cookies',
   agreement: 'terms',
   legal: 'terms',
   tools: 'tools',
@@ -523,6 +527,7 @@ export default function App() {
   }, [isTauri, launcherSettings.hudHotkey]);
   const [showJungleFeverSpoiler, setShowJungleFeverSpoiler] = useState(true);
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [cookieSettingsOpen, setCookieSettingsOpen] = useState(false);
 
   const [twitchSettings, setTwitchSettings] = useState<{
     channelName: string;
@@ -2064,6 +2069,19 @@ export default function App() {
             </motion.div>
           )}
 
+          {activeTab === 'cookies' && (
+            <motion.div key="cookies-page" className="w-full space-y-5" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.2 }}>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#f28a24]">R.L. / DOCUMENTS</p>
+                  <h1 className="mt-1 text-2xl font-bold text-white">{lang === 'ru' ? 'Конфиденциальность и Cookies' : 'Privacy & Cookies'}</h1>
+                </div>
+                <button type="button" onClick={() => handleTabChange('home')} className="rounded-md border border-white/10 px-3 py-2 text-sm text-zinc-300 hover:border-orange-400/40 hover:text-white">{lang === 'ru' ? 'На главную' : 'Back home'}</button>
+              </div>
+              <CookiePolicy lang={lang} onManageCookies={() => setCookieSettingsOpen(true)} />
+            </motion.div>
+          )}
+
           {activeTab === 'terms' && (
             <motion.div
               key="terms-page"
@@ -2877,7 +2895,13 @@ export default function App() {
           onOpenCabinet={() => handleTabChange('account')}
           onOpenDonation={() => handleTabChange('support')}
           onOpenTerms={() => handleTabChange('terms')}
+          onOpenCookiePolicy={() => handleTabChange('cookies')}
+          onManageCookies={() => setCookieSettingsOpen(true)}
         />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <CookieConsentManager lang={lang} settingsOpen={cookieSettingsOpen} onSettingsClose={() => setCookieSettingsOpen(false)} />
       </Suspense>
 
       {/* GLOBAL AUTHORIZATION MODALS */}
