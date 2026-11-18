@@ -26,7 +26,7 @@ export default function Footer({ lang, onNavigate, onOpenCabinet, onOpenDonation
             <p className="max-w-xs text-sm leading-relaxed text-[#8793a4]">
               {ru ? 'Инструменты, справочники и материалы для игроков Rust.' : 'Tools, references and resources for Rust players.'}
             </p>
-            <a className={linkClass} href="mailto:rusty.lub_offers@bk.ru">rusty.lub_offers@bk.ru</a>
+            <a className={linkClass} href="mailto:rusty.lub-slq@inbox.ru">rusty.lub-slq@inbox.ru</a>
           </div>
 
           <div className="space-y-3">
@@ -56,7 +56,7 @@ export default function Footer({ lang, onNavigate, onOpenCabinet, onOpenDonation
             <h2 className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#f28a24]">{ru ? 'Аккаунт' : 'Account'}</h2>
             <nav className="flex flex-col items-start gap-2">
               <button className={linkClass} onClick={onOpenCabinet}>{ru ? 'Личный кабинет' : 'User cabinet'}</button>
-              <button className={linkClass} onClick={onOpenDonation}>{ru ? 'Поддержка / VIP' : 'Support / VIP'}</button>
+              <button className={linkClass} onClick={onOpenDonation}>{ru ? 'Поддержать проект' : 'Support the project'}</button>
             </nav>
           </div>
 
@@ -66,15 +66,15 @@ export default function Footer({ lang, onNavigate, onOpenCabinet, onOpenDonation
               <button className={linkClass} onClick={onOpenTerms}>{ru ? 'Пользовательское соглашение' : 'User agreement'}</button>
               <button className={linkClass} onClick={onOpenCookiePolicy}>{ru ? 'Политика Cookies и конфиденциальности' : 'Cookie & Privacy Policy'}</button>
               <button className={linkClass} onClick={onManageCookies}>{ru ? 'Настройки Cookies' : 'Cookie settings'}</button>
-              <a className={linkClass} href="mailto:rusty.lub_offers@bk.ru?subject=Privacy%20and%20personal%20data">{ru ? 'Вопросы по персональным данным' : 'Privacy and personal data'}</a>
-              <a className={linkClass} href="mailto:rusty.lub_offers@bk.ru?subject=Paid%20services%20and%20refunds">{ru ? 'Платные услуги и возвраты' : 'Paid services and refunds'}</a>
+              <a className={linkClass} href="mailto:rusty.lub-slq@inbox.ru?subject=Privacy%20and%20personal%20data">{ru ? 'Вопросы по персональным данным' : 'Privacy and personal data'}</a>
+              <a className={linkClass} href="mailto:rusty.lub-slq@inbox.ru?subject=Paid%20services%20and%20refunds">{ru ? 'Связаться с проектом' : 'Contact the project'}</a>
             </nav>
           </div>
         </div>
 
         <div className="flex flex-col gap-3 pt-6 text-xs text-[#778294] sm:flex-row sm:items-center sm:justify-between">
           <span>© 2026 Rusty.Lub</span>
-          <span>{ru ? 'Связь по вопросам проекта:' : 'Project contact:'} <a className="text-[#aeb8c5] hover:text-[#f28a24]" href="mailto:rusty.lub_offers@bk.ru">rusty.lub_offers@bk.ru</a></span>
+          <span>{ru ? 'Связь по вопросам проекта:' : 'Project contact:'} <a className="text-[#aeb8c5] hover:text-[#f28a24]" href="mailto:rusty.lub-slq@inbox.ru">rusty.lub-slq@inbox.ru</a></span>
           <span className="font-mono">INDUSTRIAL STEEL · R.L.</span>
         </div>
       </div>
