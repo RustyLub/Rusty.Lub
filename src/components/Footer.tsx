@@ -67,7 +67,7 @@ export default function Footer({ lang, onNavigate, onOpenCabinet, onOpenDonation
               <button className={linkClass} onClick={onOpenCookiePolicy}>{ru ? 'Политика Cookies и конфиденциальности' : 'Cookie & Privacy Policy'}</button>
               <button className={linkClass} onClick={onManageCookies}>{ru ? 'Настройки Cookies' : 'Cookie settings'}</button>
               <a className={linkClass} href="mailto:rusty.lub-slq@inbox.ru?subject=Privacy%20and%20personal%20data">{ru ? 'Вопросы по персональным данным' : 'Privacy and personal data'}</a>
-              <a className={linkClass} href="mailto:rusty.lub-slq@inbox.ru?subject=Paid%20services%20and%20refunds">{ru ? 'Связаться с проектом' : 'Contact the project'}</a>
+              <a className={linkClass} href="mailto:rusty.lub-slq@inbox.ru">{ru ? 'Связаться с проектом' : 'Contact the project'}</a>
             </nav>
           </div>
         </div>
