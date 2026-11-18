@@ -146,12 +146,12 @@ export default function TermsModal({ isOpen, onClose, lang, pageMode = false }: 
         },
         paragraphs: [
           {
-            ru: '6.1. Сервис осуществляет сбор исключительно минимального объема технических данных, необходимых для авторизации, сохранения настроек калькулятора и обеспечения стабильности работы веб-приложения.',
-            en: '6.1. The Service collects only the minimal technical data strictly necessary for user authentication, calculator preference persistence, and application stability.'
+            ru: '6.1. Сервис обрабатывает данные, необходимые для работы аккаунта, пользовательских функций, настроек и безопасности. Для отдельных функций используются Firebase/Google, Discord, Enum.gg и другие технические поставщики; при обращении к ним могут передаваться технические данные запроса. Подробности о технологиях хранения и внешних сервисах приведены в Политике Cookies и конфиденциальности.',
+            en: '6.1. The Service processes data needed to provide accounts, user features, preferences and security. Some features rely on Firebase/Google, Discord, Enum.gg and other technical providers; technical request data may be transmitted when the browser contacts them. Details about device storage and external services are described in the Cookie & Privacy Policy.'
           },
           {
-            ru: '6.2. Сервис не осуществляет передачу персональных данных третьим лицам и не использует личные данные в рекламных целях без явного согласия Пользователя.',
-            en: '6.2. The Service does not sell or transfer user personal data to third parties, nor does it monetize user telemetry without explicit consent.'
+            ru: '6.2. Сервис не заявляет об отсутствии передачи технических данных сторонним поставщикам: такие обращения описаны в Политике Cookies и конфиденциальности. В проверенном исходном коде рекламные трекеры и активная аналитика не обнаружены.',
+            en: '6.2. The Service does not claim that no technical data is ever shared with third-party providers: these requests are described in the Cookie & Privacy Policy. No advertising trackers or active analytics were identified in the inspected source code.'
           }
         ]
       },
