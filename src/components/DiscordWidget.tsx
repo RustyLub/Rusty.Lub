@@ -47,7 +47,7 @@ export default function DiscordWidget({ lang }: { lang: 'ru' | 'en' }) {
           setData({
             id: '1454527123023728712',
             name: 'RustyLub / EazyAntiCheat',
-            instant_invite: 'https://discord.gg/R2TyKZ9xvZ',
+            instant_invite: 'https://discord.gg/rustylub',
             channels: [],
             members: [
               { id: 'discord-fallback-member-1', username: '#gladiator', status: 'online', avatar_url: '', game: { name: 'Rust' } },
@@ -66,7 +66,7 @@ export default function DiscordWidget({ lang }: { lang: 'ru' | 'en' }) {
     };
   }, []);
 
-  const inviteUrl = data?.instant_invite || "https://discord.gg/R2TyKZ9xvZ";
+  const inviteUrl = data?.instant_invite || "https://discord.gg/rustylub";
   const onlineCount = data?.presence_count ?? 38;
   const guildName = data?.name || "EAZYANTICHEAT";
 
