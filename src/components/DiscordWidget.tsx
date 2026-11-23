@@ -66,7 +66,7 @@ export default function DiscordWidget({ lang }: { lang: 'ru' | 'en' }) {
     };
   }, []);
 
-  const inviteUrl = data?.instant_invite || "https://discord.gg/rustylub";
+  const inviteUrl = "https://discord.gg/rustylub";
   const onlineCount = data?.presence_count ?? 38;
   const guildName = data?.name || "EAZYANTICHEAT";
 
