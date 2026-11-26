@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { hasActiveVipSubscription } from '../utils/vip';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, 
@@ -82,6 +81,8 @@ interface CabinetModalProps {
   onToast: (msg: string, type: 'success' | 'warning' | 'error') => void;
   onOpenTab?: (tab: string) => void;
   onLoadRaidInCalc?: (raid: SavedRaid) => void;
+  isAdmin?: boolean;
+  isVip?: boolean;
 }
 
 interface RegisteredUser {
@@ -111,6 +112,8 @@ export default function CabinetModal({
   onToast,
   onOpenTab,
   onLoadRaidInCalc,
+  isAdmin: verifiedIsAdmin = false,
+  isVip: verifiedIsVip = false,
   pageMode = false
 }: CabinetModalProps) {
   const [activeTab, setActiveTab] = useState<'profile' | 'history' | 'raids' | 'binds' | 'favorites' | 'applications' | 'friends' | 'admin_users' | 'admin_site' | 'vip' | 'feedback'>('profile');
@@ -181,11 +184,7 @@ export default function CabinetModal({
 
   const [fullProfile, setFullProfile] = useState<CustomUser | null>(null);
 
-  const isAdmin = user && (
-    user.uid === 'serustqs' || 
-    user.email === 'misterzet556@gmail.com' || 
-    (fullProfile && (fullProfile.badges?.includes('founder') || fullProfile.role === 'admin'))
-  );
+  const isAdmin = verifiedIsAdmin;
 
   // Sync saved raids, binds, clan applications and favorites
   useEffect(() => {
@@ -1020,7 +1019,7 @@ export default function CabinetModal({
                     : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <Crown size={13} className={hasActiveVipSubscription(fullProfile) ? 'text-amber-500 animate-pulse' : ''} />
+                <Crown size={13} className={verifiedIsVip ? 'text-amber-500 animate-pulse' : ''} />
                 <span>{lang === 'ru' ? 'VIP Статус' : 'VIP Membership'}</span>
                 {hasActiveVipSubscription(fullProfile) && (
                   <span className="ml-auto bg-amber-500 text-black text-[8px] px-1 font-black font-mono uppercase tracking-widest rounded-sm">
