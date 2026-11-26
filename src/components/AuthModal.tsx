@@ -31,6 +31,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
   const [authLoading, setAuthLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const TERMS_VERSION = '2.5';
 
 
   if (!isOpen) return null;
@@ -83,7 +84,11 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
           username: cleanUsername, displayName: cleanDisplayName,
           passwordHash: hashHex, passwordSalt: saltHex, passwordAlgorithm: 'PBKDF2-SHA256',
           avatarClass: selectedAvatar, photoURL: matchedAvatar.url, gender,
-          role: 'user', isBlocked: false, createdAt: new Date().toISOString()
+          role: 'user', isBlocked: false, createdAt: new Date().toISOString(),
+          termsAccepted: true,
+          termsVersion: TERMS_VERSION,
+          termsAcceptedAt: new Date().toISOString(),
+          termsLanguage: lang
         });
         onUserLogin({ uid: cleanUsername, displayName: cleanDisplayName, photoURL: matchedAvatar.url, avatarClass: selectedAvatar, gender, role: 'user' } as CustomUser);
         onToast(lang === 'ru' ? 'Аккаунт создан!' : 'Account created!', 'success');

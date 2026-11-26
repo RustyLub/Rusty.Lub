@@ -6,7 +6,17 @@ import { registerUsernameLoginRoute } from '../src/server/usernameLogin';
 const app = express();
 
 app.disable('x-powered-by');
-app.use(express.json({ limit: '32kb' }));
+app.use('/api', (_req, res, next) => {
+  res.set({
+    'Cache-Control': 'no-store, max-age=0',
+    'Pragma': 'no-cache',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'no-referrer'
+  });
+  next();
+});
+app.use(express.json({ limit: '32kb', strict: true }));
 
 app.get('/api/health', (_req, res) => {
   res.set('Cache-Control', 'no-store');

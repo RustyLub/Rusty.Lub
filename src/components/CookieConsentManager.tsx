@@ -15,7 +15,7 @@ function readConsent(): CookieConsentValue | null {
     if (!raw) return null;
     const value = JSON.parse(raw) as CookieConsentValue;
     if (value.version !== 1 || value.necessary !== true || typeof value.analytics !== 'boolean') return null;
-    return value;
+    return { ...value, analytics: false };
   } catch {
     return null;
   }
@@ -31,20 +31,18 @@ export default function CookieConsentManager({ lang, settingsOpen, onSettingsClo
   const ru = lang === 'ru';
   const [consent, setConsent] = useState<CookieConsentValue | null>(() => readConsent());
   const [showSettings, setShowSettings] = useState(false);
-  const [analytics, setAnalytics] = useState(false);
 
   useEffect(() => {
     if (settingsOpen) {
-      setAnalytics(readConsent()?.analytics ?? false);
       setShowSettings(true);
     }
   }, [settingsOpen]);
 
-  const save = (allowAnalytics: boolean) => {
+  const save = () => {
     const next: CookieConsentValue = {
       version: 1,
       necessary: true,
-      analytics: allowAnalytics,
+      analytics: false,
       updatedAt: new Date().toISOString()
     };
     try {
@@ -76,19 +74,13 @@ export default function CookieConsentManager({ lang, settingsOpen, onSettingsClo
               <h2 className="mt-1 text-base font-bold text-white">{ru ? 'Настройки Cookies' : 'Cookie preferences'}</h2>
               <p className="mt-1 text-sm leading-relaxed text-slate-300">
                 {ru
-                  ? 'Сайт использует необходимые технологии для работы интерфейса и входа в аккаунт. Необязательная аналитика сейчас не подключена. Вы можете сохранить выбор или открыть подробные настройки.'
-                  : 'The site uses essential technologies for the interface and account sign-in. Optional analytics is not currently enabled. You can save your choice or open detailed settings.'}
+                  ? 'Сайт использует необходимые технологии для работы интерфейса и входа в аккаунт. Необязательная аналитика сейчас не подключена. Вы можете сохранить настройки необходимых технологий.'
+                  : 'The site uses essential technologies for the interface and account sign-in. Optional analytics is not currently enabled. You can save the essential settings.'}
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
-              <button type="button" onClick={() => save(false)} className="min-h-10 border border-slate-500 px-3 py-2 text-xs font-bold text-white transition hover:border-white">
+              <button type="button" onClick={save} className="min-h-10 border border-slate-500 px-3 py-2 text-xs font-bold text-white transition hover:border-white">
                 {ru ? 'Только необходимые' : 'Essential only'}
-              </button>
-              <button type="button" onClick={() => save(true)} className="min-h-10 border border-[#d65a2c] bg-[#c94b2b] px-3 py-2 text-xs font-bold text-white transition hover:bg-[#e05b35]">
-                {ru ? 'Принять все' : 'Accept all'}
-              </button>
-              <button type="button" onClick={() => { setAnalytics(false); setShowSettings(true); }} className="min-h-10 border border-slate-700 px-3 py-2 text-xs font-bold text-slate-300 transition hover:text-white">
-                {ru ? 'Настроить' : 'Customize'}
               </button>
             </div>
           </div>
@@ -113,19 +105,16 @@ export default function CookieConsentManager({ lang, settingsOpen, onSettingsClo
                 </div>
                 <span className="shrink-0 text-xs font-bold text-emerald-400">{ru ? 'Всегда активны' : 'Always active'}</span>
               </div>
-              <label className="flex cursor-pointer items-start justify-between gap-4 border border-white/10 p-4">
-                <span>
-                  <span className="block text-sm font-bold text-white">{ru ? 'Аналитика' : 'Analytics'}</span>
-                  <span className="mt-1 block text-xs leading-relaxed text-slate-400">{ru ? 'Может использоваться для статистики посещений и улучшения сайта. Аналитический сервис сейчас не подключён.' : 'May be used for visit statistics and site improvements. No analytics provider is currently connected.'}</span>
-                </span>
-                <input type="checkbox" checked={analytics} onChange={event => setAnalytics(event.target.checked)} className="mt-1 h-4 w-4 accent-[#f28a24]" />
-              </label>
+              <div className="border border-white/10 p-4">
+                <h3 className="text-sm font-bold text-white">{ru ? 'Необязательная аналитика' : 'Optional analytics'}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-slate-400">{ru ? 'Аналитические и рекламные сервисы сейчас не подключены. Поэтому необязательные аналитические технологии не используются и отдельный выбор для них недоступен.' : 'Analytics and advertising providers are not currently connected. Optional analytics technologies are therefore not used, and no separate opt-in is available.'}</p>
+              </div>
               <p className="text-[11px] leading-relaxed text-slate-500">{ru ? 'Вы можете изменить выбор позднее через ссылку «Настройки Cookies» внизу сайта. Сохранение выбора не включает сервисы, которые фактически не подключены.' : 'You can change your choice later using the “Cookie settings” link in the site footer. Saving a preference does not activate services that are not actually integrated.'}</p>
             </div>
             <div className="flex flex-col-reverse gap-2 border-t border-white/10 p-4 sm:flex-row sm:justify-end">
               <button type="button" onClick={closeSettings} className="min-h-10 border border-slate-700 px-4 py-2 text-xs font-bold text-slate-300 hover:text-white">{ru ? 'Закрыть' : 'Close'}</button>
-              <button type="button" onClick={() => save(false)} className="min-h-10 border border-slate-500 px-4 py-2 text-xs font-bold text-white hover:border-white">{ru ? 'Отклонить необязательные' : 'Reject optional'}</button>
-              <button type="button" onClick={() => save(analytics)} className="min-h-10 border border-[#d65a2c] bg-[#c94b2b] px-4 py-2 text-xs font-bold text-white hover:bg-[#e05b35]">{ru ? 'Сохранить выбор' : 'Save choices'}</button>
+              <button type="button" onClick={() => save()} className="min-h-10 border border-slate-500 px-4 py-2 text-xs font-bold text-white hover:border-white">{ru ? 'Только необходимые' : 'Essential only'}</button>
+              <button type="button" onClick={() => save()} className="min-h-10 border border-[#d65a2c] bg-[#c94b2b] px-4 py-2 text-xs font-bold text-white hover:bg-[#e05b35]">{ru ? 'Сохранить настройки' : 'Save settings'}</button>
             </div>
           </div>
         </div>

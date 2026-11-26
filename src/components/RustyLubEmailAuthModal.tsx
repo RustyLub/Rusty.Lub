@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { reload } from 'firebase/auth';
 import { motion } from 'motion/react';
 import { ArrowLeft, Mail, Lock, User, Crosshair, ShieldCheck, KeyRound } from 'lucide-react';
 import type { CustomUser } from '../types';
@@ -33,6 +34,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
   const [migrationBusy, setMigrationBusy] = useState(false);
   const [legacyPassword, setLegacyPassword] = useState('');
   const [migrationComplete, setMigrationComplete] = useState(false);
+  const [verificationPending, setVerificationPending] = useState(false);
 
   if (!isOpen) return null;
 
@@ -59,19 +61,12 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
         if (password.length < 8 || password.length > 128 || password !== confirmPassword) {
           throw new Error(ru ? 'Проверьте пароль: минимум 8 символов, оба поля должны совпадать.' : 'Check your password: at least 8 characters and both fields must match.');
         }
-        const user = await registerWithEmail(email, password, username, displayName);
-          const result = await completeRegistration(user, username, displayName);
-        const profile = result.profile;
-        onUserLogin({
-          uid: profile.uid,
-          authProvider: 'firebase-email',
-          displayName: profile.displayName,
-          email: profile.email,
-          photoURL: '',
-          role: 'user'
-        } as CustomUser);
-        onToast(ru ? 'Аккаунт создан. Добро пожаловать в Rusty.Lub!' : 'Account created. Welcome to Rusty.Lub!', 'success');
-        onClose();
+        await registerWithEmail(email, password);
+        setVerificationPending(true);
+        onToast(
+          ru ? 'Письмо для подтверждения email отправлено. Перейдите по ссылке, затем вернитесь сюда и завершите регистрацию.' : 'A verification email has been sent. Follow its link, return here, and finish registration.',
+          'success'
+        );
         return;
       }
 
@@ -123,6 +118,34 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
     }
   };
 
+
+  const finishRegistration = async () => {
+    setBusy(true);
+    try {
+      const user = rustylubAuth.currentUser;
+      if (!user) throw new Error(ru ? 'Сессия регистрации не найдена. Повторите регистрацию.' : 'Registration session not found. Please register again.');
+      await reload(user);
+      if (!user.emailVerified) {
+        throw new Error(ru ? 'Email ещё не подтверждён. Перейдите по ссылке из письма и повторите попытку.' : 'Email is not verified yet. Follow the email link and try again.');
+      }
+      const result = await completeRegistration(user, username, displayName, lang);
+      const profile = result.profile;
+      onUserLogin({
+        uid: profile.uid,
+        authProvider: 'firebase-email',
+        displayName: profile.displayName,
+        email: profile.email,
+        photoURL: profile.photoURL || '',
+        role: profile.role || 'user'
+      } as CustomUser);
+      onToast(ru ? 'Аккаунт создан. Добро пожаловать в Rusty.Lub!' : 'Account created. Welcome to Rusty.Lub!', 'success');
+      onClose();
+    } catch (error: any) {
+      onToast(error?.message || (ru ? 'Не удалось завершить регистрацию.' : 'Could not finish registration.'), 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const migrateLegacyProfile = async () => {
     const user = rustylubAuth.currentUser;
@@ -196,7 +219,18 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
           <button type="button" onClick={() => { setMode('login'); }} className={`flex-1 border-b-2 py-3 text-sm ${mode === 'login' ? 'border-orange-400 text-orange-300' : 'border-transparent text-zinc-500'}`}>{ru ? 'Вход' : 'Sign in'}</button>
           <button type="button" onClick={() => { setMode('register'); }} className={`flex-1 border-b-2 py-3 text-sm ${mode === 'register' ? 'border-orange-400 text-orange-300' : 'border-transparent text-zinc-500'}`}>{ru ? 'Регистрация' : 'Register'}</button>
         </div>
-        <form onSubmit={submit} className="space-y-4">
+        {verificationPending && (
+          <section className="mb-6 border border-orange-500/30 bg-orange-500/5 p-4">
+            <h3 className="mb-2 text-sm font-semibold text-orange-300">{ru ? 'Подтвердите email' : 'Verify your email'}</h3>
+            <p className="mb-4 text-xs leading-5 text-zinc-300">
+              {ru ? 'Откройте письмо от Firebase и перейдите по ссылке подтверждения. После этого вернитесь на эту страницу.' : 'Open the Firebase email and follow the verification link. Then return to this page.'}
+            </p>
+            <button type="button" disabled={busy} onClick={finishRegistration} className="w-full bg-orange-500 px-4 py-3 text-xs font-bold text-black hover:bg-orange-400 disabled:opacity-50">
+              {busy ? (ru ? 'Проверяем...' : 'Checking...') : (ru ? 'Я подтвердил email — завершить регистрацию' : 'I verified my email — finish registration')}
+            </button>
+          </section>
+        )}
+        <form onSubmit={submit} className={verificationPending ? 'hidden' : 'space-y-4'}>
           <label className="block text-xs text-zinc-300">{ru ? 'Электронная почта' : 'Email'}
             <span className="relative mt-2 block"><Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" /><input type="email" required maxLength={254} autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" className="w-full border border-[#2a2f3b] bg-[#090b0f] py-3 pl-10 pr-3 text-sm text-white outline-none focus:border-orange-500" /></span>
           </label>
