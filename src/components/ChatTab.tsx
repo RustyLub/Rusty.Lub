@@ -61,7 +61,6 @@ import { CUSTOM_AVATARS, getAvatarUrl } from '../customAvatars';
 interface ChatTabProps {
   lang: 'ru' | 'en';
   user: CustomUser | null;
-  onUserLogin: (user: CustomUser) => void;
   onUserLogout: () => void;
   onToast: (msg: string, type: 'success' | 'error' | 'warning') => void;
   onOpenAuth?: () => void;
@@ -189,7 +188,7 @@ export const SURVIVOR_AVATARS = [
   }),
 ];
 
-export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast, onOpenAuth }: ChatTabProps) {
+export default function ChatTab({ lang, user, onUserLogout, onToast, onOpenAuth }: ChatTabProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [replyTo, setReplyTo] = useState<Message | null>(null);
