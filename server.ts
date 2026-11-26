@@ -148,9 +148,6 @@ async function startServer() {
 
   // CMS endpoints use verified Firebase ID tokens and server-side role records.
   // The legacy verifyToken middleware accepts caller-supplied UID headers; do not use it here.
-  const cmsOwnerUids = new Set(['serustqs']);
-  const cmsOwnerEmails = new Set(['misterzet556@gmail.com']);
-
   const verifyCmsIdentity = async (req: any, res: any, next: any) => {
     try {
       const authHeader = String(req.headers.authorization || '');
@@ -159,10 +156,16 @@ async function startServer() {
       }
       const token = authHeader.slice(7);
       const identity = await adminAuth.verifyIdToken(token, true);
+      if (identity.email_verified !== true) {
+        return res.status(403).json({ message: 'A verified email is required.' });
+      }
+
       const uid = String(identity.uid || '');
       const email = String(identity.email || '').toLowerCase();
-      const isOwner = cmsOwnerUids.has(uid) || cmsOwnerEmails.has(email);
-      let role = isOwner ? 'owner' : '';
+      const profileSnap = await adminDb.collection('auth_users').doc(uid).get();
+      const profileRole = profileSnap.exists ? String(profileSnap.data()?.role || '') : '';
+      let role = profileRole === 'owner' ? 'owner' : profileRole === 'admin' ? 'admin' : '';
+
       if (!role) {
         const roleSnap = await adminDb.collection('cms_admins').doc(uid).get();
         if (roleSnap.exists) role = String(roleSnap.data()?.role || '');
@@ -171,7 +174,7 @@ async function startServer() {
         return res.status(403).json({ message: 'CMS access is not assigned to this account.' });
       }
       req.cmsActor = { uid, email, role };
-      next();
+      return next();
     } catch (error) {
       console.warn('CMS authentication rejected:', error instanceof Error ? error.message : 'unknown error');
       return res.status(401).json({ message: 'Invalid or expired Firebase ID token.' });
