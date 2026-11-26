@@ -41,3 +41,21 @@ Find the runtime service account configured for the deployed Cloud Function and 
 6. Verify the destination `auth_users/{uid}` document contains the allowed profile fields, the migration marker and the server-assigned owner role. No password or password hash is copied to the destination project.
 
 The endpoint verifies the new Firebase ID token, verified destination email, legacy password, and destination profile before writing. Only the fixed owner account regains the `admin` role after both identity checks succeed. VIP flags, block/scam state and credentials are not migrated. If the legacy source record still contains a plaintext password, the successful migration converts it to PBKDF2-SHA256 and deletes the plaintext field; an existing password hash is not copied to the destination.
+
+## Server-side sign-in for remaining legacy accounts
+
+The repository now contains `POST /api/rustylub-auth/login-legacy`. It reads the old `chat_users/{username}` record through the Admin SDK, verifies PBKDF2-SHA256, legacy scrypt, or (once) a plaintext legacy password, then removes a plaintext password after successful verification. It creates a deterministic, least-privilege account in the destination Firebase project and issues a Firebase custom token. Legacy role, admin, VIP, and block flags are not copied as privileges; blocked legacy accounts are rejected.
+
+The old login form uses this route only when the build-time variable `VITE_LEGACY_AUTH_API_ENABLED=true` is set. It deliberately remains on the compatibility path while the endpoint and old-project permissions have not been deployed and verified. **Do not enable this variable yet.** Enabling it before deployment will make legacy sign-in fail.
+
+Before enabling it in production:
+
+1. Deploy the Firebase API to project `rustylub` and verify `/api/rustylub-auth/health`.
+2. Confirm the deployed API includes `/api/rustylub-auth/login-legacy`.
+3. Grant the Cloud Functions runtime service account read/update access to the legacy `chat_users` collection in project `psychic-origin-5kpr3`; grant only the required legacy-project access.
+4. Review the currently deployed Firestore Rules in `psychic-origin-5kpr3`. Do not replace them with the destination project's rules: other legacy app features may depend on existing collections. After inventorying every client use, deny client access to `chat_users` while preserving only the rules needed by other features.
+5. Test existing accounts in a staging copy, including PBKDF2, scrypt, plaintext migration, blocked users, duplicate usernames, and the reserved owner account.
+6. Set `VITE_LEGACY_AUTH_API_ENABLED=true` in the production build and verify sign-in, sign-out, restored sessions, account data, and privilege checks.
+7. Only after successful production verification, remove the temporary direct-client compatibility path and deploy the restrictive legacy Firestore Rules.
+
+The route is code in the repository, not proof that the production Firebase Function or legacy Firestore Rules have been deployed. Until the steps above are complete, point 6 remains **partially implemented, not production-complete**.
