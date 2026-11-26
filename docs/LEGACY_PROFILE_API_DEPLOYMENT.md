@@ -46,7 +46,7 @@ The endpoint verifies the new Firebase ID token, verified destination email, leg
 
 The repository now contains `POST /api/rustylub-auth/login-legacy`. It reads the old `chat_users/{username}` record through the Admin SDK, verifies PBKDF2-SHA256, legacy scrypt, or (once) a plaintext legacy password, then removes a plaintext password after successful verification. It creates a deterministic, least-privilege account in the destination Firebase project and issues a Firebase custom token. Legacy role, admin, VIP, and block flags are not copied as privileges; blocked legacy accounts are rejected.
 
-The old login form uses this route only when the build-time variable `VITE_LEGACY_AUTH_API_ENABLED=true` is set. It deliberately remains on the compatibility path while the endpoint and old-project permissions have not been deployed and verified. **Do not enable this variable yet.** Enabling it before deployment will make legacy sign-in fail.
+The old login form now always uses this route. The browser-side fallback that read `chat_users`, compared passwords, created legacy accounts, and migrated plaintext passwords has been removed. If the API is not deployed or cannot access the legacy project, legacy sign-in fails closed with an error instead of falling back to insecure client-side authentication. Registration from this modal switches to the verified-email registration flow.
 
 Before enabling it in production:
 
@@ -55,8 +55,8 @@ Before enabling it in production:
 3. Grant the Cloud Functions runtime service account read/update access to the legacy `chat_users` collection in project `psychic-origin-5kpr3`; grant only the required legacy-project access.
 4. Review the currently deployed Firestore Rules in `psychic-origin-5kpr3`. Do not replace them with the destination project's rules: other legacy app features may depend on existing collections. After inventorying every client use, deny client access to `chat_users` while preserving only the rules needed by other features.
 5. Test existing accounts in a staging copy, including PBKDF2, scrypt, plaintext migration, blocked users, duplicate usernames, and the reserved owner account.
-6. Set `VITE_LEGACY_AUTH_API_ENABLED=true` in the production build and verify sign-in, sign-out, restored sessions, account data, and privilege checks.
-7. Only after successful production verification, remove the temporary direct-client compatibility path and deploy the restrictive legacy Firestore Rules.
+6. Verify sign-in, sign-out, restored sessions, account data, and privilege checks in production.
+7. Only after all legacy profile/chat operations have been moved to authenticated server endpoints or a separately permissioned public profile model, deploy restrictive legacy Firestore Rules.
 
 Additional audit finding: `chat_users` is not an authentication-only collection. The existing application still uses it for profile editing, chat membership, friend requests, moderation, VIP status, voice presence, and admin screens. Therefore, a blanket client deny on `chat_users` would break existing features. Those functions need to be moved to authenticated server endpoints or redesigned around a separate public profile collection before tightening the legacy project's Rules.
 
@@ -65,3 +65,10 @@ The chat module previously contained a hard-coded owner credential and could cre
 Other legacy components still perform direct client reads/writes to `chat_users`, including profile and administration workflows. The old Firestore Rules for `psychic-origin-5kpr3` have not been retrieved or verified, and client-side admin writes have not yet all been converted to server-authorized operations. This is a separate remaining security task, not something the new login route alone resolves.
 
 The route is code in the repository, not proof that the production Firebase Function or legacy Firestore Rules have been deployed. Until the steps above are complete, point 6 remains **partially implemented, not production-complete**.
+
+
+## Update: browser-side legacy password fallback removed
+
+The legacy login form now always calls `POST /api/rustylub-auth/login-legacy`. It no longer reads `chat_users/{username}` from the browser, verifies a password in client JavaScript, creates a legacy account directly, or writes password hashes from the browser. New registrations continue through the email-verification flow. This is a fail-closed change: the production Firebase Function and its cross-project permissions must be deployed before legacy sign-in can work.
+
+This change does **not** finish the full account-security migration. The application still reads and writes legacy profile/chat data in `chat_users` from components such as `App.tsx`, `ChatTab.tsx`, and `UserProfileModal.tsx`. Do not deploy a blanket deny rule until those operations are migrated and regression-tested. The new server-side login is only one part of the migration.
