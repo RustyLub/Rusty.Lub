@@ -30,36 +30,50 @@ if (!projectId) {
   throw new Error('Firebase Admin is not configured: set FIREBASE_PROJECT_ID or provide firebase-applet-config.json.');
 }
 
-const appName = 'rustylub-legacy-admin';
-const existingApp = getApps().find((item) => item.name === appName);
-
-function initializeAdminApp() {
-  if (existingApp) return existingApp;
-
+function getCredential() {
   const rawServiceAccount = process.env.RUSTYLUB_FIREBASE_SERVICE_ACCOUNT;
-  if (rawServiceAccount) {
-    let serviceAccount: Record<string, unknown>;
-    try {
-      serviceAccount = JSON.parse(rawServiceAccount);
-    } catch {
-      throw new Error('RUSTYLUB_FIREBASE_SERVICE_ACCOUNT must contain valid JSON.');
-    }
+  if (!rawServiceAccount) return applicationDefault();
 
-    return initializeApp({
-      credential: cert(serviceAccount as any),
-      projectId
-    }, appName);
+  let serviceAccount: Record<string, unknown>;
+  try {
+    serviceAccount = JSON.parse(rawServiceAccount);
+  } catch {
+    throw new Error('RUSTYLUB_FIREBASE_SERVICE_ACCOUNT must contain valid JSON.');
+  }
+  return cert(serviceAccount as any);
+}
+
+function getOrInitializeApp(name: string, targetProjectId: string) {
+  const existing = getApps().find((item) => item.name === name);
+  if (existing) {
+    if (existing.options.projectId && existing.options.projectId !== targetProjectId) {
+      throw new Error(
+        `Firebase Admin app "${name}" is already initialized for project "${existing.options.projectId}", expected "${targetProjectId}".`
+      );
+    }
+    return existing;
   }
 
   return initializeApp({
-    credential: applicationDefault(),
-    projectId
-  }, appName);
+    credential: getCredential(),
+    projectId: targetProjectId
+  }, name);
 }
 
-const adminApp = initializeAdminApp();
-
-// Bind Auth and Firestore to the same explicitly named project app. Do not
-// silently use whichever Firebase Admin app happened to initialize first.
+// Destination project: new Rusty.Lub authentication and profiles.
+const adminApp = getOrInitializeApp('rustylub-destination-admin', projectId);
 export const adminDb = getFirestore(adminApp, databaseId);
 export const adminAuth = getAuth(adminApp);
+
+// Legacy project: old chat_users records. It is deliberately a separate Admin
+// app so a migration can never accidentally read the destination database.
+// Grant the function runtime service account roles/datastore.user in this project.
+const legacyProjectId = process.env.FIREBASE_LEGACY_PROJECT_ID || 'psychic-origin-5kpr3';
+const legacyRawDatabaseId =
+  process.env.FIREBASE_LEGACY_DATABASE_ID ||
+  'ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59';
+const legacyDatabaseId =
+  legacyRawDatabaseId && legacyRawDatabaseId !== '(default)' ? legacyRawDatabaseId : undefined;
+
+const legacyApp = getOrInitializeApp('rustylub-legacy-source-admin', legacyProjectId);
+export const legacyAdminDb = getFirestore(legacyApp, legacyDatabaseId);
