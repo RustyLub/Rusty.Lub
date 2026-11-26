@@ -43,7 +43,6 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast,
     }
     const cleanUsername = usernameInput.trim().toLowerCase();
     const cleanPassword = passwordInput;
-    const cleanDisplayName = displayNameInput.trim();
     if (!/^[a-z0-9_-]{3,20}$/.test(cleanUsername)) {
       onToast(lang === 'ru' ? 'Логин: 3–20 символов, латиница, цифры, _ или -.' : 'Username must be 3–20 characters using letters, numbers, _ or -.', 'warning');
       return;
