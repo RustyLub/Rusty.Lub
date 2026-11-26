@@ -6,7 +6,8 @@ The website may be hosted as static files on REG.RU. In that setup, REG.RU does 
 
 - Export: `apiServer`
 - Region: `us-central1`
-- Health check: `https://us-central1-rustylub.cloudfunctions.net/apiServer/api/health`
+- General health check: `https://us-central1-rustylub.cloudfunctions.net/apiServer/api/health`
+- Auth backend readiness: `https://us-central1-rustylub.cloudfunctions.net/apiServer/api/rustylub-auth/health` (must return HTTP 200 and `configured: true`)
 - Migration: `POST https://us-central1-rustylub.cloudfunctions.net/apiServer/api/rustylub-auth/migrate-legacy-profile`
 
 The frontend uses this URL by default. To override it at build time, set `VITE_RUSTYLUB_AUTH_API_BASE` to the function base URL, without a trailing slash.
@@ -22,7 +23,7 @@ firebase use rustylub
 firebase deploy --only functions:apiServer
 ```
 
-The repository's CI builds and checks the function bundle. It does not deploy production automatically.
+The repository's CI builds and checks the function bundle. It does not deploy production automatically. The secure email-registration flow checks the auth readiness endpoint before creating a Firebase account; do not bypass this check or manually create destination profiles if the endpoint is unavailable.
 
 ## Required cross-project access
 
@@ -32,10 +33,11 @@ Find the runtime service account configured for the deployed Cloud Function and 
 
 ## Validation after deployment
 
-1. Open the health-check URL; expect HTTP 200 and JSON with `status: "ok"`.
-2. In the site, sign in to the verified destination account.
-3. Enter the old account password and submit once.
-4. Confirm the POST returns HTTP 200 for a valid password or HTTP 401 for an invalid password. HTTP 404/405 indicates the function URL/deployment is not correctly configured.
-5. Verify the destination `auth_users/{uid}` document contains only the allowed profile fields and migration marker. The legacy record and its password/hash must remain unchanged.
+1. Open the general health-check URL; expect HTTP 200 and JSON with `status: "ok"`.
+2. Open the auth readiness URL; expect HTTP 200 and `configured: true`. HTTP 404 means the function is not deployed; HTTP 503 means the Admin SDK cannot reach/configure Firebase.
+3. In the site, create/sign in to the verified destination owner account using the reserved username `serustqs` and the verified email `cheater.cooperation@inbox.ru`.
+4. Enter the old `serustqs` password and submit once.
+5. Confirm the POST returns HTTP 200 for a valid password or HTTP 401 for an invalid password.
+6. Verify the destination `auth_users/{uid}` document contains the allowed profile fields, the migration marker and the server-assigned owner role. No password or password hash is copied to the destination project.
 
-The endpoint verifies the new Firebase ID token, verified destination email, legacy password, and destination profile before writing. It does not migrate role, VIP, block/scam flags, or credentials.
+The endpoint verifies the new Firebase ID token, verified destination email, legacy password, and destination profile before writing. Only the fixed owner account regains the `admin` role after both identity checks succeed. VIP flags, block/scam state and credentials are not migrated. If the legacy source record still contains a plaintext password, the successful migration converts it to PBKDF2-SHA256 and deletes the plaintext field; an existing password hash is not copied to the destination.
