@@ -122,6 +122,118 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
       return res.status(500).json({ message: 'Не удалось создать профиль. Проверьте настройки серверного Firebase.' });
     }
   });
+  // Existing legacy accounts are verified only on the server. A successful login
+  // creates a least-privilege destination identity; legacy roles/VIP flags are never trusted.
+  app.post('/api/rustylub-auth/login-legacy', async (req: any, res: any) => {
+    let createdUid: string | null = null;
+    try {
+      const username = String(req.body?.username || '').trim().toLowerCase();
+      const password = typeof req.body?.password === 'string' ? req.body.password : '';
+      if (!/^[a-z0-9_-]{3,20}$/.test(username) || !password || password.length > 128 || username === 'serustqs') {
+        return res.status(400).json({ message: 'Проверьте логин и пароль. Аккаунт владельца переносится отдельно.' });
+      }
+
+      const legacyRef = legacyAdminDb.collection('chat_users').doc(username);
+      const legacySnap = await legacyRef.get();
+      if (!legacySnap.exists) return res.status(401).json({ message: 'Неверный логин или пароль.' });
+      const legacy = legacySnap.data() || {};
+      if (legacy.isBlocked === true) return res.status(403).json({ message: 'Аккаунт заблокирован.' });
+
+      let passwordValid = false;
+      if (legacy.passwordAlgorithm === 'PBKDF2-SHA256' && typeof legacy.passwordHash === 'string' && typeof legacy.passwordSalt === 'string') {
+        const salt = Buffer.from(legacy.passwordSalt, 'hex');
+        const expected = Buffer.from(legacy.passwordHash, 'hex');
+        const actual = crypto.pbkdf2Sync(password, salt, 210000, 32, 'sha256');
+        passwordValid = expected.length === actual.length && crypto.timingSafeEqual(actual, expected);
+      } else if (typeof legacy.passwordHash === 'string' && typeof legacy.passwordSalt === 'string') {
+        const expected = Buffer.from(legacy.passwordHash, 'hex');
+        const actual = crypto.scryptSync(password, legacy.passwordSalt, 64);
+        passwordValid = expected.length === actual.length && crypto.timingSafeEqual(actual, expected);
+      } else if (typeof legacy.password === 'string') {
+        passwordValid = legacy.password === password;
+        if (passwordValid) {
+          const salt = crypto.randomBytes(16);
+          const hash = crypto.pbkdf2Sync(password, salt, 210000, 32, 'sha256');
+          await legacyRef.update({
+            passwordHash: hash.toString('hex'),
+            passwordSalt: salt.toString('hex'),
+            passwordAlgorithm: 'PBKDF2-SHA256',
+            password: FieldValue.delete()
+          });
+        }
+      }
+      if (!passwordValid) return res.status(401).json({ message: 'Неверный логин или пароль.' });
+
+      const { auth, db } = getServices();
+      const digest = crypto.createHash('sha256').update(username).digest('hex');
+      const uid = `legacy_${digest.slice(0, 40)}`;
+      const email = `legacy-${digest.slice(0, 24)}@legacy.rusty-lub.invalid`;
+      const displayName = (typeof legacy.displayName === 'string' ? legacy.displayName : username).slice(0, 40);
+      let authUser;
+      try {
+        authUser = await auth.getUser(uid);
+        if (authUser.disabled) return res.status(403).json({ message: 'Аккаунт заблокирован.' });
+      } catch (error: any) {
+        if (error?.code !== 'auth/user-not-found') throw error;
+        authUser = await auth.createUser({ uid, email, emailVerified: true, displayName, disabled: false });
+        createdUid = uid;
+      }
+
+      const profileRef = db.collection('auth_users').doc(uid);
+      const usernameRef = db.collection('auth_usernames').doc(username);
+      const allowedProfile = {
+        photoURL: typeof legacy.photoURL === 'string' ? legacy.photoURL.slice(0, 2048) : '',
+        avatarClass: typeof legacy.avatarClass === 'string' ? legacy.avatarClass.slice(0, 80) : 'whiteout',
+        gender: legacy.gender === 'female' ? 'female' : 'male',
+        bio: typeof legacy.bio === 'string' ? legacy.bio.slice(0, 500) : '',
+        clanTag: typeof legacy.clanTag === 'string' ? legacy.clanTag.slice(0, 24) : '',
+        hoursPlayed: Number.isFinite(Number(legacy.hoursPlayed)) ? Math.max(0, Math.min(100000, Number(legacy.hoursPlayed))) : 0,
+        playstyle: typeof legacy.playstyle === 'string' ? legacy.playstyle.slice(0, 500) : '',
+        favoriteWeapon: typeof legacy.favoriteWeapon === 'string' ? legacy.favoriteWeapon.slice(0, 80) : '',
+        steamId: typeof legacy.steamId === 'string' ? legacy.steamId.slice(0, 32) : '',
+        steamName: typeof legacy.steamName === 'string' ? legacy.steamName.slice(0, 80) : '',
+        steamAvatar: typeof legacy.steamAvatar === 'string' ? legacy.steamAvatar.slice(0, 2048) : '',
+        customTheme: typeof legacy.customTheme === 'string' ? legacy.customTheme.slice(0, 40) : 'default'
+      };
+      await db.runTransaction(async (transaction) => {
+        const [profileSnap, usernameSnap] = await Promise.all([
+          transaction.get(profileRef),
+          transaction.get(usernameRef)
+        ]);
+        if (usernameSnap.exists && usernameSnap.get('uid') !== uid) {
+          throw new Error('Этот логин уже связан с другим аккаунтом.');
+        }
+        if (profileSnap.exists && profileSnap.get('username') !== username) {
+          throw new Error('Профиль старого аккаунта уже связан с другим логином.');
+        }
+        if (!usernameSnap.exists) transaction.create(usernameRef, { uid, username, createdAt: FieldValue.serverTimestamp() });
+        if (!profileSnap.exists) {
+          transaction.create(profileRef, {
+            uid, username, displayName, email, role: 'user', isBlocked: false,
+            legacyLoginMigrated: true, ...allowedProfile,
+            createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+          });
+        } else {
+          transaction.update(profileRef, { lastLegacyLoginAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp() });
+        }
+      });
+
+      const customToken = await auth.createCustomToken(uid);
+      const saved = await profileRef.get();
+      return res.json({
+        customToken,
+        profile: { uid, ...(saved.data() || {}) }
+      });
+    } catch (error) {
+      if (createdUid) {
+        try { await getServices().auth.deleteUser(createdUid); } catch { /* best-effort cleanup */ }
+      }
+      console.error('[RustyLub auth] Legacy login failed:', error instanceof Error ? error.message : 'unknown');
+      const message = error instanceof Error && error.message.includes('уже') ? error.message : 'Не удалось выполнить вход. Проверьте данные и попробуйте позже.';
+      return res.status(503).json({ message });
+    }
+  });
+
   // One-time legacy profile migration. The old password is verified on the server
   // against the legacy Firestore record; no password/hash is copied to the new project.
   app.post('/api/rustylub-auth/migrate-legacy-profile', async (req: any, res: any) => {
