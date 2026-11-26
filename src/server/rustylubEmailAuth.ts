@@ -205,7 +205,7 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
         legacyProfileMigratedAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp()
       };
-      // Privileged role, VIP flags, block/scam state and all credentials are intentionally excluded.
+      // Only the fixed owner identity regains its administrator role after both the new email and legacy password are verified. VIP flags, block/scam state and credentials are never migrated.
       await profileRef.update(migrated);
       const publicProfile = Object.fromEntries(
         Object.entries(migrated).filter(([key]) => !key.endsWith('At') && key !== 'updatedAt')
