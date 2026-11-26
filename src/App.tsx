@@ -433,6 +433,7 @@ export default function App() {
       return null;
     }
   });
+  const [verifiedAuthProfile, setVerifiedAuthProfile] = useState<any>(null);
   useEffect(() => {
     let active = true;
     const unsubscribe = onRustyLubAuthStateChanged(rustylubAuth, async (firebaseUser) => {
@@ -505,7 +506,6 @@ export default function App() {
   const [onlineCount, setOnlineCount] = useState<number>(0);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [emailAuthReady] = useState(true);
-  const [verifiedAuthProfile, setVerifiedAuthProfile] = useState<any>(null);
   const hasVerifiedAuthProfile = currentUser?.authProvider === 'firebase-email' && verifiedAuthProfile?.uid === currentUser.uid;
   const isAdmin = Boolean(hasVerifiedAuthProfile && ['admin', 'owner'].includes(String(verifiedAuthProfile?.role || '')));
 
