@@ -2604,10 +2604,6 @@ export default function App() {
                 user={currentUser}
                 isAdmin={isAdmin}
                 isVip={isVip} 
-                onUserLogin={(user) => {
-                  setCurrentUser(user);
-                  localStorage.setItem('rust_survivor_user', JSON.stringify(user));
-                }}
                 onUserLogout={() => {
                   if (currentUser?.authProvider === 'firebase-email') void logoutFromRustyLub();
                   setCurrentUser(null);
