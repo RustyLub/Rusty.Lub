@@ -71,7 +71,7 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
       const termsAccepted = req.body?.termsAccepted === true;
       const termsVersion = String(req.body?.termsVersion || '');
       const termsLanguage = String(req.body?.termsLanguage || '');
-      if (!termsAccepted || termsVersion !== '2.5' || !['ru', 'en'].includes(termsLanguage)) {
+      if (!termsAccepted || termsVersion !== '2.6' || !['ru', 'en'].includes(termsLanguage)) {
         return res.status(400).json({ message: 'Для завершения регистрации необходимо принять действующую редакцию пользовательского соглашения.' });
       }
       if (!/^[a-z0-9_-]{3,20}$/.test(username) || username === 'serustqs') {
