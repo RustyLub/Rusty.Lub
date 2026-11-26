@@ -1,4 +1,7 @@
 import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  reload,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithCustomToken,
@@ -38,10 +41,55 @@ function profileRef(uid: string) {
   return doc(rustylubDb, 'auth_users', uid);
 }
 
-export async function completeRegistration(user: User, username: string, displayName: string) {
-  await requireSignedInUser(user);
-  throw new Error('Регистрация должна выполняться через защищённый серверный endpoint.');
+export async function completeRegistration(
+  user: User,
+  username: string,
+  displayName: string,
+  termsLanguage: 'ru' | 'en'
+) {
+  await reload(user);
+  if (!user.emailVerified) {
+    throw new Error('Подтвердите email по ссылке из письма, затем нажмите кнопку завершения регистрации.');
+  }
+  const token = await user.getIdToken(true);
+  const apiBase = String(import.meta.env.VITE_RUSTYLUB_AUTH_API_BASE || 'https://us-central1-rustylub.cloudfunctions.net/apiServer').replace(/\\/+$/, '');
+  const response = await fetch(`${apiBase}/api/rustylub-auth/profile`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    cache: 'no-store',
+    body: JSON.stringify({
+      username: username.trim().toLowerCase(),
+      displayName: displayName.trim(),
+      termsAccepted: true,
+      termsVersion: '2.5',
+      termsLanguage
+    })
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload.profile) {
+    throw new Error(typeof payload.message === 'string' ? payload.message : 'Не удалось завершить регистрацию.');
+  }
+  return payload as { success: boolean; profile: RustyLubEmailProfile };
+}
 
+export async function registerWithEmail(email: string, password: string) {
+  let user: User;
+  try {
+    const credential = await createUserWithEmailAndPassword(rustylubAuth, email.trim().toLowerCase(), password);
+    user = credential.user;
+  } catch (error: any) {
+    if (error?.code !== 'auth/email-already-in-use') throw error;
+    const credential = await signInWithEmailAndPassword(rustylubAuth, email.trim().toLowerCase(), password);
+    user = credential.user;
+  }
+  await reload(user);
+  if (!user.emailVerified) {
+    await sendEmailVerification(user);
+  }
+  return user;
 }
 
 export async function getEmailAuthProfile(user: User) {
@@ -59,6 +107,11 @@ export async function getEmailAuthProfile(user: User) {
 
 export async function loginWithEmail(email: string, password: string) {
   const credential = await signInWithEmailAndPassword(rustylubAuth, email.trim().toLowerCase(), password);
+  await reload(credential.user);
+  if (!credential.user.emailVerified) {
+    await signOut(rustylubAuth);
+    throw new Error('Подтвердите email по ссылке из письма, прежде чем входить в аккаунт.');
+  }
   await requireSignedInUser(credential.user);
   const snapshot = await getDoc(profileRef(credential.user.uid));
   if (!snapshot.exists()) {
