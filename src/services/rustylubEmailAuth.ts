@@ -93,6 +93,11 @@ export async function registerWithEmail(email: string, password: string) {
 }
 
 export async function getEmailAuthProfile(user: User) {
+  await reload(user);
+  if (!user.emailVerified) {
+    await signOut(rustylubAuth);
+    return null;
+  }
   await requireSignedInUser(user);
   const snapshot = await getDoc(profileRef(user.uid));
   if (!snapshot.exists()) return null;
