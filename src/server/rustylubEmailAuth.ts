@@ -3,7 +3,7 @@ import { initializeApp, cert, applicationDefault, getApps } from 'firebase-admin
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import crypto from 'node:crypto';
-import { adminDb as legacyAdminDb } from '../lib/firebase-admin';
+import { legacyAdminDb } from '../lib/firebase-admin';
 
 const PROJECT_ID = 'rustylub';
 const DATABASE_ID = 'ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59';
