@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { deleteField } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, User, Lock, Crosshair, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
 import { 
@@ -18,9 +19,10 @@ interface AuthModalProps {
   lang: 'ru' | 'en';
   onUserLogin: (user: CustomUser) => void;
   onToast: (msg: string, type: 'success' | 'warning' | 'error') => void;
+  onSwitchToEmailAuth: () => void;
 }
 
-export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast, onSwitchToEmailAuth }: AuthModalProps) {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
@@ -117,7 +119,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
             const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(cleanPassword), 'PBKDF2', false, ['deriveBits']);
             const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, key, 256);
             const hashHex = Array.from(new Uint8Array(bits), b => b.toString(16).padStart(2, '0')).join('');
-            await setDoc(userRef, { passwordHash: hashHex, passwordSalt: saltHex, passwordAlgorithm: 'PBKDF2-SHA256', password: null }, { merge: true });
+            await setDoc(userRef, { passwordHash: hashHex, passwordSalt: saltHex, passwordAlgorithm: 'PBKDF2-SHA256', password: deleteField() }, { merge: true });
           }
         }
         if (!passwordValid) {
@@ -339,6 +341,9 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
               ? (lang === 'ru' ? 'Нет аккаунта? Переключитесь на регистрацию выше.' : 'New here? Choose Register above.')
               : (lang === 'ru' ? 'Уже зарегистрированы? Переключитесь на вход выше.' : 'Already registered? Choose Login above.')}
           </p>
+          <button type="button" onClick={onSwitchToEmailAuth} className="w-full border border-orange-500/30 px-4 py-3 text-xs font-semibold text-orange-300 transition hover:border-orange-400 hover:bg-orange-500/5">
+            {lang === 'ru' ? 'Перейти на защищённый вход по email' : 'Switch to secure email sign-in'}
+          </button>
         </div>
         </section>
       </motion.div>
