@@ -58,4 +58,10 @@ Before enabling it in production:
 6. Set `VITE_LEGACY_AUTH_API_ENABLED=true` in the production build and verify sign-in, sign-out, restored sessions, account data, and privilege checks.
 7. Only after successful production verification, remove the temporary direct-client compatibility path and deploy the restrictive legacy Firestore Rules.
 
+Additional audit finding: `chat_users` is not an authentication-only collection. The existing application still uses it for profile editing, chat membership, friend requests, moderation, VIP status, voice presence, and admin screens. Therefore, a blanket client deny on `chat_users` would break existing features. Those functions need to be moved to authenticated server endpoints or redesigned around a separate public profile collection before tightening the legacy project's Rules.
+
+The chat module previously contained a hard-coded owner credential and could create/recreate the owner account from client code. That automatic account creation and the chat-local plaintext-password registration/login handler have now been removed; the chat opens the shared site authentication modal instead. The old owner credential must be treated as compromised because it existed in public source history and must be rotated. Admin/VIP controls in the chat and account/profile modals now receive privilege state from the App's Firebase-verified profile instead of trusting a UID/email string or local profile role.
+
+Other legacy components still perform direct client reads/writes to `chat_users`, including profile and administration workflows. The old Firestore Rules for `psychic-origin-5kpr3` have not been retrieved or verified, and client-side admin writes have not yet all been converted to server-authorized operations. This is a separate remaining security task, not something the new login route alone resolves.
+
 The route is code in the repository, not proof that the production Firebase Function or legacy Firestore Rules have been deployed. Until the steps above are complete, point 6 remains **partially implemented, not production-complete**.
