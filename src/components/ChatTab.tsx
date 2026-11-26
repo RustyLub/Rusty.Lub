@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { hasActiveVipSubscription } from '../utils/vip';
 import { 
   db, 
   collection, 
@@ -67,6 +66,8 @@ interface ChatTabProps {
   onToast: (msg: string, type: 'success' | 'error' | 'warning') => void;
   onOpenAuth?: () => void;
   onOpenClanBoard?: () => void;
+  isAdmin?: boolean;
+  isVip?: boolean;
 }
 
 interface Message {
@@ -685,16 +686,9 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
     };
   }, [user]);
 
-  // Check if user is Admin
-  const isAdmin = user && (user.uid === 'serustqs' || user.email === 'misterzet556@gmail.com' || user.role === 'admin');
-
-  // Check if current user is VIP Subscriber or Admin
-  const isCurrentVipSub = !!user && (
-    user.uid === 'serustqs' ||
-    user.role === 'admin' ||
-    user.email === 'misterzet556@gmail.com' ||
-    hasActiveVipSubscription(usersMap[user.uid] || user)
-  );
+  // Privileges come only from App's Firebase-verified profile, never from local user fields.
+  const isAdmin = verifiedIsAdmin;
+  const isCurrentVipSub = verifiedIsAdmin || verifiedIsVip;
 
   const filteredMessages = messages.filter((msg: any) => {
     const msgChannel = msg.channel || 'general';
