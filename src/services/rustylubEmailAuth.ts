@@ -64,7 +64,7 @@ export async function completeRegistration(
       username: username.trim().toLowerCase(),
       displayName: displayName.trim(),
       termsAccepted: true,
-      termsVersion: '2.5',
+      termsVersion: '2.6',
       termsLanguage
     })
   });
