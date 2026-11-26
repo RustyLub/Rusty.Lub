@@ -36,8 +36,12 @@ function getServices() {
 
 export function registerRustyLubEmailAuthRoutes(app: Express) {
   app.get('/api/rustylub-auth/health', (_req, res) => {
-    const configured = Boolean(process.env.RUSTYLUB_FIREBASE_SERVICE_ACCOUNT || process.env.GOOGLE_APPLICATION_CREDENTIALS);
-    res.json({ service: 'rustylub-email-auth', configured });
+    try {
+      getServices();
+      return res.json({ service: 'rustylub-email-auth', configured: true });
+    } catch {
+      return res.status(503).json({ service: 'rustylub-email-auth', configured: false });
+    }
   });
 
   app.get('/api/rustylub-auth/profile', async (req: any, res: any) => {
