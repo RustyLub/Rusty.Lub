@@ -10,7 +10,6 @@ import axios from "axios";
 import { 
   db as clientDb, 
   getDoc as clientGetDoc, 
-  setDoc as clientSetDoc,
   doc as clientDoc,
   collection as clientCollection,
   query as clientQuery,
@@ -18,7 +17,6 @@ import {
   getDocs as clientGetDocs,
   addDoc as clientAddDoc,
   deleteDoc as clientDeleteDoc,
-  serverTimestamp as clientServerTimestamp,
   orderBy as clientOrderBy,
   limit as clientLimit
 } from "./src/lib/firebase-client-on-server";
@@ -136,18 +134,12 @@ async function startServer() {
     });
   };
 
-  function userSnapToData(snap: any) {
-    return snap.exists() ? snap.data() : null;
-  }
-
-
   app.use(express.json());
   registerEmailAuthRoutes(app);
   registerRustyLubEmailAuthRoutes(app);
   registerLisSkinsRoutes(app);
 
-  // CMS endpoints use verified Firebase ID tokens and server-side role records.
-  // The legacy verifyToken middleware accepts caller-supplied UID headers; do not use it here.
+  // CMS endpoints also use verified Firebase ID tokens and server-side role records.
   const verifyCmsIdentity = async (req: any, res: any, next: any) => {
     try {
       const authHeader = String(req.headers.authorization || '');
