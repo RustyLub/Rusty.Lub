@@ -113,8 +113,8 @@ export default function CookieConsentManager({ lang, settingsOpen, onSettingsClo
             </div>
             <div className="flex flex-col-reverse gap-2 border-t border-white/10 p-4 sm:flex-row sm:justify-end">
               <button type="button" onClick={closeSettings} className="min-h-10 border border-slate-700 px-4 py-2 text-xs font-bold text-slate-300 hover:text-white">{ru ? 'Закрыть' : 'Close'}</button>
-              <button type="button" onClick={() => save(false)} className="min-h-10 border border-slate-500 px-4 py-2 text-xs font-bold text-white hover:border-white">{ru ? 'Только необходимые' : 'Essential only'}</button>
-              <button type="button" onClick={() => save(false)} className="min-h-10 border border-[#d65a2c] bg-[#c94b2b] px-4 py-2 text-xs font-bold text-white hover:bg-[#e05b35]">{ru ? 'Сохранить настройки' : 'Save settings'}</button>
+              <button type="button" onClick={() => save()} className="min-h-10 border border-slate-500 px-4 py-2 text-xs font-bold text-white hover:border-white">{ru ? 'Только необходимые' : 'Essential only'}</button>
+              <button type="button" onClick={() => save()} className="min-h-10 border border-[#d65a2c] bg-[#c94b2b] px-4 py-2 text-xs font-bold text-white hover:bg-[#e05b35]">{ru ? 'Сохранить настройки' : 'Save settings'}</button>
             </div>
           </div>
         </div>
