@@ -173,6 +173,9 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
       try {
         authUser = await auth.getUser(uid);
         if (authUser.disabled) return res.status(403).json({ message: 'Аккаунт заблокирован.' });
+        if (authUser.email !== email || authUser.emailVerified !== true) {
+          return res.status(409).json({ message: 'Идентификатор старого аккаунта уже занят.' });
+        }
       } catch (error: any) {
         if (error?.code !== 'auth/user-not-found') throw error;
         authUser = await auth.createUser({ uid, email, emailVerified: true, displayName, disabled: false });
@@ -203,6 +206,9 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
         if (usernameSnap.exists && usernameSnap.get('uid') !== uid) {
           throw new Error('Этот логин уже связан с другим аккаунтом.');
         }
+        if (profileSnap.exists && profileSnap.get('isBlocked') === true) {
+          throw new Error('Аккаунт заблокирован.');
+        }
         if (profileSnap.exists && profileSnap.get('username') !== username) {
           throw new Error('Профиль старого аккаунта уже связан с другим логином.');
         }
@@ -214,7 +220,13 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
             createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
           });
         } else {
-          transaction.update(profileRef, { lastLegacyLoginAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp() });
+          transaction.update(profileRef, {
+            role: 'user',
+            isVip: false,
+            isChatVip: false,
+            lastLegacyLoginAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp()
+          });
         }
       });
 
@@ -229,8 +241,9 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
         try { await getServices().auth.deleteUser(createdUid); } catch { /* best-effort cleanup */ }
       }
       console.error('[RustyLub auth] Legacy login failed:', error instanceof Error ? error.message : 'unknown');
-      const message = error instanceof Error && error.message.includes('уже') ? error.message : 'Не удалось выполнить вход. Проверьте данные и попробуйте позже.';
-      return res.status(503).json({ message });
+      const knownConflict = error instanceof Error && (error.message.includes('уже') || error.message === 'Аккаунт заблокирован.');
+      const message = knownConflict ? error.message : 'Не удалось выполнить вход. Проверьте данные и попробуйте позже.';
+      return res.status(knownConflict ? 409 : 503).json({ message });
     }
   });
 
