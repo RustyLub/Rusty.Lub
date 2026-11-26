@@ -2601,7 +2601,9 @@ export default function App() {
             >
               <ChatTab 
                 lang={lang} 
-                user={currentUser} 
+                user={currentUser}
+                isAdmin={isAdmin}
+                isVip={isVip} 
                 onUserLogin={(user) => {
                   setCurrentUser(user);
                   localStorage.setItem('rust_survivor_user', JSON.stringify(user));
