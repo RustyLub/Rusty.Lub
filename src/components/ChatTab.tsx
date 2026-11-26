@@ -1630,6 +1630,7 @@ export default function ChatTab({ lang, user, onUserLogout, onToast, onOpenAuth 
             onClose={() => setInspectUserId(null)}
             targetUserId={inspectUserId}
             currentUser={user}
+            currentUserIsAdmin={isAdmin}
             lang={lang}
             onToast={onToast}
           />
