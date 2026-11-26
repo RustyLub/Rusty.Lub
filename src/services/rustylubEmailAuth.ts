@@ -52,7 +52,7 @@ export async function completeRegistration(
     throw new Error('Подтвердите email по ссылке из письма, затем нажмите кнопку завершения регистрации.');
   }
   const token = await user.getIdToken(true);
-  const apiBase = String(import.meta.env.VITE_RUSTYLUB_AUTH_API_BASE || 'https://us-central1-rustylub.cloudfunctions.net/apiServer').replace(/\\/+$/, '');
+  const apiBase = String(import.meta.env.VITE_RUSTYLUB_AUTH_API_BASE || 'https://us-central1-rustylub.cloudfunctions.net/apiServer').replace(/\/+$/, '');
   const response = await fetch(`${apiBase}/api/rustylub-auth/profile`, {
     method: 'POST',
     headers: {
