@@ -2970,7 +2970,6 @@ export default function App() {
             onSwitchToEmailAuth={() => { setAuthModalOpen(false); setEmailAuthModalOpen(true); }}
             onUserLogin={(user) => {
               setCurrentUser(user);
-              setVerifiedAuthProfile(user);
               localStorage.setItem('rust_survivor_user', JSON.stringify(user));
             }}
             onToast={(msg, type) => {
@@ -2993,6 +2992,7 @@ export default function App() {
             onBackToLegacy={() => { setEmailAuthModalOpen(false); setAuthModalOpen(true); }}
             onUserLogin={(user) => {
               setCurrentUser(user);
+              setVerifiedAuthProfile(user);
               localStorage.setItem('rust_survivor_user', JSON.stringify(user));
             }}
             onToast={(msg, type) => {
