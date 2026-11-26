@@ -72,33 +72,28 @@ async function startServer() {
     }
   };
 
-  // Middleware for Admin only
+  // Admin access is granted only by the server-managed profile in the
+  // destination Firebase project. Never trust localStorage, caller-supplied
+  // role fields, legacy usernames, or email-address allowlists.
   const verifyAdmin = async (req: any, res: any, next: any) => {
     await verifyToken(req, res, async () => {
       try {
-        const uid = req.user?.uid;
-        if (uid === 'serustqs' || uid === 'admin' || req.user?.email === 'misterzet556@gmail.com' || req.user?.role === 'admin') {
-          req.user = { ...req.user, isAdmin: true };
-          return next();
+        if (req.user?.email_verified !== true) {
+          return res.status(403).json({ success: false, message: 'Forbidden: Verified email required' });
         }
-
-        const userDoc = await clientGetDoc(clientDoc(clientDb, 'chat_users', String(uid)));
-        const userData = userDoc.data();
-        
-        const isAdminUser = userData?.role === 'admin' || uid === 'serustqs' || req.user?.email === 'misterzet556@gmail.com';
-        
-        if (!isAdminUser) {
+        const uid = String(req.user?.uid || '');
+        if (!uid) {
+          return res.status(403).json({ success: false, message: 'Forbidden: Account identity missing' });
+        }
+        const profileSnap = await adminDb.collection('auth_users').doc(uid).get();
+        const profile = profileSnap.exists ? profileSnap.data() : null;
+        if (!profile || !['admin', 'owner'].includes(String(profile.role || ''))) {
           return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
         }
-        
-        req.user = { ...req.user, ...userData, isAdmin: true };
-        next();
-      } catch (err) {
-        if (req.user?.uid === 'serustqs' || req.user?.uid === 'admin' || req.user?.email === 'misterzet556@gmail.com' || req.user?.role === 'admin') {
-          req.user = { ...req.user, isAdmin: true };
-          return next();
-        }
-        return res.status(500).json({ success: false, message: 'Internal server error during authorization' });
+        req.user = { ...req.user, isAdmin: true, verifiedProfileRole: profile.role };
+        return next();
+      } catch (error) {
+        return res.status(403).json({ success: false, message: 'Forbidden: Could not verify admin status' });
       }
     });
   };
