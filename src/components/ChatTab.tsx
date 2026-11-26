@@ -14,9 +14,6 @@ import {
   setDoc,
   updateDoc,
   getDoc,
-  getDocs,
-  deleteDoc,
-  writeBatch,
   handleFirestoreError,
   OperationType
 } from '../firebase';
@@ -278,61 +275,6 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
     bannedToastError: { ru: 'Ошибка! Ваш аккаунт заблокирован создателем!', en: 'Access Denied! Your account has been banned by the Founder.' }
   };
 
-  // Setup initial admin account on load if it doesn't exist & Purge old chat if requested
-  useEffect(() => {
-    const setupAdminAndPurge = async () => {
-      try {
-        // Setup new admin
-        const adminRef = doc(db, 'chat_users', 'serustqs');
-        const defaultAvatar = SURVIVOR_AVATARS.find(a => a.id === 'heavy_plate') || SURVIVOR_AVATARS[0];
-        await setDoc(adminRef, {
-          username: 'serustqs',
-          password: 'Duf@#13@4fhe34',
-          displayName: 'SEO-RustyLub',
-          avatarClass: 'heavy_plate',
-          photoURL: defaultAvatar.url,
-          role: 'admin',
-          isBlocked: false,
-          createdAt: new Date().toISOString()
-        });
-
-        // Clean up fraudulent mock-admin accounts that mimicking logins created
-        try {
-          await deleteDoc(doc(db, 'chat_users', 'seo-rustylub'));
-          await deleteDoc(doc(db, 'chat_users', 'seo-rusty'));
-        } catch (e) {
-          console.warn("Error deleting fraud accounts:", e);
-        }
-
-        // Set default gender 'male' for all existing users
-        const usersSnap = await getDocs(collection(db, 'chat_users'));
-        usersSnap.forEach(async (userDoc) => {
-          const userData = userDoc.data();
-          if (!userData.gender) {
-            await setDoc(userDoc.ref, { gender: 'male' }, { merge: true });
-          }
-        });
-
-        // Trigger one-time chat purge to clear existing messages completely
-        const purgeMetaRef = doc(db, 'chat_metadata', 'purge_req_v1');
-        const purgeMetaSnap = await getDoc(purgeMetaRef);
-        if (!purgeMetaSnap.exists()) {
-          const messagesSnapshot = await getDocs(collection(db, 'messages'));
-          const batch = writeBatch(db);
-          messagesSnapshot.forEach((doc) => {
-            batch.delete(doc.ref);
-          });
-          await batch.commit();
-          await setDoc(purgeMetaRef, { purged: true });
-          console.log("Chat purged completely as requested by SEO-RustyLub.");
-        }
-      } catch (err) {
-        console.warn("Could not setup admin/purge:", err);
-      }
-    };
-    setupAdminAndPurge();
-  }, []);
-
   // Real-time subscribe to registered users to dynamically retrieve VIP status, blocks, and roles
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'chat_users'), (snapshot) => {
@@ -392,190 +334,18 @@ export default function ChatTab({ lang, user, onUserLogin, onUserLogout, onToast
 
 
 
-  // Auth Submit Handler (Login or Register)
-  const handleAuthSubmit = async (e: React.FormEvent) => {
+  // Account credentials are managed by the shared site authentication flow.
+  // This chat panel must never create users, assign roles, or read password fields.
+  const handleAuthSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanUsername = usernameInput.trim().toLowerCase();
-    const cleanPassword = passwordInput.trim();
-    const cleanDisplayName = displayNameInput.trim() || usernameInput.trim();
-
-    if (cleanUsername.length < 3 || cleanUsername.length > 20 || !/^[a-zA-Z0-9_\-]+$/.test(cleanUsername)) {
-      onToast(t.validationUser[lang], 'warning');
+    if (onOpenAuth) {
+      onOpenAuth();
       return;
     }
-
-    if (cleanPassword.length < 4) {
-      onToast(t.validationPass[lang], 'warning');
-      return;
-    }
-
-    setAuthLoading(true);
-
-    try {
-      const userRef = doc(db, 'chat_users', cleanUsername);
-      const userSnap = await getDoc(userRef);
-
-      if (authMode === 'register') {
-        // Register Mode
-        if (userSnap.exists()) {
-          onToast(lang === 'ru' ? 'Этот логин уже занят!' : 'Username is already taken!', 'error');
-          setAuthLoading(false);
-          return;
-        }
-
-        if (cleanDisplayName.length < 3 || cleanDisplayName.length > 40) {
-          onToast(t.validationName[lang], 'warning');
-          setAuthLoading(false);
-          return;
-        }
-
-        // Check if the displayName (username/nickname) is already registered
-        const nameQuery = query(
-          collection(db, 'chat_users'),
-          where('displayName', '==', cleanDisplayName)
-        );
-        const nameQuerySnap = await getDocs(nameQuery);
-        if (!nameQuerySnap.empty) {
-          onToast(
-            lang === 'ru' ? 'Этот позывной (никнейм) уже занят!' : 'This callsign is already taken!',
-            'error'
-          );
-          setAuthLoading(false);
-          return;
-        }
-
-        // Case-insensitive double check for any matching display name or username
-        const allUsersSnap = await getDocs(collection(db, 'chat_users'));
-        let isNameTaken = false;
-        allUsersSnap.forEach((doc) => {
-          const data = doc.data();
-          if (data.displayName && data.displayName.toLowerCase() === cleanDisplayName.toLowerCase()) {
-            isNameTaken = true;
-          }
-          if (data.username && data.username.toLowerCase() === cleanUsername.toLowerCase()) {
-            isNameTaken = true;
-          }
-        });
-
-        if (isNameTaken) {
-          onToast(
-            lang === 'ru' ? 'Этот логин или позывной уже занят!' : 'This login or callsign is already taken!',
-            'error'
-          );
-          setAuthLoading(false);
-          return;
-        }
-
-        const matchedAvatar = SURVIVOR_AVATARS.find(a => a.id === selectedAvatar) || SURVIVOR_AVATARS[0];
-        
-        // Prevent mimicry of 'seo-rustylub' and related admin terms
-        const lowerUser = cleanUsername.toLowerCase();
-        const lowerDisplay = cleanDisplayName.toLowerCase();
-        const isMimic = 
-          lowerUser.includes('rusty') || 
-          lowerUser.includes('seo') || 
-          lowerDisplay.includes('rusty') || 
-          lowerDisplay.includes('seo');
-
-        if (isMimic && cleanUsername !== 'serustqs') {
-          onToast(
-            lang === 'ru' 
-              ? 'Логины и никнеймы, содержащие SEO или RUSTY, защищены от копирования!' 
-              : 'Usernames and nicknames containing SEO or RUSTY are protected from mimicry!',
-            'error'
-          );
-          setAuthLoading(false);
-          return;
-        }
-
-        // Automatically make admin accounts
-        const isSystemAdmin = cleanUsername === 'serustqs';
-
-        const newUserData = {
-          username: cleanUsername,
-          password: cleanPassword,
-          displayName: isSystemAdmin ? 'SEO-RustyLub' : cleanDisplayName,
-          avatarClass: isSystemAdmin ? 'heavy_plate' : selectedAvatar,
-          photoURL: matchedAvatar.url,
-          gender: gender,
-          role: isSystemAdmin ? 'admin' : 'user',
-          isBlocked: false,
-          createdAt: new Date().toISOString()
-        };
-
-        await setDoc(userRef, newUserData);
-        
-        onUserLogin({
-          uid: cleanUsername,
-          displayName: newUserData.displayName,
-          photoURL: newUserData.photoURL,
-          avatarClass: newUserData.avatarClass
-        });
-
-        onToast(
-          lang === 'ru' ? 'Регистрация прошла успешно! Вы в эфире.' : 'Registration successful! Connected to beacon.',
-          'success'
-        );
-      } else {
-        // Login Mode
-        let dbUser = userSnap.exists() ? userSnap.data() : null;
-
-        // Auto-recreate admin 'serustqs' if they don't exist in Firestore
-        if (!dbUser && cleanUsername === 'serustqs') {
-          const matchedAvatar = SURVIVOR_AVATARS.find(a => a.id === 'heavy_plate') || SURVIVOR_AVATARS[0];
-          const newUserData = {
-            username: 'serustqs',
-            password: cleanPassword,
-            displayName: 'SEO-RustyLub',
-            avatarClass: 'heavy_plate',
-            photoURL: matchedAvatar.url,
-            gender: 'male',
-            role: 'admin',
-            isBlocked: false,
-            isVip: true,
-            isChatVip: true,
-            createdAt: new Date().toISOString()
-          };
-          await setDoc(userRef, newUserData);
-          dbUser = newUserData;
-        }
-
-        if (!dbUser) {
-          onToast(lang === 'ru' ? 'Пользователь не найден!' : 'Survivor callsign not registered!', 'error');
-          setAuthLoading(false);
-          return;
-        }
-
-        if (dbUser.password !== cleanPassword) {
-          onToast(lang === 'ru' ? 'Неверный пароль!' : 'Incorrect credentials!', 'error');
-          setAuthLoading(false);
-          return;
-        }
-
-        if (dbUser.isBlocked) {
-          onToast(t.bannedToastError[lang], 'error');
-          setAuthLoading(false);
-          return;
-        }
-
-        onUserLogin({
-          uid: dbUser.username,
-          displayName: dbUser.displayName,
-          photoURL: dbUser.photoURL,
-          avatarClass: dbUser.avatarClass
-        });
-
-        onToast(
-          lang === 'ru' ? `С возвращением, ${dbUser.displayName}!` : `Welcome back, ${dbUser.displayName}!`,
-          'success'
-        );
-      }
-    } catch (error) {
-      console.error("Auth process failure:", error);
-      onToast(lang === 'ru' ? 'Ошибка базы данных.' : 'Database connectivity error.', 'error');
-    } finally {
-      setAuthLoading(false);
-    }
+    onToast(
+      lang === 'ru' ? 'Откройте вход в аккаунт через главное меню сайта.' : 'Open account sign-in from the website menu.',
+      'warning'
+    );
   };
 
   // Sync messages from Firestore - public access
