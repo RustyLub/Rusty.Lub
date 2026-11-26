@@ -73,7 +73,7 @@ export default function Footer({ lang, onNavigate, onOpenCabinet, onOpenDonation
         </div>
 
         <div className="flex flex-col gap-3 pt-6 text-xs text-[#778294] sm:flex-row sm:items-center sm:justify-between">
-          <span>© 2026 Rusty.Lub</span>
+          <span>© 2026 Rusty.Lub · {ru ? 'Независимый фанатский ресурс; игровые материалы принадлежат их правообладателям.' : 'Independent fan resource; game materials belong to their respective rights holders.'}</span>
           <span>{ru ? 'Связь по вопросам проекта:' : 'Project contact:'} <a className="text-[#aeb8c5] hover:text-[#f28a24]" href="mailto:rusty.lub-slq@inbox.ru">rusty.lub-slq@inbox.ru</a></span>
           <span className="font-mono">INDUSTRIAL STEEL · R.L.</span>
         </div>
