@@ -19,6 +19,23 @@ import { rustylubAuth } from '../lib/rustylub-auth/firebase';
 const DATABASE_ID = 'ai-studio-rustylub-2e66bd8d-85dd-4eba-bb83-f354ddc97d59';
 const rustylubDb: Firestore = getFirestore(rustylubAuth.app, DATABASE_ID);
 
+function getAuthApiBase() {
+  return String(import.meta.env.VITE_RUSTYLUB_AUTH_API_BASE || 'https://us-central1-rustylub.cloudfunctions.net/apiServer').replace(/\/+$/, '');
+}
+
+async function ensureAuthApiReady() {
+  let response: Response;
+  try {
+    response = await fetch(`${getAuthApiBase()}/api/rustylub-auth/health`, { cache: 'no-store' });
+  } catch {
+    throw new Error('Сервер защищённой регистрации пока недоступен. Попробуйте позже.');
+  }
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || payload.configured !== true) {
+    throw new Error('Сервер защищённой регистрации ещё не настроен. Новый аккаунт пока нельзя создать.');
+  }
+}
+
 export interface RustyLubEmailProfile {
   uid: string;
   username: string;
@@ -63,7 +80,7 @@ export async function completeRegistration(
     throw new Error('Подтвердите email по ссылке из письма, затем нажмите кнопку завершения регистрации.');
   }
   const token = await user.getIdToken(true);
-  const apiBase = String(import.meta.env.VITE_RUSTYLUB_AUTH_API_BASE || 'https://us-central1-rustylub.cloudfunctions.net/apiServer').replace(/\/+$/, '');
+  const apiBase = getAuthApiBase();
   const response = await fetch(`${apiBase}/api/rustylub-auth/profile`, {
     method: 'POST',
     headers: {
@@ -87,6 +104,7 @@ export async function completeRegistration(
 }
 
 export async function registerWithEmail(email: string, password: string) {
+  await ensureAuthApiReady();
   let user: User;
   try {
     const credential = await createUserWithEmailAndPassword(rustylubAuth, email.trim().toLowerCase(), password);
