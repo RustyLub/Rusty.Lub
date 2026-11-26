@@ -31,6 +31,17 @@ export interface RustyLubEmailProfile {
   isVip?: boolean;
   isChatVip?: boolean;
   vipUntil?: string;
+  gender?: 'male' | 'female';
+  bio?: string;
+  clanTag?: string;
+  hoursPlayed?: number;
+  playstyle?: string;
+  favoriteWeapon?: string;
+  steamId?: string;
+  steamName?: string;
+  steamAvatar?: string;
+  customTheme?: string;
+  legacyProfileMigrated?: boolean;
 }
 
 async function requireSignedInUser(user: User) {
