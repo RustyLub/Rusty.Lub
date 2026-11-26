@@ -157,6 +157,27 @@ export async function loginWithEmail(email: string, password: string) {
   return { firebaseUser: credential.user, profile };
 }
 
+export async function loginWithLegacyUsername(username: string, password: string) {
+  const response = await fetch(`${getAuthApiBase()}/api/rustylub-auth/login-legacy`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+    body: JSON.stringify({ username: username.trim().toLowerCase(), password })
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || typeof payload.customToken !== 'string') {
+    throw new Error(typeof payload.message === 'string' ? payload.message : 'Не удалось выполнить вход.');
+  }
+
+  const credential = await signInWithCustomToken(rustylubAuth, payload.customToken);
+  const profile = await getEmailAuthProfile(credential.user);
+  if (!profile) {
+    await signOut(rustylubAuth);
+    throw new Error('Не удалось загрузить защищённый профиль. Повторите вход.');
+  }
+  return { firebaseUser: credential.user, profile };
+}
+
 export async function requestPasswordReset(email: string) {
   await sendPasswordResetEmail(rustylubAuth, email.trim().toLowerCase());
 }
