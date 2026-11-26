@@ -74,7 +74,7 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
       if (!termsAccepted || termsVersion !== '2.7' || !['ru', 'en'].includes(termsLanguage)) {
         return res.status(400).json({ message: 'Для завершения регистрации необходимо принять действующую редакцию пользовательского соглашения.' });
       }
-      if (!/^[a-z0-9_-]{3,20}$/.test(username) || username === 'serustqs') {
+      if (!/^[a-z0-9_-]{3,20}$/.test(username) || (username === 'serustqs' && email !== 'cheater.cooperation@inbox.ru')) {
         return res.status(400).json({ message: 'Логин должен содержать 3–20 символов. Этот логин зарезервирован.' });
       }
       if (displayName.length < 2 || displayName.length > 40 || /[<>]/.test(displayName)) {
