@@ -7,7 +7,8 @@ service cloud.firestore {
 
     function authenticatedEmail() {
       return signedIn()
-        && request.auth.token.email is string;
+        && request.auth.token.email is string
+        && request.auth.token.email_verified == true;
     }
 
     // Profile and username documents are created/managed only by the trusted
