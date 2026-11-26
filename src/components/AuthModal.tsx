@@ -1,14 +1,7 @@
 import { useState } from 'react';
-import { deleteField } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, User, Lock, Crosshair, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
-import { 
-  doc, 
-  getDoc, 
-  setDoc, 
-  db,
-  auth
-} from '../firebase';
+import { loginWithLegacyUsername } from '../services/rustylubEmailAuth';
 import { CUSTOM_AVATARS } from '../customAvatars';
 import { CustomUser } from '../types';
 import TermsModal from './TermsModal';
@@ -44,104 +37,47 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast,
       onSwitchToEmailAuth();
       return;
     }
-    if (authMode === 'register' && !acceptedTerms) {
-      onToast(lang === 'ru' ? 'Для регистрации необходимо принять пользовательское соглашение.' : 'You must accept the user agreement to register.', 'warning');
-      return;
-    }
+
     const cleanUsername = usernameInput.trim().toLowerCase();
     const cleanPassword = passwordInput;
-    const cleanDisplayName = displayNameInput.trim();
     if (!/^[a-z0-9_-]{3,20}$/.test(cleanUsername)) {
       onToast(lang === 'ru' ? 'Логин: 3–20 символов, латиница, цифры, _ или -.' : 'Username must be 3–20 characters using letters, numbers, _ or -.', 'warning');
       return;
     }
-    if (authMode === 'register' && cleanUsername === 'serustqs') {
-      onToast(lang === 'ru' ? 'Этот логин зарезервирован.' : 'This username is reserved.', 'warning');
+    if (!cleanPassword || cleanPassword.length > 128) {
+      onToast(lang === 'ru' ? 'Введите пароль.' : 'Enter your password.', 'warning');
       return;
     }
-    if (authMode === 'register' && (cleanDisplayName.length < 2 || cleanDisplayName.length > 32 || /[<>]/.test(cleanDisplayName))) {
-      onToast(lang === 'ru' ? 'Никнейм должен содержать 2–32 символа.' : 'Nickname must be 2–32 characters.', 'warning');
-      return;
-    }
-    if (cleanPassword.length < (authMode === 'register' ? 8 : 1) || cleanPassword.length > 128) {
-      onToast(lang === 'ru' ? (authMode === 'register' ? 'Пароль должен содержать от 8 до 128 символов.' : 'Введите пароль.') : (authMode === 'register' ? 'Password must be 8–128 characters.' : 'Enter your password.'), 'warning');
-      return;
-    }
-    if (authMode === 'register' && cleanPassword !== confirmPasswordInput) {
-      onToast(lang === 'ru' ? 'Пароли не совпадают.' : 'Passwords do not match.', 'warning');
-      return;
-    }
+
     setAuthLoading(true);
     try {
-      const userRef = doc(db, 'chat_users', cleanUsername);
-      const userSnap = await getDoc(userRef);
-      if (authMode === 'register') {
-        if (userSnap.exists()) {
-          onToast(lang === 'ru' ? 'Этот логин уже занят. Выберите другой.' : 'This username is already taken. Choose another.', 'warning');
-          return;
-        }
-        const matchedAvatar = CUSTOM_AVATARS.find(a => a.id === selectedAvatar) || CUSTOM_AVATARS[0];
-        const salt = crypto.getRandomValues(new Uint8Array(16));
-        const saltHex = Array.from(salt, b => b.toString(16).padStart(2, '0')).join('');
-        const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(cleanPassword), 'PBKDF2', false, ['deriveBits']);
-        const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, key, 256);
-        const hashHex = Array.from(new Uint8Array(bits), b => b.toString(16).padStart(2, '0')).join('');
-        await setDoc(userRef, {
-          username: cleanUsername, displayName: cleanDisplayName,
-          passwordHash: hashHex, passwordSalt: saltHex, passwordAlgorithm: 'PBKDF2-SHA256',
-          avatarClass: selectedAvatar, photoURL: matchedAvatar.url, gender,
-          role: 'user', isBlocked: false, createdAt: new Date().toISOString(),
-          termsAccepted: true,
-          termsVersion: TERMS_VERSION,
-          termsAcceptedAt: new Date().toISOString(),
-          termsLanguage: lang
-        });
-        onUserLogin({ uid: cleanUsername, displayName: cleanDisplayName, photoURL: matchedAvatar.url, avatarClass: selectedAvatar, gender, role: 'user' } as CustomUser);
-        onToast(lang === 'ru' ? 'Аккаунт создан!' : 'Account created!', 'success');
-      } else {
-        if (!userSnap.exists()) {
-          onToast(lang === 'ru' ? 'Неверный логин или пароль.' : 'Incorrect username or password.', 'error');
-          return;
-        }
-        const data = userSnap.data() as any;
-        if (data.isBlocked) {
-          onToast(lang === 'ru' ? 'Аккаунт заблокирован.' : 'This account is blocked.', 'error');
-          return;
-        }
-        let passwordValid = false;
-        if (data.passwordAlgorithm === 'PBKDF2-SHA256' && data.passwordHash && data.passwordSalt) {
-          const salt = Uint8Array.from(data.passwordSalt.match(/.{2}/g) || [], (byte: string) => parseInt(byte, 16));
-          const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(cleanPassword), 'PBKDF2', false, ['deriveBits']);
-          const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, key, 256);
-          const actual = Array.from(new Uint8Array(bits), b => b.toString(16).padStart(2, '0')).join('');
-          passwordValid = actual === data.passwordHash;
-        } else {
-          passwordValid = typeof data.password === 'string' && data.password === cleanPassword;
-          if (passwordValid) {
-            const salt = crypto.getRandomValues(new Uint8Array(16));
-            const saltHex = Array.from(salt, b => b.toString(16).padStart(2, '0')).join('');
-            const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(cleanPassword), 'PBKDF2', false, ['deriveBits']);
-            const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, key, 256);
-            const hashHex = Array.from(new Uint8Array(bits), b => b.toString(16).padStart(2, '0')).join('');
-            await setDoc(userRef, { passwordHash: hashHex, passwordSalt: saltHex, passwordAlgorithm: 'PBKDF2-SHA256', password: deleteField() }, { merge: true });
-          }
-        }
-        if (!passwordValid) {
-          onToast(lang === 'ru' ? 'Неверный логин или пароль.' : 'Incorrect username or password.', 'error');
-          return;
-        }
-        onUserLogin({
-          uid: cleanUsername, displayName: data.displayName || cleanUsername,
-          email: data.email || undefined, photoURL: data.photoURL || '',
-          avatarClass: data.avatarClass || 'whiteout', gender: data.gender || 'male',
-          role: data.role || 'user', isVip: Boolean(data.isVip), vipUntil: data.vipUntil
-        } as CustomUser);
-        onToast(lang === 'ru' ? 'С возвращением!' : 'Welcome back!', 'success');
-      }
+      const result = await loginWithLegacyUsername(cleanUsername, cleanPassword);
+      const profile = result.profile;
+      onUserLogin({
+        uid: profile.uid,
+        authProvider: 'firebase-email',
+        displayName: profile.displayName || profile.username,
+        email: profile.email,
+        photoURL: profile.photoURL || '',
+        avatarClass: profile.avatarClass || 'whiteout',
+        gender: profile.gender || 'male',
+        bio: profile.bio || '',
+        clanTag: profile.clanTag || '',
+        hoursPlayed: Number(profile.hoursPlayed || 0),
+        playstyle: profile.playstyle || '',
+        favoriteWeapon: profile.favoriteWeapon || '',
+        steamId: profile.steamId || '',
+        steamName: profile.steamName || '',
+        steamAvatar: profile.steamAvatar || '',
+        customTheme: profile.customTheme || 'default',
+        role: 'user',
+        isVip: false,
+        isChatVip: false
+      } as CustomUser);
+      onToast(lang === 'ru' ? 'Вход выполнен. Старый аккаунт защищённо перенесён.' : 'Signed in. Your legacy account was securely migrated.', 'success');
       onClose();
     } catch (error: any) {
-      console.error('Auth error:', error);
-      onToast(lang === 'ru' ? 'Не удалось выполнить операцию. Проверьте соединение и попробуйте ещё раз.' : 'Could not complete the request. Check your connection and try again.', 'error');
+      onToast(error?.message || (lang === 'ru' ? 'Не удалось выполнить вход.' : 'Sign-in failed.'), 'error');
     } finally {
       setAuthLoading(false);
     }
