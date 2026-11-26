@@ -68,6 +68,12 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
 
       const username = String(req.body?.username || '').trim().toLowerCase();
       const displayName = String(req.body?.displayName || '').trim();
+      const termsAccepted = req.body?.termsAccepted === true;
+      const termsVersion = String(req.body?.termsVersion || '');
+      const termsLanguage = String(req.body?.termsLanguage || '');
+      if (!termsAccepted || termsVersion !== '2.5' || !['ru', 'en'].includes(termsLanguage)) {
+        return res.status(400).json({ message: 'Для завершения регистрации необходимо принять действующую редакцию пользовательского соглашения.' });
+      }
       if (!/^[a-z0-9_-]{3,20}$/.test(username) || username === 'serustqs') {
         return res.status(400).json({ message: 'Логин должен содержать 3–20 символов. Этот логин зарезервирован.' });
       }
@@ -94,6 +100,10 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
           username,
           displayName,
           email: identity.email!.toLowerCase(),
+          termsAccepted: true,
+          termsVersion,
+          termsAcceptedAt: FieldValue.serverTimestamp(),
+          termsLanguage,
           role: 'user',
           isBlocked: false,
           createdAt: FieldValue.serverTimestamp(),
