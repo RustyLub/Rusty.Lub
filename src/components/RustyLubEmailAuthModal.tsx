@@ -190,7 +190,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
         steamName: migrated.steamName || '',
         steamAvatar: migrated.steamAvatar || '',
         customTheme: migrated.customTheme || 'default',
-        role: 'user'
+        role: migrated.role || 'user'
       } as CustomUser);
       setMigrationComplete(true);
       setLegacyPassword('');
