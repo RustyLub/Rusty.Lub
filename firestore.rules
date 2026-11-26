@@ -10,41 +10,20 @@ service cloud.firestore {
         && request.auth.token.email is string;
     }
 
-    // Email-auth profiles are private to their owner. Privileged fields are
-    // immutable from the client; admin roles must be assigned out-of-band.
+    // Profile and username documents are created/managed only by the trusted
+    // Admin SDK registration endpoint. Clients may read their own profile and
+    // perform single-document username availability checks after email verification.
+    // This prevents client-side privilege escalation and username squatting.
     match /auth_users/{uid} {
       allow get: if authenticatedEmail() && request.auth.uid == uid;
       allow list: if false;
-      allow create: if authenticatedEmail()
-        && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly([
-          'uid', 'username', 'displayName', 'email', 'role', 'isBlocked',
-          'createdAt', 'updatedAt'
-        ])
-        && request.resource.data.uid == uid
-        && request.resource.data.email == request.auth.token.email
-        && request.resource.data.role == 'user'
-        && request.resource.data.isBlocked == false
-        && request.resource.data.username is string
-        && request.resource.data.username.matches('^[a-z0-9_-]{3,20}$')
-        && (request.resource.data.username != 'serustqs' || request.auth.token.email == 'cheater.cooperation@inbox.ru')
-        && request.resource.data.displayName is string
-        && request.resource.data.displayName.size() >= 2
-        && request.resource.data.displayName.size() <= 40;
-      allow update, delete: if false;
+      allow create, update, delete: if false;
     }
 
-    // Username documents are only readable one-at-a-time by verified users
-    // for availability checks; public enumeration is disabled.
     match /auth_usernames/{username} {
       allow get: if authenticatedEmail();
       allow list: if false;
-      allow create: if authenticatedEmail()
-        && request.resource.data.keys().hasOnly(['uid', 'createdAt'])
-        && request.resource.data.uid == request.auth.uid
-        && username.matches('^[a-z0-9_-]{3,20}$')
-        && (username != 'serustqs' || request.auth.token.email == 'cheater.cooperation@inbox.ru');
-      allow update, delete: if false;
+      allow create, update, delete: if false;
     }
 
     // Promo-code management is restricted to the explicitly approved Firebase account.
