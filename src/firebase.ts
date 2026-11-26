@@ -50,7 +50,9 @@ const firebaseConfig: any = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Use custom database ID with auto long-polling to prevent connection drops in sandboxed iframe environments
+// Use the explicitly configured database. Never silently fall back to the
+// project's default database: doing so can route reads/writes to a different
+// dataset when the named database is unavailable or misconfigured.
 const firestoreDbId = firebaseConfig.firestoreDatabaseId === "(default)" ? undefined : firebaseConfig.firestoreDatabaseId;
 
 let dbInstance: any;
@@ -58,12 +60,21 @@ try {
   dbInstance = initializeFirestore(app, {
     experimentalAutoDetectLongPolling: true,
   }, firestoreDbId);
-} catch (e1) {
+} catch (initializeError) {
   try {
+    // initializeFirestore can throw when this app/database was initialized
+    // earlier (for example during HMR); reuse that exact database instance.
     dbInstance = getFirestore(app, firestoreDbId);
-  } catch (e2) {
-    console.warn("Falling back to default getFirestore instance:", e2);
-    dbInstance = getFirestore(app);
+  } catch (getError) {
+    console.error("Unable to initialize the configured Firestore database.", {
+      projectId: firebaseConfig.projectId,
+      databaseId: firestoreDbId || "(default)",
+      initializeError,
+      getError
+    });
+    throw new Error(
+      `Firestore database "${firestoreDbId || "(default)"}" is unavailable in project "${firebaseConfig.projectId}".`
+    );
   }
 }
 const db = dbInstance;
