@@ -200,8 +200,8 @@ const appTranslations = {
   vacSafe: { ru: 'В одиночку', en: 'Solo Project' },
   wipesPlayed: { ru: 'Предназначение', en: 'Target Audience' },
   copyright: {
-    ru: 'Разработчик © 2026. Все права на ассеты принадлежат Facepunch.',
-    en: 'Developer © 2026. All assets belong to Facepunch Studios.'
+    ru: '© 2026 Rusty.Lub. Игровые материалы Rust принадлежат Facepunch Studios Ltd. и соответствующим правообладателям.',
+    en: '© 2026 Rusty.Lub. Rust game materials belong to Facepunch Studios Ltd. and their respective rights holders.'
   },
   joinClan: { ru: 'Присоединиться к клану', en: 'Join our Clan' },
   discordWidgetTitle: { ru: 'Наше Rust-Сообщество', en: 'Our Rust Community' },
