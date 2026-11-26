@@ -238,10 +238,6 @@ export default function ChatTab({ lang, user, onUserLogout, onToast, onOpenAuth 
     signUpBtn: { ru: 'ЗАРЕГИСТРИРОВАТЬСЯ', en: 'REGISTER FREQUENCY' },
     tabLogin: { ru: 'Вход в аккаунт', en: 'Sign In' },
     tabRegister: { ru: 'Создать профиль', en: 'Create Profile' },
-    adminHint: { 
-      ru: '💡 КАНАЛ СОЗДАТЕЛЯ: Войдите как serustqs с паролем Duf@#13@4fhe34 для доступа к панели Создателя!',
-      en: '💡 CREATOR CHANNEL: Sign in as serustqs with password Duf@#13@4fhe34 to access Founder panel!'
-    },
     placeholder: { ru: 'Введите сообщение в эфир...', en: 'Transmit message over frequency...' },
     sendBtn: { ru: 'ПЕРЕДАТЬ', en: 'SEND' },
     logoutBtn: { ru: 'Отключиться', en: 'Disconnect' },
