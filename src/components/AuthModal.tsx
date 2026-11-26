@@ -40,6 +40,10 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast,
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (authMode === 'register') {
+      onSwitchToEmailAuth();
+      return;
+    }
     if (authMode === 'register' && !acceptedTerms) {
       onToast(lang === 'ru' ? 'Для регистрации необходимо принять пользовательское соглашение.' : 'You must accept the user agreement to register.', 'warning');
       return;
@@ -207,7 +211,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast,
             </button>
             <button
               type="button"
-              onClick={() => setAuthMode('register')}
+              onClick={onSwitchToEmailAuth}
               className={`flex-1 border-b-2 py-3 text-sm font-semibold transition-all cursor-pointer ${
                 authMode === 'register'
                   ? 'border-orange-400 text-orange-300 font-bold'
