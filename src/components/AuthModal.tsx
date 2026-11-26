@@ -31,7 +31,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast 
   const [authLoading, setAuthLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
-  const TERMS_VERSION = '2.5';
+  const TERMS_VERSION = '2.6';
 
 
   if (!isOpen) return null;
