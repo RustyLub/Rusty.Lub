@@ -120,6 +120,7 @@ interface UserProfileModalProps {
   onClose: () => void;
   targetUserId: string;
   currentUser: CustomUser | null;
+  currentUserIsAdmin?: boolean;
   lang: 'ru' | 'en';
   onToast: (msg: string, type: 'success' | 'warning' | 'error') => void;
 }
@@ -129,6 +130,7 @@ export default function UserProfileModal({
   onClose,
   targetUserId,
   currentUser,
+  currentUserIsAdmin = false,
   lang,
   onToast
 }: UserProfileModalProps) {
@@ -339,12 +341,7 @@ export default function UserProfileModal({
   const matchedAvatar = targetUser ? CUSTOM_AVATARS.find(a => a.id === targetUser.avatarClass) || CUSTOM_AVATARS[0] : null;
 
   // Check if target user has active VIP Subscription
-  const isTargetVipSub = !!targetUser && (
-    targetUser.uid === 'serustqs' ||
-    targetUser.role === 'admin' ||
-    targetUser.email === 'misterzet556@gmail.com' ||
-    hasActiveVipSubscription(targetUser)
-  );
+  const isTargetVipSub = !!targetUser && hasActiveVipSubscription(targetUser);
 
   const isScamActive = !!targetUser?.isScam && (
     !targetUser.scamUntil || 
@@ -735,7 +732,7 @@ export default function UserProfileModal({
             )}
 
             {/* Exclusive Owner Administration Panel */}
-            {currentUser && currentUser.uid === 'serustqs' && (
+            {currentUser && currentUserIsAdmin && (
               <div className="bg-red-950/20 border border-red-900/50 p-3.5 space-y-2 relative" id="owner-admin-panel">
                 <span className="text-[10px] font-mono text-red-400 font-bold uppercase tracking-wider block">
                   {lang === 'ru' ? '🛠️ Панель Владельца: Выдача тега [EAC]' : '🛠️ Owner Control: [EAC] Tag'}
