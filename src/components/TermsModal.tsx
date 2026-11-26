@@ -27,8 +27,8 @@ export default function TermsModal({ isOpen, onClose, lang, pageMode = false }: 
       en: 'LEGAL TERMS AND CONDITIONS GOVERNING USE OF RUSTY.LUB'
     },
     version: {
-      ru: 'Редакция: 2.5 | Дата обновления: 28 октября 2026 г.',
-      en: 'Version: 2.5 | Updated: October 28, 2026'
+      ru: 'Редакция: 2.6 | Дата обновления: 26 ноября 2026 г.',
+      en: 'Version: 2.6 | Updated: November 26, 2026'
     },
     intro: {
       ru: 'Настоящее соглашение регулирует использование Rusty.Lub — независимого справочника и набора инструментов для игроков Rust. Оно распространяется на калькуляторы рейдов и гниения, руководства, бинды, игровые справочные материалы, сохранённые расчёты, избранное, чат и функции сообщества. Регистрация означает согласие с этими условиями. Аккаунт нужен для персональных функций и не является игровым аккаунтом Rust или Facepunch.',
@@ -48,8 +48,8 @@ export default function TermsModal({ isOpen, onClose, lang, pageMode = false }: 
             en: '1.1. Rusty.Lub is an independent public web resource developed by the player community to provide reference calculators, guides, interactive diagrams, and team recruitment tools.'
           },
           {
-            ru: '1.2. Сервис не является аффилированным лицом, партнером, спонсируемым проектом или официальным представителем компании Facepunch Studios Ltd. Товарные знаки, наименования предметов, текстуры и графические материалы игры Rust принадлежат их законному правообладателю — Facepunch Studios Ltd.',
-            en: '1.2. The Service is not affiliated with, endorsed by, sponsored by, or officially associated with Facepunch Studios Ltd. Trademarks, item names, textures, and graphical assets of the game Rust are the property of their respective copyright holder, Facepunch Studios Ltd.'
+            ru: '1.2. Rusty.Lub — независимый фанатский справочный ресурс. Сервис не является аффилированным лицом, партнером, спонсируемым проектом или официальным представителем Facepunch Studios Ltd. Упоминание Rust и использование игровых материалов не означает одобрения или поддержки со стороны Facepunch.',
+            en: '1.2. Rusty.Lub is an independent fan reference resource. The Service is not affiliated with, endorsed by, sponsored by, or officially associated with Facepunch Studios Ltd. References to Rust and use of game-related materials do not imply endorsement or support by Facepunch.'
           },
           {
             ru: '1.3. Использование Сервиса является добровольным. Если Пользователь не согласен с каким-либо из пунктов настоящего Соглашения, он обязан немедленно прекратить использование Сервиса.',
@@ -110,12 +110,36 @@ export default function TermsModal({ isOpen, onClose, lang, pageMode = false }: 
         },
         paragraphs: [
           {
-            ru: '4.1. Архитектура программного кода, алгоритмы калькуляторов, дизайн интерфейса, стили и база данных структурированных гайдов являются объектами интеллектуальной собственности Администрации и защищены законом.',
-            en: '4.1. The software codebase, calculator algorithms, UI layouts, styling, and curated knowledge databases are the intellectual property of the Administration and protected by applicable copyright laws.'
+            ru: '4.1. Оригинальный программный код Rusty.Lub, самостоятельно созданные тексты, алгоритмы калькуляторов и элементы интерфейса охраняются законодательством об интеллектуальной собственности. Администрация заявляет права только на те материалы, исключительные права на которые действительно принадлежат ей или переданы ей. Это положение не распространяется на материалы и обозначения третьих лиц.',
+            en: '4.1. Original Rusty.Lub source code, independently created text, calculator logic and interface elements are protected by applicable intellectual property laws. The Administration claims rights only in materials it actually owns or has been licensed or assigned. This does not extend to third-party materials or marks.'
           },
           {
-            ru: '4.2. Пользовательский контент (тексты объявлений о наборе в клан, сообщения) остается собственностью Пользователя, однако размещая его, Пользователь предоставляет Сервису неисключительную безвозмездную лицензию на его отображение и обработку в рамках функционала платформы.',
-            en: '4.2. User-generated content (clan listings, chat messages) remains the author’s property; however, posting grants the Service a non-exclusive, royalty-free license to display and process it within platform operations.'
+            ru: '4.2. Пользовательский контент (тексты объявлений о наборе в клан, сообщения) остается собственностью Пользователя, однако размещая его, Пользователь предоставляет Сервису неисключительную безвозмездную лицензию на его отображение и обработку в рамках функционала платформы.
+          },
+          {
+            ru: '4.3. Название Rust, логотипы и товарные знаки Rust, игровые изображения, модели, текстуры, звуки, элементы интерфейса и иные материалы игры принадлежат Facepunch Studios Ltd. или соответствующим правообладателям и лицензиарам. Rusty.Lub не заявляет исключительных прав на эти материалы. Их использование в справочных и фанатских целях не передает Сервису право собственности на них.',
+            en: '4.3. The Rust name, Rust logos and trademarks, game images, models, textures, sounds, interface elements and other game materials belong to Facepunch Studios Ltd. or their respective rights holders and licensors. Rusty.Lub does not claim ownership of these materials. Their use for reference and fan-content purposes does not transfer ownership to the Service.'
+          },
+          {
+            ru: '4.4. Правила Facepunch разрешают создание независимых сообществ и фанатских сайтов, но устанавливают ограничения на коммерциализацию фанатского контента и использование материалов третьих лиц. Любая коммерческая модель, связанная с игровыми материалами Rust, должна отдельно проверяться по действующим правилам правообладателя; при необходимости требуется его предварительное письменное разрешение.',
+            en: '4.4. Facepunch guidelines allow independent community websites and fan content, but place limits on monetizing fan content and using third-party materials. Any commercial model involving Rust game materials must be checked against the rights holder’s current rules and obtain prior written permission where required.'
+          },
+          {
+            ru: '4.5. Если Пользователь или правообладатель считает, что материал на Сервисе нарушает его права, он может направить обращение на rusty.lub-slq@inbox.ru с указанием спорного материала, его адреса на Сервисе, подтверждения прав и контактных данных. Администрация проверит обращение и при наличии оснований ограничит доступ к материалу или удалит его.',
+            en: '4.5. If a user or rights holder believes that material on the Service infringes their rights, they may contact rusty.lub-slq@inbox.ru with the material, its location on the Service, evidence of rights and contact details. The Administration will review the request and, where justified, restrict access to or remove the material.'',
+            en: '4.2. User-generated content (clan listings, chat messages) remains the author’s property; however, posting grants the Service a non-exclusive, royalty-free license to display and process it within platform operations.
+          },
+          {
+            ru: '4.3. Название Rust, логотипы и товарные знаки Rust, игровые изображения, модели, текстуры, звуки, элементы интерфейса и иные материалы игры принадлежат Facepunch Studios Ltd. или соответствующим правообладателям и лицензиарам. Rusty.Lub не заявляет исключительных прав на эти материалы. Их использование в справочных и фанатских целях не передает Сервису право собственности на них.',
+            en: '4.3. The Rust name, Rust logos and trademarks, game images, models, textures, sounds, interface elements and other game materials belong to Facepunch Studios Ltd. or their respective rights holders and licensors. Rusty.Lub does not claim ownership of these materials. Their use for reference and fan-content purposes does not transfer ownership to the Service.'
+          },
+          {
+            ru: '4.4. Правила Facepunch разрешают создание независимых сообществ и фанатских сайтов, но устанавливают ограничения на коммерциализацию фанатского контента и использование материалов третьих лиц. Любая коммерческая модель, связанная с игровыми материалами Rust, должна отдельно проверяться по действующим правилам правообладателя; при необходимости требуется его предварительное письменное разрешение.',
+            en: '4.4. Facepunch guidelines allow independent community websites and fan content, but place limits on monetizing fan content and using third-party materials. Any commercial model involving Rust game materials must be checked against the rights holder’s current rules and obtain prior written permission where required.'
+          },
+          {
+            ru: '4.5. Если Пользователь или правообладатель считает, что материал на Сервисе нарушает его права, он может направить обращение на rusty.lub-slq@inbox.ru с указанием спорного материала, его адреса на Сервисе, подтверждения прав и контактных данных. Администрация проверит обращение и при наличии оснований ограничит доступ к материалу или удалит его.',
+            en: '4.5. If a user or rights holder believes that material on the Service infringes their rights, they may contact rusty.lub-slq@inbox.ru with the material, its location on the Service, evidence of rights and contact details. The Administration will review the request and, where justified, restrict access to or remove the material.''
           }
         ]
       },
@@ -170,6 +194,28 @@ export default function TermsModal({ isOpen, onClose, lang, pageMode = false }: 
           {
             ru: '7.2. В случае выявления грубых нарушений положений Соглашения Администрация оставляет за собой право ограничить или полностью заблокировать доступ Пользователя к функциям портала без предварительного уведомления.',
             en: '7.2. In case of material violations of this Agreement, Administration reserves the right to restrict or terminate User access to portal features without prior notice.'
+          }
+        ]
+      },
+      {
+        id: 8,
+        icon: <Globe className="text-sky-400" size={18} />,
+        title: {
+          ru: '8. ВНЕШНИЕ ССЫЛКИ И РЕКЛАМНЫЕ МАТЕРИАЛЫ',
+          en: '8. EXTERNAL LINKS & ADVERTISING MATERIALS'
+        },
+        paragraphs: [
+          {
+            ru: '8.1. На Сервисе могут размещаться ссылки на сторонние сайты и платформы, необходимые для работы функций или предоставленные как справочная информация. Такие ресурсы управляются третьими лицами; Rusty.Lub не контролирует их содержание, условия и политику обработки данных. Ссылка сама по себе не означает партнерство, спонсорство или рекомендацию.',
+            en: '8.1. The Service may link to third-party websites and platforms needed for certain features or provided as reference information. These resources are operated by third parties; Rusty.Lub does not control their content, terms or data practices. A link alone does not imply partnership, sponsorship or endorsement.'
+          },
+          {
+            ru: '8.2. Добровольная поддержка проекта через DonationAlerts не является покупкой товара, подписки или услуги и не предоставляет Пользователю VIP-статус, игровые преимущества, специальные права или дополнительный доступ. Платежи и платежные данные обрабатываются DonationAlerts и привлеченными им поставщиками на их условиях.',
+            en: '8.2. Voluntary support through DonationAlerts is not a purchase of goods, a subscription or a service and does not grant VIP status, gameplay advantages, special rights or additional access. Payments and payment data are handled by DonationAlerts and its payment providers under their terms.'
+          },
+          {
+            ru: '8.3. Если Сервис начнет размещать платные рекламные или партнерские материалы, они должны быть отделены от обычной справочной информации и оформлены с учетом применимых требований закона, включая маркировку «реклама», сведения о рекламодателе и идентификатор рекламы, когда такие требования применимы.',
+            en: '8.3. If the Service begins publishing paid advertising or affiliate materials, they must be distinguished from ordinary reference information and handled in accordance with applicable legal requirements, including an advertising label, advertiser details and an advertising identifier where required.'
           }
         ]
       }
