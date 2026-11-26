@@ -60,6 +60,8 @@ import {
   LayoutGrid
 } from 'lucide-react';
 import { ToastType, CustomUser, APP_VERSION } from './types';
+import { onAuthStateChanged as onRustyLubAuthStateChanged } from 'firebase/auth';
+import { getEmailAuthProfile, logoutFromRustyLub, rustylubAuth } from './services/rustylubEmailAuth';
 
 // Firebase & Auth Presence dependencies
 import { 
@@ -114,6 +116,7 @@ const CookieConsentManager = lazy(() => import('./components/CookieConsentManage
 const CookiePolicy = lazy(() => import('./components/CookiePolicy'));
 const DiscordBotLegal = lazy(() => import('./components/DiscordBotLegal'));
 const AuthModal = lazy(() => import('./components/AuthModal'));
+const RustyLubEmailAuthModal = lazy(() => import('./components/RustyLubEmailAuthModal'));
 const CabinetModal = lazy(() => import('./components/CabinetModal'));
 const TermsModal = lazy(() => import('./components/TermsModal'));
 const NotificationSettingsModal = lazy(() => import('./components/NotificationSettingsModal'));
@@ -430,10 +433,81 @@ export default function App() {
       return null;
     }
   });
+  useEffect(() => {
+    let active = true;
+    const unsubscribe = onRustyLubAuthStateChanged(rustylubAuth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        if (!active) return;
+        setVerifiedAuthProfile(null);
+        setCurrentUser((previous) => {
+          if (previous?.authProvider === 'firebase-email') {
+            localStorage.removeItem('rust_survivor_user');
+            return null;
+          }
+          return previous;
+        });
+        return;
+      }
+
+      try {
+        const profile = await getEmailAuthProfile(firebaseUser);
+        if (!active) return;
+        if (!profile) {
+          setVerifiedAuthProfile(null);
+          setCurrentUser((previous) => previous?.authProvider === 'firebase-email' ? null : previous);
+          localStorage.removeItem('rust_survivor_user');
+          return;
+        }
+
+        const verifiedUser = {
+          uid: firebaseUser.uid,
+          authProvider: 'firebase-email',
+          displayName: profile.displayName || profile.username,
+          email: profile.email,
+          photoURL: profile.photoURL || '',
+          avatarClass: profile.avatarClass || 'whiteout',
+          gender: profile.gender || 'male',
+          bio: profile.bio || '',
+          clanTag: profile.clanTag || '',
+          hoursPlayed: Number(profile.hoursPlayed || 0),
+          playstyle: profile.playstyle || '',
+          favoriteWeapon: profile.favoriteWeapon || '',
+          steamId: profile.steamId || '',
+          steamName: profile.steamName || '',
+          steamAvatar: profile.steamAvatar || '',
+          customTheme: profile.customTheme || 'default',
+          role: profile.role || 'user',
+          isVip: Boolean(profile.isVip),
+          isChatVip: Boolean(profile.isChatVip),
+          vipUntil: profile.vipUntil || ''
+        } as CustomUser;
+
+        setVerifiedAuthProfile(profile);
+        setCurrentUser(verifiedUser);
+        localStorage.setItem('rust_survivor_user', JSON.stringify(verifiedUser));
+      } catch (error) {
+        console.error('[Rusty.Lub auth] Could not validate restored session:', error);
+        if (active) {
+          setVerifiedAuthProfile(null);
+          setCurrentUser((previous) => previous?.authProvider === 'firebase-email' ? null : previous);
+          localStorage.removeItem('rust_survivor_user');
+        }
+        void logoutFromRustyLub();
+      }
+    });
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, []);
+
   const [onlineCount, setOnlineCount] = useState<number>(0);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [emailAuthReady] = useState(true);
-  const isAdmin = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'admin');
+  const [verifiedAuthProfile, setVerifiedAuthProfile] = useState<any>(null);
+  const hasVerifiedAuthProfile = currentUser?.authProvider === 'firebase-email' && verifiedAuthProfile?.uid === currentUser.uid;
+  const isAdmin = Boolean(hasVerifiedAuthProfile && ['admin', 'owner'].includes(String(verifiedAuthProfile?.role || '')));
 
   // Diamond Outfit Studio is an administration-only workspace.
   useEffect(() => {
@@ -442,12 +516,15 @@ export default function App() {
       window.history.replaceState({ tab: 'home' }, '', window.location.pathname + window.location.search);
     }
   }, [isAdmin, activeTab]);
-  const isOwner = (currentUser?.uid === 'serustqs' || currentUser?.email === 'misterzet556@gmail.com' || currentUser?.role === 'owner');
+  const isOwner = isAdmin;
   const isVip = useMemo(() => {
-    return isAdmin || hasActiveVipSubscription(currentUser);
-  }, [currentUser, isAdmin]);
+    if (isAdmin) return true;
+    if (!hasVerifiedAuthProfile) return false;
+    return hasActiveVipSubscription({ ...currentUser, ...verifiedAuthProfile } as CustomUser);
+  }, [currentUser, verifiedAuthProfile, hasVerifiedAuthProfile, isAdmin]);
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [emailAuthModalOpen, setEmailAuthModalOpen] = useState(false);
   const [cabinetModalOpen, setCabinetModalOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [sectionsDrawerOpen, setSectionsDrawerOpen] = useState(false);
@@ -2890,6 +2967,7 @@ export default function App() {
             isOpen={authModalOpen}
             onClose={() => setAuthModalOpen(false)}
             lang={lang}
+            onSwitchToEmailAuth={() => { setAuthModalOpen(false); setEmailAuthModalOpen(true); }}
             onUserLogin={(user) => {
               setCurrentUser(user);
               localStorage.setItem('rust_survivor_user', JSON.stringify(user));
@@ -2900,6 +2978,26 @@ export default function App() {
               setTimeout(() => {
                 setToasts(prev => prev.filter(t => t.id !== id));
               }, 3000);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {emailAuthModalOpen && (
+          <RustyLubEmailAuthModal
+            isOpen={emailAuthModalOpen}
+            lang={lang}
+            onClose={() => setEmailAuthModalOpen(false)}
+            onBackToLegacy={() => { setEmailAuthModalOpen(false); setAuthModalOpen(true); }}
+            onUserLogin={(user) => {
+              setCurrentUser(user);
+              localStorage.setItem('rust_survivor_user', JSON.stringify(user));
+            }}
+            onToast={(msg, type) => {
+              const id = Math.random().toString(36).substring(2, 9);
+              setToasts(prev => [...prev, { id, message: msg, type: type === 'error' ? 'error' : 'success' }]);
+              setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id), 3000);
             }}
           />
         )}
