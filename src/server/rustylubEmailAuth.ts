@@ -154,6 +154,16 @@ export function registerRustyLubEmailAuthRoutes(app: Express) {
         passwordValid = actual.length === expected.length && crypto.timingSafeEqual(actual, expected);
       } else if (typeof legacy.password === 'string') {
         passwordValid = legacy.password === legacyPassword;
+        if (passwordValid) {
+          const salt = crypto.randomBytes(16);
+          const hash = crypto.pbkdf2Sync(legacyPassword, salt, 210000, 32, 'sha256');
+          await legacyRef.update({
+            passwordHash: hash.toString('hex'),
+            passwordSalt: salt.toString('hex'),
+            passwordAlgorithm: 'PBKDF2-SHA256',
+            password: FieldValue.delete()
+          });
+        }
       }
       if (!passwordValid || legacy.isBlocked === true) {
         return res.status(401).json({ message: 'Старый логин или пароль неверен, либо аккаунт заблокирован.' });
