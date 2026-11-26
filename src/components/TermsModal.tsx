@@ -27,8 +27,8 @@ export default function TermsModal({ isOpen, onClose, lang, pageMode = false }: 
       en: 'LEGAL TERMS AND CONDITIONS GOVERNING USE OF RUSTY.LUB'
     },
     version: {
-      ru: 'Редакция: 2.6 | Дата обновления: 26 ноября 2026 г.',
-      en: 'Version: 2.6 | Updated: November 26, 2026'
+      ru: 'Редакция: 2.7 | Дата обновления: 26 ноября 2026 г.',
+      en: 'Version: 2.7 | Updated: November 26, 2026'
     },
     intro: {
       ru: 'Настоящее соглашение регулирует использование Rusty.Lub — независимого справочника и набора инструментов для игроков Rust. Оно распространяется на калькуляторы рейдов и гниения, руководства, бинды, игровые справочные материалы, сохранённые расчёты, избранное, чат и функции сообщества. Регистрация означает согласие с этими условиями. Аккаунт нужен для персональных функций и не является игровым аккаунтом Rust или Facepunch.',
@@ -194,16 +194,16 @@ export default function TermsModal({ isOpen, onClose, lang, pageMode = false }: 
         },
         paragraphs: [
           {
-            ru: '8.1. На Сервисе могут размещаться ссылки на сторонние сайты и платформы, необходимые для работы функций или предоставленные как справочная информация. Такие ресурсы управляются третьими лицами; Rusty.Lub не контролирует их содержание, условия и политику обработки данных. Ссылка сама по себе не означает партнерство, спонсорство или рекомендацию.',
-            en: '8.1. The Service may link to third-party websites and platforms needed for certain features or provided as reference information. These resources are operated by third parties; Rusty.Lub does not control their content, terms or data practices. A link alone does not imply partnership, sponsorship or endorsement.'
+            ru: '8.1. На Сервисе могут размещаться ссылки на сторонние сайты и платформы, а также обычные дружеские упоминания знакомых проектов. Такие ресурсы управляются третьими лицами; Rusty.Lub не контролирует их содержание, условия и политику обработки данных. За дружеские упоминания и ссылки, о которых идёт речь в настоящем пункте, Администрация не получает оплату, товары, услуги или иное вознаграждение; они не публикуются по рекламному договору или обязательству. Само по себе безвозмездное упоминание не означает платного рекламного размещения; оценка конкретной публикации зависит от её содержания и обстоятельств.',
+            en: '8.1. The Service may link to third-party websites and platforms or include ordinary friendly mentions of acquaintances’ projects. These resources are operated by third parties; Rusty.Lub does not control their content, terms or data practices. Rusty.Lub receives no payment, goods, services or other compensation for the friendly mentions and links described in this clause; they are not published under an advertising agreement or obligation. An unpaid mention alone does not constitute a paid advertising placement; the assessment of a particular publication depends on its content and circumstances.'
           },
           {
             ru: '8.2. Добровольная поддержка проекта через DonationAlerts не является покупкой товара, подписки или услуги и не предоставляет Пользователю VIP-статус, игровые преимущества, специальные права или дополнительный доступ. Платежи и платежные данные обрабатываются DonationAlerts и привлеченными им поставщиками на их условиях.',
             en: '8.2. Voluntary support through DonationAlerts is not a purchase of goods, a subscription or a service and does not grant VIP status, gameplay advantages, special rights or additional access. Payments and payment data are handled by DonationAlerts and its payment providers under their terms.'
           },
           {
-            ru: '8.3. Если Сервис начнет размещать платные рекламные или партнерские материалы, они должны быть отделены от обычной справочной информации и оформлены с учетом применимых требований закона: маркировка «реклама», сведения о рекламодателе, идентификатор рекламы и передача сведений через оператора рекламных данных, когда это требуется. До размещения необходимо проверить, возникают ли обязанности рекламораспространителя и обязательные отчисления.',
-            en: '8.3. If the Service begins publishing paid advertising or affiliate materials, they must be distinguished from ordinary reference information and handled in accordance with applicable legal requirements: an advertising label, advertiser details, an advertising identifier and reporting through an advertising data operator where required. Before publication, any duties of the advertising distributor and mandatory contributions must be assessed.'
+            ru: '8.3. На дату редакции платные рекламные и партнерские размещения на Сервисе не осуществляются. Если такая деятельность появится в будущем, материалы должны быть отделены от обычной справочной информации и оформлены с учетом применимых требований закона: маркировка «реклама», сведения о рекламодателе, идентификатор рекламы и передача сведений через оператора рекламных данных, когда это требуется. До размещения необходимо проверить, возникают ли обязанности рекламораспространителя и обязательные отчисления.',
+            en: '8.3. As of this version, the Service does not publish paid advertising or affiliate placements. If such activity is introduced in the future, the materials must be distinguished from ordinary reference information and handled in accordance with applicable legal requirements: an advertising label, advertiser details, an advertising identifier and reporting through an advertising data operator where required. Before publication, any duties of the advertising distributor and mandatory contributions must be assessed.'
           }
         ]
       }
