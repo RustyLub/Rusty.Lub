@@ -1,71 +1,65 @@
 import { initializeApp, cert, getApps, applicationDefault } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
-let firebaseConfig: any = null;
+type FirebaseRuntimeConfig = {
+  projectId?: string;
+  firestoreDatabaseId?: string;
+};
+
 const configPath = path.join(process.cwd(), 'firebase-applet-config.json');
-const logPath = path.join(process.cwd(), 'firebase-init-log.txt');
-
-function log(msg: string) {
-  const line = `[${new Date().toISOString()}] ${msg}\n`;
-  console.log(msg);
-  try {
-    fs.appendFileSync(logPath, line);
-  } catch (e) {}
-}
-
-log('Firebase Admin: Starting initialization');
-log(`Firebase Admin: CWD: ${process.cwd()}`);
-log(`Firebase Admin: Config Path: ${configPath}`);
+let fileConfig: FirebaseRuntimeConfig = {};
 
 if (fs.existsSync(configPath)) {
   try {
-    firebaseConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    log(`Firebase Admin: Config loaded for project: ${firebaseConfig?.projectId}`);
-    log(`Firebase Admin: Database ID: ${firebaseConfig?.firestoreDatabaseId}`);
-  } catch (err: any) {
-    log(`Error reading firebase-applet-config.json: ${err.message}`);
+    fileConfig = JSON.parse(fs.readFileSync(configPath, 'utf8')) as FirebaseRuntimeConfig;
+  } catch (error) {
+    throw new Error(
+      `Firebase Admin configuration file is invalid: ${error instanceof Error ? error.message : 'unknown error'}`
+    );
   }
-} else {
-  log('Firebase Admin: firebase-applet-config.json not found');
 }
 
-  if (!getApps().length) {
+const projectId = process.env.FIREBASE_PROJECT_ID || fileConfig.projectId;
+const rawDatabaseId = process.env.FIRESTORE_DATABASE_ID || fileConfig.firestoreDatabaseId;
+const databaseId = rawDatabaseId && rawDatabaseId !== '(default)' ? rawDatabaseId : undefined;
+
+if (!projectId) {
+  throw new Error('Firebase Admin is not configured: set FIREBASE_PROJECT_ID or provide firebase-applet-config.json.');
+}
+
+const appName = 'rustylub-legacy-admin';
+const existingApp = getApps().find((item) => item.name === appName);
+
+function initializeAdminApp() {
+  if (existingApp) return existingApp;
+
+  const rawServiceAccount = process.env.RUSTYLUB_FIREBASE_SERVICE_ACCOUNT;
+  if (rawServiceAccount) {
+    let serviceAccount: Record<string, unknown>;
     try {
-      log('Firebase Admin: Initializing with Application Default Credentials');
-      const app = initializeApp({
-        credential: applicationDefault(),
-        projectId: firebaseConfig?.projectId
-      });
-      log(`Firebase Admin: initializeApp called successfully. Project ID: ${app.options.projectId}`);
-    } catch (error: any) {
-      log(`Firebase Admin init error: ${error.message}`);
+      serviceAccount = JSON.parse(rawServiceAccount);
+    } catch {
+      throw new Error('RUSTYLUB_FIREBASE_SERVICE_ACCOUNT must contain valid JSON.');
     }
+
+    return initializeApp({
+      credential: cert(serviceAccount as any),
+      projectId
+    }, appName);
   }
 
-  let db: any;
-  let auth: any;
-
-  try {
-    const app = getApps()[0];
-    const rawDbId = firebaseConfig?.firestoreDatabaseId;
-    const dbId = rawDbId === "(default)" ? undefined : rawDbId;
-    log(`Firebase Admin: Getting Firestore instance for database: ${dbId || '(default)'}`);
-    db = getFirestore(app, dbId);
-    log('Firebase Admin: Firestore instance obtained');
-  } catch (e: any) {
-    log(`Firebase Admin: Error getting Firestore: ${e.message}`);
-  }
-
-try {
-  log('Firebase Admin: Getting Auth instance');
-  auth = getAuth();
-  log('Firebase Admin: Auth instance obtained');
-} catch (e: any) {
-  log(`Firebase Admin: Error getting Auth: ${e.message}`);
+  return initializeApp({
+    credential: applicationDefault(),
+    projectId
+  }, appName);
 }
 
-export const adminDb = db;
-export const adminAuth = auth;
+const adminApp = initializeAdminApp();
+
+// Bind Auth and Firestore to the same explicitly named project app. Do not
+// silently use whichever Firebase Admin app happened to initialize first.
+export const adminDb = getFirestore(adminApp, databaseId);
+export const adminAuth = getAuth(adminApp);
