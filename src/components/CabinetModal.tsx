@@ -2840,6 +2840,7 @@ export default function CabinetModal({
             onClose={() => setInspectUserId(null)}
             targetUserId={inspectUserId}
             currentUser={user}
+            currentUserIsAdmin={isAdmin}
             lang={lang}
             onToast={onToast}
           />
