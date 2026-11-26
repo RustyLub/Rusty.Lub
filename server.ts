@@ -98,55 +98,40 @@ async function startServer() {
     });
   };
 
-  // Middleware for VIP status check
+  // VIP access is derived from the same server-managed destination profile
+  // used for administrator authorization; client-side profile fields are ignored.
   const verifyVIP = async (req: any, res: any, next: any) => {
     await verifyToken(req, res, async () => {
       try {
-        const uid = req.user.uid;
-        let userDoc = await clientGetDoc(clientDoc(clientDb, 'chat_users', uid));
-        let userData = userSnapToData(userDoc);
-        
-        if (!userDoc.exists()) {
-          // Fallback to 'users' collection
-          userDoc = await clientGetDoc(clientDoc(clientDb, 'users', uid));
-          userData = userSnapToData(userDoc);
+        if (req.user?.email_verified !== true) {
+          return res.status(403).json({ success: false, message: 'Forbidden: Verified email required' });
+        }
+        const uid = String(req.user?.uid || '');
+        const profileSnap = await adminDb.collection('auth_users').doc(uid).get();
+        const profile = profileSnap.exists ? profileSnap.data() : null;
+        if (!profile) {
+          return res.status(403).json({ success: false, message: 'Forbidden: Account profile not found' });
         }
 
-        if (!userDoc.exists()) {
-          // Auto-register user in 'users' if missing
-          userData = {
-            uid,
-            email: req.user.email || '',
-            displayName: req.user.name || 'Survivor',
-            photoURL: req.user.picture || '',
-            createdAt: clientServerTimestamp()
-          };
-          await clientSetDoc(clientDoc(clientDb, 'users', uid), userData);
-        }
+        const isAdminUser = ['admin', 'owner'].includes(String(profile.role || ''));
+        const isVipUser = profile.isVip === true;
+        const vipUntilRaw = profile.vipUntil;
+        const vipUntilDate = vipUntilRaw
+          ? (typeof vipUntilRaw.toDate === 'function' ? vipUntilRaw.toDate() : new Date(vipUntilRaw))
+          : null;
+        const hasValidVipExpiry = vipUntilDate instanceof Date
+          && Number.isFinite(vipUntilDate.getTime())
+          && vipUntilDate.getTime() > Date.now();
 
-        const isAdminUser = userData?.role === 'admin' || uid === 'serustqs' || req.user.email === 'misterzet556@gmail.com';
-        const isVipUser = userData?.isVip === true;
-        
-        // Handle Firestore Timestamp or Date string
-        const vipUntilRaw = userData?.vipUntil;
-        let vipUntilDate: Date | null = null;
-        if (vipUntilRaw) {
-          vipUntilDate = vipUntilRaw.toDate ? vipUntilRaw.toDate() : new Date(vipUntilRaw);
-        }
-        
-        const now = new Date();
-        const hasValidVipExpiry = vipUntilDate instanceof Date && Number.isFinite(vipUntilDate.getTime()) && vipUntilDate.getTime() > now.getTime();
-        const hasVip = isAdminUser || (isVipUser && hasValidVipExpiry);
-
-        if (!hasVip) {
+        if (!isAdminUser && !(isVipUser && hasValidVipExpiry)) {
           return res.status(403).json({ success: false, message: 'Forbidden: VIP subscription required' });
         }
 
-        req.user = { ...req.user, ...userData, isAdmin: isAdminUser, isVip: true };
-        next();
-      } catch (err) {
-        console.error('verifyVIP Error:', err);
-        return res.status(500).json({ success: false, message: 'Internal server error during authorization' });
+        req.user = { ...req.user, isAdmin: isAdminUser, isVip: true };
+        return next();
+      } catch (error) {
+        console.error('verifyVIP Error:', error);
+        return res.status(403).json({ success: false, message: 'Forbidden: Could not verify VIP status' });
       }
     });
   };
