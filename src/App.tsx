@@ -2058,6 +2058,8 @@ export default function App() {
                   onClose={() => handleTabChange('home')}
                   lang={lang}
                   user={currentUser}
+                  isAdmin={isAdmin}
+                  isVip={isVip}
                   onOpenTab={(tab) => handleTabChange(tab as any)}
                   onUserLogout={() => {
                     
@@ -3009,6 +3011,8 @@ export default function App() {
             onClose={() => setCabinetModalOpen(false)}
             lang={lang}
             user={currentUser}
+            isAdmin={isAdmin}
+            isVip={isVip}
             onOpenTab={(tab) => handleTabChange(tab as any)}
             onUserLogout={() => {
               if (currentUser?.authProvider === 'firebase-email') void logoutFromRustyLub();
