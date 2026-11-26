@@ -12,8 +12,8 @@ service cloud.firestore {
     }
 
     // Profile and username documents are created/managed only by the trusted
-    // Admin SDK registration endpoint. Clients may read their own profile and
-    // perform single-document username availability checks after email verification.
+    // Admin SDK registration endpoint. Clients may read only their own profile;
+    // username lookups remain server-side to avoid exposing account UIDs.
     // This prevents client-side privilege escalation and username squatting.
     match /auth_users/{uid} {
       allow get: if authenticatedEmail() && request.auth.uid == uid;
@@ -22,8 +22,7 @@ service cloud.firestore {
     }
 
     match /auth_usernames/{username} {
-      allow get: if authenticatedEmail();
-      allow list: if false;
+      allow read: if false;
       allow create, update, delete: if false;
     }
 
