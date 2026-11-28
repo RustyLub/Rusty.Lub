@@ -35,6 +35,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
   const [legacyPassword, setLegacyPassword] = useState('');
   const [migrationComplete, setMigrationComplete] = useState(false);
   const [verificationPending, setVerificationPending] = useState(false);
+  const [authErrorMessage, setAuthErrorMessage] = useState('');
 
   if (!isOpen) return null;
 
@@ -112,7 +113,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
         WEAK_PASSWORD: messages['auth/weak-password'],
         CONFIGURATION_NOT_FOUND: ru ? 'Конфигурация Firebase Authentication не найдена в проекте rustylub.' : 'Firebase Authentication configuration was not found in project rustylub.'
       };
-      onToast(messages[code] || serverMessages[serverMessage] || (rawMessage || (ru ? 'Не удалось выполнить операцию.' : 'The operation failed.')), 'error');
+      setAuthErrorMessage(messages[code] || serverMessages[serverMessage] || (rawMessage || (ru ? 'Не удалось выполнить операцию.' : 'The operation failed.')));
     } finally {
       setBusy(false);
     }
@@ -141,7 +142,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
       onToast(ru ? 'Аккаунт создан. Добро пожаловать в Rusty.Lub!' : 'Account created. Welcome to Rusty.Lub!', 'success');
       onClose();
     } catch (error: any) {
-      onToast(error?.message || (ru ? 'Не удалось завершить регистрацию.' : 'Could not finish registration.'), 'error');
+      setAuthErrorMessage(error?.message || (ru ? 'Не удалось завершить регистрацию.' : 'Could not finish registration.'));
     } finally {
       setBusy(false);
     }
@@ -154,7 +155,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
       return;
     }
     if (user.email?.trim().toLowerCase() !== 'cheater.cooperation@inbox.ru') {
-      onToast(ru ? 'Перенос доступен только целевому аккаунту владельца.' : 'Migration is restricted to the designated owner account.', 'error');
+      setAuthErrorMessage(ru ? 'Перенос доступен только целевому аккаунту владельца.' : 'Migration is restricted to the designated owner account.');
       return;
     }
     if (!legacyPassword) {
@@ -198,7 +199,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
         ? (payload.alreadyMigrated ? 'Профиль уже был перенесён. Данные загружены.' : 'Старый профиль перенесён и загружен.')
         : (payload.alreadyMigrated ? 'Profile was already migrated. Data loaded.' : 'Legacy profile migrated and loaded.'), 'success');
     } catch (error: any) {
-      onToast(error?.message || (ru ? 'Не удалось перенести профиль.' : 'Profile migration failed.'), 'error');
+      setAuthErrorMessage(error?.message || (ru ? 'Не удалось перенести профиль.' : 'Profile migration failed.'));
     } finally {
       setMigrationBusy(false);
     }
@@ -264,6 +265,18 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
         )}
         {mode === 'login' && <button type="button" onClick={() => setMode('reset')} className="mt-4 text-left text-xs text-orange-300 hover:underline">{ru ? 'Забыли пароль?' : 'Forgot password?'}</button>}
         <button type="button" onClick={onBackToLegacy} className="mt-8 flex items-center gap-2 border-t border-white/10 pt-5 text-xs text-zinc-500 hover:text-white"><ArrowLeft size={14} />{ru ? 'Вернуться к прежнему входу' : 'Back to existing sign in'}</button>
+        {authErrorMessage && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/75 p-4" role="alertdialog" aria-modal="true" aria-labelledby="auth-error-title" aria-describedby="auth-error-description">
+            <motion.div initial={{ opacity: 0, scale: 0.96, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="w-full max-w-sm border border-red-500/40 bg-[#11151d] p-6 shadow-2xl shadow-black/60">
+              <div className="mb-3 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center border border-red-500/40 bg-red-500/10 text-red-400"><ShieldCheck size={20} /></div>
+                <h3 id="auth-error-title" className="text-base font-bold text-white">{ru ? 'Не удалось выполнить вход' : 'Authentication failed'}</h3>
+              </div>
+              <p id="auth-error-description" className="mb-5 break-words text-sm leading-6 text-zinc-300">{authErrorMessage}</p>
+              <button type="button" autoFocus onClick={() => setAuthErrorMessage('')} className="w-full bg-orange-500 px-4 py-3 text-sm font-bold text-black transition-colors hover:bg-orange-400">{ru ? 'Понятно' : 'Got it'}</button>
+            </motion.div>
+          </div>
+        )}
       </motion.div>
     </div>
   );
