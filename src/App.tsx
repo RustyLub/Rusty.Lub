@@ -489,6 +489,20 @@ export default function App() {
       } catch (error) {
         console.error('[Rusty.Lub auth] Could not validate restored session:', error);
         if (active) {
+          const code = String((error as any)?.code || '');
+          const authMessages: Record<string, string> = {
+            'auth/network-request-failed': 'Не удалось подключиться к Firebase. Проверьте интернет-соединение.',
+            'auth/too-many-requests': 'Слишком много запросов к авторизации. Попробуйте позже.',
+            'auth/user-disabled': 'Этот аккаунт отключён. Обратитесь в поддержку.',
+            'permission-denied': 'Firebase Firestore запретил чтение профиля. Требуется проверить правила доступа.',
+            'unavailable': 'Сервис профилей временно недоступен. Попробуйте позже.'
+          };
+          const message = authMessages[code] || 'Не удалось восстановить сессию. Войдите в аккаунт повторно.';
+          const id = Math.random().toString(36).slice(2, 9);
+          setToasts((previous) => [...previous, { id, message, type: 'error' }]);
+          window.setTimeout(() => setToasts((previous) => previous.filter((toast) => toast.id !== id)), 8000);
+        }
+        if (active) {
           setVerifiedAuthProfile(null);
           setCurrentUser((previous) => previous?.authProvider === 'firebase-email' ? null : previous);
           localStorage.removeItem('rust_survivor_user');
@@ -500,6 +514,37 @@ export default function App() {
     return () => {
       active = false;
       unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    const report = (message: string) => {
+      const id = Math.random().toString(36).slice(2, 9);
+      setToasts((previous) => [...previous, { id, message, type: 'error' }]);
+      window.setTimeout(() => setToasts((previous) => previous.filter((toast) => toast.id !== id)), 8000);
+    };
+    const onUnhandledRejection = (event: PromiseRejectionEvent) => {
+      const error = event.reason as any;
+      const code = String(error?.code || '');
+      const known: Record<string, string> = {
+        'auth/network-request-failed': 'Ошибка авторизации: Firebase недоступен из-за проблемы с сетью.',
+        'auth/too-many-requests': 'Ошибка авторизации: слишком много попыток. Попробуйте позже.',
+        'permission-denied': 'Ошибка профиля: Firestore отклонил запрос. Проверьте правила доступа.',
+        'unavailable': 'Ошибка профиля: сервис временно недоступен.'
+      };
+      if (code.startsWith('auth/') || code === 'permission-denied' || code === 'unavailable') {
+        report(known[code] || 'Не удалось выполнить запрос авторизации. Попробуйте обновить страницу и войти снова.');
+      }
+      console.error('[Rusty.Lub] Unhandled application rejection:', error);
+    };
+    const onWindowError = (event: ErrorEvent) => {
+      console.error('[Rusty.Lub] Unhandled application error:', event.error || event.message);
+    };
+    window.addEventListener('unhandledrejection', onUnhandledRejection);
+    window.addEventListener('error', onWindowError);
+    return () => {
+      window.removeEventListener('unhandledrejection', onUnhandledRejection);
+      window.removeEventListener('error', onWindowError);
     };
   }, []);
 
