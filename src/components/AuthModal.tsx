@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, User, Lock, Crosshair, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
+import { X, User, Lock, Crosshair, Sparkles, ShieldCheck, ArrowRight, Copy } from 'lucide-react';
 import { loginWithLegacyUsername } from '../services/rustylubEmailAuth';
 import { CUSTOM_AVATARS } from '../customAvatars';
 import { CustomUser } from '../types';
@@ -26,6 +26,33 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast,
   const [authLoading, setAuthLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [authErrorMessage, setAuthErrorMessage] = useState('');
+  const [authErrorLog, setAuthErrorLog] = useState('');
+  const [authErrorCopied, setAuthErrorCopied] = useState(false);
+
+  const showAuthError = (error: any) => {
+    const message = typeof error?.message === 'string' && error.message.length < 240
+      ? error.message
+      : (lang === 'ru' ? 'Не удалось выполнить вход. Проверьте соединение и попробуйте ещё раз.' : 'Could not sign in. Check your connection and try again.');
+    setAuthErrorMessage(message);
+    setAuthErrorLog([
+      'Rusty.Lub authentication error',
+      `Time: ${new Date().toISOString()}`,
+      'Operation: legacy username sign-in',
+      `Code: ${String(error?.code || 'not provided')}`,
+      `Message: ${String(error?.message || message)}`
+    ].join('\\n'));
+    setAuthErrorCopied(false);
+  };
+
+  const copyAuthErrorLog = async () => {
+    try {
+      await navigator.clipboard.writeText(authErrorLog || authErrorMessage);
+      setAuthErrorCopied(true);
+    } catch {
+      setAuthErrorCopied(false);
+    }
+  };
   const TERMS_VERSION = '2.8';
 
 
@@ -94,12 +121,7 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast,
       onClose();
     } catch (error: any) {
       console.error('Auth error:', error);
-      onToast(
-        typeof error?.message === 'string' && error.message.length < 240
-          ? error.message
-          : (lang === 'ru' ? 'Не удалось выполнить вход. Проверьте соединение и попробуйте ещё раз.' : 'Could not sign in. Check your connection and try again.'),
-        'error'
-      );
+      showAuthError(error);
     } finally {
       setAuthLoading(false);
     }
@@ -309,6 +331,26 @@ export default function AuthModal({ isOpen, onClose, lang, onUserLogin, onToast,
         </div>
         </section>
       </motion.div>
+
+      {authErrorMessage && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 p-4" role="alertdialog" aria-modal="true" aria-labelledby="legacy-auth-error-title" aria-describedby="legacy-auth-error-description">
+          <motion.div initial={{ opacity: 0, scale: 0.96, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="w-full max-w-sm border border-red-500/40 bg-[#11151d] p-6 shadow-2xl shadow-black/60">
+            <div className="mb-3 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center border border-red-500/40 bg-red-500/10 text-red-400"><ShieldCheck size={20} /></div>
+              <h3 id="legacy-auth-error-title" className="text-base font-bold text-white">{lang === 'ru' ? 'Не удалось выполнить вход' : 'Authentication failed'}</h3>
+            </div>
+            <p id="legacy-auth-error-description" className="mb-4 break-words text-sm leading-6 text-zinc-300">{authErrorMessage}</p>
+            <div className="mb-4 border border-white/10 bg-black/30 p-3">
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">{lang === 'ru' ? 'Технический лог' : 'Technical log'}</div>
+              <pre className="max-h-24 overflow-auto whitespace-pre-wrap break-words text-[10px] leading-4 text-zinc-400">{authErrorLog}</pre>
+            </div>
+            <button type="button" onClick={copyAuthErrorLog} className="mb-2 flex w-full items-center justify-center gap-2 border border-white/15 px-4 py-3 text-xs font-bold text-zinc-200 transition-colors hover:bg-white/5">
+              <Copy size={14} />{authErrorCopied ? (lang === 'ru' ? 'Лог скопирован' : 'Log copied') : (lang === 'ru' ? 'Скопировать лог ошибки' : 'Copy error log')}
+            </button>
+            <button type="button" autoFocus onClick={() => { setAuthErrorMessage(''); setAuthErrorLog(''); }} className="w-full bg-orange-500 px-4 py-3 text-sm font-bold text-black transition-colors hover:bg-orange-400">{lang === 'ru' ? 'Понятно' : 'Got it'}</button>
+          </motion.div>
+        </div>
+      )}
 
       <AnimatePresence>
         {showTerms && (
