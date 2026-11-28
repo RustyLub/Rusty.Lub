@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { reload } from 'firebase/auth';
 import { motion } from 'motion/react';
-import { ArrowLeft, Mail, Lock, User, Crosshair, ShieldCheck, KeyRound } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, User, Crosshair, ShieldCheck, KeyRound, Copy } from 'lucide-react';
 import type { CustomUser } from '../types';
 import {
   completeRegistration,
@@ -36,6 +36,31 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
   const [migrationComplete, setMigrationComplete] = useState(false);
   const [verificationPending, setVerificationPending] = useState(false);
   const [authErrorMessage, setAuthErrorMessage] = useState('');
+  const [authErrorLog, setAuthErrorLog] = useState('');
+  const [authErrorCopied, setAuthErrorCopied] = useState(false);
+
+  const showAuthError = (message: string, error?: any) => {
+    const code = String(error?.code || '');
+    const technicalMessage = String(error?.message || message || 'Unknown error');
+    setAuthErrorMessage(message || technicalMessage);
+    setAuthErrorLog([
+      'Rusty.Lub authentication error',
+      `Time: ${new Date().toISOString()}`,
+      `Operation: ${mode}`,
+      `Code: ${code || 'not provided'}`,
+      `Message: ${technicalMessage}`
+    ].join('\\n'));
+    setAuthErrorCopied(false);
+  };
+
+  const copyAuthErrorLog = async () => {
+    try {
+      await navigator.clipboard.writeText(authErrorLog || authErrorMessage);
+      setAuthErrorCopied(true);
+    } catch {
+      setAuthErrorCopied(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -113,7 +138,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
         WEAK_PASSWORD: messages['auth/weak-password'],
         CONFIGURATION_NOT_FOUND: ru ? 'Конфигурация Firebase Authentication не найдена в проекте rustylub.' : 'Firebase Authentication configuration was not found in project rustylub.'
       };
-      setAuthErrorMessage(messages[code] || serverMessages[serverMessage] || (rawMessage || (ru ? 'Не удалось выполнить операцию.' : 'The operation failed.')));
+      showAuthError(messages[code] || serverMessages[serverMessage] || (rawMessage || (ru ? 'Не удалось выполнить операцию.' : 'The operation failed.')), error);
     } finally {
       setBusy(false);
     }
@@ -142,7 +167,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
       onToast(ru ? 'Аккаунт создан. Добро пожаловать в Rusty.Lub!' : 'Account created. Welcome to Rusty.Lub!', 'success');
       onClose();
     } catch (error: any) {
-      setAuthErrorMessage(error?.message || (ru ? 'Не удалось завершить регистрацию.' : 'Could not finish registration.'));
+      showAuthError(error?.message || (ru ? 'Не удалось завершить регистрацию.' : 'Could not finish registration.'), error);
     } finally {
       setBusy(false);
     }
@@ -155,7 +180,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
       return;
     }
     if (user.email?.trim().toLowerCase() !== 'cheater.cooperation@inbox.ru') {
-      setAuthErrorMessage(ru ? 'Перенос доступен только целевому аккаунту владельца.' : 'Migration is restricted to the designated owner account.');
+      showAuthError(ru ? 'Перенос доступен только целевому аккаунту владельца.' : 'Migration is restricted to the designated owner account.');
       return;
     }
     if (!legacyPassword) {
@@ -199,7 +224,7 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
         ? (payload.alreadyMigrated ? 'Профиль уже был перенесён. Данные загружены.' : 'Старый профиль перенесён и загружен.')
         : (payload.alreadyMigrated ? 'Profile was already migrated. Data loaded.' : 'Legacy profile migrated and loaded.'), 'success');
     } catch (error: any) {
-      setAuthErrorMessage(error?.message || (ru ? 'Не удалось перенести профиль.' : 'Profile migration failed.'));
+      showAuthError(error?.message || (ru ? 'Не удалось перенести профиль.' : 'Profile migration failed.'), error);
     } finally {
       setMigrationBusy(false);
     }
@@ -272,8 +297,15 @@ export default function RustyLubEmailAuthModal({ isOpen, initialMode = 'login', 
                 <div className="flex h-10 w-10 items-center justify-center border border-red-500/40 bg-red-500/10 text-red-400"><ShieldCheck size={20} /></div>
                 <h3 id="auth-error-title" className="text-base font-bold text-white">{ru ? 'Не удалось выполнить вход' : 'Authentication failed'}</h3>
               </div>
-              <p id="auth-error-description" className="mb-5 break-words text-sm leading-6 text-zinc-300">{authErrorMessage}</p>
-              <button type="button" autoFocus onClick={() => setAuthErrorMessage('')} className="w-full bg-orange-500 px-4 py-3 text-sm font-bold text-black transition-colors hover:bg-orange-400">{ru ? 'Понятно' : 'Got it'}</button>
+              <p id="auth-error-description" className="mb-4 break-words text-sm leading-6 text-zinc-300">{authErrorMessage}</p>
+              <div className="mb-4 border border-white/10 bg-black/30 p-3">
+                <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">{ru ? 'Технический лог' : 'Technical log'}</div>
+                <pre className="max-h-24 overflow-auto whitespace-pre-wrap break-words text-[10px] leading-4 text-zinc-400">{authErrorLog}</pre>
+              </div>
+              <button type="button" onClick={copyAuthErrorLog} className="mb-2 flex w-full items-center justify-center gap-2 border border-white/15 px-4 py-3 text-xs font-bold text-zinc-200 transition-colors hover:bg-white/5">
+                <Copy size={14} />{authErrorCopied ? (ru ? 'Лог скопирован' : 'Log copied') : (ru ? 'Скопировать лог ошибки' : 'Copy error log')}
+              </button>
+              <button type="button" autoFocus onClick={() => { setAuthErrorMessage(''); setAuthErrorLog(''); }} className="w-full bg-orange-500 px-4 py-3 text-sm font-bold text-black transition-colors hover:bg-orange-400">{ru ? 'Понятно' : 'Got it'}</button>
             </motion.div>
           </div>
         )}
